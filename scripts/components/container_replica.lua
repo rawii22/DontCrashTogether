@@ -273,6 +273,7 @@ function Container:Has(prefab, amount)
 end
 
 function Container:Open(doer)
+	print(">> Replica:Open()")
     if self.inst.components.container ~= nil then
         if self.opentask ~= nil then
             self.opentask:Cancel()
@@ -296,6 +297,7 @@ function Container:Open(doer)
 end
 
 function Container:Close()
+	print(">> Replica:Close()")
     if self.opentask ~= nil then
         self.opentask:Cancel()
         self.opentask = nil
@@ -314,6 +316,7 @@ function Container:Close()
 end
 
 function Container:IsBusy()
+	print(">> Replica:IsBusy()")
     return self.inst.components.container == nil and (self.classified == nil or self.classified:IsBusy())
 end
 

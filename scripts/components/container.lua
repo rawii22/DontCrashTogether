@@ -285,6 +285,7 @@ end
 
 function Container:Open(doer)
     if self.opener == nil and doer ~= nil then
+		print(">> COMPONENT FN: Container:Open()")
         self.inst:StartUpdatingComponent(self)
 
         local inventory = doer.components.inventory
@@ -321,6 +322,7 @@ end
 
 function Container:Close()
     if self.opener ~= nil then
+		print(">> COMPONENT FN: Container:Close()")
         self.inst:StopUpdatingComponent(self)
 
         local doer = self.opener
