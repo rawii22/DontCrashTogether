@@ -340,7 +340,6 @@ ACTIONS.SEW.fn = function(act)
 end
 
 ACTIONS.RUMMAGE.fn = function(act)
-	print("Something has been rummaged through...fn")
     local targ = act.target or act.invobject
 
     if targ ~= nil and targ.components.container ~= nil then
@@ -373,7 +372,6 @@ ACTIONS.RUMMAGE.fn = function(act)
 end
 
 ACTIONS.RUMMAGE.strfn = function(act)
-	print("Something has been rummaged through...strfn")
     local targ = act.target or act.invobject
     return targ ~= nil
         and (   targ.replica.container ~= nil and
@@ -406,12 +404,11 @@ ACTIONS.DROP.strfn = function(act)
     end
 end
 
---------------------------------------------------------------------- THE CHANGE IS HERE ---------------------------------------------------------------------
 ACTIONS.LOOKAT.fn = function(act)
     local targ = act.target or act.invobject
 
     if targ ~= nil and targ.components.inspectable ~= nil then
-        local desc = targ.components.inspectable:GetDescription(act.doer) --.. " [" .. targ.prefab .. "]"
+        local desc = targ.components.inspectable:GetDescription(act.doer)
         if desc ~= nil then
             if act.doer.components.playercontroller == nil or
                 not act.doer.components.playercontroller.directwalking then

@@ -140,6 +140,7 @@ function Container:CanTakeItemInSlot(item, slot)
         and item.components.inventoryitem ~= nil
         and item.components.inventoryitem.cangoincontainer
         and (slot == nil or (slot >= 1 and slot <= self.numslots))
+        and not (GetGameModeProperty("non_item_equips") and item.components.equippable ~= nil)
         and (self.itemtestfn == nil or self:itemtestfn(item, slot))
 end
 
@@ -313,7 +314,7 @@ function Container:Open(doer)
         self.inst:PushEvent("onopen", { doer = doer })
 
         if self.onopenfn ~= nil then
-            self.onopenfn(self.inst)
+            self.onopenfn(self.inst, { doer = doer })
         end
     end
 end
@@ -342,7 +343,7 @@ function Container:Close()
             self.onclosefn(self.inst, doer)
         end
 
-        self.inst:PushEvent("onclose")
+        self.inst:PushEvent("onclose", { doer = doer })
     end
 end
 
@@ -670,32 +671,37 @@ function Container:MoveItemFromAllOfSlot(slot, container)
     local item = self:GetItemInSlot(slot)
     if item ~= nil and container ~= nil then
         container = container.components.container or container.components.inventory
-        if container ~= nil and
-            container:IsOpenedBy(self.opener) and
-            container:CanTakeItemInSlot(item) then
+        if container ~= nil and container:IsOpenedBy(self.opener) then
+            local targetslot =
+                self.opener.components.constructionbuilderuidata ~= nil and
+                self.opener.components.constructionbuilderuidata:GetContainer() == container.inst and
+                self.opener.components.constructionbuilderuidata:GetSlotForIngredient(item.prefab) or
+                nil
 
-            item = self:RemoveItemBySlot(slot)
-            item.prevcontainer = nil
-            item.prevslot = nil
+            if container:CanTakeItemInSlot(item, targetslot) then
+                item = self:RemoveItemBySlot(slot)
+                item.prevcontainer = nil
+                item.prevslot = nil
 
-            --Hacks for altering normal inventory:GiveItem() behaviour
-            if container.ignoreoverflow ~= nil and container:GetOverflowContainer() == self then
-                container.ignoreoverflow = true
-            end
-            if container.ignorefull ~= nil then
-                container.ignorefull = true
-            end
+                --Hacks for altering normal inventory:GiveItem() behaviour
+                if container.ignoreoverflow ~= nil and container:GetOverflowContainer() == self then
+                    container.ignoreoverflow = true
+                end
+                if container.ignorefull ~= nil then
+                    container.ignorefull = true
+                end
 
-            if not container:GiveItem(item) then
-                self:GiveItem(item, slot, nil, true)
-            end
+                if not container:GiveItem(item, targetslot) then
+                    self:GiveItem(item, slot, nil, true)
+                end
 
-            --Hacks for altering normal inventory:GiveItem() behaviour
-            if container.ignoreoverflow then
-                container.ignoreoverflow = false
-            end
-            if container.ignorefull then
-                container.ignorefull = false
+                --Hacks for altering normal inventory:GiveItem() behaviour
+                if container.ignoreoverflow then
+                    container.ignoreoverflow = false
+                end
+                if container.ignorefull then
+                    container.ignorefull = false
+                end
             end
         end
     end
@@ -707,34 +713,41 @@ function Container:MoveItemFromHalfOfSlot(slot, container)
         container = container.components.container or container.components.inventory
         if container ~= nil and
             container:IsOpenedBy(self.opener) and
-            container:CanTakeItemInSlot(item) and
             item.components.stackable ~= nil and
             item.components.stackable:IsStack() then
 
-            local halfstack = item.components.stackable:Get(math.floor(item.components.stackable:StackSize() / 2))
-            halfstack.prevcontainer = nil
-            halfstack.prevslot = nil
+            local targetslot =
+                self.opener.components.constructionbuilderuidata ~= nil and
+                self.opener.components.constructionbuilderuidata:GetContainer() == container.inst and
+                self.opener.components.constructionbuilderuidata:GetSlotForIngredient(item.prefab) or
+                nil
 
-            --Hacks for altering normal inventory:GiveItem() behaviour
-            if container.ignoreoverflow ~= nil and container:GetOverflowContainer() == self then
-                container.ignoreoverflow = true
-            end
-            if container.ignorefull ~= nil then
-                container.ignorefull = true
-            end
+            if container:CanTakeItemInSlot(item, targetslot) then
+                local halfstack = item.components.stackable:Get(math.floor(item.components.stackable:StackSize() / 2))
+                halfstack.prevcontainer = nil
+                halfstack.prevslot = nil
 
-            if not container:GiveItem(halfstack) then
-                self.ignoresound = true
-                self:GiveItem(halfstack, slot, nil, true)
-                self.ignoresound = false
-            end
+                --Hacks for altering normal inventory:GiveItem() behaviour
+                if container.ignoreoverflow ~= nil and container:GetOverflowContainer() == self then
+                    container.ignoreoverflow = true
+                end
+                if container.ignorefull ~= nil then
+                    container.ignorefull = true
+                end
 
-            --Hacks for altering normal inventory:GiveItem() behaviour
-            if container.ignoreoverflow then
-                container.ignoreoverflow = false
-            end
-            if container.ignorefull then
-                container.ignorefull = false
+                if not container:GiveItem(halfstack, targetslot) then
+                    self.ignoresound = true
+                    self:GiveItem(halfstack, slot, nil, true)
+                    self.ignoresound = false
+                end
+
+                --Hacks for altering normal inventory:GiveItem() behaviour
+                if container.ignoreoverflow then
+                    container.ignoreoverflow = false
+                end
+                if container.ignorefull then
+                    container.ignorefull = false
+                end
             end
         end
     end

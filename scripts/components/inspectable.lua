@@ -67,7 +67,7 @@ function Inspectable:GetDescription(viewer)
     elseif self.inst.components.burnable ~= nil and self.inst.components.burnable:IsSmoldering() then
         return GetString(viewer, "DESCRIBE_SMOLDERING")
     end
-	
+
     return desc
 end
 
