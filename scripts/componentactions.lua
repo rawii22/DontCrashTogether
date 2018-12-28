@@ -63,6 +63,7 @@ local COMPONENT_ACTIONS =
         end,
 
         container = function(inst, doer, actions, right)
+			print("ACTION CHECK, SCENE: container")
             if inst:HasTag("bundle") then
                 if right and inst.replica.container:IsOpenedBy(doer) then
                     table.insert(actions, doer.components.constructionbuilderuidata ~= nil and doer.components.constructionbuilderuidata:GetContainer() == inst and ACTIONS.APPLYCONSTRUCTION or ACTIONS.WRAPBUNDLE)
@@ -124,6 +125,7 @@ local COMPONENT_ACTIONS =
         end,
 
         inventoryitem = function(inst, doer, actions, right)
+			print("ACTION CHECK, SCENE: inventoryitem")
             if inst.replica.inventoryitem:CanBePickedUp() and
                 doer.replica.inventory ~= nil and
                 (doer.replica.inventory:GetNumSlots() > 0 or inst.replica.equippable ~= nil) and
@@ -497,6 +499,7 @@ local COMPONENT_ACTIONS =
         end,
 
         inventoryitem = function(inst, doer, target, actions, right)
+			print("ACTION CHECK, USEITEM: inventoryitem")
             if target.replica.container ~= nil and
                 target.replica.container:CanBeOpened() and
                 inst.replica.inventoryitem ~= nil and
@@ -841,6 +844,7 @@ local COMPONENT_ACTIONS =
         end,
 
         inventoryitem = function(inst, doer, pos, actions, right)
+			print("ACTION CHECK, POINT: inventoryitem")
             if not right and inst.replica.inventoryitem:IsHeldBy(doer) then
                 table.insert(actions, ACTIONS.DROP)
             end
@@ -1018,6 +1022,7 @@ local COMPONENT_ACTIONS =
         end,
 
         container = function(inst, doer, actions)
+			print("ACTION CHECK, INVENTORY: container")
             if not inst:HasTag("burnt") then
                 local container = inst.replica.container
                 if container:CanBeOpened() and

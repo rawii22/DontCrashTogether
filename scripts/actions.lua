@@ -340,6 +340,7 @@ ACTIONS.SEW.fn = function(act)
 end
 
 ACTIONS.RUMMAGE.fn = function(act)
+	print("ACTION: Rummage")
     local targ = act.target or act.invobject
 
     if targ ~= nil and targ.components.container ~= nil then
@@ -350,6 +351,7 @@ ACTIONS.RUMMAGE.fn = function(act)
         elseif targ.components.container:IsOpen() then
             return false, "INUSE"
         elseif targ.components.container.canbeopened then
+			print("  >> Rummage: canbeopened = true")
             local owner = targ.components.inventoryitem ~= nil and targ.components.inventoryitem:GetGrandOwner() or nil
             if owner ~= nil and targ.components.quagmire_stewer ~= nil then
                 if owner == act.doer then
@@ -372,6 +374,7 @@ ACTIONS.RUMMAGE.fn = function(act)
 end
 
 ACTIONS.RUMMAGE.strfn = function(act)
+	print("ACTION: Rummage strfn")
     local targ = act.target or act.invobject
     return targ ~= nil
         and (   targ.replica.container ~= nil and

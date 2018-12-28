@@ -79,12 +79,14 @@ Container.OnRemoveEntity = Container.OnRemoveFromEntity
 --------------------------------------------------------------------------
 
 local function OnRefreshCrafting(inst)
+	print(">> REPLICA: OnRefreshCrafting()")
     if ThePlayer ~= nil and ThePlayer.HUD ~= nil then
         ThePlayer:PushEvent("refreshcrafting")
     end
 end
 
 local function OpenContainer(inst, self, snap)
+	print(">> REPLICA: OpenContainer()")
     self.opentask = nil
 
     --V2C: don't animate to and from the backpack position 
@@ -100,11 +102,20 @@ local function OpenContainer(inst, self, snap)
     end
 end
 
+---------------
+function Container:WarnClosed()
+	print("onclose event fired")
+end
+---------------
+
 function Container:AttachClassified(classified)
+	print(">> REPLICA: AttachClassified()")
     self.classified = classified
 
     self.ondetachclassified = function() self:DetachClassified() end
+	self.warnclosed = function() self:WarnClosed() end
     self.inst:ListenForEvent("onremove", self.ondetachclassified, classified)
+	self.inst:ListenForEvent("onclose", self.warnclosed, classified)
 
     classified:InitializeSlots(self:GetNumSlots())
 
@@ -118,6 +129,7 @@ function Container:AttachClassified(classified)
 end
 
 function Container:DetachClassified()
+	print(">> REPLICA: DetachClassified()")
     self.classified = nil
     self.ondetachclassified = nil
     if self.issidewidget then
@@ -179,10 +191,12 @@ function Container:GetNumSlots()
 end
 
 function Container:SetCanBeOpened(canbeopened)
+	print(">> Replica:SetCanBeOpened()")
     self._cannotbeopened:set(not canbeopened)
 end
 
 function Container:CanBeOpened()
+	print(">> Replica:CanBeOpened()")
     return not self._cannotbeopened:value()
 end
 
@@ -203,6 +217,7 @@ function Container:IsSideWidget()
 end
 
 function Container:SetOpener(opener)
+	print(">> Replica:SetOpener()")
     self.classified.Network:SetClassifiedTarget(opener or self.inst)
     if self.inst.components.container ~= nil then
         for k, v in pairs(self.inst.components.container.slots) do
@@ -215,6 +230,7 @@ function Container:SetOpener(opener)
 end
 
 function Container:IsOpenedBy(guy)
+	print(">> Replica:IsOpenedBy()")
     if self.inst.components.container ~= nil then
         return self.inst.components.container:IsOpenedBy(guy)
     else
@@ -279,6 +295,7 @@ function Container:Open(doer)
             self.opentask:Cancel()
             self.opentask = nil
         end
+		print(">> Replica called COMPONENT FN: Open()")
         self.inst.components.container:Open(doer)
     elseif self.classified ~= nil and
         self.opentask == nil and
