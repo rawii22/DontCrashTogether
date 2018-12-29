@@ -8,6 +8,7 @@ local TIMEOUT = 2
 local function InitializeSlots(inst, numslots)
     --Can't re-initialize slots after RegisterNetListeners
     assert(inst._slottasks == nil)
+	print("CLASSIFIED: InitializeSlots()")
 
     local curslots = #inst._items
     if numslots > curslots then
@@ -44,13 +45,17 @@ end
 --------------------------------------------------------------------------
 
 local function OnRemoveEntity(inst)
+	print("CLASSIFIED: OnRemoveEntity()")
     if inst._parent ~= nil then
         inst._parent.container_classified = nil
     end
 end
 
 local function OnEntityReplicated(inst)
+	print("CLASSIFIED: OnEntityReplicated()")
     inst._parent = inst.entity:GetParent()
+	print("  >> inst: "..(inst or "nil"))
+	print("  >> inst.parent: "..(inst._parent or "nil"))
     if inst._parent == nil then
         print("Unable to initialize classified data for container")
     elseif inst._parent.replica.container ~= nil then
@@ -170,6 +175,7 @@ end
 --------------------------------------------------------------------------
 
 local function RefreshCrafting(inst)
+	print("CLASSIFIED: RefreshCrafting()")
     local player = ThePlayer
     if player ~= nil and player.replica.inventory ~= nil then
         local overflow = player.replica.inventory:GetOverflowContainer()
@@ -205,6 +211,7 @@ local function CancelRefresh(inst)
 end
 
 local function OnItemsDirty(inst, slot, netitem)
+	print("CLASSIFIED: OnItemsDirty()")
     inst._slottasks[netitem] = nil
     if inst._parent ~= nil then
         local item = netitem:value()
