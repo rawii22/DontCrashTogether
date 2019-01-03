@@ -374,7 +374,7 @@ ACTIONS.RUMMAGE.fn = function(act)
 end
 
 ACTIONS.RUMMAGE.strfn = function(act)
-	print("ACTION: Rummage strfn")
+	--print("ACTION: Rummage strfn")
     local targ = act.target or act.invobject
     return targ ~= nil
         and (   targ.replica.container ~= nil and

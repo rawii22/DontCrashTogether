@@ -196,7 +196,7 @@ function Container:SetCanBeOpened(canbeopened)
 end
 
 function Container:CanBeOpened()
-	print(">> Replica:CanBeOpened()")
+	--print(">> Replica:CanBeOpened()")
     return not self._cannotbeopened:value()
 end
 
@@ -217,11 +217,15 @@ function Container:IsSideWidget()
 end
 
 function Container:SetOpener(opener)
-	print(">> Replica:SetOpener()")
+	--print(">> Replica:SetOpener()")
+	print(opener or "There is no 'opener'")
+	print(" :This is the 'opener' in SetOpener")
     self.classified.Network:SetClassifiedTarget(opener or self.inst)
     if self.inst.components.container ~= nil then
         for k, v in pairs(self.inst.components.container.slots) do
             v.replica.inventoryitem:SetOwner(self.inst)
+			print(self.inst)
+			print("The above should be 'self.inst'")
         end
     else
         --Should only reach here during container construction
@@ -230,7 +234,7 @@ function Container:SetOpener(opener)
 end
 
 function Container:IsOpenedBy(guy)
-	print(">> Replica:IsOpenedBy()")
+	--print(">> Replica:IsOpenedBy()")
     if self.inst.components.container ~= nil then
         return self.inst.components.container:IsOpenedBy(guy)
     else
@@ -290,6 +294,7 @@ end
 
 function Container:Open(doer)
 	print(">> Replica:Open()")
+	print(doer or "Doer is nil")
     if self.inst.components.container ~= nil then
         if self.opentask ~= nil then
             self.opentask:Cancel()
