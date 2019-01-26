@@ -1,6 +1,6 @@
 local assets =
 {
-    Asset("ANIM", "anim/cutreeds.zip"),
+    Asset("ANIM", "anim/pig_token.zip"),
 }
 
 local function fn()
@@ -8,12 +8,13 @@ local function fn()
 
     inst.entity:AddTransform()
     inst.entity:AddAnimState()
+    inst.entity:AddSoundEmitter()
     inst.entity:AddNetwork()
 
     MakeInventoryPhysics(inst)
 
-    inst.AnimState:SetBank("cutreeds")
-    inst.AnimState:SetBuild("cutreeds")
+    inst.AnimState:SetBank("pig_token")
+    inst.AnimState:SetBuild("pig_token")
     inst.AnimState:PlayAnimation("idle")
 
     inst.entity:SetPristine()
@@ -25,25 +26,18 @@ local function fn()
     inst:AddComponent("stackable")
     inst.components.stackable.maxsize = TUNING.STACK_SIZE_SMALLITEM
 
-    inst:AddComponent("inspectable")
-
-    inst:AddComponent("edible")
-    inst.components.edible.foodtype = FOODTYPE.ROUGHAGE
-    inst.components.edible.woodiness = 1
-    inst.components.edible.healthvalue = TUNING.HEALING_TINY
-    inst.components.edible.hungervalue = TUNING.CALORIES_TINY/2
-
-    inst:AddComponent("fuel")
-    inst.components.fuel.fuelvalue = TUNING.SMALL_FUEL
-
     MakeSmallBurnable(inst, TUNING.SMALL_BURNTIME)
     MakeSmallPropagator(inst)
 
-    MakeHauntableLaunchAndIgnite(inst)
+    inst:AddComponent("tradable")
+
+    inst:AddComponent("inspectable")
 
     inst:AddComponent("inventoryitem")
+
+    MakeHauntableLaunch(inst)
 
     return inst
 end
 
-return Prefab("cutwheat", fn, assets)
+return Prefab("pig_token", fn, assets)

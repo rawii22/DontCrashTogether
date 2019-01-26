@@ -8,7 +8,6 @@ local TIMEOUT = 2
 local function InitializeSlots(inst, numslots)
     --Can't re-initialize slots after RegisterNetListeners
     assert(inst._slottasks == nil)
-	print("CLASSIFIED: InitializeSlots()")
 
     local curslots = #inst._items
     if numslots > curslots then
@@ -45,17 +44,13 @@ end
 --------------------------------------------------------------------------
 
 local function OnRemoveEntity(inst)
-	print("CLASSIFIED: OnRemoveEntity()")
     if inst._parent ~= nil then
         inst._parent.container_classified = nil
     end
 end
 
 local function OnEntityReplicated(inst)
-	print("CLASSIFIED: OnEntityReplicated()")
     inst._parent = inst.entity:GetParent()
-	print("  >> inst: "..(inst or "nil"))
-	print("  >> inst.parent: "..(inst._parent or "nil"))
     if inst._parent == nil then
         print("Unable to initialize classified data for container")
     elseif inst._parent.replica.container ~= nil then
@@ -175,7 +170,6 @@ end
 --------------------------------------------------------------------------
 
 local function RefreshCrafting(inst)
-	print("CLASSIFIED: RefreshCrafting()")
     local player = ThePlayer
     if player ~= nil and player.replica.inventory ~= nil then
         local overflow = player.replica.inventory:GetOverflowContainer()
@@ -211,7 +205,6 @@ local function CancelRefresh(inst)
 end
 
 local function OnItemsDirty(inst, slot, netitem)
-	print("CLASSIFIED: OnItemsDirty()")
     inst._slottasks[netitem] = nil
     if inst._parent ~= nil then
         local item = netitem:value()
@@ -390,7 +383,7 @@ local function ReturnActiveItemToSlot(inst, slot)
             if item == nil then
                 local giveitem = SlotItem(active_item, slot)
                 PushItemGet(inst, giveitem, true)
-            elseif item.replica.stackable ~= nil and item.prefab == active_item.prefab then
+            elseif item.replica.stackable ~= nil and item.prefab == active_item.prefab and item.skinname == active_item.skinname then
                 local stacksize = item.replica.stackable:StackSize() + active_item.replica.stackable:StackSize()
                 local maxsize = item.replica.stackable:MaxSize()
                 PushStackSize(inst, nil, item, math.min(stacksize, maxsize), true)
@@ -460,7 +453,7 @@ local function AddOneOfActiveItemToSlot(inst, slot)
         local inventory, active_item, busy = QueryActiveItem()
         if not busy and active_item ~= nil then
             local item = inst:GetItemInSlot(slot)
-            if item ~= nil and item.prefab == active_item.prefab then
+            if item ~= nil and item.prefab == active_item.prefab and item.skinname == active_item.skinname then
                 PushStackSize(inst, nil, item, item.replica.stackable:StackSize() + 1, true)
                 PushStackSize(inst, inventory, active_item, nil, nil, active_item.replica.stackable:StackSize() - 1, true)
                 SendRPCToServer(RPC.AddOneOfActiveItemToSlot, slot, inst._parent)
@@ -474,7 +467,7 @@ local function AddAllOfActiveItemToSlot(inst, slot)
         local inventory, active_item, busy = QueryActiveItem()
         if not busy and active_item ~= nil then
             local item = inst:GetItemInSlot(slot)
-            if item ~= nil and item.prefab == active_item.prefab then
+            if item ~= nil and item.prefab == active_item.prefab and item.skinname == active_item.skinname then
                 local stacksize = item.replica.stackable:StackSize() + active_item.replica.stackable:StackSize()
                 local maxsize = item.replica.stackable:MaxSize()
                 if stacksize <= maxsize then
@@ -594,7 +587,7 @@ local function ReceiveItem(inst, item, count, forceslot)
                     if emptyslot == nil then
                         emptyslot = i
                     end
-                elseif slotitem.prefab == item.prefab and
+                elseif slotitem.prefab == item.prefab and slotitem.skinname == item.skinname and
                     slotitem.replica.stackable ~= nil and
                     not slotitem.replica.stackable:IsFull() then
                     local stacksize = slotitem.replica.stackable:StackSize() + count

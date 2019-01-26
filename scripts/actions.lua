@@ -340,7 +340,6 @@ ACTIONS.SEW.fn = function(act)
 end
 
 ACTIONS.RUMMAGE.fn = function(act)
-	print("ACTION: Rummage")
     local targ = act.target or act.invobject
 
     if targ ~= nil and targ.components.container ~= nil then
@@ -351,7 +350,6 @@ ACTIONS.RUMMAGE.fn = function(act)
         elseif targ.components.container:IsOpen() then
             return false, "INUSE"
         elseif targ.components.container.canbeopened then
-			print("  >> Rummage: canbeopened = true")
             local owner = targ.components.inventoryitem ~= nil and targ.components.inventoryitem:GetGrandOwner() or nil
             if owner ~= nil and targ.components.quagmire_stewer ~= nil then
                 if owner == act.doer then
@@ -374,7 +372,6 @@ ACTIONS.RUMMAGE.fn = function(act)
 end
 
 ACTIONS.RUMMAGE.strfn = function(act)
-	--print("ACTION: Rummage strfn")
     local targ = act.target or act.invobject
     return targ ~= nil
         and (   targ.replica.container ~= nil and
@@ -634,7 +631,10 @@ end
 
 ACTIONS.ATTACK.fn = function(act)
     if act.doer.sg ~= nil then
-        if act.doer.sg:HasStateTag("thrusting") then
+        if act.doer.sg:HasStateTag("propattack") then
+            --don't do a real attack with prop weapons
+            return true
+        elseif act.doer.sg:HasStateTag("thrusting") then
             local weapon = act.doer.components.combat:GetWeapon()
             return weapon ~= nil
                 and weapon.components.multithruster ~= nil
@@ -653,13 +653,17 @@ end
 ACTIONS.ATTACK.strfn = function(act)
     if act.target ~= nil then
         --act.invobject is weapon
-        if act.invobject ~= nil and act.doer.replica.combat ~= nil then
-            if act.doer.replica.combat:CanExtinguishTarget(act.target, act.invobject) then
-                return "RANGEDSMOTHER"
-            elseif act.doer.replica.combat:CanLightTarget(act.target, act.invobject) then
-                return "RANGEDLIGHT"
-            elseif act.target:HasTag("mole") and act.invobject:HasTag("hammer") then
-                return "WHACK"
+        if act.invobject ~= nil then
+            if act.invobject:HasTag("propweapon") then
+                return "PROP"
+            elseif act.doer.replica.combat ~= nil then
+                if act.doer.replica.combat:CanExtinguishTarget(act.target, act.invobject) then
+                    return "RANGEDSMOTHER"
+                elseif act.doer.replica.combat:CanLightTarget(act.target, act.invobject) then
+                    return "RANGEDLIGHT"
+                elseif act.target:HasTag("mole") and act.invobject:HasTag("hammer") then
+                    return "WHACK"
+                end
             end
         end
 
@@ -1468,7 +1472,7 @@ end
 ACTIONS.COMBINESTACK.fn = function(act)
     local target = act.target
     local invobj = act.invobject
-    if invobj and target and invobj.prefab == target.prefab and target.components.stackable and not target.components.stackable:IsFull() then
+    if invobj and target and invobj.prefab == target.prefab and invobj.skinname == target.skinname and target.components.stackable and not target.components.stackable:IsFull() then
         target.components.stackable:Put(invobj)
         return true
     end 
