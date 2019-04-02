@@ -508,6 +508,9 @@ function Tune(overrides)
         HUNGRY_THRESH = .333,
         GHOST_THRESH = .125,
 
+        HUNGRY_BUILDER_DELTA = -5,
+        HUNGRY_BUILDER_RESET_TIME = seg_time * 2,
+
         GRUEDAMAGE = wilson_health*.667,
 
         MARSHBUSH_DAMAGE = wilson_health*.02,
@@ -2640,6 +2643,7 @@ function Tune(overrides)
             WATHGRITHR = 150,
             WEBBER = 150,
             WINONA = 200,
+            WORTOX = 200, --VITO do something here
         },
 
 		GAMEMODE_STARTING_ITEMS =
@@ -2658,6 +2662,7 @@ function Tune(overrides)
 				WATHGRITHR = { "spear_gungnir", "lavaarena_armorlightspeed" },
 				WEBBER = { "blowdart_lava", "lavaarena_armorlightspeed" },
 				WINONA = { "hammer_mjolnir", "lavaarena_armormedium" },
+                WORTOX = {}, --VITO do something here
 			},
 			QUAGMIRE =
 			{
@@ -2673,6 +2678,7 @@ function Tune(overrides)
 				WATHGRITHR = {},
 				WEBBER = {},
 				WINONA = {},
+                WORTOX = {}, --VITO do something here
 			},
 		},
 
@@ -2690,6 +2696,7 @@ function Tune(overrides)
             WATHGRITHR = 2,
             WEBBER = 1,
             WINONA = 1,
+            WORTOX = 1, --VITO do something here
         },
 
 	    LAVAARENA_BERNIE_SCALE = 1.2,
@@ -2747,6 +2754,40 @@ function Tune(overrides)
         DRAGONHAT_PERISHTIME = total_day_time, --only consumes while dancing
         YOTG_PERD_SPAWNCHANCE = .3,
 
+        --v2 Winona
+        WINONA_ENGINEERING_SPACING = 3.2,
+        --this is just the default recipe spacing
+        --we still want to explicitly define it for engineering recipes because of the fixed range indicators
+
+        WINONA_CATAPULT_HEALTH = 400,
+        WINONA_CATAPULT_HEALTH_REGEN_PERIOD = 10,
+        WINONA_CATAPULT_HEALTH_REGEN = 400 * 10 / total_day_time,
+        WINONA_CATAPULT_DAMAGE = wilson_attack * 1.25,
+        WINONA_CATAPULT_MIN_RANGE = 6,
+        WINONA_CATAPULT_MAX_RANGE = 15,
+        WINONA_CATAPULT_ATTACK_PERIOD = 2.5,
+        WINONA_CATAPULT_AOE_RADIUS = 1.25,
+
+        WINONA_SPOTLIGHT_RADIUS = 2.4,
+        WINONA_SPOTLIGHT_MIN_RANGE = 4,
+        WINONA_SPOTLIGHT_MAX_RANGE = 20,
+
+        WINONA_BATTERY_LOW_MAX_FUEL_TIME = seg_time * 6,
+        WINONA_BATTERY_LOW_FUEL_RATE_MULT = .375, --changes max fuel to last 1 full day, while still only costing 2 nitre
+        WINONA_BATTERY_HIGH_MAX_FUEL_TIME = total_day_time * 6,
+        WINONA_BATTERY_RANGE = 5,
+        WINONA_BATTERY_MIN_LOAD = .2,
+
+        --wortox
+        WORTOX_HEALTH = 200,
+        WORTOX_HUNGER = 175,
+        WORTOX_SANITY = 150,
+        WORTOX_SANITY_AURA_MULT = .5,
+        WORTOX_MAX_SOULS = 20,
+        WORTOX_FOOD_MULT = .5,
+        WORTOX_SOULEXTRACT_RANGE = 20, --die within this range of wortox to spawn soul
+        WORTOX_SOULSTEALER_RANGE = 8, --souls fly towards wortox when he walks within this range
+        WORTOX_SOULHEAL_RANGE = 8,
     }
 end
 

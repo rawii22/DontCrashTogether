@@ -167,16 +167,22 @@ local function OnEquip(inst, data)
     --Reticule targeting items
     if data.eslot == EQUIPSLOTS.HANDS then
         local self = inst.components.playercontroller
-        if self.reticule ~= nil then
-            self.reticule:DestroyReticule()
-            self.reticule = nil
-        end
         if data.item.components.aoetargeting ~= nil then
+            if self.reticule ~= nil then
+                self.reticule:DestroyReticule()
+                self.reticule = nil
+            end
             data.item.components.aoetargeting:StopTargeting()
         else
-            self.reticule = data.item.components.reticule
-            if self.reticule ~= nil and self.reticule.reticule == nil and (self.reticule.mouseenabled or TheInput:ControllerAttached()) then
-                self.reticule:CreateReticule()
+            local newreticule = data.item.components.reticule or inst.components.reticule
+            if newreticule ~= self.reticule then
+                if self.reticule ~= nil then
+                    self.reticule:DestroyReticule()
+                end
+                self.reticule = newreticule
+                if newreticule ~= nil and newreticule.reticule == nil and (newreticule.mouseenabled or TheInput:ControllerAttached()) then
+                    newreticule:CreateReticule()
+                end
             end
         end
     end
@@ -186,11 +192,14 @@ local function OnUnequip(inst, data)
     --Reticule targeting items
     if data.eslot == EQUIPSLOTS.HANDS then
         local self = inst.components.playercontroller
-        if self.reticule ~= nil then
+        if self.reticule ~= nil and self.reticule ~= inst.components.reticule then
             local equip = inst.replica.inventory:GetEquippedItem(data.eslot)
             if equip == nil or self.reticule ~= equip.components.reticule then
                 self.reticule:DestroyReticule()
-                self.reticule = nil
+                self.reticule = inst.components.reticule
+                if self.reticule ~= nil and self.reticule.reticule == nil and (self.reticule.mouseenabled or TheInput:ControllerAttached()) then
+                    self.reticule:CreateReticule()
+                end
             end
         end
     end
@@ -737,6 +746,7 @@ function PlayerController:DoControllerAltActionButton()
     end
 
     local lmb, act = self:GetGroundUseAction()
+    local isspecial = nil
     local obj = nil
     if act == nil then
         obj = self:GetControllerTarget()
@@ -749,8 +759,13 @@ function PlayerController:DoControllerAltActionButton()
                 obj = self.inst
                 act = BufferedAction(obj, obj, ACTIONS.DISMOUNT)
             else
-                self:TryAOETargeting()
-                return
+                obj = nil
+                act = self:GetGroundUseSpecialAction(nil, true)
+                if act == nil then
+                    self:TryAOETargeting()
+                    return
+                end
+                isspecial = true
             end
         end
     end
@@ -774,12 +789,12 @@ function PlayerController:DoControllerAltActionButton()
         end
     elseif self.locomotor == nil then
         self.remote_controls[CONTROL_CONTROLLER_ALTACTION] = 0
-        SendRPCToServer(RPC.ControllerAltActionButtonPoint, act.action.code, act.pos.x, act.pos.z, nil, act.action.canforce, act.action.mod_name)
+        SendRPCToServer(RPC.ControllerAltActionButtonPoint, act.action.code, act.pos.x, act.pos.z, nil, act.action.canforce, isspecial, act.action.mod_name)
     elseif self:CanLocomote() then
         act.preview_cb = function()
             self.remote_controls[CONTROL_CONTROLLER_ALTACTION] = 0
             local isreleased = not TheInput:IsControlPressed(CONTROL_CONTROLLER_ALTACTION)
-            SendRPCToServer(RPC.ControllerAltActionButtonPoint, act.action.code, act.pos.x, act.pos.z, isreleased, nil, act.action.mod_name)
+            SendRPCToServer(RPC.ControllerAltActionButtonPoint, act.action.code, act.pos.x, act.pos.z, isreleased, nil, isspecial, act.action.mod_name)
         end
     end
 
@@ -823,13 +838,18 @@ function PlayerController:OnRemoteControllerAltActionButton(actioncode, target, 
     end
 end
 
-function PlayerController:OnRemoteControllerAltActionButtonPoint(actioncode, position, isreleased, noforce, mod_name)
+function PlayerController:OnRemoteControllerAltActionButtonPoint(actioncode, position, isreleased, noforce, isspecial, mod_name)
     if self.ismastersim and self:IsEnabled() and self.handler == nil then
         self.inst.components.combat:SetTarget(nil)
 
         self.remote_controls[CONTROL_CONTROLLER_ALTACTION] = 0
         self:ClearControlMods()
-        local lmb, rmb = self:GetGroundUseAction(position)
+        local lmb, rmb
+        if isspecial then
+            rmb = self:GetGroundUseSpecialAction(position, true)
+        else
+            lmb, rmb = self:GetGroundUseAction(position)
+        end
         if isreleased then
             self.remote_controls[CONTROL_CONTROLLER_ALTACTION] = nil
         end
@@ -1118,7 +1138,7 @@ function PlayerController:RefreshReticule()
     if self.reticule ~= nil then
         self.reticule:DestroyReticule()
     end
-    self.reticule = item ~= nil and item.components.reticule or nil
+    self.reticule = item ~= nil and item.components.reticule or self.inst.components.reticule
     if self.reticule ~= nil and self.reticule.reticule == nil and (self.reticule.mouseenabled or TheInput:ControllerAttached()) then
         self.reticule:CreateReticule()
     end
@@ -1943,9 +1963,23 @@ function PlayerController:OnUpdate(dt)
         end
 
         local terraform = false
+        local hidespecialactionreticule = false
         if controller_mode then
             local lmb, rmb = self:GetGroundUseAction()
-            terraform = rmb ~= nil and rmb.action == ACTIONS.TERRAFORM
+            if rmb ~= nil then
+                terraform = rmb.action == ACTIONS.TERRAFORM
+                hidespecialactionreticule = self.reticule ~= nil and self.reticule.inst == self.inst
+            else
+                if self.controller_target ~= nil then
+                    lmb, rmb = self:GetSceneItemControllerAction(self.controller_target)
+                end
+                if rmb ~= nil then
+                    hidespecialactionreticule = true
+                else
+                    local rider = self.inst.replica.rider
+                    hidespecialactionreticule = rider ~= nil and rider:IsRiding() or not self:HasGroundUseSpecialAction(true)
+                end
+            end
         else
             local rmb = self:GetRightMouseAction() 
             terraform = rmb ~= nil and rmb.action == ACTIONS.TERRAFORM
@@ -1967,7 +2001,11 @@ function PlayerController:OnUpdate(dt)
             end
 
             if self.reticule ~= nil and self.reticule.reticule ~= nil then
-                self.reticule.reticule:Show()
+                if hidespecialactionreticule then
+                    self.reticule.reticule:Hide()
+                else
+                    self.reticule.reticule:Show()
+                end
             end
         else
             if self.terraformer ~= nil then
@@ -3174,7 +3212,7 @@ end
 function PlayerController:GetGroundUseAction(position)
     local islocal = position == nil
     position = position or
-        (self.reticule ~= nil and self.reticule.targetpos) or
+        (self.reticule ~= nil and self.reticule.inst ~= self.inst and self.reticule.targetpos) or
         (self.terraformer ~= nil and self.terraformer:GetPosition()) or
         (self.placer ~= nil and self.placer:GetPosition()) or
         (self.deployplacer ~= nil and self.deployplacer:GetPosition()) or
@@ -3184,10 +3222,11 @@ function PlayerController:GetGroundUseAction(position)
         --Check validitiy because FE controls may call this in WallUpdate
         local equipitem = self.inst.replica.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
         if equipitem ~= nil and equipitem:IsValid() and
-            (   equipitem.components.aoetargeting ~= nil and
-                equipitem.components.aoetargeting.alwaysvalid and
-                equipitem.components.aoetargeting:IsEnabled() or
-                self.map:IsPassableAtPoint(position:Get())
+            (   self.map:IsPassableAtPoint(position:Get()) or
+                (   equipitem.components.aoetargeting ~= nil and
+                    equipitem.components.aoetargeting.alwaysvalid and
+                    equipitem.components.aoetargeting:IsEnabled()
+                )
             ) then
             local isaoetargeting = islocal and self:IsAOETargeting()
             local lmb = not isaoetargeting and self.inst.components.playeractionpicker:GetPointActions(position, equipitem, false)[1] or nil
@@ -3205,6 +3244,25 @@ function PlayerController:GetGroundUseAction(position)
             return lmb, rmb ~= nil and (lmb == nil or lmb.action ~= rmb.action) and rmb or nil
         end
     end
+end
+
+function PlayerController:GetGroundUseSpecialAction(position, right)
+    --local islocal = position == nil
+    position = position or
+        (self.reticule ~= nil and self.reticule.targetpos) or
+        (self.terraformer ~= nil and self.terraformer:GetPosition()) or
+        (self.placer ~= nil and self.placer:GetPosition()) or
+        (self.deployplacer ~= nil and self.deployplacer:GetPosition()) or
+        self.inst:GetPosition()
+
+    return CanEntitySeePoint(self.inst, position:Get())
+        and self.map:IsPassableAtPoint(position:Get())
+        and self.inst.components.playeractionpicker:GetPointSpecialActions(position, nil, right)[1]
+        or nil
+end
+
+function PlayerController:HasGroundUseSpecialAction(right)
+    return #self.inst.components.playeractionpicker:GetPointSpecialActions(self.inst:GetPosition(), nil, right) > 0
 end
 
 local function ValidateItemUseAction(self, act, active_item, target)

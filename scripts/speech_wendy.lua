@@ -376,7 +376,7 @@ return {
 			ATTACKER = "%s is plotting something dastardly with that axe.",
 			MURDERER = "I'll send you someplace much nicer than this, %s.",
 			REVIVER = "Abigail likes you, %s. But she likes Lucy more.",
-			GHOST = "We'll get a heart, but are you sure you want to come back, %s?",
+			GHOST = "We'll get a heart, but are you sure you want to come back?",
 			BEAVER = "He pinky-promised I'd get to ride on his shoulders. Such lies.",
 			BEAVERGHOST = "The curse haunts you even in death, %s?",
 			FIRESTARTER = "Fire setting does not seem in your best interest...",
@@ -425,6 +425,15 @@ return {
             REVIVER = "Hi %s. Abigail says \"thank-you\".",
             GHOST = "You can't escape that way, %s. I've tried.",
             FIRESTARTER = "Is fire important in your line of work...?",
+        },
+        WORTOX =
+        {
+            GENERIC = "Heehee. You're funny, %s.",
+            ATTACKER = "You haven't been a good imp today, %s.",
+            MURDERER = "Abby and I will put your souls to rest!",
+            REVIVER = "%s is reliable when it counts.",
+            GHOST = "Did you lose a game, %s?",
+            FIRESTARTER = "Abby and I know what you did, %s.",
         },
 
 		GLOMMER = "Well aren't you a happy little fuzzball. Die.",
@@ -2402,6 +2411,37 @@ return {
 
         QUAGMIRE_LAMP_SHORT = "The only light in my life is Abigail.",
 
+        --v2 Winona
+        WINONA_CATAPULT = 
+        {
+        	GENERIC = "It visits death upon intruders.",
+        	OFF = "It's dead...",
+        	BURNING = "Oh no...",
+        	BURNT = "It all crumbles to ash, in the end.",
+        },
+        WINONA_SPOTLIGHT = 
+        {
+        	GENERIC = "But what if I liked the dark?",
+        	OFF = "It's dead...",
+			BURNING = "Oh no...",
+        	BURNT = "It all crumbles to ash, in the end.",
+        },
+        WINONA_BATTERY_LOW = 
+        {
+        	GENERIC = "It's a kind of electrical box.",
+        	LOWPOWER = "It's not long for this world.",
+        	OFF = "What did Winona put in it again? Oh...",
+        	BURNING = "Oh no...",
+        	BURNT = "It all crumbles to ash, in the end.",
+        },
+        WINONA_BATTERY_HIGH = 
+        {
+        	GENERIC = "This one looks odd.",
+        	LOWPOWER = "It's slowly dying.",
+        	OFF = "I think it wants... gems...",
+        	BURNING = "Oh no...",
+        	BURNT = "It all crumbles to ash, in the end.",
+        },
     },
     DESCRIBE_GENERIC = "Sigh... I don't know.",
     DESCRIBE_TOODARK = "The darkness! It is too dark!",

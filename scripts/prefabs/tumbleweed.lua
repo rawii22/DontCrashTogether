@@ -132,7 +132,7 @@ local function onpickup(inst, picker)
             item.components.inventoryitem.ondropfn(item)
         end
         if inst.lootaggro[i] and item.components.combat ~= nil and picker ~= nil then
-            if not (item:HasTag("spider") and (picker:HasTag("spiderwhisperer") or picker:HasTag("monster"))) then
+            if not (item:HasTag("spider") and (picker:HasTag("spiderwhisperer") or picker:HasTag("spiderdisguise") or (picker:HasTag("monster") and not picker:HasTag("player")))) then
                 item.components.combat:SuggestTarget(picker)
             end
         end
@@ -453,7 +453,7 @@ local function fn()
         inst.angle = math.clamp(GetRandomWithVariance(inst.angle, ANGLE_VARIANCE), 0, 360)
         inst.components.blowinwind:Start(inst.angle)
     else
-        inst.SoundEmitter:PlaySound("dontstarve_DLC001/common/tumbleweed_roll", "tumbleweed_roll")
+        inst.components.blowinwind:StartSoundLoop()
     end
 
     ---local color = 0.5 + math.random() * 0.5

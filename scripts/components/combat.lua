@@ -70,6 +70,8 @@ nil,
     panic_thresh = onpanicthresh,
 })
 
+local AREA_EXCLUDE_TAGS = { "INLIMBO", "notarget", "noattack", "flight", "invisible", "playerghost" }
+
 function Combat:SetLastTarget(target)
     self.lasttargetGUID = target ~= nil and target:IsValid() and target.GUID or nil
     self.inst.replica.combat:SetLastTarget(target ~= nil and target:IsValid() and target or nil)
@@ -233,6 +235,10 @@ function Combat:OnEntityWake()
 
     if self.retargetperiod ~= nil then
         self.retargettask = self.inst:DoPeriodicTask(self.retargetperiod, dotryretarget, nil, self)
+    end
+
+    if self.target ~= nil and self.keeptargetfn ~= nil then
+        self.inst:StartUpdatingComponent(self)
     end
 end
 
@@ -763,9 +769,11 @@ function Combat:CanLightTarget(target, weapon)
         and target.components.burnable.canlight
         and not target.components.burnable:IsBurning()
         and not target:HasTag("burnt")
-        and (target.components.fueled == nil or
+        --[[and (target.components.fueled == nil or
+            not target.components.fueled.accepting or
             target.components.fueled.fueltype == FUELTYPE.BURNABLE or
-            target.components.fueled.secondaryfueltype == FUELTYPE.BURNABLE)
+            target.components.fueled.secondaryfueltype == FUELTYPE.BURNABLE)]]
+        --V2C: fueled or fueltype should not really matter. if we can burn it, should still allow lighting.
 end
 
 function Combat:CanHitTarget(target, weapon)
@@ -808,7 +816,7 @@ function Combat:DoAttack(targ, weapon, projectile, stimuli, instancemult)
     if not self:CanHitTarget(targ, weapon) then
         self.inst:PushEvent("onmissother", { target = targ, weapon = weapon })
         if self.areahitrange ~= nil and not self.areahitdisabled then
-            self:DoAreaAttack(projectile or self.inst, self.areahitrange, weapon, nil, stimuli, { "INLIMBO" })
+            self:DoAreaAttack(projectile or self.inst, self.areahitrange, weapon, nil, stimuli, AREA_EXCLUDE_TAGS)
         end
         return
     end
@@ -861,7 +869,7 @@ function Combat:DoAttack(targ, weapon, projectile, stimuli, instancemult)
     end
 
     if self.areahitrange ~= nil and not self.areahitdisabled then
-        self:DoAreaAttack(targ, self.areahitrange, weapon, nil, stimuli, { "INLIMBO" })
+        self:DoAreaAttack(targ, self.areahitrange, weapon, nil, stimuli, AREA_EXCLUDE_TAGS)
     end
 
     self.lastdoattacktime = GetTime()

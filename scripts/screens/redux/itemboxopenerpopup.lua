@@ -51,7 +51,6 @@ local ItemBoxOpenerPopup = Class(Screen, function(self, options, open_box_fn, co
     Screen._ctor(self, "ItemBoxOpenerPopup")
 
     self.allow_cancel = options.allow_cancel
-    self.use_bigportraits = options.use_bigportraits
     self.open_box_fn = open_box_fn
 	self.completed_cb = completed_cb
 
@@ -192,12 +191,7 @@ function ItemBoxOpenerPopup:OnUpdate(dt)
 
         local item_widget = self:GetItem(self.active_item_idx)
         assert(item_widget)
-        -- We use bigportaits when there's tons of items, so probably don't
-        -- want to show each item either. Also the item icons won't be the
-        -- bigportait.
-        if not self.use_bigportraits then
-            item_widget:Show()
-        end
+        item_widget:Show()
 
         local item_key = self.items[self.active_item_idx]
         self.current_item_summary:UpdateSummary(item_key)
@@ -264,12 +258,13 @@ function ItemBoxOpenerPopup:_UpdateSwapIcon(index)
     local item_key = self.items[index]
     local desired_symbol = "SWAP_ICON"
     local build = GetBuildForItem(item_key)
-    if self.use_bigportraits then
-        local portrait = GetBigPortraitForItem(item_key)
-        if portrait and portrait.build then
-            build, desired_symbol = portrait.build, portrait.symbol
-        end
+    
+    --if there's a portrait we can use it, otherwise we'll just use the SWAP_ICON
+    local portrait = GetBigPortraitAnimForItem(item_key)
+    if portrait and portrait.build then
+        build, desired_symbol = portrait.build, portrait.symbol
     end
+
     self.bundle:GetAnimState():OverrideSkinSymbol("SWAP_ICON", build, desired_symbol)
     self.active_item_idx = index
 end
@@ -293,11 +288,11 @@ function ItemBoxOpenerPopup:_OpenItemBox()
             columns = 1
         elseif #item_types == 2 or #item_types == 4 then
             columns = 2
-        elseif #item_types == 3 or #item_types == 6 or #item_types == 9 then
+        elseif #item_types == 3 or #item_types == 6 then
             columns = 3
         elseif #item_types == 7 or #item_types == 8 then
             columns = 4
-        elseif #item_types == 5 or #item_types == 10 then
+        elseif #item_types == 5 or #item_types == 10 or #item_types == 9 then
             columns = 5
         elseif #item_types == 12 or #item_types == 11 then
 			columns = 6

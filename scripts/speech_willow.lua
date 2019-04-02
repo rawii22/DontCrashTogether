@@ -396,7 +396,7 @@ return {
 			ATTACKER = "That mime punch was really convincing! Haha, ow!",
 			MURDERER = "Your actions speak louder than words! Murderer!",
 			REVIVER = "Who do ghosts call? %s!",
-			GHOST = "%s, just tell me whatcha need and I'll get it for you. Heheheh!",
+			GHOST = "Just tell me whatcha need and I'll get it for you. Heheh!",
 			FIRESTARTER = "Make it BURN!",
 		},
 		WEBBER = 
@@ -425,6 +425,15 @@ return {
             REVIVER = "%s never gives up on anyone.",
             GHOST = "A heart sure would come in handy!",
             FIRESTARTER = "Nice fire, %s!",
+        },
+        WORTOX =
+        {
+            GENERIC = "Hi %s!",
+            ATTACKER = "You're supposed to prank everyone else, not ME.",
+            MURDERER = "Monster! Murderer! BURN!",
+            REVIVER = "I guess %s isn't all mischief.",
+            GHOST = "You're looking a little pale there, red.",
+            FIRESTARTER = "Haha, YES! %s!!",
         },
 
         MULTIPLAYER_PORTAL = "The vines coil away from my lighter... weird!",
@@ -2428,6 +2437,37 @@ return {
 
         QUAGMIRE_LAMP_SHORT = "Whatever. It's a lamp.",
 
+        --v2 Winona
+        WINONA_CATAPULT = 
+        {
+        	GENERIC = "It flings big stinkin' rocks.",
+        	OFF = "Is this thing on?",
+        	BURNING = "Hehehe!",
+        	BURNT = "Well, that was mildly entertaining.",
+        },
+        WINONA_SPOTLIGHT = 
+        {
+        	GENERIC = "So no more night fires then?",
+        	OFF = "Is this thing on?",
+        	BURNING = "Hehehe!",
+        	BURNT = "Well, that was mildly entertaining.",
+        },
+        WINONA_BATTERY_LOW = 
+        {
+        	GENERIC = "Iunno, it's Winona's junk.",
+        	LOWPOWER = "It's on its last legs.",
+        	OFF = "Oops. It broke.",
+        	BURNING = "Hehehe!",
+        	BURNT = "Well, that was mildly entertaining.",
+        },
+        WINONA_BATTERY_HIGH = 
+        {
+        	GENERIC = "More of Winona's weird junk.",
+        	LOWPOWER = "It's on its last legs.",
+        	OFF = "Oops. It broke.",
+        	BURNING = "Hehehe!",
+        	BURNT = "Well, that was mildly entertaining.",
+        },
     },
     DESCRIBE_GENERIC = "I have no idea what that is!",
     DESCRIBE_TOODARK = "I need more light!",

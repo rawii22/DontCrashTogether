@@ -40,6 +40,7 @@ local Builder = Class(function(self, inst)
     self.ancient_bonus = 0
     self.shadow_bonus = 0
     self.ingredientmod = 1
+    --self.last_hungry_build = nil
 
     self.freebuildmode = false
 
@@ -76,10 +77,12 @@ function Builder:ActivateCurrentResearchMachine(recipe)
 end
 
 function Builder:OnSave()
+    local hungrytime = self.last_hungry_build ~= nil and math.ceil(GetTime() - self.last_hungry_build) or math.huge
     return
     {
         buffered_builds = self.buffered_builds,
         recipes = self.recipes,
+        hungrytime = hungrytime < TUNING.HUNGRY_BUILDER_RESET_TIME and hungrytime or nil,
     }
 end
 
@@ -99,6 +102,10 @@ function Builder:OnLoad(data)
                 self:AddRecipe(v)
             end
         end
+    end
+
+    if data.hungrytime ~= nil then
+        self.last_hungry_build = GetTime() - data.hungrytime
     end
 end
 
@@ -417,6 +424,16 @@ function Builder:DoBuild(recname, pt, rotation, skin)
             wetlevel = self:GetIngredientWetness(materials)
             self:RemoveIngredients(materials, recname)
         end
+
+        if self.inst:HasTag("hungrybuilder") and not self.inst.sg:HasStateTag("slowaction") then
+            local t = GetTime()
+            if self.last_hungry_build == nil or t > self.last_hungry_build + TUNING.HUNGRY_BUILDER_RESET_TIME then
+                self.inst.components.hunger:DoDelta(TUNING.HUNGRY_BUILDER_DELTA)
+                self.inst:PushEvent("hungrybuild")
+            end
+            self.last_hungry_build = t
+        end
+
         self.inst:PushEvent("refreshcrafting")
 
         if recipe.tab.manufacturing_station then
@@ -552,6 +569,12 @@ function Builder:CanLearn(recname)
     return recipe ~= nil
         and (recipe.builder_tag == nil or
             self.inst:HasTag(recipe.builder_tag))
+end
+
+function Builder:LongUpdate(dt)
+    if self.last_hungry_build ~= nil then
+        self.last_hungry_build = self.last_hungry_build - dt
+    end
 end
 
 --------------------------------------------------------------------------

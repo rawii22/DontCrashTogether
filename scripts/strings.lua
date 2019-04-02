@@ -58,6 +58,7 @@ STRINGS =
         wathgrithr = "Wigfrid",
         webber = "Webber",
         winona = "Winona",
+        wortox = "Wortox",
         unknown = "The Unknown",
         random = "Random",
     },
@@ -77,6 +78,7 @@ STRINGS =
         wathgrithr = "\"All the wörld's a stage. För me!\"",
         webber = "\"We're always together, and never alone!\"",
         winona = "\"Anything can be fixed with hard work and elbow grease.\"",
+        wortox = "\"Pardon me if I don't shake your hand.\"",
         random = "Anybody could be under that hat.",
     },
 
@@ -94,6 +96,7 @@ STRINGS =
         wathgrithr = "The Performance Artist",
         webber = "The Indigestible",
         winona = "The Handywoman",
+        wortox = "The Soul Starved",
         random = "?"
     },
 
@@ -113,7 +116,8 @@ STRINGS =
         woodie_canada = "*Has a lovely axe... \n*And a terrible secret \n*Celebrates Thanksgiving at the correct time",
         wathgrithr = "*Excels in battle \n*Absorbs the power of fallen foes \n*Only eats meat",
         webber = "*Is a monster \n*Can befriend spiders \n*Grows a silky smooth beard",
-        winona = "*Is a skilled builder\n*Gets one free hit from the dark\n*Brings her own tools",
+        winona = "*Is a skilled builder\n*Gets one free hit from the dark\n*Invents her own gadgets",
+        wortox = "*Is an imp \n*Can hop through time and space \n*Less nourished by physical food",
         random = "\nSelect a random character",
     },
 
@@ -132,7 +136,7 @@ STRINGS =
         woodie_canada = "*Lucy returns to Woodie when thrown\n*Attack speed increased when wielding Lucy\n\nExpertise:\nMelee",
         wathgrithr = "*Battle cries increase nearby allies' next attack damage by 25%\n*Gains less aggro when attacking\n\nExpertise:\nMelee, Darts",
         webber = "*Accompanied by itsy bitsy spiders\n\n\n\nExpertise:\nDarts",
-        winona = "*All ability cooldowns are 10% faster\n\n\n\nExpertise:\nMelee, Darts, Staves",
+        wortox = "*PLACEHOLDER\n\n\n\nExpertise:\nPLACEHOLDER",
         random = "\nSelect a random character",
     },
 
@@ -152,6 +156,7 @@ STRINGS =
         wathgrithr = "*Harvests an extra meat when slaughtering Beefalo\n\n\n*Expertise:\nGathering",
         webber = "*Sows seeds and harvests plants much more quickly\n\n\n*Expertise:\nFarming",
         winona = "*Performs most actions slightly faster\n\n\n\n*Expertise:\nFarming",
+        wortox = "*PLACEHOLDER\n\n\n\nExpertise:\nPLACEHOLDER",
         random = "\nSelect a random character",
     },
 
@@ -169,6 +174,7 @@ STRINGS =
         wathgrithr = "Whoever Wigfrid was before her titular role has been lost to time, and the power of method acting.",
         webber = "Webber is a polite young monster who cares deeply for all his friends, human or otherwise.",
         winona = "Winona is a former assembly line worker with a boisterous attitude and love of all things mechanical.",
+        wortox = "Wortox is a mischievous imp whose levity masks a deep well of guilt. He has taken many souls in his time.",
     },
 
     --ACTION MOUSEOVER TEXT
@@ -208,6 +214,7 @@ STRINGS =
             GENERIC = "Drop",
             SETTRAP = "Set Trap",
             SETMINE = "Set Mine",
+            FREESOUL = "Release Soul",
             PLACELANTERN = "Place",
         },
         PICK = "Pick",
@@ -375,7 +382,11 @@ STRINGS =
             GENERIC = "Cast Spell", --"Cast Spell on"
             SCIENCE = "Use Gadget",
         },
-        BLINK = "Telepoof",
+        BLINK =
+        {
+            GENERIC = "Telepoof",
+            SOUL = "Soul Hop",
+        },
         COMBINESTACK = "Combine Stack",
         BURY = "Bury",
         FEED = "Feed",
@@ -787,6 +798,7 @@ STRINGS =
         WATHGRITHR = "Wigfrid",
         WEBBER = "Webber",
         WINONA = "Winona",
+        WORTOX = "Wortox",
 
         PIGKING = "Pig King",
         STRAWHAT = "Straw Hat",
@@ -1881,6 +1893,15 @@ STRINGS =
         QUAGMIRE_FOOD_067 = "Scone",
         QUAGMIRE_FOOD_068 = "Trifle",
         QUAGMIRE_FOOD_069 = "Cheesecake",
+
+        --v2 Winona
+        WINONA_CATAPULT = "Winona's Catapult",
+        WINONA_SPOTLIGHT = "Winona's Spotlight",
+        WINONA_BATTERY_LOW = "Winona's Generator",
+        WINONA_BATTERY_HIGH = "Winona's G.E.M.erator",
+
+        --Wortox
+        WORTOX_SOUL = "Soul",
     },
 
     NAME_DETAIL_EXTENTION =
@@ -2248,6 +2269,12 @@ STRINGS =
         QUAGMIRE_SEEDPACKET_MIX = "Unusual crop seeds. Plant in tilled soil.",
 
         QUAGMIRE_GOATMILK = "Fresh from the source.",
+
+        --v2 Winona
+        WINONA_CATAPULT = "Lob big rocks at fearful foes.",
+        WINONA_SPOTLIGHT = "Shine a light both day and night.",
+        WINONA_BATTERY_LOW = "Someone's gotta keep the juice flowing.",
+        WINONA_BATTERY_HIGH = "This one uses gems, so you know it's good.",
     },
 
     -- MAXWELL_TEST = {"Say pal, you don't look so good.", "You better find something to eat before night comes!"},
@@ -3038,6 +3065,7 @@ STRINGS =
         ANCIENT = "Ancient",
         CELESTIAL = "Celestial",
         SHADOW = "Shadow",
+        ENGINEERING = "Engineering",
         CARTOGRAPHY = "Cartography",
         SCULPTING = "Sculptures",
         ORPHANAGE = "Critters",
@@ -3615,6 +3643,7 @@ STRINGS.UI =
             "Woodie's plaid...",
             "WX-78's gears...",
             "Winona's tools...",
+            "Wortox's hooves...",
             "a monarch's sorrow...",
             "an inescapable nostalgia...",
             "gold and marble...",
@@ -3630,6 +3659,7 @@ STRINGS.UI =
             "food...",
             "lovely roses...",
             "gems...",
+            "souls...",
             "unspeakable things...",
             "primal instincts...",
             "terrible darkness...",
@@ -3652,24 +3682,30 @@ STRINGS.UI =
         LOCALEXECUTE = "Local:",
     },
 
-    BUGREPORTSCREEN =
-    {
+    BUGREPORTSCREEN = {
         YES = "Yes",
         NO = "No",
         OK = "OK",
 
-        SUBMIT_TITLE = "Upload files?",
-        SUBMIT_TEXT = "Would you like to upload your logs and data files to Klei?",
-
         SUBMIT_SUCCESS_TITLE = "Success",
-        SUBMIT_SUCCESS_TEXT = "Files successfully uploaded. Code: ",
+        SUBMIT_SUCCESS = "Files successfully uploaded. Thanks for the report!",
 
         SUBMIT_FAILURE_TITLE = "Error",
         SUBMIT_FAILURE_TEXT = "There was a problem uploading your files.",
 
-        DESCRIPTION_LABEL = "Please enter a description of your issue.",
+        DESCRIPTION_LABEL = "Please describe your issue.",
         SUBMIT = "Submit",
         SUBMITTING_TEXT = "Submitting files, please wait",
+
+        SUBMIT_DIALOG_HEADER = "Submit Bug Report?",
+        SUBMIT_DIALOG_BODY = "Submitting a bug report will upload your game information and saved worlds to Klei to help us analyze the issue.\n\nThis may take several minutes.",
+        SUBMIT_TEXT_PLACEHOLDER = "Please enter a description of the bug you are experiencing and any details that you feel may aid us in fixing it.",
+
+        CANCEL_SUBMIT_HEADER = "Cancel Bug Report?",
+        CANCEL_SUBMIT_BODY = "You have not submitted your report.\nAre you sure you want to cancel?",
+
+        ENTER_BUG_DESCRIPTION = "Enter Bug Description",
+        CHANGE_BUG_DESCRIPTION = "Change Bug Description",
     },
 
     EMAILSCREEN =
@@ -3813,6 +3849,11 @@ STRINGS.UI =
         ASKQUIT = "Quit Game?",
         ASKQUITDESC = "Charlie will miss you.",
         QUIT = "Quit",
+
+        DYNAMICCONTENT_TITLE = "Dynamic Content",
+        DYNAMICCONTENT_DESC = "Due to an error, dynamic content loading has been disabled.",
+        DYNAMICCONTENT_RE_ENABLE = "Re-enable",
+        DYNAMICCONTENT_OK = "I understand",
 
         FRESHBUILD = "Fresh Build!",
         UPDATERELEASED = "Now Playing:",
@@ -4276,6 +4317,7 @@ STRINGS.UI =
         MOVEMENTPREDICTION = "Lag Compensation:",
         MOVEMENTPREDICTION_ENABLED = "Predictive",
         MOVEMENTPREDICTION_DISABLED = "None",
+		TARGETLOCKING = "Target Locking:",
         DISPLAY_AREA_LABEL = "Display Area:",
         DISPLAY_AREA_BUTTON = "Adjust",
         -- INPUTFREQENCY = "Input Frequency(hz):",
@@ -4288,7 +4330,9 @@ STRINGS.UI =
         REDEEM = "Redeem a Code",
         EULA = "Review the EULA",
         EULA_RESPONSE_CHANGED_TITLE = "Login Required",
-        EULA_RESPONSE_CHANGED_BODY = "Your settings have changed and you must log in again to continue.",
+        EULA_RESPONSE_CHANGED_BODY = "Your settings have changed and you must log in again to continue.",		
+		BUGREPORT = "Submit a Bug Report",
+        DYNAMICCONTENT_ENABLE = "Re-enable Dynamic Content",
         OFFLINE_MODE_TITLE = "Offline Mode",
         OFFLINE_MODE_BODY = "Your selection is not available in offline mode. Please log in and try again.",
         KLEI_ID_PREFIX = "Klei ID: ",
@@ -4336,6 +4380,7 @@ STRINGS.UI =
     
     ITEM_SCREEN =
     {
+        THANKS_POPUP_DAILY = "Welcome back!\nPlease enjoy this daily gift.",
         THANKS_POPUP_TITLE_DEFAULT = "Thanks for playing",
         THANKS_POPUP_SWR = "Thank you for buying the ShipWrecked DLC",
         THANKS_POPUP_ROGR = "Thank you for buying the Reign of Giants DLC",
@@ -4359,6 +4404,12 @@ STRINGS.UI =
         {
             EARLY_ACCESS = "Early\nAccess",
         },
+    },
+
+    STATSPANEL =
+    {
+        MOTD_TITLE = "Now Available!",
+        MOTD_BODY = "Character and item skin sets now available for purchase!",
     },
 
     POPUPDIALOG =
@@ -5492,7 +5543,11 @@ STRINGS.UI =
         EMPTY_SLOT = "Available Slot",
         READY = "Ready!",
         TOGGLE_PORTRAIT = "Toggle Portrait",
-        
+
+        UNOWNED_CHARACTER_TITLE = "Character Not Owned",
+        UNOWNED_CHARACTER_BODY = "You have not yet unlocked {character}.\nTo play this character, you must either weave them using Spools, or purchase them from the Shop.",
+        VISIT_SHOP = "Visit Shop",
+
         SERVER_SHUTDOWN_TITLE = "Server is Shutting Down",
         SERVER_SHUTDOWN_BODY = "This server is about to shut down.",
     },
@@ -6593,7 +6648,7 @@ STRINGS.UI =
 
         FESTIVAL_HISTORY = "History of Travels",
         CURRENCY_LABEL = "Spools",
-        CURRENCY_EXPLAIN = "Items can be unraveled into Spools to weave event items.",
+        CURRENCY_EXPLAIN = "Items can be unraveled into Spools to weave special items.",
         XP_LABEL = "XP Earned",
         NEW_STUFF = "Recent Discoveries",
         LOADING_STUFF = "Loading Discoveries...",
@@ -6646,22 +6701,25 @@ STRINGS.UI =
 
     BARTERSCREEN =
     {
-        TITLE = "The Event Loom",
+        TITLE = "The Curio Loom",
         COMMERCE_BUY = "Weave",
         COMMERCE_GRIND = "Unravel",
-        CONFIRM_BUY_FMT = "Use {doodad_count} Spools to weave item: {item_name}?\n\nYou will be left with {doodad_net} Spools.\nSpools are used to weave limited-time event items.",
+        CONFIRM_BUY_FMT = "Use {doodad_count} Spools to weave item: {item_name}?\n\nYou will be left with {doodad_net} Spools.\nSpools are used to weave \"Woven\" rarity curios.",
         FAIL_BUY_FMT = "{doodad_count} Spools are required to weave item: {item_name}.\n\nYou need {doodad_net} more Spool(s) to weave this item.\nSpools can be obtained by unraveling curios.",
-        CONFIRM_GRIND_FMT = "Unravel this {item_name} into {doodad_count} Spools?\n\nYou will have a total of {doodad_net} Spools.\nSpools are used to weave limited-time event items.",
-        COMMERCE_INFO_BUY = "Use {doodad_value} Spools to weave this special event item.",
-        COMMERCE_INFO_NOBUY = "Only special event items from an active event can be woven from Spools.",
-        COMMERCE_INFO_GRIND = "This item can be unraveled into {doodad_value} Spools.",
-        COMMERCE_INFO_NOGRIND = "This item cannot be unraveled.",
-        NO_MARKET = "This item cannot be traded or sold.",
+        CONFIRM_GRIND_FMT = "Unravel this {item_name} into {doodad_count} Spools?\n\nYou will have a total of {doodad_net} Spools.\nSpools are used to weave \"Woven\" rarity curios.",
+        COMMERCE_INFO_BUY = "Use {doodad_value} Spools to weave this curio.",
+        COMMERCE_INFO_NOBUY_NOT_ACTIVE = "This curio is not currently weaveable.",
+        COMMERCE_INFO_NOBUY_NEVER = "This curio is not weaveable.",
+        COMMERCE_INFO_NOBUY_UNOWNED = "You must have {character} unlocked to weave this item from Spools.",
+        COMMERCE_INFO_GRIND = "This curio can be unraveled into {doodad_value} Spools.",
+        COMMERCE_INFO_NOGRIND = "This curio cannot be unraveled.",
+        NO_MARKET = "This curio cannot be traded or sold.",
         CANCEL = "Nevermind",
         OK = "OK",
         
         UNRAVEL_WARNING_TITLE = "Warning!",
         UNRAVEL_WARNING_BODY = "Unraveling this item will break your {ensemble_name} and cause you to lose access to the Reward item, {reward_name}.",
+        UNRAVEL_WARNING_RESTRICTED_BODY = "You will no longer be able to play as {character} if you unravel this item. You'll also lose access to all the items you own that are character-specific to {character}, although you'll be able to unravel them, if you wish.",
         
         FAILED_TITLE = "Connection failure",
         FAILED_BODY = "Sorry!\nFailed to contact Klei Servers. Please try again.",
@@ -6742,6 +6800,8 @@ STRINGS.UI =
         
         PURCHASE_GIFT_INFO_TITLE = "Purchase Gift",
         PURCHASE_GIFT_INFO_BODY = "To purchase the {pack_name} as a gift for your friend, click on \"Add to Cart\", then \"Purchase as a gift\".",
+        
+        FILTERS = "Filters",
 
         OWNED_FILTER = "Owned:",
         TYPE_FILTER = "Type:",
@@ -6749,6 +6809,9 @@ STRINGS.UI =
         FILTER_UNOWNED = "Unowned",
         FILTER_ITEMS = "Belongings",
         
+        UNOWNED_CHARACTER_BODY = "You do not currently own {character}.\nThis chest contains skins for {character}, which will be unusable without owning them.",
+        VIEW_REQUIRED = "View {character} Chests",
+
         OK = "OK",
     },
 
@@ -6780,6 +6843,11 @@ STRINGS.UI =
         Spiffy          = "Spiffy",
         Distinguished   = "Distinguished",
         Elegant         = "Elegant",
+        Character       = "Character",
+        HeirloomClassy = "Heirloom Classy",
+        HeirloomSpiffy = "Heirloom Spiffy",
+        HeirloomDistinguished = "Heirloom Distinguished",
+        HeirloomElegant = "Heirloom Elegant",
         Timeless        = "Timeless",
         Loyal           = "Loyal",
         ProofOfPurchase = "Proof Of Purchase",
@@ -6787,8 +6855,9 @@ STRINGS.UI =
         Event           = "Event (Limited-Time Use)",
         
         Lustrous        = "Lustrous",
-		EventModifier	= "Event - ",
-		Seasonal		= "Seasonal - ",
+		Woven		    = "Woven - ",
+        CharacterModifier = "",
+
     },
     
     COLOUR =
@@ -7815,6 +7884,7 @@ STRINGS.UI =
 		HELPTEXTPREFIX = "Emote:  ",
         EMOTIONS = "Emotions",
         ACTIONS = "Actions",
+		UNLOCKABLES = "Extras",
 
 		ANGRY = "Angry",
 		NO = "Annoyed",
@@ -7834,6 +7904,16 @@ STRINGS.UI =
         SLEEPY = "Sleepy", 
         SWOON = "Swoon", 
         CAROL = "Carol", 
+        FISTSHAKE = "Fist Shake",
+        CHEER = "Cheer",
+        CHICKEN = "Chicken Dance",
+        FLEX = "Flex",
+        IMPATIENT = "Impatient",
+        LAUGH = "Laugh",
+        ROBOT = "Robot Dance",
+        SHRUG = "Shrug",
+        SLOWCLAP = "Slow Clap",
+        STEP = "Step Dance",
     },
 
     PRESENCE = 
@@ -7860,6 +7940,7 @@ STRINGS.CHARACTERS =
     WATHGRITHR = require "speech_wathgrithr",
     WEBBER = require "speech_webber",
     WINONA = require "speech_winona",
+    WORTOX = require "speech_wortox",
 }
 
 STRINGS.LUCY =
@@ -8568,4 +8649,30 @@ if PLATFORM == "WIN32_RAIL" then
     STRINGS.UI.DATACOLLECTION_POPUP.PRIVACY_PORTAL = nil
     STRINGS.UI.DATACOLLECTION_POPUP.TITLE = nil
     STRINGS.UI.DATACOLLECTION_POPUP.BODY = nil
+	
+    STRINGS.UI.MAINSCREEN.DYNAMICCONTENT_TITLE = nil
+    STRINGS.UI.MAINSCREEN.DYNAMICCONTENT_DESC = nil
+    STRINGS.UI.MAINSCREEN.DYNAMICCONTENT_RE_ENABLE = nil
+    STRINGS.UI.MAINSCREEN.DYNAMICCONTENT_OK = nil
+	
+	STRINGS.UI.OPTIONS.BUGREPORT = nil
+    STRINGS.UI.OPTIONS.DYNAMICCONTENT_ENABLE = nil
+
+    STRINGS.UI.BUGREPORTSCREEN.YES = nil
+    STRINGS.UI.BUGREPORTSCREEN.NO = nil
+    STRINGS.UI.BUGREPORTSCREEN.OK = nil
+    STRINGS.UI.BUGREPORTSCREEN.SUBMIT_SUCCESS_TITLE = nil
+    STRINGS.UI.BUGREPORTSCREEN.SUBMIT_SUCCESS = nil
+    STRINGS.UI.BUGREPORTSCREEN.SUBMIT_FAILURE_TITLE = nil
+    STRINGS.UI.BUGREPORTSCREEN.SUBMIT_FAILURE_TEXT = nil
+    STRINGS.UI.BUGREPORTSCREEN.DESCRIPTION_LABEL = nil
+    STRINGS.UI.BUGREPORTSCREEN.SUBMIT = nil
+    STRINGS.UI.BUGREPORTSCREEN.SUBMITTING_TEXT = nil
+    STRINGS.UI.BUGREPORTSCREEN.SUBMIT_DIALOG_HEADER = nil
+    STRINGS.UI.BUGREPORTSCREEN.SUBMIT_DIALOG_BODY = nil
+    STRINGS.UI.BUGREPORTSCREEN.SUBMIT_TEXT_PLACEHOLDER = nil
+    STRINGS.UI.BUGREPORTSCREEN.CANCEL_SUBMIT_HEADER = nil
+    STRINGS.UI.BUGREPORTSCREEN.CANCEL_SUBMIT_BODY = nil
+    STRINGS.UI.BUGREPORTSCREEN.ENTER_BUG_DESCRIPTION = nil
+    STRINGS.UI.BUGREPORTSCREEN.CHANGE_BUG_DESCRIPTION = nil
 end

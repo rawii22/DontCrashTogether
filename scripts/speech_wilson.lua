@@ -364,11 +364,11 @@ return {
         },
 		WILSON = 
 		{
-			GENERIC = "Stars and atoms! Are you my doppelganger, %s?",
+			GENERIC = "Stars and atoms! Are you my doppelganger?",
 			ATTACKER = "Yeesh. Do I always look that creepy?",
 			MURDERER = "Your existence is an affront to the laws of science, %s!",
 			REVIVER = "%s has expertly put our theories into practice.",
-			GHOST = "Better concoct a revival device. Can't leave another man of science floating.",
+			GHOST = "Best concoct a revival device. Can't leave another man of science floating.",
 			FIRESTARTER = "Burning that wasn't very scientific, %s.",
 		},
 		WOLFGANG = 
@@ -377,7 +377,7 @@ return {
 			ATTACKER = "Let's not start a fight with the strongman...",
 			MURDERER = "Murderer! I can take you!",
 			REVIVER = "%s is just a big teddy bear.",
-			GHOST = "I told you you couldn't deadlift that boulder, %s. The numbers were all wrong.",
+			GHOST = "I told you you couldn't deadlift that boulder. The numbers were all wrong.",
 			FIRESTARTER = "You can't actually \"fight\" fire, %s!",
 		},
 		WAXWELL = 
@@ -448,7 +448,7 @@ return {
 		WEBBER = 
 		{
 			GENERIC = "Good day, %s!",
-			ATTACKER = "I'm gonna roll up a piece of papyrus newspaper, just in case.",
+			ATTACKER = "I'm gonna roll up a papyrus newspaper, just in case.",
 			MURDERER = "Murderer! I'll squash you, %s!",
 			REVIVER = "%s is playing well with others.",
 			GHOST = "%s is really buggin' me for a heart.",
@@ -472,6 +472,16 @@ return {
             GHOST = "Looks like someone threw a wrench into your plans.",
             FIRESTARTER = "Things are burning up at the factory.",
         },
+        WORTOX =
+        {
+            GENERIC = "Greetings to you, %s!",
+            ATTACKER = "I knew %s couldn't be trusted!",
+            MURDERER = "Time to grab the imp by the horns!",
+            REVIVER = "Thanks for lending a helping claw, %s.",
+            GHOST = "I reject the reality of ghosts and imps.",
+            FIRESTARTER = "%s is becoming a survival liability.",
+        },
+
         MIGRATION_PORTAL = 
         {
             GENERIC = "If I had any friends, this could take me to them.",
@@ -2426,6 +2436,37 @@ return {
 
         QUAGMIRE_LAMP_SHORT = "Enlightening.",
 
+        --v2 Winona
+        WINONA_CATAPULT = 
+        {
+        	GENERIC = "She's made a sort of automatic defense system.",
+        	OFF = "It needs some electricity.",
+        	BURNING = "It's on fire!",
+        	BURNT = "Science couldn't save it.",
+        },
+        WINONA_SPOTLIGHT = 
+        {
+        	GENERIC = "What an ingenious idea!",
+        	OFF = "It needs some electricity.",
+        	BURNING = "It's on fire!",
+        	BURNT = "Science couldn't save it.",
+        },
+        WINONA_BATTERY_LOW = 
+        {
+        	GENERIC = "Looks science-y. How does it work?",
+        	LOWPOWER = "It's getting low on power.",
+        	OFF = "I could get it working, if Winona's busy.",
+        	BURNING = "It's on fire!",
+        	BURNT = "Science couldn't save it.",
+        },
+        WINONA_BATTERY_HIGH = 
+        {
+        	GENERIC = "Hey! That's not science!",
+        	LOWPOWER = "It'll turn off soon.",
+        	OFF = "Science beats magic, every time.",
+        	BURNING = "It's on fire!",
+        	BURNT = "Science couldn't save it.",
+        },
     },
     DESCRIBE_GENERIC = "It's a... thing.",
     DESCRIBE_TOODARK = "It's too dark to see!",
