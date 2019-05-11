@@ -20,7 +20,7 @@ local function goinactive(inst)
     if inst:GetSkinName() ~= nil then
         skin_name = string.gsub(inst:GetSkinName(), "_big", "")
     end
-    local inactive = SpawnPrefab("bernie_inactive", skin_name, inst.skin_id, nil )
+    local inactive = SpawnPrefab("bernie_inactive", skin_name, inst.skin_id, nil)
     if inactive ~= nil then
         --Transform health % into fuel.
         inactive.components.fueled:SetPercent(inst.components.health:GetPercent())
@@ -95,16 +95,29 @@ end
 
 local function OnAttacked(inst, data)
     local attacker = data ~= nil and data.attacker or nil
-    if attacker ~= nil then
-        if not attacker:HasTag("bernieowner") then
-            local target = inst.components.combat.target
-            if not (target ~= nil and target:IsValid() and inst:IsNear(target, TUNING.BERNIE_BIG_ATTACK_RANGE + target:GetPhysicsRadius(0))) then
-                inst.components.combat:SetTarget(attacker)
-            end
-        elseif inst.components.combat:TargetIs(attacker) then
-            --V2C: prevent targeting Willows when using fire/ice staff against Bernie
-            inst.components.combat:DropTarget()
+    if attacker ~= nil and not PreventTargetingOnAttacked(inst, attacker, TheNet:GetPVPEnabled() and "bernieowner" or "player") then
+        local target = inst.components.combat.target
+        if not (target ~= nil and target:IsValid() and inst:IsNear(target, TUNING.BERNIE_BIG_ATTACK_RANGE + target:GetPhysicsRadius(0))) then
+            inst.components.combat:SetTarget(attacker)
         end
+    end
+end
+
+local function OnSleepTask(inst)
+    inst._sleeptask = nil
+    inst:GoInactive()
+end
+
+local function OnEntitySleep(inst)
+    if inst._sleeptask ~= nil then
+        inst._sleeptask = inst:DoTaskInTime(.5, OnSleepTask)
+    end
+end
+
+local function OnEntityWake(inst)
+    if inst._sleeptask ~= nil then
+        inst._sleeptask:Cancel()
+        inst._sleeptask = nil
     end
 end
 
@@ -170,11 +183,10 @@ local function fn()
     inst._taunttask = inst:DoPeriodicTask(TAUNT_PERIOD, TauntCreatures, 0)
     inst.OnLoad = OnLoad
     inst.GoInactive = goinactive
+    inst.OnEntitySleep = OnEntitySleep
+    inst.OnEntityWake = OnEntityWake
 
     inst:ListenForEvent("attacked", OnAttacked)
-
-    inst:ListenForEvent("ms_registerbernieactive", function(src, bernieactive) bernieactive:TrackBernieBig(inst) end, TheWorld)
-    TheWorld:PushEvent("ms_registerberniebig", inst)
 
     return inst
 end
