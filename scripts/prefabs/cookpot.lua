@@ -6,6 +6,7 @@ local assets =
 {
     Asset("ANIM", "anim/cook_pot.zip"),
     Asset("ANIM", "anim/cook_pot_food.zip"),
+    Asset("ANIM", "anim/cook_pot_food2.zip"),
     Asset("ANIM", "anim/ui_cookpot_1x4.zip"),
 }
 
@@ -22,7 +23,7 @@ local function onhammered(inst, worker)
         inst.components.burnable:Extinguish()
     end
     if not inst:HasTag("burnt") and inst.components.stewer.product ~= nil and inst.components.stewer:IsDone() then
-        inst.components.lootdropper:AddChanceLoot(inst.components.stewer.product, 1)
+        inst.components.stewer:Harvest()
     end
     if inst.components.container ~= nil then
         inst.components.container:DropEverything()
@@ -39,10 +40,17 @@ local function onhit(inst, worker)
         if inst.components.stewer:IsCooking() then
             inst.AnimState:PlayAnimation("hit_cooking")
             inst.AnimState:PushAnimation("cooking_loop", true)
+            inst.SoundEmitter:PlaySound("dontstarve/common/cookingpot_close")
         elseif inst.components.stewer:IsDone() then
             inst.AnimState:PlayAnimation("hit_full")
             inst.AnimState:PushAnimation("idle_full", false)
         else
+            if inst.components.container ~= nil and inst.components.container:IsOpen() then
+                inst.components.container:Close()
+                --onclose will trigger sfx already
+            else
+                inst.SoundEmitter:PlaySound("dontstarve/common/cookingpot_close")
+            end
             inst.AnimState:PlayAnimation("hit_empty")
             inst.AnimState:PushAnimation("idle_empty", false)
         end
@@ -62,7 +70,7 @@ end
 
 local function onopen(inst)
     if not inst:HasTag("burnt") then
-        inst.AnimState:PlayAnimation("cooking_pre_loop", true)
+        inst.AnimState:PlayAnimation("cooking_pre_loop")
         inst.SoundEmitter:KillSound("snd")
         inst.SoundEmitter:PlaySound("dontstarve/common/cookingpot_open")
         inst.SoundEmitter:PlaySound("dontstarve/common/cookingpot", "snd")
@@ -79,21 +87,37 @@ local function onclose(inst)
     end
 end
 
+local function SetProductSymbol(inst, product, overridebuild)
+    local recipe = cooking.GetRecipe(inst.prefab, product)
+    local potlevel = recipe ~= nil and recipe.potlevel or nil
+    local build = overridebuild or (recipe ~= nil and recipe.overridebuild) or "cook_pot_food"
+    if potlevel == "high" then
+        inst.AnimState:Show("swap_high")
+        inst.AnimState:Hide("swap_mid")
+        inst.AnimState:Hide("swap_low")
+    elseif potlevel == "low" then
+        inst.AnimState:Hide("swap_high")
+        inst.AnimState:Hide("swap_mid")
+        inst.AnimState:Show("swap_low")
+    else
+        inst.AnimState:Hide("swap_high")
+        inst.AnimState:Show("swap_mid")
+        inst.AnimState:Hide("swap_low")
+    end
+    inst.AnimState:OverrideSymbol("swap_cooked", build, product)
+end
+
 local function spoilfn(inst)
     if not inst:HasTag("burnt") then
         inst.components.stewer.product = inst.components.stewer.spoiledproduct
-        inst.AnimState:OverrideSymbol("swap_cooked", "cook_pot_food", inst.components.stewer.product)
+        SetProductSymbol(inst, inst.components.stewer.product)
     end
 end
 
 local function ShowProduct(inst)
     if not inst:HasTag("burnt") then
         local product = inst.components.stewer.product
-        if IsModCookingProduct(inst.prefab, product) then
-            inst.AnimState:OverrideSymbol("swap_cooked", product, product)
-        else
-            inst.AnimState:OverrideSymbol("swap_cooked", "cook_pot_food", product)
-        end
+        SetProductSymbol(inst, product, IsModCookingProduct(inst.prefab, product) and product or nil)
     end
 end
 
@@ -127,6 +151,7 @@ end
 local function harvestfn(inst)
     if not inst:HasTag("burnt") then
         inst.AnimState:PlayAnimation("idle_empty")
+        inst.SoundEmitter:PlaySound("dontstarve/common/cookingpot_close")
     end
 end
 
@@ -209,6 +234,9 @@ local function fn()
     --inst.Light:SetColour(1,0,0)
 
     inst:AddTag("structure")
+
+    --stewer (from stewer component) added to pristine state for optimization
+    inst:AddTag("stewer")
 
     inst.AnimState:SetBank("cook_pot")
     inst.AnimState:SetBuild("cook_pot")

@@ -169,6 +169,7 @@ local function fn()
     inst.AnimState:SetRayTestOnBB(true)
 
     inst:AddTag("cattoyairborne")
+	inst:AddTag("flying")
 
     inst._fadeval = net_float(inst.GUID, "fireflies._fadeval")
     inst._faderate = net_smallbyte(inst.GUID, "fireflies._faderate", "onfaderatedirty")

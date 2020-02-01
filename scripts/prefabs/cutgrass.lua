@@ -19,6 +19,8 @@ local function fn()
     inst:AddTag("cattoy")
     inst:AddTag("renewable")
 
+    MakeInventoryFloatable(inst, "med", 0.05, 0.68)
+
     inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
@@ -26,12 +28,12 @@ local function fn()
     end
 
     inst:AddComponent("inventoryitem")
+
     inst:AddComponent("stackable")
     inst.components.stackable.maxsize = TUNING.STACK_SIZE_SMALLITEM
 
     inst:AddComponent("edible")
     inst.components.edible.foodtype = FOODTYPE.ROUGHAGE
-    inst.components.edible.woodiness = 1
     inst.components.edible.healthvalue = TUNING.HEALING_TINY
     inst.components.edible.hungervalue = TUNING.CALORIES_TINY/2
 

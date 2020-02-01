@@ -163,7 +163,7 @@ end
 
 local function ShouldAcceptItem(inst, item)
     if inst:HasTag("playerghost") then
-        return item.prefab == "reviver"
+        return item.prefab == "reviver" and inst:IsOnPassablePoint()
     else
         return item.components.inventoryitem ~= nil
     end
@@ -186,9 +186,9 @@ local function OnGetItem(inst, giver, item)
     end
 end
 
-local function DropWetTool(inst, data)
+local function DropWetTool(inst, data)    
     --Tool slip.
-    if inst.components.moisture:GetSegs() < 4 then
+    if inst.components.moisture:GetSegs() < 4 or inst:HasTag("stronggrip") then
         return
     end
 
@@ -321,6 +321,7 @@ end
 
 local function OnActionFailed(inst, data)
     if inst.components.talker ~= nil
+		and not data.action.action.silent_fail
         and (data.reason ~= nil or
             not data.action.autoequipped or
             inst.components.inventory.activeitem == nil) then
@@ -429,7 +430,10 @@ local function ActivateHUD(inst)
     if TheFrontEnd:GetFocusWidget() == nil then
         hud:SetFocus()
     end
-    TheCamera:SetOnUpdateFn(not TheWorld:HasTag("cave") and function(camera) hud:UpdateClouds(camera) end or nil)
+    TheCamera:SetOnUpdateFn(not TheWorld:HasTag("cave") and function(camera)
+        hud:UpdateClouds(camera)
+        hud:UpdateDrops(camera)        
+    end or nil)
     hud:SetMainCharacter(inst)
 end
 
@@ -538,7 +542,13 @@ local function EnableMovementPrediction(inst, enable)
 
                 inst.entity:EnableMovementPrediction(true)
                 print("Movement prediction enabled")
-            end
+                inst.components.locomotor.is_prediction_enabled = true
+                --This is unfortunate but it doesn't seem like you can send an rpc on the first
+                --frame when a character is spawned
+                inst:DoTaskInTime(0, function(inst)
+                    SendRPCToServer(RPC.MovementPredictionEnabled, inst)
+                    end)
+            end            
         elseif inst.components.locomotor ~= nil then
             inst:RemoveEventCallback("cancelmovementprediction", OnCancelMovementPrediction)
             inst.entity:EnableMovementPrediction(false)
@@ -549,8 +559,14 @@ local function EnableMovementPrediction(inst, enable)
             end
             inst:RemoveComponent("locomotor")
             print("Movement prediction disabled")
+            --This is unfortunate but it doesn't seem like you can send an rpc on the first
+            --frame when a character is spawned            
+            inst:DoTaskInTime(0, function(inst)
+                SendRPCToServer(RPC.MovementPredictionDisabled, inst)
+                end)            
         end
     end
+
 end
 
 --Always on the bottom of the stack
@@ -654,11 +670,13 @@ local function OnRemoveEntity(inst)
         if TheWorld.ismastersim then
             inst.player_classified:Remove()
             inst.player_classified = nil
-            if inst.ghostenabled then
-                inst.Network:RemoveUserFlag(USERFLAGS.IS_GHOST)
-            end
-            inst.Network:RemoveUserFlag(USERFLAGS.CHARACTER_STATE_1)
-            inst.Network:RemoveUserFlag(USERFLAGS.CHARACTER_STATE_2)
+            --No bit ops support, but in this case, + results in same as |
+            inst.Network:RemoveUserFlag(
+                USERFLAGS.CHARACTER_STATE_1 +
+                USERFLAGS.CHARACTER_STATE_2 +
+                USERFLAGS.CHARACTER_STATE_3 +
+                (inst.ghostenabled and USERFLAGS.IS_GHOST or 0)
+            )
         else
             inst.player_classified._parent = nil
             inst:RemoveEventCallback("onremove", inst.ondetachclassified, inst.player_classified)
@@ -787,6 +805,23 @@ local function OnLoad(inst, data)
     if inst._OnLoad ~= nil then
         inst:_OnLoad(data)
     end
+
+    inst:DoTaskInTime(0, function()
+        --V2C: HACK! enabled false instead of nil means it was overriden by weregoose on load.
+        --     Please refactor drownable and this block to use POST LOAD timing instead.
+        if inst.components.drownable ~= nil and inst.components.drownable.enabled ~= false then
+            local my_x, my_y, my_z = inst.Transform:GetWorldPosition()
+
+            if not TheWorld.Map:IsPassableAtPoint(my_x, my_y, my_z) then
+            for k,v in pairs(Ents) do
+                    if v:IsValid() and v:HasTag("multiplayer_portal") then
+                        inst.Transform:SetPosition(v.Transform:GetWorldPosition())
+                        inst:SnapCamera()
+                    end
+                end
+            end
+        end
+    end)
 end
 
 --------------------------------------------------------------------------
@@ -1117,6 +1152,19 @@ local function LoadForReroll(inst, data)
     end
 end
 
+local function OnGotOnPlatform(player, platform)
+    player.Transform:SetIsOnPlatform(true)
+end
+
+local function OnGotOffPlatform(player, platform)    
+    player.Transform:SetIsOnPlatform(false)
+end
+
+local function OnWintersFeastMusic(inst)
+    if ThePlayer ~= nil and  ThePlayer == inst then
+        ThePlayer:PushEvent("isfeasting")
+    end
+end
 --------------------------------------------------------------------------
 
 --V2C: starting_inventory passed as a parameter here is now deprecated
@@ -1126,6 +1174,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
     {
         Asset("ANIM", "anim/player_basic.zip"),
         Asset("ANIM", "anim/player_idles_shiver.zip"),
+        Asset("ANIM", "anim/player_idles_lunacy.zip"),
         Asset("ANIM", "anim/player_actions.zip"),
         Asset("ANIM", "anim/player_actions_axe.zip"),
         Asset("ANIM", "anim/player_actions_pickaxe.zip"),
@@ -1138,12 +1187,24 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         Asset("ANIM", "anim/player_actions_bugnet.zip"),
         Asset("ANIM", "anim/player_actions_unsaddle.zip"),
         Asset("ANIM", "anim/player_actions_fishing.zip"),
+        Asset("ANIM", "anim/player_actions_fishing_ocean.zip"),
+        Asset("ANIM", "anim/player_actions_fishing_ocean_new.zip"),
+        Asset("ANIM", "anim/player_actions_pocket_scale.zip"),
         Asset("ANIM", "anim/player_actions_boomerang.zip"),
         Asset("ANIM", "anim/player_actions_whip.zip"),
         Asset("ANIM", "anim/player_actions_till.zip"),
+		Asset("ANIM", "anim/player_actions_feast_eat.zip"),
+        Asset("ANIM", "anim/player_boat.zip"),
+        Asset("ANIM", "anim/player_boat_plank.zip"),
+        Asset("ANIM", "anim/player_oar.zip"),
+        Asset("ANIM", "anim/player_boat_hook.zip"),
+        Asset("ANIM", "anim/player_boat_net.zip"),
+        Asset("ANIM", "anim/player_boat_sink.zip"),
+        Asset("ANIM", "anim/player_boat_jump.zip"),
+        Asset("ANIM", "anim/player_boat_channel.zip"),
         Asset("ANIM", "anim/player_bush_hat.zip"),
         Asset("ANIM", "anim/player_attacks.zip"),
-        Asset("ANIM", "anim/player_idles.zip"),
+        --Asset("ANIM", "anim/player_idles.zip"),--Moved to global.lua for use in Item Collection
         Asset("ANIM", "anim/player_rebirth.zip"),
         Asset("ANIM", "anim/player_jump.zip"),
         Asset("ANIM", "anim/player_amulet_resurrect.zip"),
@@ -1152,6 +1213,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         Asset("ANIM", "anim/player_one_man_band.zip"),
         Asset("ANIM", "anim/player_slurtle_armor.zip"),
         Asset("ANIM", "anim/player_staff.zip"),
+        Asset("ANIM", "anim/player_cointoss.zip"),
         Asset("ANIM", "anim/player_hit_darkness.zip"),
         Asset("ANIM", "anim/player_hit_spike.zip"),
         Asset("ANIM", "anim/player_lunge.zip"),
@@ -1161,6 +1223,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         Asset("ANIM", "anim/player_book_attack.zip"),
         Asset("ANIM", "anim/player_parryblock.zip"),
         Asset("ANIM", "anim/player_attack_prop.zip"),
+        Asset("ANIM", "anim/player_peruse.zip"),
 
         Asset("ANIM", "anim/player_frozen.zip"),
         Asset("ANIM", "anim/player_shock.zip"),
@@ -1182,7 +1245,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         Asset("SOUND", "sound/sfx.fsb"),
         Asset("SOUND", "sound/wilson.fsb"),
 
-        Asset("ANIM", "anim/player_ghost_withhat.zip"),
+        --Asset("ANIM", "anim/player_ghost_withhat.zip"),--Moved to global.lua for use in Item Collection
         Asset("ANIM", "anim/player_revive_ghosthat.zip"),
         Asset("ANIM", "anim/player_revive_to_character.zip"),
         Asset("ANIM", "anim/player_revive_from_corpse.zip"),
@@ -1209,9 +1272,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
 
         Asset("ANIM", "anim/player_sandstorm.zip"),
         Asset("ANIM", "anim/player_tiptoe.zip"),
-
-        Asset("ANIM", "anim/corner_dude.zip"),
-
+		
         Asset("IMAGE", "images/colour_cubes/ghost_cc.tex"),
         Asset("IMAGE", "images/colour_cubes/mole_vision_on_cc.tex"),
         Asset("IMAGE", "images/colour_cubes/mole_vision_off_cc.tex"),
@@ -1222,6 +1283,8 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         Asset("ANIM", "anim/player_mount_actions_item.zip"),
         Asset("ANIM", "anim/player_mount_unique_actions.zip"),
         Asset("ANIM", "anim/player_mount_one_man_band.zip"),
+        Asset("ANIM", "anim/player_mount_boat_jump.zip"),
+        Asset("ANIM", "anim/player_mount_boat_sink.zip"),
         Asset("ANIM", "anim/player_mount_blowdart.zip"),
         Asset("ANIM", "anim/player_mount_shock.zip"),
         Asset("ANIM", "anim/player_mount_frozen.zip"),
@@ -1234,6 +1297,8 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         Asset("ANIM", "anim/player_mount_emotesxl.zip"),
         Asset("ANIM", "anim/player_mount_emotes_sit.zip"),
         Asset("ANIM", "anim/player_mount_bow.zip"),
+        Asset("ANIM", "anim/player_mount_cointoss.zip"),
+        Asset("ANIM", "anim/player_mount_hornblow.zip"),
 
         Asset("INV_IMAGE", "skull_"..name),
 
@@ -1246,6 +1311,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         "frostbreath",
         "mining_fx",
         "mining_ice_fx",
+        "mining_moonglass_fx",
         "die_fx",
         "ghost_transform_overlay_fx",
         "attune_out_fx",
@@ -1263,6 +1329,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         "globalmapicon",
         "lavaarena_player_revive_from_corpse_fx",
         "superjump_fx",
+		"washashore_puddle_fx",
 
         -- Player specific classified prefabs
         "player_classified",
@@ -1299,6 +1366,28 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
             table.insert(assets, v)
         end
     end
+	
+	local function SetInstanceFunctions(inst)	
+		-- we're bumping against the limit of upvalues in a lua function so work around by breaking this assignment out into its own function
+        inst.AttachClassified = AttachClassified
+        inst.DetachClassified = DetachClassified
+        inst.OnRemoveEntity = OnRemoveEntity
+        inst.CanExamine = nil -- Can be overridden; Needs to be on client as well for actions
+        inst.ActionStringOverride = nil -- Can be overridden; Needs to be on client as well for actions
+        inst.CanUseTouchStone = CanUseTouchStone -- Didn't want to make touchstonetracker a networked component
+        inst.GetTemperature = GetTemperature -- Didn't want to make temperature a networked component
+        inst.IsFreezing = IsFreezing -- Didn't want to make temperature a networked component
+        inst.IsOverheating = IsOverheating -- Didn't want to make temperature a networked component
+        inst.GetMoisture = GetMoisture -- Didn't want to make moisture a networked component
+        inst.GetMaxMoisture = GetMaxMoisture -- Didn't want to make moisture a networked component
+        inst.GetMoistureRateScale = GetMoistureRateScale -- Didn't want to make moisture a networked component
+        inst.GetSandstormLevel = GetSandstormLevel -- Didn't want to make stormwatcher a networked component
+        inst.IsCarefulWalking = IsCarefulWalking -- Didn't want to make carefulwalking a networked component
+        inst.EnableMovementPrediction = EnableMovementPrediction
+        inst.ShakeCamera = ShakeCamera
+        inst.SetGhostMode = SetGhostMode
+        inst.IsActionsVisible = IsActionsVisible
+	end
 
     local function fn()
         local inst = CreateEntity()
@@ -1333,6 +1422,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         inst.AnimState:OverrideSymbol("fx_wipe", "wilson_fx", "fx_wipe")
         inst.AnimState:OverrideSymbol("fx_liquid", "wilson_fx", "fx_liquid")
         inst.AnimState:OverrideSymbol("shadow_hands", "shadow_hands", "shadow_hands")
+        inst.AnimState:OverrideSymbol("snap_fx", "player_actions_fishing_ocean_new", "snap_fx")
 
         --Additional effects symbols for hit_darkness animation
         inst.AnimState:AddOverrideBuild("player_hit_darkness")
@@ -1345,7 +1435,18 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         inst.AnimState:AddOverrideBuild("player_multithrust")
         inst.AnimState:AddOverrideBuild("player_parryblock")
         inst.AnimState:AddOverrideBuild("player_emote_extra")
+        inst.AnimState:AddOverrideBuild("player_boat")
+        inst.AnimState:AddOverrideBuild("player_boat_plank")
+        inst.AnimState:AddOverrideBuild("player_boat_net")        
+        inst.AnimState:AddOverrideBuild("player_boat_sink")
+        inst.AnimState:AddOverrideBuild("player_oar")
+        inst.AnimState:AddOverrideBuild("player_peruse")
+		inst.AnimState:AddOverrideBuild("player_boat_channel")
 
+        inst.AnimState:AddOverrideBuild("player_actions_fishing_ocean")
+        inst.AnimState:AddOverrideBuild("player_actions_fishing_ocean_new")
+
+		inst.AnimState:AddOverrideBuild("player_actions_feast_eat")
         inst.DynamicShadow:SetSize(1.3, .6)
 
         inst.MiniMapEntity:SetIcon(name..".png")
@@ -1370,24 +1471,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         inst:AddTag("character")
         inst:AddTag("lightningtarget")
 
-        inst.AttachClassified = AttachClassified
-        inst.DetachClassified = DetachClassified
-        inst.OnRemoveEntity = OnRemoveEntity
-        inst.CanExamine = nil -- Can be overridden; Needs to be on client as well for actions
-        inst.ActionStringOverride = nil -- Can be overridden; Needs to be on client as well for actions
-        inst.CanUseTouchStone = CanUseTouchStone -- Didn't want to make touchstonetracker a networked component
-        inst.GetTemperature = GetTemperature -- Didn't want to make temperature a networked component
-        inst.IsFreezing = IsFreezing -- Didn't want to make temperature a networked component
-        inst.IsOverheating = IsOverheating -- Didn't want to make temperature a networked component
-        inst.GetMoisture = GetMoisture -- Didn't want to make moisture a networked component
-        inst.GetMaxMoisture = GetMaxMoisture -- Didn't want to make moisture a networked component
-        inst.GetMoistureRateScale = GetMoistureRateScale -- Didn't want to make moisture a networked component
-        inst.GetSandstormLevel = GetSandstormLevel -- Didn't want to make stormwatcher a networked component
-        inst.IsCarefulWalking = IsCarefulWalking -- Didn't want to make carefulwalking a networked component
-        inst.EnableMovementPrediction = EnableMovementPrediction
-        inst.ShakeCamera = ShakeCamera
-        inst.SetGhostMode = SetGhostMode
-        inst.IsActionsVisible = IsActionsVisible
+		SetInstanceFunctions(inst)
 
         inst.foleysound = nil --Characters may override this in common_postinit
         inst.playercolour = DEFAULT_PLAYER_COLOUR --Default player colour used in case it doesn't get set properly
@@ -1419,6 +1503,8 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
 
         inst:AddComponent("playeravatardata")
         inst:AddComponent("constructionbuilderuidata")
+        
+        inst:AddComponent("inkable")
 
         if TheNet:GetServerGameMode() == "lavaarena" then
             inst:AddComponent("healthsyncer")
@@ -1446,6 +1532,19 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
 
         inst.userid = ""
 
+        inst:AddComponent("embarker")
+        inst.components.embarker.embark_speed = TUNING.WILSON_RUN_SPEED * 1.25
+
+        --TODO(YOG): Replace these with relative error prediction in transform component
+        inst:ListenForEvent("got_on_platform", function(player, platform) OnGotOnPlatform(inst, platform) end)
+        inst:ListenForEvent("got_off_platform", function(player, platform) OnGotOffPlatform(inst, platform) end)
+
+
+        inst._winters_feast_music = net_event(inst.GUID, "localplayer._winters_feast_music")
+        if not TheNet:IsDedicated() then
+            inst:ListenForEvent("localplayer._winters_feast_music", OnWintersFeastMusic)
+        end
+
         inst.entity:SetPristine()
 
         if not TheWorld.ismastersim then
@@ -1464,11 +1563,13 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         inst:RemoveTag("_sheltered")
         inst:RemoveTag("_rider")
 
-        if inst.ghostenabled then
-            inst.Network:RemoveUserFlag(USERFLAGS.IS_GHOST)
-        end
-        inst.Network:RemoveUserFlag(USERFLAGS.CHARACTER_STATE_1)
-        inst.Network:RemoveUserFlag(USERFLAGS.CHARACTER_STATE_2)
+        --No bit ops support, but in this case, + results in same as |
+        inst.Network:RemoveUserFlag(
+            USERFLAGS.CHARACTER_STATE_1 +
+            USERFLAGS.CHARACTER_STATE_2 +
+            USERFLAGS.CHARACTER_STATE_3 +
+            (inst.ghostenabled and USERFLAGS.IS_GHOST or 0)
+        )
 
         inst.player_classified = SpawnPrefab("player_classified")
         inst.player_classified.entity:SetParent(inst.entity)
@@ -1495,6 +1596,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
 
         inst:AddComponent("locomotor") -- locomotor must be constructed before the stategraph
         ex_fns.ConfigurePlayerLocomotor(inst)
+
 
         inst:AddComponent("combat")
         inst.components.combat:SetDefaultDamage(TUNING.UNARMED_DAMAGE)
@@ -1609,6 +1711,8 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         inst:AddComponent("debuffable")
         inst.components.debuffable:SetFollowSymbol("headbase", 0, -200, 0)
 
+        inst:AddComponent("workmultiplier")
+
         inst:AddComponent("grogginess")
         inst.components.grogginess:SetResistance(3)
         inst.components.grogginess:SetKnockOutTest(ex_fns.ShouldKnockout)
@@ -1621,6 +1725,13 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         if not GetGameModeProperty("hide_received_gifts") then
             inst:AddComponent("giftreceiver")
         end
+
+		if TheWorld.has_ocean then
+	        inst:AddComponent("drownable")
+		end
+
+        inst:AddComponent("steeringwheeluser")
+        inst:AddComponent("walkingplankuser")
 
         inst:AddInherentAction(ACTIONS.PICK)
         inst:AddInherentAction(ACTIONS.SLEEPIN)

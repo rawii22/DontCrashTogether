@@ -5,13 +5,16 @@ local Text = require "widgets/text"
 local TEMPLATES = require "widgets/templates"
 
 -- all delay times are in seconds
-local SPEECH_TIME = 6
+local SPEECH_TIME = 9
 local IDLE_SPEECH_DELAY = 180
 
-local SkinCollector = Class(Widget, function(self, num_items)
+local SkinCollector = Class(Widget, function(self, num_items, mini_game, start_text)
     Widget._ctor(self, "SkinCollector")
     
-    self.root = self:AddChild(Widget("root"))
+	self.mini_game = mini_game
+	self.start_text = start_text
+	
+	self.root = self:AddChild(Widget("root"))
     
     self.innkeeper = self.root:AddChild(UIAnim())
   	self.innkeeper:GetAnimState():SetBank("skin_collector")
@@ -65,7 +68,6 @@ function SkinCollector:Snap()
 end
 
 function SkinCollector:QuitTalking()
-	--print("SkinCollector QuitTalking")
 	self:ClearSpeech()
 	TheFrontEnd:GetSound():KillSound("skincollector")
 end
@@ -122,14 +124,32 @@ function SkinCollector:ClearSpeech()
 	end
 end
 
+function SkinCollector:Sleep()
+	self.sleeped = true
+	self:ClearSpeech()
+	
+end
+
+function SkinCollector:Wake()
+	self.sleeped = false
+end
+
+
 function SkinCollector:OnUpdate(dt)
+	if self.sleeped then
+		return
+	end
+
 	-- Do intro if appear animation has finished
-	if not self.intro_done and 
+	if not self.intro_done and
 		self.innkeeper:GetAnimState():IsCurrentAnimation("appear") and 
 		self.innkeeper:GetAnimState():AnimDone() then 
 		self.innkeeper:GetAnimState():PlayAnimation("idle", true)
 		self.intro_done = true
-		if self.num_items > 0 then 
+
+		if self.mini_game then
+			self:Say(self.start_text)			
+		elseif self.num_items > 0 then 
 			self:Say(STRINGS.UI.TRADESCREEN.SKIN_COLLECTOR_SPEECH.START)
 		else
 			self:Say(STRINGS.UI.TRADESCREEN.SKIN_COLLECTOR_SPEECH.START_EMPTY)
@@ -145,10 +165,11 @@ function SkinCollector:OnUpdate(dt)
 		return
 	end
 
-	if self.intro_done and (GetTime() - self.last_speech_time) > IDLE_SPEECH_DELAY then 
-		--print("Playing idle speech at ", GetTime(), self.last_speech_time)
-		-- It's been a while since the last speech. Say something random
-		self:Say(STRINGS.UI.TRADESCREEN.SKIN_COLLECTOR_SPEECH.IDLE)
+	if not self.crow_game then
+		if self.intro_done and (GetTime() - self.last_speech_time) > IDLE_SPEECH_DELAY then
+			-- It's been a while since the last speech. Say something random
+			self:Say(STRINGS.UI.TRADESCREEN.SKIN_COLLECTOR_SPEECH.IDLE)
+		end
 	end
 
 	-- Update text
@@ -159,10 +180,8 @@ function SkinCollector:OnUpdate(dt)
 			self.text:SetString(self.text_string)
 
 			if not self.sound_started then 
-				--print("Playing skin collector talk sound")
 				TheFrontEnd:GetSound():PlaySound("dontstarve/characters/skincollector/talk_LP", "skincollector")
 				self.sound_started = true
-				--print("Starting sound")
 			end
 		end
 

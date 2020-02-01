@@ -60,6 +60,12 @@ local function oncancast(self)
         else
             self.inst:RemoveTag("castonpoint")
         end
+
+        if self.canuseonpoint_water then
+            self.inst:AddTag("castonpointwater")
+        else
+            self.inst:RemoveTag("castonpointwater")
+        end
     else
         self.inst:RemoveTag("castfrominventory")
         self.inst:RemoveTag("castontargets")
@@ -91,6 +97,7 @@ local SpellCaster = Class(function(self, inst)
     self.canonlyuseonworkable = false
     self.canonlyuseoncombat = false
     self.canuseonpoint = false
+    self.canuseonpoint_water = false
     self.spell = nil
     self.quickcast = false
 end,
@@ -105,6 +112,7 @@ nil,
     canonlyuseonworkable = oncancast,
     canonlyuseoncombat = oncancast,
     canuseonpoint = oncancast,
+    canuseonpoint_water = oncancast,
     quickcast = onquickcast,
 })
 
@@ -152,16 +160,23 @@ function SpellCaster:CanCast(doer, target, pos)
         if pos == nil then
             return self.canusefrominventory
         end
-        return self.canuseonpoint
-            and TheWorld.Map:IsAboveGroundAtPoint(pos:Get())
-            and not TheWorld.Map:IsGroundTargetBlocked(pos)
+
+        if self.canuseonpoint then
+            local px, py, pz = pos:Get()
+            return TheWorld.Map:IsAboveGroundAtPoint(px, py, pz, self.canuseonpoint_water) and not TheWorld.Map:IsGroundTargetBlocked(pos)
+        elseif self.canuseonpoint_water then
+            return TheWorld.Map:IsOceanAtPoint(pos:Get()) and not TheWorld.Map:IsGroundTargetBlocked(pos)
+        else
+            return false
+        end
     elseif target:IsInLimbo()
         or not target.entity:IsVisible()
         or (target.components.health ~= nil and target.components.health:IsDead())
         or (target.sg ~= nil and (
                 target.sg.currentstate.name == "death" or
                 target.sg:HasStateTag("flight") or
-                target.sg:HasStateTag("invisible")
+                target.sg:HasStateTag("invisible") or
+                target.sg:HasStateTag("nospellcasting")
             )) then
         return false
     end

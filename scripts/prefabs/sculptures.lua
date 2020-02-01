@@ -69,7 +69,6 @@ local function MakeFixed(inst)
     end
 
     inst.components.lootdropper:SetChanceLootTable(nil)
-    inst.components.lootdropper:SetLoot({ PIECE_NAME[inst.prefab] })
 
     CheckMorph(inst)
 end
@@ -105,16 +104,26 @@ local function getstatus(inst)
         or "COVERED"
 end
 
+local function NoHoles(pt)
+    return not TheWorld.Map:IsPointNearHole(pt)
+end
+
 local function onworkfinished(inst, worker)
     inst.SoundEmitter:PlaySound("dontstarve/wilson/rock_break")
-    inst.components.lootdropper:DropLoot(inst:GetPosition())
 
     MakeBroken(inst)
 
-    if inst.components.lootdropper.chanceloottable ~= nil and
-        worker ~= nil and worker.components.talker ~= nil then
+    if inst.components.lootdropper.chanceloottable ~= nil then
+	    inst.components.lootdropper:DropLoot(inst:GetPosition())
         -- say the uncovered state description string
-        worker.components.talker:Say(inst.components.inspectable:GetDescription(worker, inst, "UNCOVERED"))
+        if worker ~= nil and worker.components.talker ~= nil then
+            worker.components.talker:Say(inst.components.inspectable:GetDescription(worker, inst, "UNCOVERED"))
+        end
+	else
+		local pos = inst:GetPosition()
+        local offset = FindWalkableOffset(pos, math.random() * 2 * PI, inst:GetPhysicsRadius(1) + 0.1, 60, false, false, NoHoles) or Vector3(2, 0, 0)
+		local piece = SpawnPrefab(PIECE_NAME[inst.prefab])
+		piece.Transform:SetPosition((pos + offset):Get())
     end
 end
 
@@ -196,16 +205,18 @@ local function makesculpture(name, physics_radius, scale, second_piece_name)
         while not placed do
             local topology = TheWorld.topology
             local area = topology.nodes[math.random(#topology.nodes)]
-            local points_x, points_y = TheWorld.Map:GetRandomPointsForSite(area.x, area.y, area.poly, 1)
-            if #points_x == 1 and #points_y == 1 then
-                local x = points_x[1]
-                local z = points_y[1]
+			if not table.contains(area.tags, "not_mainland") then
+				local points_x, points_y = TheWorld.Map:GetRandomPointsForSite(area.x, area.y, area.poly, 1)
+				if #points_x == 1 and #points_y == 1 then
+					local x = points_x[1]
+					local z = points_y[1]
 
-                if TheWorld.Map:CanPlantAtPoint(x, 0, z) then
-                    second_piece.Transform:SetPosition(x, 0, z)
-                    placed = true
-                end
-            end
+					if TheWorld.Map:CanPlantAtPoint(x, 0, z) then
+						second_piece.Transform:SetPosition(x, 0, z)
+						placed = true
+					end
+				end
+			end
         end
     end or nil
 

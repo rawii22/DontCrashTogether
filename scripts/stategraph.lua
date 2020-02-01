@@ -121,9 +121,14 @@ function StateGraphWrangler:Update(current_tick)
     TheSim:ProfilerPush("updaters")
     for k,v in pairs(updaters) do
         if k.inst:IsValid() then
-			TheSim:ProfilerPush(k.inst.prefab)
+            local prefab = k.inst.prefab
+            if prefab ~= nil then
+			     TheSim:ProfilerPush(k.inst.prefab)
+            end
             local sleep_amount = k:Update()
-            TheSim:ProfilerPop()
+            if prefab ~= nil then
+                TheSim:ProfilerPop()
+            end
             if sleep_amount then
                 if sleep_amount > 0 then
                   self:Sleep(k, sleep_amount)
@@ -301,7 +306,7 @@ StateGraphInstance = Class( function (self, stategraph, inst)
     self.timeinstate = 0
     self.lastupdatetime = 0
     self.timelineindex = nil
-    self.prevstate = nil
+    self.laststate = nil
     self.bufferedevents={}
     self.inst = inst
     self.statemem = {}
@@ -442,6 +447,7 @@ local SGTagsToEntTags =
     ["pausepredict"] = true,
     ["sleeping"] = true,
     ["working"] = true,
+    ["jumping"] = true,
 }
 
 function StateGraphInstance:HasState(statename)
@@ -456,8 +462,6 @@ function StateGraphInstance:GoToState(statename, params)
     end
     --assert(state ~= nil, "State not found: " ..tostring(self.sg.name).."."..tostring(statename) )
     
-
-    self.prevstate = self.currentstate
     if self.currentstate ~= nil and self.currentstate.onexit ~= nil then 
         self.currentstate.onexit(self.inst)
     end

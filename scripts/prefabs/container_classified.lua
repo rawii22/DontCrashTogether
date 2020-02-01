@@ -165,6 +165,26 @@ local function Has(inst, prefab, amount)
     return count >= amount, count
 end
 
+local function HasItemWithTag(inst, tag, amount)
+    local count = 0
+    if inst._itemspreview ~= nil then
+        for i, v in ipairs(inst._items) do
+            local item = inst._itemspreview[i]
+            if item ~= nil and item:HasTag(tag) then
+                count = count + Count(item)
+            end
+        end
+    else
+        for i, v in ipairs(inst._items) do
+            local item = v:value()
+            if item ~= nil and item:HasTag(tag) then
+                count = count + Count(item)
+            end
+        end
+    end
+    return count >= amount, count
+end
+
 --------------------------------------------------------------------------
 --Client sync event handlers that translate and dispatch local UI messages
 --------------------------------------------------------------------------
@@ -500,6 +520,24 @@ local function SwapActiveItemWithSlot(inst, slot)
     end
 end
 
+local function SwapOneOfActiveItemWithSlot(inst, slot)
+    if not IsBusy(inst) then
+        local inventory, active_item, busy = QueryActiveItem()
+        if not busy and active_item ~= nil then
+            local item = inst:GetItemInSlot(slot)
+            if item ~= nil then
+                local takeitem = SlotItem(item, slot)
+                PushItemLose(inst, takeitem)
+				local giveitem = SlotItem(active_item, slot)
+				PushItemGet(inst, giveitem, true)
+				PushStackSize(inst, inventory, active_item, 1, false, active_item.replica.stackable:StackSize() - 1, true)
+                inventory:ReceiveItem(takeitem)
+                SendRPCToServer(RPC.SwapOneOfActiveItemWithSlot, slot, inst._parent)
+            end
+        end
+    end
+end
+
 local function MoveItemFromAllOfSlot(inst, slot, container)
     if not IsBusy(inst) then
         local container_classified = container ~= nil and container.replica.inventory ~= nil and container.replica.inventory.classified or (container.replica.container ~= nil and container.replica.container.classified or nil)
@@ -564,7 +602,11 @@ local function ReceiveItem(inst, item, count, forceslot)
     if not IsBusy(inst) and (forceslot == nil or (forceslot >= 1 and forceslot <= #inst._items)) then
         local isstackable = item.replica.stackable ~= nil
         local originalstacksize = isstackable and item.replica.stackable:StackSize() or 1
-        if not isstackable or inst._parent.replica.container == nil or not inst._parent.replica.container:AcceptsStacks() then
+        local container = inst._parent.replica.container
+        if forceslot == nil and container ~= nil then
+            forceslot = container:GetSpecificSlotForItem(item)
+        end
+        if not isstackable or container == nil or not container:AcceptsStacks() then
             for i = forceslot or 1, forceslot or #inst._items do
                 if inst._items[i]:value() == nil then
                     local giveitem = SlotItem(item, i)
@@ -699,6 +741,7 @@ local function fn()
         inst.AddOneOfActiveItemToSlot = AddOneOfActiveItemToSlot
         inst.AddAllOfActiveItemToSlot = AddAllOfActiveItemToSlot
         inst.SwapActiveItemWithSlot = SwapActiveItemWithSlot
+		inst.SwapOneOfActiveItemWithSlot = SwapOneOfActiveItemWithSlot
         inst.MoveItemFromAllOfSlot = MoveItemFromAllOfSlot
         inst.MoveItemFromHalfOfSlot = MoveItemFromHalfOfSlot
 

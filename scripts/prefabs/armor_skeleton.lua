@@ -15,6 +15,7 @@ local RESISTANCES =
     "explosive",
     "quakedebris",
     "caveindebris",
+    "trapdamage",
 }
 
 for j = 0, 3, 3 do
@@ -141,6 +142,8 @@ local function fn()
     inst:AddTag("fossil")
 
     inst.foleysound = "dontstarve/movement/foley/bone"
+
+    MakeInventoryFloatable(inst, "small", 0.2, 0.80)
 
     inst.entity:SetPristine()
 

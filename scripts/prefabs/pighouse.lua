@@ -9,6 +9,7 @@ local assets =
 local prefabs =
 {
     "pigman",
+    "splash_sink",
 }
 
 --Client update
@@ -21,6 +22,12 @@ local function OnUpdateWindow(window, inst, snow)
     elseif inst.Light:IsEnabled() and inst.AnimState:IsCurrentAnimation("lit") then
         if not window._shown then
             window._shown = true
+            
+            local build_name = inst.AnimState:GetSkinBuild()
+            if build_name ~= "" then
+                window.AnimState:SetSkin(build_name)
+                snow.AnimState:SetSkin(build_name)
+            end
             window:Show()
             snow:Show()
         end
@@ -37,11 +44,19 @@ local function LightsOn(inst)
         inst.AnimState:PlayAnimation("lit", true)
         inst.SoundEmitter:PlaySound("dontstarve/pig/pighut_lighton")
         inst.lightson = true
+
+        local build_name = inst.AnimState:GetSkinBuild()
         if inst._window ~= nil then
+            if build_name ~= "" then
+                inst._window.AnimState:SetSkin(build_name)
+            end
             inst._window.AnimState:PlayAnimation("windowlight_idle", true)
             inst._window:Show()
         end
         if inst._windowsnow ~= nil then
+            if build_name ~= "" then
+                inst._windowsnow.AnimState:SetSkin(build_name)
+            end
             inst._windowsnow.AnimState:PlayAnimation("windowsnow_idle", true)
             inst._windowsnow:Show()
         end
@@ -136,10 +151,19 @@ local function onvacate(inst, child)
             if child.components.werebeast ~= nil then
                 child.components.werebeast:ResetTriggers()
             end
-            if child.components.health ~= nil then
-                child.components.health:SetPercent(1)
+
+            local child_platform = child:GetCurrentPlatform()
+            if (child_platform == nil and not child:IsOnValidGround()) then
+                local fx = SpawnPrefab("splash_sink")
+                fx.Transform:SetPosition(child.Transform:GetWorldPosition())
+
+                child:Remove()
+            else
+                if child.components.health ~= nil then
+                    child.components.health:SetPercent(1)
+                end
+			    child:PushEvent("onvacatehome")
             end
-			child:PushEvent("onvacatehome")
         end
     end
 end
@@ -282,7 +306,7 @@ local function oninit(inst)
 end
 
 local function MakeWindow()
-    local inst = CreateEntity()
+    local inst = CreateEntity("Pighouse.MakeWindow")
 
     inst.entity:AddTransform()
     inst.entity:AddAnimState()
@@ -305,7 +329,7 @@ local function MakeWindow()
 end
 
 local function MakeWindowSnow()
-    local inst = CreateEntity()
+    local inst = CreateEntity("Pighouse.MakeWindowSnow")
 
     inst.entity:AddTransform()
     inst.entity:AddAnimState()
@@ -383,6 +407,7 @@ local function fn()
     inst.components.spawner:Configure("pigman", TUNING.TOTAL_DAY_TIME*4)
     inst.components.spawner.onoccupied = onoccupied
     inst.components.spawner.onvacate = onvacate
+    inst.components.spawner:SetWaterSpawning(false, true)
     inst.components.spawner:CancelSpawning()
 
     inst:AddComponent("playerprox")

@@ -35,7 +35,7 @@ local EMOTES =
     },
 
     ["dance"] = {
-        data = { anim = { "emoteXL_pre_dance0", "emoteXL_loop_dance0" }, loop = true, fx = false, beaver = true, mounted = true, mountsound = "curious", tags = { "dancing" } },
+        data = { anim = { "emoteXL_pre_dance0", "emoteXL_loop_dance0" }, loop = true, fx = false, beaver = true, moose = true, goose = true, mounted = true, mountsound = "curious", tags = { "dancing" } },
     },
 
     ["sit"] = {
@@ -64,6 +64,11 @@ local EMOTES =
     ["pose"] = {
         aliases = { "strut", "strikepose" },
         data = { anim = "emote_strikepose", zoom = true, soundoverride = "pose", mounted = true },
+    },
+
+    ["toast"] = {
+        aliases = { "toasting", "cheers" },
+        data = { anim = { "emote_pre_toast", "emote_loop_toast" }, mounted = true, soundoverride = "pose", loop = true, fx = false, sounddelay = 0.55, },
     },
 }
 

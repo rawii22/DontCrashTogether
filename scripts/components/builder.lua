@@ -153,7 +153,7 @@ function Builder:EvaluateTechTrees()
 
     local prototyper_active = false
     for i, v in ipairs(ents) do
-        if v.components.prototyper ~= nil then
+        if v.components.prototyper ~= nil and (v.components.prototyper.restrictedtag == nil or self.inst:HasTag(v.components.prototyper.restrictedtag)) then
             if not prototyper_active then
                 --activate the first machine in the list. This will be the one you're closest to.
                 v.components.prototyper:TurnOn(self.inst)
@@ -380,7 +380,7 @@ function Builder:MakeRecipe(recipe, pt, rot, skin, onsuccess)
         self.inst:PushEvent("makerecipe", { recipe = recipe })
         if self:IsBuildBuffered(recipe.name) or self:CanBuild(recipe.name) then
             self.inst.components.locomotor:Stop()
-            local buffaction = BufferedAction(self.inst, nil, ACTIONS.BUILD, nil, pt or self.inst:GetPosition(), recipe.name, 1, nil, rot)
+            local buffaction = BufferedAction(self.inst, nil, ACTIONS.BUILD, nil, pt or self.inst:GetPosition(), recipe.name, recipe.build_distance, nil, rot)
             buffaction.skin = skin
             if onsuccess ~= nil then
                 buffaction:AddSuccessAction(onsuccess)
@@ -506,7 +506,7 @@ function Builder:DoBuild(recname, pt, rotation, skin)
                 --     have not been updated to support placement rotation yet
                 prod.Transform:SetRotation(rotation or 0)
                 self.inst:PushEvent("buildstructure", { item = prod, recipe = recipe, skin = skin })
-                prod:PushEvent("onbuilt", { builder = self.inst })
+                prod:PushEvent("onbuilt", { builder = self.inst, pos = pt })
                 ProfileStatsAdd("build_"..prod.prefab)
                 NotifyPlayerProgress("TotalItemsCrafted", 1, self.inst)
 
@@ -599,6 +599,8 @@ function Builder:MakeRecipeFromMenu(recipe, skin)
                             --V2C: for recipes known through tech bonus, still
                             --     want to unlock in case we reroll characters
                             self:AddRecipe(recipe.name)
+						else
+							self:ActivateCurrentResearchMachine(recipe)
                         end
                     end
                 )
@@ -633,6 +635,8 @@ function Builder:BufferBuild(recname)
             if self.freebuildmode then
                 --V2C: free-build should still trigger prototyping
                 if not table.contains(self.recipes, recname) and CanPrototypeRecipe(recipe.level, self.accessible_tech_trees) then
+					-- Note:	This can currently activate prototypers that have no relation to the item or structure
+					--			built, such as when building a Fire Pit near a Science Machine or Mad Science Lab.
                     self:ActivateCurrentResearchMachine(recipe)
                 end
             elseif not recipe.nounlock then

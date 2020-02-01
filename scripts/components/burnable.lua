@@ -1,4 +1,5 @@
 local SMOLDER_TICK_TIME = 2
+local SourceModifierList = require("util/sourcemodifierlist")
 
 local function oncanlight(self)
     if not self.burning and self.canlight then
@@ -45,9 +46,12 @@ local Burnable = Class(function(self, inst)
     self.onignite = nil
     self.onextinguish = nil
     self.onburnt = nil
+    self.onsmoldering = nil
+    self.onstopsmoldering = nil
     self.canlight = true
 
     self.lightningimmune = false
+
     --self.nocharring = false --default almost everything chars
     --self.ignorefuel = false --set true if igniting/extinguishing should not start/stop fuel consumption
 
@@ -60,6 +64,16 @@ nil,
     canlight = oncanlight,
     smoldering = onsmoldering,
 })
+
+--- Set the function that will be called when the object stops smoldering
+function Burnable:SetOnStopSmolderingFn(fn)
+    self.onstopsmoldering = fn
+end
+
+--- Set the function that will be called when the object starts smoldering
+function Burnable:SetOnSmolderingFn(fn)
+    self.onsmoldering = fn
+end
 
 --- Set the function that will be called when the object starts burning
 function Burnable:SetOnIgniteFn(fn)
@@ -216,6 +230,10 @@ end
 function Burnable:StartWildfire()
     if not (self.burning or self.smoldering or self.inst:HasTag("fireimmune")) then
         self.smoldering = true
+        if self.onsmoldering then
+            self.onsmoldering(self.inst)
+        end
+
         self.smoke = SpawnPrefab("smoke_plant")
         if self.smoke ~= nil then
             if #self.fxdata == 1 and self.fxdata[1].follow then
@@ -249,6 +267,9 @@ function Burnable:StartWildfire()
 end
 
 local function DoneBurning(inst, self)
+    local isplant = inst:HasTag("plant") and not (inst.components.diseaseable ~= nil and inst.components.diseaseable:IsDiseased())
+    local pos = isplant and inst:GetPosition() or nil
+
     inst:PushEvent("onburnt")
 
     if self.onburnt ~= nil then
@@ -262,6 +283,10 @@ local function DoneBurning(inst, self)
 
     if self.extinguishimmediately then
         self:Extinguish()
+    end
+
+    if isplant then
+        TheWorld:PushEvent("plantkilled", { pos = pos }) --this event is pushed in other places too
     end
 end
 
@@ -344,6 +369,10 @@ function Burnable:StopSmoldering(heatpct)
 
         if self.inst.components.propagator ~= nil then
             self.inst.components.propagator:StopSpreading(true, heatpct)
+        end
+
+        if self.onstopsmoldering ~= nil then
+            self.onstopsmoldering(self.inst)
         end
     end
 end

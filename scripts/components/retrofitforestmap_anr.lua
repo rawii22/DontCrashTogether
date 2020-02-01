@@ -32,6 +32,10 @@ local retrofit_part1 = false
 --[[ Private member functions ]]
 --------------------------------------------------------------------------
 
+local function NoHoles(pt)
+    return not TheWorld.Map:IsPointNearHole(pt)
+end
+
 local function RetrofitNewContentPrefab(inst, prefab, min_space, dist_from_structures, canplacefn)
 	local attempt = 1
 	local topology = TheWorld.topology
@@ -63,6 +67,224 @@ local function RetrofitNewContentPrefab(inst, prefab, min_space, dist_from_struc
 		attempt = attempt + 1
 	end
 	print ("Retrofitting world for " .. prefab .. ": " .. (attempt < MAX_PLACEMENT_ATTEMPTS and ("Success after "..attempt.." attempts.") or "Failed."))
+end
+
+local function RemovePrefabs(prefabs_to_remove, biomes_to_cleanup)
+	local count = 0
+	for _,ent in pairs(Ents) do
+		if ent:IsValid() and table.contains(prefabs_to_remove, ent.prefab) and (biomes_to_cleanup == nil or table.contains(biomes_to_cleanup, TheWorld.Map:GetTileAtPoint(ent.Transform:GetWorldPosition()))) then
+			count = count + 1
+			ent:Remove()
+		end
+	end
+
+	return count
+end
+
+local function populate_ocean(tile_type, contents, width, height, on_spawnfn)
+	for y = OCEAN_POPULATION_EDGE_DIST, height - OCEAN_POPULATION_EDGE_DIST - 1, 1 do
+		for x = OCEAN_POPULATION_EDGE_DIST, width - OCEAN_POPULATION_EDGE_DIST - 1, 1 do
+			if TheWorld.Map:GetTile(x, y) == tile_type then
+				if math.random() < contents.distributepercent then
+					local prefab = weighted_random_choice(contents.distributeprefabs)
+					if prefab ~= nil then
+						local obj = SpawnPrefab(prefab)
+						obj.Transform:SetPosition((x - width/2.0)*TILE_SCALE + math.random()*2-1, 0, (y - height/2.0)*TILE_SCALE + math.random()*2-1)
+
+						if on_spawnfn ~= nil then
+							on_spawnfn(prefab, obj:GetPosition())
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
+local function TurnOfTidesRetrofitting_PopulateOcean()
+	local pop = {
+		OCEAN_COASTAL =  {
+			distributepercent = 0.01,
+			distributeprefabs = {
+				driftwood_log = 1,
+				bullkelp_plant = 2,
+			},
+		},
+		OCEAN_SWELL = {
+			distributepercent = 0.01,
+			distributeprefabs =
+			{
+				driftwood_log = 1,
+				antchovies_group = 1,
+				seastack = 1,
+			},
+		},
+		OCEAN_ROUGH = {
+			distributepercent = 0.03,
+			distributeprefabs =
+			{
+				seastack = 1,
+			},
+		},
+		OCEAN_HAZARDOUS = {
+			distributepercent = 0.15,
+			distributeprefabs =
+			{
+				boatfragment03 = 1,
+				boatfragment04 = 1,
+				boatfragment05 = 1,
+				seastack = 1,
+			},
+		},
+	}
+
+	local width, height = TheWorld.Map:GetSize()
+	for k, v in pairs(pop) do
+		populate_ocean(GROUND[k], v, width, height)
+	end
+
+	print("Retrofitting for Return Of Them: Turn of Tides - Populated Ocean.")
+end
+
+local function TurnOfTidesRetrofitting_CleanupOceanPoution(inst)
+	require "map/bunch_spawner"
+
+	local items_to_remove = { "seastack", "antchovies_group", "driftwood_log" }
+	local biomes_to_cleanup = { GROUND.OCEAN_SWELL, GROUND.OCEAN_ROUGH, GROUND.OCEAN_BRINEPOOL }
+
+	local count = RemovePrefabs(items_to_remove, biomes_to_cleanup)
+	count = count + RemovePrefabs(items_to_remove, biomes_to_cleanup)
+	print ("Retrofitting for Turn of Tides Beta: Removed "..tostring(count).." ocean things.")
+
+
+	local width, height = TheWorld.Map:GetSize()
+	
+	BunchSpawnerInit(nil, width, height)
+	local function SpawnBoatingSafePrefab(prefab, x, z)
+		if #TheSim:FindEntities(x, 0, z, TUNING.MAX_WALKABLE_PLATFORM_RADIUS + 4, {"walkableplatform"}) == 0 then
+			local obj = SpawnPrefab(prefab)
+			obj.Transform:SetPosition(x, 0, z)
+		end
+	end
+
+	local function populate(tile_type, contents)
+		for y = OCEAN_POPULATION_EDGE_DIST, height - OCEAN_POPULATION_EDGE_DIST - 1, 1 do
+			for x = OCEAN_POPULATION_EDGE_DIST, width - OCEAN_POPULATION_EDGE_DIST - 1, 1 do
+				if TheWorld.Map:GetTile(x, y) == tile_type then
+					if math.random() < contents.distributepercent then
+						local spawn_x, spawn_z = (x - width/2.0)*TILE_SCALE + math.random()*2-1, (y - height/2.0)*TILE_SCALE + math.random()*2-1
+						local prefab = weighted_random_choice(contents.distributeprefabs)
+						if prefab ~= nil then
+							if IsBunchSpawner( prefab ) then
+								BunchSpawnerRunSingleBatchSpawner(TheWorld.Map, prefab, spawn_x, spawn_z, SpawnBoatingSafePrefab)
+							else
+								local obj = SpawnPrefab(prefab)
+								obj.Transform:SetPosition(spawn_x, 0, spawn_z)
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	local pop = {
+		OCEAN_SWELL = {
+			distributepercent = 0.005,
+			distributeprefabs =
+			{
+				seastack = 1,
+				seastack_spawner_swell = 0.1,
+			},
+		},
+		OCEAN_ROUGH = {
+			distributepercent = 0.01,
+			distributeprefabs =
+			{
+				seastack = 1,
+				seastack_spawner_rough = 0.13,
+			},
+		},
+	}
+
+	for k, v in pairs(pop) do
+		populate(GROUND[k], v)
+	end
+
+	print("Retrofitting for Return Of Them : Turn of Tides Beta - Repopulated Ocean.")
+end
+
+local function SaltyRetrofitting_PopulateShoalSpawner()
+	local width, height = TheWorld.Map:GetSize()
+
+	local pop = {
+		OCEAN_SWELL = {
+			distributepercent = 0.0003,
+			distributeprefabs =
+			{
+				oceanfish_shoalspawner = 1,
+			},
+		},
+	}
+
+	local width, height = TheWorld.Map:GetSize()
+	for k, v in pairs(pop) do
+		populate_ocean(GROUND[k], v, width, height)
+	end
+end
+
+
+local function SaltyRetrofitting_PopulateBrinePools()
+	require "map/bunch_spawner"
+
+	local bunches = require "map/bunches"
+	bunches.Bunches["SaltyRetrofitting_PopulateBrinePools"] = 
+	{
+		prefab = "saltstack",
+		range = 14,
+		min = 4,
+		max = 6,
+		min_spacing = 3, 
+		valid_tile_types = {
+			GROUND.OCEAN_BRINEPOOL,
+		},
+	}
+
+	local num_spawners = 0
+	local num_stacks = 0
+
+	local width, height = TheWorld.Map:GetSize()
+	BunchSpawnerInit(nil, width, height)
+
+	local function SpawnBoatingSafePrefab(prefab, x, z)
+		if #TheSim:FindEntities(x, 0, z, TUNING.MAX_WALKABLE_PLATFORM_RADIUS + 4, {"walkableplatform"}) == 0 then
+			local obj = SpawnPrefab(prefab)
+			obj.Transform:SetPosition(x, 0, z)
+
+			num_stacks = num_stacks + 1
+		end
+	end
+
+	local function onspawn(prefab, pt)
+		BunchSpawnerRunSingleBatchSpawner(TheWorld.Map, "SaltyRetrofitting_PopulateBrinePools", pt.x, pt.z, SpawnBoatingSafePrefab)
+		num_spawners = num_spawners + 1
+	end
+
+	local pop = {
+		OCEAN_BRINEPOOL = {
+			distributepercent = 0.012,
+			distributeprefabs =
+			{
+				cookiecutter_spawner = 1,
+			},
+		},
+	}
+
+	local width, height = TheWorld.Map:GetSize()
+	for k, v in pairs(pop) do
+		populate_ocean(GROUND[k], v, width, height, onspawn)
+	end
+
+	print("Retrofitting for Return Of Them: Salty Dog - Added " .. tostring(num_spawners) .. " 'cookiecutter_spawner' and " .. tostring(num_stacks) .. " 'saltstack' prefabs.")
 end
 
 --------------------------------------------------------------------------
@@ -394,8 +616,84 @@ function self:OnPostInit()
 		if count ~= 0 then
 			print ("Retrofitting for Pengull spawned Mini Glaciers: Converted " .. count .. " Mini Glaciers near pengull colonies to be remove on dry up.")
 		end
-		
 	end
+
+	if self.retrofit_turnoftides then
+		self.retrofit_turnoftides = nil
+
+		print ("Retrofitting for Return Of Them: Turn of Tides")
+
+		TurnOfTidesRetrofitting_PopulateOcean()
+
+		self.requiresreset = true
+	end
+	
+	if self.retrofit_turnoftides_betaupdate1 then
+		TheWorld.Map:RetrofitNavGrid()
+		print ("Retrofitting for Return Of Them: Turn of Tides - Updated Nav Grid")
+		self.requiresreset = true
+	end
+	
+	if self.retrofit_turnoftides_seastacks then
+		print ("Retrofitting for Return Of Them: Turn of Tides - Balancing Seastacks")
+		TurnOfTidesRetrofitting_CleanupOceanPoution(self.inst)
+	end
+	
+	if self.retrofit_fix_sculpture_pieces then
+		local count = 0
+		for _,obj in pairs(Ents) do
+			if obj:IsValid() then
+				if obj.prefab == "sculpture_knighthead" or obj.prefab == "sculpture_bishophead" or obj.prefab == "sculpture_rooknose" then
+					local x, y, z = obj.Transform:GetWorldPosition()
+					local bodies = TheSim:FindEntities(x, y, z, 1.6, {"sculpture"})
+					for _, body in ipairs(bodies) do
+						local radius = body.prefab == "sculpture_knightbody" and 0.8
+									or body.prefab == "sculpture_bishopbody" and 0.8
+									or body.prefab == "sculpture_rookbody" and 1.7
+									or nil
+						if radius ~= nil then
+							local offset = FindWalkableOffset(body:GetPosition(), math.random() * 2 * PI, radius, 60, false, false, NoHoles) or Vector3(2, 0, 0)
+							obj.Transform:SetPosition((body:GetPosition() + offset):Get())
+
+							count = count + 1
+							break
+						end
+					end
+				end
+			end
+		end
+
+		if count > 0 then
+			print("Retrofitting - Fixed "..tostring(count).." sculpture pieces positions.")
+		else
+			print("Retrofitting - No sculpture pieces required repositioning.")
+		end
+	end
+	
+	if self.retrofit_salty then
+		-- add shoals for malbatross spawning, salt statcks and cookie citter spawners
+		print ("Retrofitting for Return Of Them: Salty Dog - Adding Malbatross food sources.")
+		SaltyRetrofitting_PopulateShoalSpawner()
+
+--		print ("Retrofitting for Return Of Them: Salty Dog - Raising salt levels.")
+--		SaltyRetrofitting_PopulateBrinePools()
+	end
+
+	---------------------------------------------------------------------------
+	if self.requiresreset then
+		print ("Retrofitting: Worldgen retrofitting requires the server to save and restart to fully take effect.")
+		print ("Restarting server in 30 seconds...")
+
+        inst:DoTaskInTime(5,  function() TheNet:Announce(subfmt(STRINGS.UI.HUD.RETROFITTING_ANNOUNCEMENT, {time = 25})) end)
+        inst:DoTaskInTime(10, function() TheNet:Announce(subfmt(STRINGS.UI.HUD.RETROFITTING_ANNOUNCEMENT, {time = 20})) end)
+        inst:DoTaskInTime(15, function() TheNet:Announce(subfmt(STRINGS.UI.HUD.RETROFITTING_ANNOUNCEMENT, {time = 15})) end)
+		inst:DoTaskInTime(20, function() TheNet:Announce(subfmt(STRINGS.UI.HUD.RETROFITTING_ANNOUNCEMENT, {time = 10})) end)
+		inst:DoTaskInTime(22, function() TheWorld:PushEvent("ms_save") end)
+		inst:DoTaskInTime(25, function() TheNet:Announce(subfmt(STRINGS.UI.HUD.RETROFITTING_ANNOUNCEMENT, {time = 5})) end)
+		inst:DoTaskInTime(29, function() TheNet:Announce(STRINGS.UI.HUD.RETROFITTING_ANNOUNCEMENT_NOW) end)
+		inst:DoTaskInTime(30, function() TheNet:SendWorldRollbackRequestToServer(0) end)
+	end
+
 end
 
 --------------------------------------------------------------------------
@@ -408,6 +706,7 @@ end
 
 function self:OnLoad(data)
     if data ~= nil then
+		-- flags for OnPostLoad
 		retrofit_part1 = data.retrofit_part1 or false
 		self.retrofit_artsandcrafts = data.retrofit_artsandcrafts or false
         self.retrofit_artsandcrafts2 = data.retrofit_artsandcrafts2 or false
@@ -415,6 +714,11 @@ function self:OnLoad(data)
         self.retrofit_herdmentality = data.retrofit_herdmentality or false
         self.retrofit_againstthegrain = data.retrofit_againstthegrain or false
         self.retrofit_penguinice = data.retrofit_penguinice or false
+        self.retrofit_turnoftides = data.retrofit_turnoftides or false
+        self.retrofit_turnoftides_betaupdate1 = data.retrofit_turnoftides_betaupdate1 or false
+        self.retrofit_turnoftides_seastacks = data.retrofit_turnoftides_seastacks or false
+		self.retrofit_fix_sculpture_pieces = data.retrofit_fix_sculpture_pieces or false
+		self.retrofit_salty = data.retrofit_salty or false
     end
 end
 

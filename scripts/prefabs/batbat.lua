@@ -3,6 +3,7 @@ local assets =
 {
     Asset("ANIM", "anim/batbat.zip"),
     Asset("ANIM", "anim/swap_batbat.zip"),
+    Asset("ANIM", "anim/floating_items.zip"),
 }
 
 local assets_bats =
@@ -46,7 +47,9 @@ local function onattack(inst, owner, target)
     end
     if owner.components.health ~= nil and owner.components.health:GetPercent() < 1 and not (target:HasTag("wall") or target:HasTag("engineering")) then
         owner.components.health:DoDelta(TUNING.BATBAT_DRAIN, false, "batbat")
-        owner.components.sanity:DoDelta(-.5 * TUNING.BATBAT_DRAIN)
+		if owner.components.sanity ~= nil then
+	        owner.components.sanity:DoDelta(-.5 * TUNING.BATBAT_DRAIN)
+		end
     end
 end
 
@@ -64,6 +67,12 @@ local function fn()
     inst.AnimState:PlayAnimation("idle")
 
     inst:AddTag("dull")
+
+    --weapon (from weapon component) added to pristine state for optimization
+    inst:AddTag("weapon")
+
+    local swap_data = {sym_build = "swap_batbat"}
+    MakeInventoryFloatable(inst, "large", 0.05, {0.8, 0.35, 0.8}, true, -27, swap_data)
 
     inst.entity:SetPristine()
 

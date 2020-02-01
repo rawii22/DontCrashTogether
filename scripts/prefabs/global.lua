@@ -3,6 +3,18 @@ local assets =
     Asset("PKGREF", "sound/dontstarve.fev"),
     Asset("SOUNDPACKAGE", "sound/dontstarve_DLC001.fev"),
     Asset("FILE", "sound/DLC_music.fsb"),
+    Asset("SOUNDPACKAGE", "sound/turnoftides.fev"),
+    Asset("FILE", "sound/turnoftides.fsb"),
+    Asset("SOUNDPACKAGE", "sound/saltydog.fev"),
+    Asset("FILE", "sound/saltydog.fsb"),
+    Asset("SOUNDPACKAGE", "sound/hookline.fev"),
+    Asset("FILE", "sound/hookline.fsb"),
+
+    Asset("SOUNDPACKAGE", "sound/yotc_2020.fev"),
+    Asset("FILE", "sound/yotc_2020.fsb"),
+
+    Asset("SOUNDPACKAGE", "sound/wintersfeast2019.fev"),
+    Asset("FILE", "sound/wintersfeast2019.fsb"),
 
     Asset("FILE", "sound/wilton.fsb"),         -- Legacy sound that can be used in mods
     Asset("FILE", "sound/winnie.fsb"),         -- Legacy sound that can be used in mods
@@ -10,12 +22,45 @@ local assets =
     Asset("FILE", "sound/woodrow.fsb"),        -- Legacy sound that can be used in mods
     Asset("FILE", "sound/stuff.fsb"),          -- Legacy sound that can be used in mods
 
+    Asset("FILE", "klump/unused.txt"),         -- Make the klump zip not empty.
+
+
+    -- Legacy for modders to view. These files are now dynamically loaded.
+    Asset("PKGREF", "anim/ghost_wathgrithr_build.zip"),
+    Asset("PKGREF", "anim/ghost_waxwell_build.zip"),
+    Asset("PKGREF", "anim/ghost_webber_build.zip"),
+    Asset("PKGREF", "anim/ghost_wendy_build.zip"),
+    Asset("PKGREF", "anim/ghost_werebeaver_build.zip"),
+    Asset("PKGREF", "anim/ghost_wes_build.zip"),
+    Asset("PKGREF", "anim/ghost_wickerbottom_build.zip"),
+    Asset("PKGREF", "anim/ghost_willow_build.zip"),
+    Asset("PKGREF", "anim/ghost_wilson_build.zip"),
+    Asset("PKGREF", "anim/ghost_winona_build.zip"),
+    Asset("PKGREF", "anim/ghost_wolfgang_build.zip"),
+    Asset("PKGREF", "anim/ghost_woodie_build.zip"),
+    Asset("PKGREF", "anim/ghost_wx78_build.zip"),
+    Asset("PKGREF", "anim/wathgrithr.zip"),
+    Asset("PKGREF", "anim/waxwell.zip"),
+    Asset("PKGREF", "anim/webber.zip"),
+    Asset("PKGREF", "anim/wendy.zip"),
+    Asset("PKGREF", "anim/werebeaver_build.zip"),
+    Asset("PKGREF", "anim/wes.zip"),
+    Asset("PKGREF", "anim/wickerbottom.zip"),
+    Asset("PKGREF", "anim/willow.zip"),
+    Asset("PKGREF", "anim/wilson.zip"),
+    Asset("PKGREF", "anim/winona.zip"),
+    Asset("PKGREF", "anim/wolfgang.zip"),
+    Asset("PKGREF", "anim/wolfgang_mighty.zip"),
+    Asset("PKGREF", "anim/wolfgang_skinny.zip"),
+    Asset("PKGREF", "anim/woodie.zip"),
+    Asset("PKGREF", "anim/wx78.zip"),
+
+
+
     Asset("ATLAS", "images/global.xml"),
     Asset("IMAGE", "images/global.tex"),
     Asset("IMAGE", "images/visited.tex"),
     Asset("ANIM", "anim/scroll_arrow.zip"),
-
-    Asset("ANIM", "anim/corner_dude.zip"),
 
     Asset("SHADER", "shaders/anim_bloom.ksh"),
     Asset("SHADER", "shaders/anim_bloom_ghost.ksh"),
@@ -31,7 +76,8 @@ local assets =
     Asset("PKGREF", "images/fepanels.tex"),
     
     --item explorer stuff in and out of game
-    Asset("ANIM", "anim/spool.zip"), -- doodads
+    Asset("ANIM", "anim/bolt_of_cloth.zip"),
+    Asset("ANIM", "anim/spool.zip"),
     Asset("ANIM", "anim/frame_bg.zip"),
     Asset("ANIM", "anim/accountitem_frame.zip"),
     Asset("ANIM", "anim/frames_comp.zip"), -- If we replace frames_comp with accountitem_frame, we can remove.
@@ -44,6 +90,8 @@ local assets =
     Asset("PKGREF", "anim/dynamic/box_shared_spiral.dyn"),
     Asset("DYNAMIC_ANIM", "anim/dynamic/box_shared.zip"), --needed for the mystery and purchase box opening animation (happens to contain the forge box build too)
     Asset("PKGREF", "anim/dynamic/box_shared.dyn"),
+    Asset("DYNAMIC_ANIM", "anim/dynamic/box_bolt.zip"),
+    Asset("PKGREF", "anim/dynamic/box_bolt.dyn"),
 
     -- Used in event join flow and in-game victory.
     Asset("ATLAS", "images/dialogcurly_9slice.xml"),
@@ -88,6 +136,9 @@ local assets =
     Asset("IMAGE", "images/bg_spiral.tex"),
     Asset("ATLAS", "images/bg_vignette.xml"),
     Asset("IMAGE", "images/bg_vignette.tex"),
+    Asset("ANIM", "anim/sail_over.zip"),
+    Asset("ANIM", "anim/paddle_over.zip"),
+
 
     Asset("DYNAMIC_ATLAS", "images/fepanel_fills.xml"),
     Asset("PKGREF", "images/fepanel_fills.tex"),
@@ -125,6 +176,9 @@ local assets =
     Asset("IMAGE", "images/roadcorner.tex"),
     Asset("IMAGE", "images/roadendcap.tex"),
 
+    --TODO(YOG): Why does this get unloaded a the wrong time if we load it as part of the forest prefab?
+    Asset("IMAGE", "images/overlays_lunacy.tex"),
+
     Asset("IMAGE", "images/colour_cubes/identity_colourcube.tex"),
 
     Asset("SHADER", "shaders/anim.ksh"),
@@ -142,13 +196,13 @@ local assets =
     Asset("SHADER", "shaders/ground.ksh"),
     Asset("SHADER", "shaders/ground_overlay.ksh"),
     Asset("SHADER", "shaders/ground_lights.ksh"),
+    Asset("SHADER", "shaders/ground_underground.ksh"),
+	Asset("SHADER", "shaders/ocean.ksh"),
+    Asset("SHADER", "shaders/ocean_combined.ksh"),
     Asset("SHADER", "shaders/ceiling.ksh"),
-    -- Asset("SHADER", "shaders/triplanar.ksh"),
-    Asset("SHADER", "shaders/triplanar_bg.ksh"),
-    Asset("SHADER", "shaders/triplanar_alpha_wall.ksh"),
-    Asset("SHADER", "shaders/triplanar_alpha_ceiling.ksh"),
     Asset("SHADER", "shaders/lighting.ksh"),
     Asset("SHADER", "shaders/minimap.ksh"),
+    Asset("SHADER", "shaders/minimapocean.ksh"),
     Asset("SHADER", "shaders/minimapfs.ksh"),
     Asset("SHADER", "shaders/particle.ksh"),
     Asset("SHADER", "shaders/vfx_particle.ksh"),
@@ -157,6 +211,7 @@ local assets =
     Asset("SHADER", "shaders/road.ksh"),
     Asset("SHADER", "shaders/river.ksh"),
     Asset("SHADER", "shaders/splat.ksh"),
+    Asset("SHADER", "shaders/sprite.ksh"),
     Asset("SHADER", "shaders/texture.ksh"),
     Asset("SHADER", "shaders/ui.ksh"),
     Asset("SHADER", "shaders/ui_cc.ksh"),
@@ -164,10 +219,18 @@ local assets =
     Asset("SHADER", "shaders/swipe_fade.ksh"),
     Asset("SHADER", "shaders/ui_anim.ksh"),
     Asset("SHADER", "shaders/combine_colour_cubes.ksh"),
-    Asset("SHADER", "shaders/postprocess.ksh"),
+	Asset("SHADER", "shaders/zoomblur.ksh"),
+    Asset("SHADER", "shaders/postprocess_none.ksh"),
+    Asset("SHADER", "shaders/postprocess.ksh"),    
     Asset("SHADER", "shaders/postprocessbloom.ksh"),
     Asset("SHADER", "shaders/postprocessdistort.ksh"),
     Asset("SHADER", "shaders/postprocessbloomdistort.ksh"),
+    Asset("SHADER", "shaders/postprocesslunacy.ksh"),
+    Asset("SHADER", "shaders/postprocessbloomlunacy.ksh"),
+    Asset("SHADER", "shaders/postprocessdistortlunacy.ksh"),
+    Asset("SHADER", "shaders/postprocessbloomdistortlunacy.ksh"),    
+	Asset("SHADER", "shaders/blendoceantexture.ksh"),  
+    Asset("SHADER", "shaders/waterfall2.ksh"),
 
     Asset("SHADER", "shaders/waves.ksh"),
     Asset("SHADER", "shaders/overheat.ksh"),
@@ -190,6 +253,7 @@ local assets =
     Asset("ATLAS", "images/scoreboard.xml"),
     Asset("IMAGE", "images/scoreboard.tex"),
     Asset("ANIM", "anim/generating_world.zip"),
+    Asset("ANIM", "anim/generating_forest.zip"),
     Asset("ANIM", "anim/generating_cave.zip"),
     Asset("ANIM", "anim/creepy_hands.zip"),    
     Asset("ANIM", "anim/saving_indicator.zip"),
@@ -219,6 +283,13 @@ local assets =
     Asset("ATLAS", "images/profileflair.xml"),
     Asset("IMAGE", "images/profileflair.tex"),
 
+    --Wardrobe previewing
+    Asset("ANIM", "anim/player_ghost_withhat.zip"),
+    Asset("ANIM", "anim/werebeaver_basic.zip"),
+    Asset("ANIM", "anim/weremoose_basic.zip"),
+    Asset("ANIM", "anim/weregoose_basic.zip"),
+    Asset("ANIM", "anim/player_idles.zip"),
+
     Asset("DYNAMIC_ANIM", "anim/dynamic/body_default1.zip"),
     Asset("DYNAMIC_ANIM", "anim/dynamic/hand_default1.zip"),
     Asset("DYNAMIC_ANIM", "anim/dynamic/legs_default1.zip"),
@@ -231,7 +302,7 @@ local assets =
     Asset("DYNAMIC_ANIM", "anim/dynamic/previous_skin.zip"),
     Asset("PKGREF", "anim/dynamic/previous_skin.dyn"),
     Asset("DYNAMIC_ANIM", "anim/dynamic/random_skin.zip"),
-    Asset("PKGREF", "anim/dynamic/random_skin.dyn"),
+    Asset("PKGREF", "anim/dynamic/random_skin.dyn"),   
 }
 
 require "fonts"

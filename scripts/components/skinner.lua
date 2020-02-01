@@ -12,11 +12,7 @@ function SetSkinsOnAnim( anim_state, prefab, base_skin, clothing_names, skintype
 	skintype = skintype or "normal_skin"
 	default_build = default_build or ""
 	base_skin = base_skin or ""
-	
-	--print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-	--print(prefab, base_skin)
-	--dumptable(clothing_names)
-	
+
 	if skintype ~= "NO_BASE" then
 		anim_state:SetSkin(base_skin, default_build)
 	end
@@ -30,12 +26,17 @@ function SetSkinsOnAnim( anim_state, prefab, base_skin, clothing_names, skintype
 	end
 					
 	--if not ghost, then we need to apply the clothing
-	if skintype ~= "ghost_skin" and skintype ~= "werebeaver_skin" and skintype ~= "ghost_werebeaver_skin" then
+	if skintype == "normal_skin"
+	or skintype == "wimpy_skin" or skintype == "mighty_skin"
+	or skintype == "stage_2" or skintype == "stage_3" or skintype == "stage_4"
+	or skintype == "powerup"
+	or skintype == "NO_BASE" then
+
 		local needs_legacy_fixup = not anim_state:BuildHasSymbol( "torso_pelvis" ) --support clothing on legacy mod characters
 		local torso_build = nil
 		local pelvis_build = nil
 		local skirt_build = nil
-		local leg_build = nil --for boot switching
+		local leg_build = nil --for boot switching and nubs
 		local foot_build = nil --for boot switching
 		
 		local tuck_torso = BASE_TORSO_TUCK[base_skin] or "skirt" --tucked into the skirt is the default
@@ -88,10 +89,14 @@ function SetSkinsOnAnim( anim_state, prefab, base_skin, clothing_names, skintype
 			end
 		end
 		
+		local symbol_overridden = {}
+
 		for _,type in pairs( clothing_order ) do
 			local name = clothing_names[type]
 			if CLOTHING[name] ~= nil then
 				local src_symbols = nil
+				
+				--wolfgang
 				if skintype == "wimpy_skin" and CLOTHING[name].symbol_overrides_skinny then
 					src_symbols = CLOTHING[name].symbol_overrides_skinny
 					allow_arms = true
@@ -101,11 +106,22 @@ function SetSkinsOnAnim( anim_state, prefab, base_skin, clothing_names, skintype
 					src_symbols = CLOTHING[name].symbol_overrides_mighty
 					allow_arms = true
 					allow_torso = true
+				
+				--wormwood
+				elseif skintype == "stage_2" and CLOTHING[name].symbol_overrides_stage2 then
+					src_symbols = CLOTHING[name].symbol_overrides_stage2
+				elseif skintype == "stage_3" and CLOTHING[name].symbol_overrides_stage3 then
+					src_symbols = CLOTHING[name].symbol_overrides_stage3
+				elseif skintype == "stage_4" and CLOTHING[name].symbol_overrides_stage4 then
+					src_symbols = CLOTHING[name].symbol_overrides_stage4
+
+				--wurt
+				elseif skintype == "powerup" and CLOTHING[name].symbol_overrides_powerup then
+					src_symbols = CLOTHING[name].symbol_overrides_powerup
 				end
 
-
                 if type == "body" then
-                    --the last iterationw was the legs type, so check if the leg symbol was using the a boot, then we can assume it also set the foot
+                    --the last iteration was the legs type, so check if the leg symbol was using the a boot, then we can assume it also set the foot
                     local use_leg_boot = leg_build and CLOTHING[leg_build] and CLOTHING[leg_build].has_leg_boot
 	                if leg_build == foot_build and use_leg_boot then
 		                if table.contains(CLOTHING[name].symbol_overrides, "leg") then
@@ -140,9 +156,12 @@ function SetSkinsOnAnim( anim_state, prefab, base_skin, clothing_names, skintype
 							end
 							anim_state:ShowSymbol(sym)
 							anim_state:OverrideSkinSymbol(sym, real_build, src_sym )
+							symbol_overridden[sym] = true
 							--print("setting skin", sym, name )
 							
 							if sym == "leg" then
+								anim_state:ShowSymbol("foot") --Hack for wormwood cactus legs hiding feet. If someone else sets legs (full body piece) we want to show the feet again. This should be generalized better if we're going to do more silly stuff like feet hiding.
+
 								if CLOTHING[name].legs_cuff_size ~= nil then
 									legs_cuff_size = CLOTHING[name].legs_cuff_size
 									--print("setting legs_cuff_size to", legs_cuff_size, name )
@@ -167,10 +186,18 @@ function SetSkinsOnAnim( anim_state, prefab, base_skin, clothing_names, skintype
 				if CLOTHING[name].torso_tuck ~= nil and allow_torso then
 					tuck_torso = CLOTHING[name].torso_tuck
 					--print("setting tuck_torso to", tuck_torso, name )
-				end				
+				end
+				
 				if CLOTHING[name].symbol_hides then
 					for _,sym in pairs(CLOTHING[name].symbol_hides) do
 						anim_state:HideSymbol(sym)
+					end
+				end
+				if CLOTHING[name].symbol_in_base_hides then
+					for _,sym in pairs(CLOTHING[name].symbol_in_base_hides) do
+						if not symbol_overridden[sym] then
+							anim_state:HideSymbol(sym)
+						end
 					end
 				end
 			end
@@ -220,6 +247,17 @@ function SetSkinsOnAnim( anim_state, prefab, base_skin, clothing_names, skintype
 			anim_state:OverrideSkinSymbol("leg", leg_build, "leg_boot" )
 		end
 		
+		--deal with foot nubs
+		local has_nub = BASE_FEET_SIZE[base_skin] == -1
+		local nub_build = base_skin
+		if clothing_names["legs"] ~= nil and CLOTHING[clothing_names["legs"]] ~= nil and CLOTHING[clothing_names["legs"]].has_nub then
+			has_nub = CLOTHING[clothing_names["legs"]].has_nub
+			nub_build = clothing_names["legs"]
+		end
+		if has_nub and symbol_overridden["leg"] and not symbol_overridden["foot"] and leg_build ~= nub_build then
+			anim_state:OverrideSkinSymbol("foot", nub_build, "nub" )
+			feet_cuff_size = 0
+		end
 		
 		--characters with skirts, and untucked torso clothing need to exchange the render order of the torso and skirt so that the torso is above the skirt
 		if tuck_torso == "untucked" or (tuck_torso == "untucked_wide" and wide) then
@@ -257,6 +295,9 @@ function SetSkinsOnAnim( anim_state, prefab, base_skin, clothing_names, skintype
 	end
 end
 
+function Skinner:GetSkinMode()
+    return self.skintype
+end
 
 function Skinner:SetSkinMode(skintype, default_build)
 	skintype = skintype or self.skintype

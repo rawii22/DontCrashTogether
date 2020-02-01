@@ -1,6 +1,7 @@
 local assets =
 {
     Asset("ANIM", "anim/houndwhistle.zip"),
+    Asset("ANIM", "anim/houndwhistle_water.zip"),
 }
 
 local function TryAddFollower(leader, follower)
@@ -26,6 +27,7 @@ end
 local function HearHoundWhistle(inst, musician, instrument)
     if musician.components.leader ~= nil and
         (inst:HasTag("hound") or inst:HasTag("warg")) and
+		not inst:HasTag("hound_mutated") and
         not (inst.sg ~= nil and inst.sg:HasStateTag("statue")) then
         if inst.components.combat ~= nil and inst.components.combat:HasTarget() then
             inst.components.combat:GiveUp()
@@ -45,9 +47,14 @@ local function fn()
 
     inst:AddTag("whistle")
 
+    --tool (from tool component) added to pristine state for optimization
+    inst:AddTag("tool")
+
     inst.AnimState:SetBank("hound_whistle")
     inst.AnimState:SetBuild("houndwhistle")
     inst.AnimState:PlayAnimation("idle")
+
+    MakeInventoryFloatable(inst, "small", 0.025, {1.1, 0.7, 1.1})
 
     inst.entity:SetPristine()
 
@@ -72,6 +79,9 @@ local function fn()
     inst:AddComponent("inventoryitem")
 
     MakeHauntableLaunch(inst)
+
+    inst:ListenForEvent("floater_startfloating", function(inst) inst.AnimState:PlayAnimation("float") end)
+    inst:ListenForEvent("floater_stopfloating", function(inst) inst.AnimState:PlayAnimation("idle") end)
 
     return inst
 end

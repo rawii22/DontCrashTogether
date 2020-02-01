@@ -3,18 +3,18 @@ local assets =
     Asset("ANIM", "anim/torso_bearger.zip"),
 }
 
-local function onequip(inst, owner) 
+local function onequip(inst, owner)
     owner.AnimState:OverrideSymbol("swap_body", "torso_bearger", "swap_body")
-    if owner.components.hunger then
-        owner.components.hunger.burnrate = TUNING.ARMORBEARGER_SLOW_HUNGER
+    if owner.components.hunger ~= nil then
+        owner.components.hunger.burnratemodifiers:SetModifier(inst, TUNING.ARMORBEARGER_SLOW_HUNGER)
     end
     inst.components.fueled:StartConsuming()
 end
 
-local function onunequip(inst, owner) 
+local function onunequip(inst, owner)
     owner.AnimState:ClearOverrideSymbol("swap_body")
-    if owner.components.hunger then
-        owner.components.hunger.burnrate = 1
+    if owner.components.hunger ~= nil then
+        owner.components.hunger.burnratemodifiers:RemoveModifier(inst)
     end
     inst.components.fueled:StopConsuming()
 end
@@ -31,10 +31,12 @@ local function fn()
     inst.entity:AddNetwork()
 
     MakeInventoryPhysics(inst)
-    
+
     inst.AnimState:SetBank("torso_bearger")
     inst.AnimState:SetBuild("torso_bearger")
     inst.AnimState:PlayAnimation("anim")
+
+    MakeInventoryFloatable(inst, "small", 0.2, 0.9)
 
     inst.entity:SetPristine()
 
@@ -43,7 +45,7 @@ local function fn()
     end
 
     inst:AddComponent("inspectable")
-    
+
     inst:AddComponent("inventoryitem")
 
     inst:AddComponent("equippable")
@@ -63,8 +65,8 @@ local function fn()
     -- inst.components.armor:InitCondition(TUNING.ARMOR_BEEHAT, TUNING.ARMOR_BEEHAT_ABSORPTION)
     -- inst.components.armor:SetTags({"bee"})
 
-    inst.components.equippable:SetOnEquip( onequip )
-    inst.components.equippable:SetOnUnequip( onunequip )
+    inst.components.equippable:SetOnEquip(onequip)
+    inst.components.equippable:SetOnUnequip(onunequip)
 
     MakeHauntableLaunch(inst)
 

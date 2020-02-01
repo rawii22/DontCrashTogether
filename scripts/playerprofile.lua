@@ -535,6 +535,32 @@ function PlayerProfile:IsWathgrithrFontEnabled()
 	end
 end
 
+function PlayerProfile:SetBoatCameraEnabled(enabled)
+ 	if USE_SETTINGS_FILE then
+		TheSim:SetSetting("misc", "boatcamera", tostring(enabled))
+	else
+		self:SetValue("boatcamera", enabled)
+		self.dirty = true
+	end
+end
+
+function PlayerProfile:IsBoatCameraEnabled()
+ 	if USE_SETTINGS_FILE then
+ 		if TheSim:GetSetting("misc", "boatcamera") ~= nil then
+			return TheSim:GetSetting("misc", "boatcamera") == "true"
+		else
+			return true -- Default to true this value hasn't been created yet
+		end
+	else
+		if self:GetValue("boatcamera") ~= nil then
+			return self:GetValue("boatcamera")
+		else
+			return true -- Default to true this value hasn't been created yet
+		end
+	end
+end
+
+
 function PlayerProfile:SetHaveWarnedDifficultyRoG()
 	if USE_SETTINGS_FILE then
 		TheSim:SetSetting("misc", "warneddifficultyrog", "true")
@@ -657,6 +683,11 @@ local function UpgradeProfilePresets(presets_string)
                 
                 if preset.version == 2 then
                     presets[i] = savefileupgrades.utilities.UpgradeUserPresetFromV2toV3(preset, presets)
+                    didupgrade = true
+				end
+
+                if preset.version == 3 then
+                    presets[i] = savefileupgrades.utilities.UpgradeUserPresetFromV3toV4(preset, presets)
                     didupgrade = true
 				end
             end
@@ -1015,10 +1046,7 @@ end
 function PlayerProfile:SawControllerPopup()
     local sawPopup
  	if USE_SETTINGS_FILE then
-		sawPopup = TheSim:GetSetting("misc", "controller_popup")
-		if nil == sawPopup then
-		    sawPopup = false
-		end
+		sawPopup = (TheSim:GetSetting("misc", "controller_popup") == "true")
 	else
 		sawPopup = self:GetValueOrDefault(self.persistdata.controller_popup, false)
 	end
@@ -1138,6 +1166,33 @@ function PlayerProfile:GetKlumpCipher(file)
 	end
 
 	return self.persistdata.klump_ciphers[file]
+end
+
+function PlayerProfile:GetSnowbirdGameHighScore(score_version)
+	if self:GetValue("snowbird_game_high_score"..score_version) ~= nil then
+		return self:GetValue("snowbird_game_high_score"..score_version)
+	end
+	return 0
+end
+
+function PlayerProfile:SetSnowbirdGameHighScore(score, score_version)
+	self:SetValue("snowbird_game_high_score"..score_version, score)
+	self.dirty = true
+    self:Save()
+end
+
+
+function PlayerProfile:GetCrowGameHighScore(score_version)
+	if self:GetValue("crow_game_high_score"..score_version) ~= nil then
+		return self:GetValue("crow_game_high_score"..score_version)
+	end
+	return 0
+end
+
+function PlayerProfile:SetCrowGameHighScore(score, score_version)
+	self:SetValue("crow_game_high_score"..score_version, score)
+	self.dirty = true
+    self:Save()
 end
 
 

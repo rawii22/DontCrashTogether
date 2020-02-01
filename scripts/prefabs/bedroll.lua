@@ -41,7 +41,7 @@ local function onwake(inst, sleeper, nostatechange)
 end
 
 local function onsleeptick(inst, sleeper)
-    local isstarving = sleeper.components.beaverness ~= nil and sleeper.components.beaverness:IsStarving()
+    local isstarving = false
 
     if sleeper.components.hunger ~= nil then
         sleeper.components.hunger:DoDelta(TUNING.SLEEP_HUNGER_PER_TICK, true, true)
@@ -104,6 +104,8 @@ local function common_fn(bank, build)
     inst.AnimState:SetBank(bank)
     inst.AnimState:SetBuild(build)
     inst.AnimState:PlayAnimation("idle")
+
+    MakeInventoryFloatable(inst, "small", 0.2, 0.95)
 
     inst.entity:SetPristine()
 

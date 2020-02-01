@@ -67,6 +67,19 @@ local MainSounds =
 	"tentacle.fsb",
     "together.fsb",
 	"wallace.fsb",
+	"turnoftides.fev",
+	"turnoftides.fsb",
+	"turnoftides_music.fsb",
+	"turnoftides_amb.fsb",
+	"saltydog.fev",
+	"saltydog.fsb",
+    "hookline.fev",
+    "hookline.fsb",
+
+    "yotc_2020.fev",
+    "yotc_2020.fsb",
+
+    "warly.fsb",
 	"wendy.fsb",
 	"wickerbottom.fsb",
 	"willow.fsb",
@@ -75,11 +88,16 @@ local MainSounds =
 	"winnie.fsb",
 	"winona.fsb",
 	"wolfgang.fsb",
+    "wortox.fsb",
 	"woodie.fsb",
 	"woodrow.fsb",
 	"worm.fsb",
+    "wormwood.fsb",
 	"wx78.fsb",
-	"wortox.fsb",
+	"wurt.fsb",
+
+	"wintersfeast2019.fev",
+	"wintersfeast2019.fsb",
 }
 
 function PreloadSoundList(list)

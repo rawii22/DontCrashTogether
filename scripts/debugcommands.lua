@@ -12,20 +12,14 @@ function d_decodedata(path)
     end)
 end
 
-function d_domesticatedbeefalo()
-    c_give('whip')
-    c_give('saddle_war')
-    c_spawn('dummytarget')
+function d_domesticatedbeefalo(tendency, saddle)
     local beef = c_spawn('beefalo')
-    for k, v in pairs(TENDENCY) do
-        beef = c_spawn('beefalo')
-        beef.components.domesticatable:DeltaDomestication(1)
-        beef.components.domesticatable:DeltaObedience(0.5)
-        beef.components.domesticatable:DeltaTendency(v, 1)
-        beef:SetTendency()
-        beef.components.domesticatable:BecomeDomesticated()
-        beef.components.rideable:SetSaddle(nil, SpawnPrefab('saddle_basic'))
-    end
+    beef.components.domesticatable:DeltaDomestication(1)
+    beef.components.domesticatable:DeltaObedience(0.5)
+    beef.components.domesticatable:DeltaTendency(TENDENCY[tendency] or TENDENCY.DEFAULT, 1)
+    beef:SetTendency()
+    beef.components.domesticatable:BecomeDomesticated()
+    beef.components.rideable:SetSaddle(nil, SpawnPrefab(saddle or "saddle_basic"))
 end
 
 function d_domestication(domestication, obedience)
@@ -161,6 +155,9 @@ end
 ------------ skins functions --------------------
 ---------------------------------------------------
 
+--For testing legacy skin DLC popup
+--AddNewSkinDLCEntitlement("pack_oni_gift") MakeSkinDLCPopup()
+
 local TEST_ITEM_NAME = "birdcage_pirate"
 function d_test_thank_you(param)
 	local ThankYouPopup = require "screens/thankyoupopup"
@@ -177,6 +174,24 @@ end
 function d_test_skins_gift(param)
 	local GiftItemPopUp = require "screens/giftitempopup"
 	TheFrontEnd:PushScreen( GiftItemPopUp(ThePlayer, { param or TEST_ITEM_NAME }, { 0 }) )
+end
+
+function d_print_skin_info()
+	
+	print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+
+    local a = {
+        "campfire_cabin",
+        "armor_wood_roman",
+        "spear_northern",
+        "pickaxe_northern"
+    }
+
+    for _,v in pairs(a) do
+        print( GetSkinName(v), GetSkinUsableOnString(v) )
+	end
+	
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 end
 
 function d_skin_mode(mode)
@@ -287,6 +302,33 @@ function d_potions()
 	end
 end
 
+function d_weirdfloaters()
+    local weird_float_items =
+    {
+        "abigail flower",   "axe",              "batbat",       "blowdart_fire",    "blowdart_pipe",    "blowdart_sleep",
+        "blowdart_walrus",  "blowdart_yellow",  "boomerang",    "brush",            "bugnet",           "cane",
+        "firestaff",        "fishingrod",       "glasscutter",  "goldenaxe",        "goldenpickaxe",
+        "goldenshovel",     "grass_umbrella",   "greenstaff",   "hambat",           "hammer",           "houndstooth",
+        "houndwhistle",     "icestaff",         "lucy",         "miniflare",        "moonglassaxe",     "multitool_axe_pickaxe",
+        "nightstick",       "nightsword",       "opalstaff",    "orangestaff",      "panflute",         "perdfan",
+        "pickaxe",          "pitchfork",        "razor",        "redlantern",       "shovel",           "spear",
+        "spear_wathgrithr", "staff_tornado",    "telestaff",    "tentaclespike",    "trap",             "umbrella",
+        "yellowstaff",      "yotp_food3",
+    }
+
+    local spacing = 2
+    local num_wide = math.ceil(math.sqrt(#weird_float_items))
+
+    for y = 0, num_wide - 1 do
+        for x = 0, num_wide - 1 do
+            local inst = SpawnPrefab(weird_float_items[y*num_wide + x + 1])
+            if inst ~= nil then
+                inst.Transform:SetPosition((ConsoleWorldPosition() + Vector3(x*spacing, 0, y*spacing)):Get())
+            end
+        end
+    end
+end
+
 function d_wintersfeast()
 	local all_items = GetAllWinterOrnamentPrefabs()
 	local spacing = 2
@@ -300,6 +342,20 @@ function d_wintersfeast()
 			end
 		end
 	end
+end
+
+function d_wintersfood()
+    local spacing = 2
+    local num_wide = math.ceil(math.sqrt(NUM_WINTERFOOD))
+
+    for y = 0, num_wide-1 do
+        for x = 0, num_wide-1 do
+            local inst = SpawnPrefab("winter_food"..(y*num_wide + x + 1))
+            if inst ~= nil then
+                inst.Transform:SetPosition((ConsoleWorldPosition() + Vector3(x*spacing, 0, y*spacing)):Get())
+            end
+        end
+    end
 end
 
 function d_madsciencemats()
@@ -420,20 +476,282 @@ function d_reportevent(other_ku)
 		}), function(ku_tbl, success) print( "Report event:", success) dumptable(ku_tbl) end )
 end
 
-function d_makesoil()
+function d_ground(ground)
+	ground = ground == nil and GROUND.QUAGMIRE_SOIL or 
+			type(ground) == "string" and GROUND[string.upper(ground)] 
+			or ground
+
 	local pt = TheInput:GetWorldPosition()
 	
     local x, y = TheWorld.Map:GetTileCoordsAtPoint(pt:Get())
 
     local original_tile_type = TheWorld.Map:GetTileAtPoint(pt:Get())
-    TheWorld.Map:SetTile(x, y, GROUND.QUAGMIRE_SOIL)
+    TheWorld.Map:SetTile(x, y, ground)
     TheWorld.Map:RebuildLayer(original_tile_type, x, y)
-    TheWorld.Map:RebuildLayer(GROUND.QUAGMIRE_SOIL, x, y)
+    TheWorld.Map:RebuildLayer(ground, x, y)
 
     TheWorld.minimap.MiniMap:RebuildLayer(original_tile_type, x, y)
-    TheWorld.minimap.MiniMap:RebuildLayer(GROUND.QUAGMIRE_SOIL, x, y)
+    TheWorld.minimap.MiniMap:RebuildLayer(ground, x, y)
 end
 
 function d_portalfx()
 	TheWorld:PushEvent("ms_newplayercharacterspawned", { player = ThePlayer})
+end
+
+function d_islandstart()
+	c_give("log", 12)
+	c_give("rocks", 12)
+	c_give("smallmeat", 2)
+	c_give("meat", 2)
+	c_give("rope", 2)
+	c_give("cutgrass", 9)
+	c_give("backpack")
+	c_give("charcoal", 9)
+	c_give("carrot", 3)
+	c_give("berries", 12)
+	c_give("pickaxe")
+	c_give("axe")
+	c_give(PickSomeWithDups(1, {"strawhat", "minerhat", "flowerhat"})[1])
+	c_give(PickSomeWithDups(1, {"spear", "hambat", "trap"})[1])
+
+    local MainCharacter = ConsoleCommandPlayer()
+    if MainCharacter ~= nil and MainCharacter.components.sanity ~= nil then
+		MainCharacter.components.sanity:SetPercent(math.random() * 0.4 + 0.2)
+	end		
+
+end
+
+function d_boatitems()
+    c_spawn("boat_item")
+    c_spawn("mast_item", 3)
+    c_spawn("anchor_item")
+    c_spawn("steeringwheel_item")
+    c_spawn("oar")
+end
+
+function d_giveturfs()
+    local GroundTiles = require("worldtiledefs")
+    for k, v in pairs(GroundTiles.turf) do
+        c_give("turf_"..v.name)
+    end
+end
+
+function d_spawnlayout(name, offset)
+	local obj_layout = require("map/object_layout")
+	local entities = {}
+	local map_width, map_height = TheWorld.Map:GetSize()
+	local add_fn = {
+		fn=function(prefab, points_x, points_y, current_pos_idx, entitiesOut, width, height, prefab_list, prefab_data, rand_offset)
+		print("adding, ", prefab, points_x[current_pos_idx], points_y[current_pos_idx])
+			local x = (points_x[current_pos_idx] - width/2.0)*TILE_SCALE
+			local y = (points_y[current_pos_idx] - height/2.0)*TILE_SCALE
+			x = math.floor(x*100)/100.0
+			y = math.floor(y*100)/100.0
+			SpawnPrefab(prefab).Transform:SetPosition(x, 0, y)
+		end,
+		args={entitiesOut=entities, width=map_width, height=map_height, rand_offset = false, debug_prefab_list=nil}
+	}
+
+    local x, y, z = ConsoleWorldPosition():Get()
+	x, z = TheWorld.Map:GetTileCoordsAtPoint(x, y, z)
+	offset = offset or 3
+	obj_layout.Place({math.floor(x) - 3, math.floor(z) - 3}, name, add_fn, nil, TheWorld.Map)
+end
+
+function d_allfish()
+	local allfish = {"oceanfish_small_1", "oceanfish_small_2", "oceanfish_small_3",  "oceanfish_small_4", "oceanfish_small_5",
+						 "oceanfish_medium_1", "oceanfish_medium_2", "oceanfish_medium_3",  "oceanfish_medium_4", "oceanfish_medium_5", 
+						 }
+
+	local pt = ConsoleWorldPosition()
+	if TheWorld.Map:IsVisualGroundAtPoint(pt:Get()) then
+		for i, fish in ipairs(allfish) do
+			allfish[i] = fish .. "_inv"
+		end
+	end
+
+	allfish = JoinArrays(allfish, {"spoiled_fish", "fishmeat", "fishmeat_cooked", "fishmeat_small", "fishmeat_small_cooked"})
+
+	local spacing = 2
+	local num_wide = math.ceil(math.sqrt(#allfish))
+
+	for y = 0, num_wide-1 do
+		for x = 0, num_wide-1 do
+			local inst = SpawnPrefab(allfish[(y*num_wide + x + 1)])
+			if inst ~= nil then
+				inst.Transform:SetPosition((pt + Vector3(x*spacing, 0, y*spacing)):Get())
+			end
+		end
+	end
+end
+
+function d_fishing()
+	local items = {"oceanfishingbobber_ball", "oceanfishingbobber_oval", "oceanfishingrod",  "twigs", "trinket_8", 
+					 "oceanfishingbobber_crow", "oceanfishingbobber_robin", "oceanfishingbobber_robin_winter",  "oceanfishingbobber_canary", 
+					 "oceanfishingbobber_goose", "oceanfishingbobber_malbatross", 
+				 	"oceanfishinglure_spinner_red", "oceanfishinglure_spinner_blue", "oceanfishinglure_spinner_green", "oceanfishinglure_spinner_orange", "oceanfishinglure_spinner_yellow", "oceanfishinglure_spinner_white",
+					 "berries", "butterflywings"}
+
+	local spacing = 2
+	local num_wide = math.ceil(math.sqrt(#items))
+
+	local pt = ConsoleWorldPosition()
+
+	for y = 0, num_wide-1 do
+		for x = 0, num_wide-1 do
+			local inst = SpawnPrefab(items[(y*num_wide + x + 1)])
+			if inst ~= nil then
+				inst.Transform:SetPosition((pt + Vector3(x*spacing, 0, y*spacing)):Get())
+			end
+		end
+	end
+end
+
+function d_tables()
+    local items = {"table_winters_feast", "table_winters_feast","table_winters_feast","table_winters_feast","table_winters_feast","table_winters_feast","table_winters_feast",
+                    "table_winters_feast","table_winters_feast","table_winters_feast","table_winters_feast","table_winters_feast","table_winters_feast","table_winters_feast",
+                    "table_winters_feast","table_winters_feast","table_winters_feast","table_winters_feast","table_winters_feast","table_winters_feast","table_winters_feast",
+                    "table_winters_feast","table_winters_feast","table_winters_feast","table_winters_feast","table_winters_feast","table_winters_feast","table_winters_feast",}
+
+    local spacing = 1
+    local num_wide = math.ceil(math.sqrt(#items))
+
+    local pt = ConsoleWorldPosition()
+
+    for y = 0, num_wide-1 do
+        for x = 0, num_wide-1 do
+            local inst = SpawnPrefab(items[(y*num_wide + x + 1)])
+            if inst ~= nil then
+                inst.Transform:SetPosition((pt + Vector3(x*spacing, 0, y*spacing)):Get())
+            end
+        end
+    end
+end
+
+function d_gofishing()
+	c_give("oceanfishingrod", 1)
+	c_give("oceanfishingbobber_ball", 5)
+	c_give("oceanfishingbobber_robin_winter", 5)
+	c_give("oceanfishingbobber_malbatross", 5)
+	c_give("oceanfishinglure_spinner_red", 5)
+	c_give("oceanfishinglure_spinner_green", 5)
+end
+
+function d_ratracer(speed, stamina, direction, reaction)
+	local rat = DebugSpawn("carrat")
+	rat._spread_stats_task:Cancel() rat._spread_stats_task = nil
+	rat.components.yotc_racestats.speed = speed or math.random(TUNING.RACE_STATS.MAX_STAT_VALUE + 1) - 1
+	rat.components.yotc_racestats.stamina = stamina or math.random(TUNING.RACE_STATS.MAX_STAT_VALUE + 1) - 1
+	rat.components.yotc_racestats.direction = direction or math.random(TUNING.RACE_STATS.MAX_STAT_VALUE + 1) - 1
+	rat.components.yotc_racestats.reaction = reaction or math.random(TUNING.RACE_STATS.MAX_STAT_VALUE + 1) - 1
+	rat:_setcolorfn("RANDOM")
+	c_select(rat)
+	ConsoleCommandPlayer().components.inventory:GiveItem(rat)
+end
+
+function d_ratracers()
+    local MainCharacter = ConsoleCommandPlayer()
+	local rat 
+
+	rat = DebugSpawn("carrat")
+	rat._spread_stats_task:Cancel() rat._spread_stats_task = nil
+	rat.components.yotc_racestats.speed = TUNING.RACE_STATS.MAX_STAT_VALUE
+	rat:_setcolorfn("white")
+	MainCharacter.components.inventory:GiveItem(rat)
+	rat = DebugSpawn("carrat")
+	rat._spread_stats_task:Cancel() rat._spread_stats_task = nil
+	rat.components.yotc_racestats.speed = 0
+	rat:_setcolorfn("yellow")
+	MainCharacter.components.inventory:GiveItem(rat)
+
+	rat = DebugSpawn("carrat")
+	rat._spread_stats_task:Cancel() rat._spread_stats_task = nil
+	rat.components.yotc_racestats.stamina = TUNING.RACE_STATS.MAX_STAT_VALUE
+	rat:_setcolorfn("green")
+	MainCharacter.components.inventory:GiveItem(rat)
+	rat = DebugSpawn("carrat")
+	rat._spread_stats_task:Cancel() rat._spread_stats_task = nil
+	rat.components.yotc_racestats.stamina = 0
+	rat:_setcolorfn("brown")
+	MainCharacter.components.inventory:GiveItem(rat)
+
+	rat = DebugSpawn("carrat")
+	rat._spread_stats_task:Cancel() rat._spread_stats_task = nil
+	rat.components.yotc_racestats.direction = TUNING.RACE_STATS.MAX_STAT_VALUE
+	rat:_setcolorfn("blue")
+	MainCharacter.components.inventory:GiveItem(rat)
+	rat = DebugSpawn("carrat")
+	rat._spread_stats_task:Cancel() rat._spread_stats_task = nil
+	rat.components.yotc_racestats.direction = 0
+	rat:_setcolorfn("NEUTRAL")
+	MainCharacter.components.inventory:GiveItem(rat)
+
+	rat = DebugSpawn("carrat")
+	rat._spread_stats_task:Cancel() rat._spread_stats_task = nil
+	rat.components.yotc_racestats.reaction = TUNING.RACE_STATS.MAX_STAT_VALUE
+	rat:_setcolorfn("purple")
+	MainCharacter.components.inventory:GiveItem(rat)
+	rat = DebugSpawn("carrat")
+	rat._spread_stats_task:Cancel() rat._spread_stats_task = nil
+	rat.components.yotc_racestats.reaction = 0
+	rat:_setcolorfn("pink")
+	MainCharacter.components.inventory:GiveItem(rat)
+end
+
+-- d_setup_placeholders( STRINGS.CHARACTERS.WARLY, "scripts\\speech_warly.lua" )
+function d_setup_placeholders( reuse, out_file_name )
+	local use_table = nil
+	use_table = function( base_speech, reuse_speech )
+		for k,v in pairs( base_speech ) do
+			if type(v) == "string" then
+				if reuse_speech ~= nil and reuse_speech[k] ~= nil then
+					--do nothing
+				else
+					reuse_speech[k] = "PLACEHOLDER"
+				end
+			else
+				--table
+				if reuse_speech[k] == nil then
+					reuse_speech[k] = {}
+				end
+				use_table( base_speech[k], reuse_speech[k])
+			end
+		end
+	end
+	use_table( STRINGS.CHARACTERS.GENERIC, reuse )
+	
+	local out_file = io.open( out_file_name, "w")
+	
+	out_file:write("return {\n")
+	
+	local write_table = nil
+	write_table = function( tbl, tabs )
+		for k,v in orderedPairs(tbl) do
+			for i=1,tabs do out_file:write("\t") end
+
+			if type(v) == "string" then
+				local out_v = string.gsub(v, "\n", "\\n")
+				out_v = string.gsub(out_v, "\"", "\\\"")
+				if type(k) == "string" then
+					out_file:write(k .. " = \"" .. out_v .. "\",\n")
+				else
+					out_file:write("\"" .. out_v .. "\",\n")
+				end
+			else
+				out_file:write(k .. " =\n")
+				for i=1,tabs do out_file:write("\t") end
+				out_file:write("{\n")
+				
+				write_table( tbl[k], tabs + 1 )
+				
+				for i=1,tabs do out_file:write("\t") end
+				out_file:write("},\n")
+			end
+		end
+	end
+	
+	write_table( reuse, 1 )
+	
+	out_file:write("}")
+	out_file:close()
 end

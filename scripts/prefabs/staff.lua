@@ -2,6 +2,7 @@ local assets =
 {
     Asset("ANIM", "anim/staffs.zip"),
     Asset("ANIM", "anim/swap_staffs.zip"),
+    Asset("ANIM", "anim/floating_items.zip"),
 }
 
 local prefabs =
@@ -181,20 +182,35 @@ end
 
 require "prefabs/telebase"
 
-local function getrandomposition(caster)
-    local ground = TheWorld
-    local centers = {}
-    for i, node in ipairs(ground.topology.nodes) do
-        if ground.Map:IsPassableAtPoint(node.x, 0, node.y) then
-            table.insert(centers, {x = node.x, z = node.y})
-        end
-    end
-    if #centers > 0 then
-        local pos = centers[math.random(#centers)]
-        return Point(pos.x, 0, pos.z)
-    else
-        return caster:GetPosition()
-    end
+local function getrandomposition(caster, teleportee, target_in_ocean)
+	if target_in_ocean then
+		local pt = TheWorld.Map:FindRandomPointInOcean(20)
+		if pt ~= nil then
+			return pt
+		end
+		local from_pt = teleportee:GetPosition()
+		local offset = FindSwimmableOffset(from_pt, math.random() * 2 * PI, 90, 16)
+						or FindSwimmableOffset(from_pt, math.random() * 2 * PI, 60, 16)
+						or FindSwimmableOffset(from_pt, math.random() * 2 * PI, 30, 16)
+						or FindSwimmableOffset(from_pt, math.random() * 2 * PI, 15, 16)
+		if offset ~= nil then
+			return from_pt + offset
+		end
+		return teleportee:GetPosition()
+	else
+		local centers = {}
+		for i, node in ipairs(TheWorld.topology.nodes) do
+			if TheWorld.Map:IsPassableAtPoint(node.x, 0, node.y) and node.type ~= NODE_TYPE.SeparatedRoom then
+				table.insert(centers, {x = node.x, z = node.y})
+			end
+		end
+		if #centers > 0 then
+			local pos = centers[math.random(#centers)]
+			return Point(pos.x, 0, pos.z)
+		else
+			return caster:GetPosition()
+		end
+	end
 end
 
 local function teleport_end(teleportee, locpos, loctarget)
@@ -252,11 +268,11 @@ local function teleport_continue(teleportee, locpos, loctarget)
     end
 end
 
-local function teleport_start(teleportee, staff, caster, loctarget)
+local function teleport_start(teleportee, staff, caster, loctarget, target_in_ocean)
     local ground = TheWorld
 
     --V2C: Gotta do this RIGHT AWAY in case anything happens to loctarget or caster
-    local locpos = loctarget == nil and getrandomposition(caster)
+    local locpos = loctarget == nil and getrandomposition(caster, teleportee, target_in_ocean)
 				or loctarget.teletopos ~= nil and loctarget:teletopos()
 				or loctarget:GetPosition() 
 
@@ -317,9 +333,15 @@ local function teleport_func(inst, target)
     if target == nil then
         target = caster
     end
+
     local x, y, z = target.Transform:GetWorldPosition()
-    local loctarget = target.components.minigame_participator ~= nil and target.components.minigame_participator:GetMinigame() or FindNearestActiveTelebase(x, y, z, nil, 1)
-    teleport_start(target, inst, caster, loctarget)
+	local target_in_ocean = target.components.locomotor ~= nil and target.components.locomotor:IsAquatic()
+
+	local loctarget = nil
+	if not target_in_ocean then
+		loctarget = target.components.minigame_participator ~= nil and target.components.minigame_participator:GetMinigame() or FindNearestActiveTelebase(x, y, z, nil, 1)
+	end
+    teleport_start(target, inst, caster, loctarget, target_in_ocean)
 end
 
 local function onhauntpurple(inst)
@@ -425,15 +447,12 @@ end
 DESTSOUNDS = nil
 
 local function CheckSpawnedLoot(loot)
-    if loot.components.inventoryitem == nil or not loot.components.inventoryitem:IsHeld() then
-        local x, y, z = loot.Transform:GetWorldPosition()
-        if not loot:IsOnValidGround() or TheWorld.Map:IsPointNearHole(Vector3(x, 0, z)) then
-            SpawnPrefab("splash_ocean").Transform:SetPosition(x, y, z)
-            if loot:HasTag("irreplaceable") then
-                loot.Transform:SetPosition(FindSafeSpawnLocation(x, y, z))
-            else
-                loot:Remove()
-            end
+    if loot.components.inventoryitem ~= nil then
+        loot.components.inventoryitem:TryToSink()
+    else
+        local lootx, looty, lootz = loot.Transform:GetWorldPosition()
+        if ShouldEntitySink(loot, true) or TheWorld.Map:IsPointNearHole(Vector3(lootx, 0, lootz)) then
+            SinkEntity(loot)
         end
     end
 end
@@ -464,6 +483,8 @@ local function SpawnLootPrefab(inst, lootprefab)
     end
 
     loot.Transform:SetPosition(x, y, z)
+
+	loot:PushEvent("on_loot_dropped", {dropper = inst})
 
     return loot
 end
@@ -643,6 +664,15 @@ local function commonfn(colour, tags, hasskin)
         end
     end
 
+    local floater_swap_data =
+    {
+        sym_build = "swap_staffs",
+        sym_name = "swap_"..colour.."staff",
+        bank = "staffs",
+        anim = colour.."staff"
+    }
+    MakeInventoryFloatable(inst, "med", 0.1, {0.9, 0.4, 0.9}, true, -13, floater_swap_data)
+
     inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
@@ -689,7 +719,8 @@ end
 ---------COLOUR SPECIFIC CONSTRUCTIONS---------
 
 local function red()
-    local inst = commonfn("red", { "firestaff", "rangedweapon", "rangedlighter" }, true)
+    --weapon (from weapon component) added to pristine state for optimization
+    local inst = commonfn("red", { "firestaff", "weapon", "rangedweapon", "rangedlighter" }, true)
 
     inst.projectiledelay = FRAMES
 
@@ -706,6 +737,16 @@ local function red()
     inst.components.finiteuses:SetMaxUses(TUNING.FIRESTAFF_USES)
     inst.components.finiteuses:SetUses(TUNING.FIRESTAFF_USES)
 
+    local floater_swap_data =
+    {
+        sym_build = "swap_staffs",
+        sym_name = "swap_redstaff",
+        bank = "staffs",
+        anim = "redstaff"
+    }
+    inst.components.floater:SetBankSwapOnFloat(true, -9.5, floater_swap_data)
+    inst.components.floater:SetScale({0.85, 0.4, 0.85})
+
     MakeHauntableLaunch(inst)
     AddHauntableCustomReaction(inst, onhauntred, true, false, true)
 
@@ -713,7 +754,8 @@ local function red()
 end
 
 local function blue()
-    local inst = commonfn("blue", { "icestaff", "rangedweapon", "extinguisher" }, true)
+    --weapon (from weapon component) added to pristine state for optimization
+    local inst = commonfn("blue", { "icestaff", "weapon", "rangedweapon", "extinguisher" }, true)
 
     inst.projectiledelay = FRAMES
 
@@ -729,6 +771,8 @@ local function blue()
 
     inst.components.finiteuses:SetMaxUses(TUNING.ICESTAFF_USES)
     inst.components.finiteuses:SetUses(TUNING.ICESTAFF_USES)
+
+    inst.components.floater:SetScale({0.8, 0.4, 0.8})
 
     MakeHauntableLaunch(inst)
     AddHauntableCustomReaction(inst, onhauntblue, true, false, true)
@@ -752,6 +796,8 @@ local function purple()
     inst.components.spellcaster.canusefrominventory = true
     inst.components.spellcaster.canonlyuseonlocomotorspvp = true
 
+    inst.components.floater:SetScale({0.9, 0.4, 0.9})
+
     MakeHauntableLaunch(inst)
     AddHauntableCustomReaction(inst, onhauntpurple, true, false, true)
 
@@ -759,11 +805,12 @@ local function purple()
 end
 
 local function yellow()
-    local inst = commonfn("yellow", { "nopunch" })
+    local inst = commonfn("yellow", { "nopunch", "allow_action_on_impassable" }, true)
 
     inst:AddComponent("reticule")
     inst.components.reticule.targetfn = light_reticuletargetfn
     inst.components.reticule.ease = true
+    inst.components.reticule.ispassableatallpoints = true
 
     if not TheWorld.ismastersim then
         return inst
@@ -775,9 +822,19 @@ local function yellow()
     inst:AddComponent("spellcaster")
     inst.components.spellcaster:SetSpellFn(createlight)
     inst.components.spellcaster.canuseonpoint = true
+    inst.components.spellcaster.canuseonpoint_water = true
 
     inst.components.finiteuses:SetMaxUses(TUNING.YELLOWSTAFF_USES)
     inst.components.finiteuses:SetUses(TUNING.YELLOWSTAFF_USES)
+
+    local floater_swap_data =
+    {
+        sym_build = "swap_staffs",
+        sym_name = "swap_yellowstaff",
+        bank = "staffs",
+        anim = "yellowstaff"
+    }
+    inst.components.floater:SetBankSwapOnFloat(true, -14, floater_swap_data)
 
     MakeHauntableLaunch(inst)
     AddHauntableCustomReaction(inst, onhauntlight, true, false, true)
@@ -786,7 +843,7 @@ local function yellow()
 end
 
 local function green()
-    local inst = commonfn("green", { "nopunch" })
+    local inst = commonfn("green", { "nopunch" }, true)
 
     if not TheWorld.ismastersim then
         return inst
@@ -837,11 +894,12 @@ local function orange()
 end
 
 local function opal()
-    local inst = commonfn("opal", { "nopunch" })
+    local inst = commonfn("opal", { "nopunch", "allow_action_on_impassable" }, true)
 
     inst:AddComponent("reticule")
     inst.components.reticule.targetfn = light_reticuletargetfn
     inst.components.reticule.ease = true
+    inst.components.reticule.ispassableatallpoints = true
 
     if not TheWorld.ismastersim then
         return inst
@@ -853,9 +911,19 @@ local function opal()
     inst:AddComponent("spellcaster")
     inst.components.spellcaster:SetSpellFn(createlight)
     inst.components.spellcaster.canuseonpoint = true
+    inst.components.spellcaster.canuseonpoint_water = true
 
     inst.components.finiteuses:SetMaxUses(TUNING.OPALSTAFF_USES)
     inst.components.finiteuses:SetUses(TUNING.OPALSTAFF_USES)
+
+    local floater_swap_data =
+    {
+        sym_build = "swap_staffs",
+        sym_name = "swap_opalstaff",
+        bank = "staffs",
+        anim = "opalstaff"
+    }
+    inst.components.floater:SetBankSwapOnFloat(true, -14, floater_swap_data)
 
     MakeHauntableLaunch(inst)
     AddHauntableCustomReaction(inst, onhauntlight, true, false, true)

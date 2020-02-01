@@ -11,6 +11,7 @@ local function ondeploy(inst, pt)
     if lp ~= nil then
         lp.Transform:SetPosition(pt:Get())
         inst.components.stackable:Get():Remove()
+        PreventCharacterCollisionsWithPlacedObjects(lp)
         lp.sg:GoToState("spawn")
     end
 end
@@ -28,6 +29,8 @@ local function fn()
     inst.AnimState:SetBank("eyeplant_bulb")
     inst.AnimState:SetBuild("eyeplant_bulb")
     inst.AnimState:PlayAnimation("idle")
+
+    MakeInventoryFloatable(inst, "small", 0.05, 0.95)
 
     inst.entity:SetPristine()
 

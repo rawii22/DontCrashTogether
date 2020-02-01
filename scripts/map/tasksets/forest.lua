@@ -12,6 +12,13 @@ AddTaskSet("default", {
 			"Badlands",
 			"For a nice walk",
 			"Lightning Bluff",
+			
+			-- meteor island
+			"MoonIsland_IslandShards",
+			"MoonIsland_Beach",
+			"MoonIsland_Forest",
+			"MoonIsland_Baths",
+			"MoonIsland_Mine",
 		},
 		numoptionaltasks = 5,
 		optionaltasks = {
@@ -34,8 +41,26 @@ AddTaskSet("default", {
 			["WormholeGrass"] = { count = 8, tasks={"Make a pick", "Dig that rock", "Great Plains", "Squeltch", "Beeeees!", "Speak to the king", "Forest hunters", "Befriend the pigs", "For a nice walk", "Kill the spiders", "Killer bees!", "Make a Beehat", "The hunters", "Magic meadow", "Frogs and bugs", "Badlands"} },
 			["MooseNest"] = { count = 9, tasks={"Make a pick", "Beeeees!", "Speak to the king", "Forest hunters", "Befriend the pigs", "For a nice walk", "Make a Beehat", "Magic meadow", "Frogs and bugs"} },
 			["CaveEntrance"] = { count = 10, tasks={"Make a pick", "Dig that rock", "Great Plains", "Squeltch", "Beeeees!", "Speak to the king", "Forest hunters", "Befriend the pigs", "For a nice walk", "Kill the spiders", "Killer bees!", "Make a Beehat", "The hunters", "Magic meadow", "Frogs and bugs"} },
+			["MoonAltarRockGlass"] = { count = 1, tasks={"MoonIsland_Mine"} },
+			["MoonAltarRockIdol"] = { count = 1, tasks={"MoonIsland_Mine"} },
+			["MoonAltarRockSeed"] = { count = 1, tasks={"MoonIsland_Mine"} },
+            ["BathbombedHotspring"] = {count = 1, tasks={"MoonIsland_Baths"}},
+		},
+		ocean_prefill_setpieces = {
+			["BrinePool1"] = {count = 4}, -- todo: make this scale based on world gen size
+			["BrinePool2"] = {count = 2}, -- todo: make this scale based on world gen size
+			["BrinePool3"] = {count = 2}, -- todo: make this scale based on world gen size
 		},
 
+		ocean_population = {
+			"OceanCoastal", 
+			"OceanSwell",
+			"OceanRough",
+			"OceanHazardous",
+		},
+		-- ocean_population_setpieces =
+		-- {
+		-- },
 	})
 
 AddTaskSet("classic", {

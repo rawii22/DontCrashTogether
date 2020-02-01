@@ -32,7 +32,7 @@ local function onequip(inst, owner)
             local fx = SpawnPrefab(fx_prefab)
             fx.entity:SetParent(owner.entity)
             fx.entity:AddFollower()
-            fx.Follower:FollowSymbol(owner.GUID, "swap_object", 0, fx.fx_offset, 0)
+            fx.Follower:FollowSymbol(owner.GUID, "swap_object", fx.fx_offset_x or 0, fx.fx_offset, 0)
             fx:AttachLightTo(owner)
 
             table.insert(inst.fires, fx)
@@ -146,6 +146,11 @@ local function fn()
 
     --waterproofer (from waterproofer component) added to pristine state for optimization
     inst:AddTag("waterproofer")
+
+    --weapon (from weapon component) added to pristine state for optimization
+    inst:AddTag("weapon")
+
+	MakeInventoryFloatable(inst, "med", nil, 0.68)
 
     inst.entity:SetPristine()
 

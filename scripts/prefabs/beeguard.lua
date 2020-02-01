@@ -75,7 +75,7 @@ end
 local function CheckFocusTarget(inst)
     if inst._focustarget ~= nil and (
             not inst._focustarget:IsValid() or
-            inst._focustarget.components.health:IsDead() or
+            (inst._focustarget.components.health ~= nil and inst._focustarget.components.health:IsDead()) or
             inst._focustarget:HasTag("playerghost")
         ) then
         inst._focustarget = nil
@@ -236,6 +236,9 @@ local function fn()
     inst:AddTag("hostile")
     inst:AddTag("scarytoprey")
     inst:AddTag("flying")
+    inst:AddTag("ignorewalkableplatformdrowning")
+
+    MakeInventoryFloatable(inst)
 
     inst.entity:SetPristine()
 
@@ -260,6 +263,7 @@ local function fn()
     inst.components.locomotor:EnableGroundSpeedMultiplier(false)
     inst.components.locomotor:SetTriggersCreep(false)
     inst.components.locomotor.walkspeed = TUNING.BEEGUARD_SPEED
+    inst.components.locomotor.pathcaps = { allowocean = true }
 
     inst:AddComponent("health")
     inst.components.health:SetMaxHealth(TUNING.BEEGUARD_HEALTH)

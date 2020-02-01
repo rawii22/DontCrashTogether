@@ -92,7 +92,10 @@ local function fn()
 
     inst:AddTag("glommer")
     inst:AddTag("flying")
+    inst:AddTag("ignorewalkableplatformdrowning")
     inst:AddTag("cattoyairborne")
+
+    MakeInventoryFloatable(inst, "med")
 
     inst.entity:SetPristine()
 
@@ -123,6 +126,7 @@ local function fn()
 
     inst:AddComponent("locomotor")
     inst.components.locomotor.walkspeed = 6
+    inst.components.locomotor.pathcaps = {allowocean = true}
 
     inst:AddComponent("periodicspawner")
     inst.components.periodicspawner:SetOnSpawnFn(OnSpawnFuel)

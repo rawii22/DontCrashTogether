@@ -142,6 +142,9 @@ local function onworkfinished(inst)
     local fx = SpawnPrefab("collapse_small")
     fx.Transform:SetPosition(inst.Transform:GetWorldPosition())
     fx:SetMaterial("wood")
+    if inst.components.container ~= nil then
+        inst.components.container:DropEverything()
+    end
     inst:Remove()
 end
 
@@ -151,8 +154,10 @@ local function onworked(inst, worker, workleft)
         inst.AnimState:PlayAnimation(IsLightOn(inst) and "hit_on" or "hit")
         inst.AnimState:PushAnimation(IsLightOn(inst) and "idle_on" or "idle", false)
 
-        inst.components.container:DropEverything()
-        inst.components.container:Close()
+        if inst.components.container ~= nil then
+            inst.components.container:DropEverything()
+            inst.components.container:Close()
+        end
     end
 end
 
@@ -208,7 +213,6 @@ local function MakeMushroomLight(name, onlywhite, physics_rad)
         inst.Light:Enable(false)
 
         inst:AddTag("structure")
-        inst:AddTag("fridge")
         inst:AddTag("lamp")
 
         MakeSnowCoveredPristine(inst)
@@ -239,6 +243,9 @@ local function MakeMushroomLight(name, onlywhite, physics_rad)
 
         inst:AddComponent("container")
         inst.components.container:WidgetSetup(name)
+
+		inst:AddComponent("preserver")
+		inst.components.preserver:SetPerishRateMultiplier(TUNING.PERISH_MUSHROOM_LIGHT_MULT)
 
         inst:ListenForEvent("onbuilt", onbuilt)
         inst:ListenForEvent("itemget", UpdateLightState)

@@ -9,10 +9,6 @@ local function FuelTaken(inst, taker)
     end
 end
 
-local function oneaten(inst)
-    inst.SoundEmitter:PlaySound("dontstarve/creatures/leif/livinglog_burn")
-end
-
 local function onignite(inst)
     inst.SoundEmitter:PlaySound("dontstarve/creatures/leif/livinglog_burn")
 end
@@ -31,22 +27,22 @@ local function fn()
     inst.AnimState:SetBuild("livinglog")
     inst.AnimState:PlayAnimation("idle")
 
+    MakeInventoryFloatable(inst, "med", 0.1, 0.7)
+
     inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
         return inst
     end
 
+	inst:AddComponent("edible")
+    inst.components.edible.foodtype = FOODTYPE.WOOD
+    inst.components.edible.healthvalue = 0
+    inst.components.edible.hungervalue = 0
+
     inst:AddComponent("fuel")
     inst.components.fuel.fuelvalue = TUNING.MED_FUEL
     inst.components.fuel:SetOnTakenFn(FuelTaken)
-
-    inst:AddComponent("edible")
-    inst.components.edible.foodtype = FOODTYPE.WOOD
-    inst.components.edible.woodiness = 50
-    inst.components.edible.healthvalue = 0
-    inst.components.edible.hungervalue = 0
-    inst.components.edible:SetOnEatenFn(oneaten)
 
     MakeSmallBurnable(inst, TUNING.MED_BURNTIME)
     MakeSmallPropagator(inst)

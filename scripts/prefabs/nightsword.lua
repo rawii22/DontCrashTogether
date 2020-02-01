@@ -2,10 +2,17 @@ local assets =
 {
     Asset("ANIM", "anim/nightmaresword.zip"),
     Asset("ANIM", "anim/swap_nightmaresword.zip"),
+    Asset("ANIM", "anim/floating_items.zip"),
 }
 
 local function onequip(inst, owner)
-    owner.AnimState:OverrideSymbol("swap_object", "swap_nightmaresword", "swap_nightmaresword")
+    local skin_build = inst:GetSkinBuild()
+    if skin_build ~= nil then
+        owner:PushEvent("equipskinneditem", inst:GetSkinName())
+        owner.AnimState:OverrideItemSkinSymbol("swap_object", skin_build, "swap_nightmaresword", inst.GUID, "swap_nightmaresword")
+    else
+        owner.AnimState:OverrideSymbol("swap_object", "swap_nightmaresword", "swap_nightmaresword")
+    end
     owner.AnimState:Show("ARM_carry")
     owner.AnimState:Hide("ARM_normal")
 end
@@ -13,6 +20,10 @@ end
 local function onunequip(inst, owner)
     owner.AnimState:Hide("ARM_carry")
     owner.AnimState:Show("ARM_normal")
+    local skin_build = inst:GetSkinBuild()
+    if skin_build ~= nil then
+        owner:PushEvent("unequipskinneditem", inst:GetSkinName())
+    end
 end
 
 local function fn()
@@ -27,10 +38,16 @@ local function fn()
     inst.AnimState:SetBank("nightmaresword")
     inst.AnimState:SetBuild("nightmaresword")
     inst.AnimState:PlayAnimation("idle")
-    inst.AnimState:SetMultColour(1, 1, 1, .6)
+    --inst.AnimState:SetMultColour(1, 1, 1, .6)
 
     inst:AddTag("shadow")
     inst:AddTag("sharp")
+
+    --weapon (from weapon component) added to pristine state for optimization
+    inst:AddTag("weapon")
+
+    local swap_data = {sym_build = "swap_nightmaresword", bank = "nightmaresword"}
+    MakeInventoryFloatable(inst, "med", 0.05, {1.0, 0.4, 1.0}, true, -17.5, swap_data)
 
     inst.entity:SetPristine()
 

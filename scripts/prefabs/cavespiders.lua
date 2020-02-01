@@ -20,12 +20,20 @@ local dropperassets =
     Asset("SOUND", "sound/spider.fsb"),
 }
 
+local moon_assets =
+{
+    Asset("ANIM", "anim/ds_spider_basic.zip"),
+    Asset("ANIM", "anim/ds_spider_moon.zip"),
+    Asset("SOUND", "sound/spider.fsb"),
+}
+
 local prefabs =
 {
     "spidergland",
     "monstermeat",
     "silk",
     "spider_web_spit",
+	"moonspider_spike",
 }
 
 local brain = require "brains/spiderbrain"
@@ -203,7 +211,22 @@ local function MakeWeapon(inst)
     end
 end
 
-local function create_common(bank, build, tag)
+local function HalloweenMoonMutate(inst, new_inst)
+	local leader = inst ~= nil and inst.components.follower ~= nil
+		and new_inst ~= nil and new_inst.components.follower ~= nil
+		and inst.components.follower:GetLeader()
+		or nil
+
+	if leader ~= nil then
+		new_inst.components.follower:SetLeader(leader)
+		new_inst.components.follower:AddLoyaltyTime(
+			inst.components.follower:GetLoyaltyPercent()
+			* (new_inst.components.follower.maxfollowtime or inst.components.follower.maxfollowtime)
+		)
+	end
+end
+
+local function create_common(bank, build, tag, common_init)
     local inst = CreateEntity()
 
     inst.entity:AddTransform()
@@ -237,6 +260,10 @@ local function create_common(bank, build, tag)
     inst.AnimState:SetBank(bank)
     inst.AnimState:SetBuild(build)
     inst.AnimState:PlayAnimation("idle")
+
+	if common_init ~= nil then
+		common_init(inst)
+	end
 
     inst.entity:SetPristine()
 
@@ -345,6 +372,11 @@ local function create_hider()
     inst.components.locomotor.runspeed = TUNING.SPIDER_HIDER_RUN_SPEED
 
     inst.components.sanityaura.aura = -TUNING.SANITYAURA_MED
+
+	inst:AddComponent("halloweenmoonmutable")
+	inst.components.halloweenmoonmutable:SetPrefabMutated("spider_moon")
+	inst.components.halloweenmoonmutable:SetOnMutateFn(HalloweenMoonMutate)
+
     return inst
 end
 
@@ -371,6 +403,10 @@ local function create_spitter()
     inst.components.sanityaura.aura = -TUNING.SANITYAURA_MED
     MakeWeapon(inst)
 
+	inst:AddComponent("halloweenmoonmutable")
+	inst.components.halloweenmoonmutable:SetPrefabMutated("spider_moon")
+	inst.components.halloweenmoonmutable:SetOnMutateFn(HalloweenMoonMutate)
+
     return inst
 end
 
@@ -393,9 +429,72 @@ local function create_dropper()
 
     inst.components.sanityaura.aura = -TUNING.SANITYAURA_MED
 
+	inst:AddComponent("halloweenmoonmutable")
+	inst.components.halloweenmoonmutable:SetPrefabMutated("spider_moon")
+	inst.components.halloweenmoonmutable:SetOnMutateFn(HalloweenMoonMutate)
+
+    return inst
+end
+
+local variations = {1, 2, 3, 4, 5}
+
+local function DoSpikeAttack(inst, pt)
+	local x, y, z = pt:Get()
+	local inital_r = 1
+	x = GetRandomWithVariance(x, inital_r)
+	z = GetRandomWithVariance(z, inital_r)
+
+	shuffleArray(variations)
+
+	local num = math.random(2, 4)
+    local dtheta = PI * 2 / num
+    local thetaoffset = math.random() * PI * 2
+    local delaytoggle = 0
+	for i = 1, num do
+		local r = 1.1 + math.random() * 1.75
+		local theta = i * dtheta + math.random() * dtheta * 0.8 + dtheta * 0.2
+        local x1 = x + r * math.cos(theta)
+        local z1 = z + r * math.sin(theta)
+        if TheWorld.Map:IsVisualGroundAtPoint(x1, 0, z1) and not TheWorld.Map:IsPointNearHole(Vector3(x1, 0, z1)) then
+            local spike = SpawnPrefab("moonspider_spike")
+            spike.Transform:SetPosition(x1, 0, z1)
+			spike:SetOwner(inst)
+			if variations[i + 1] ~= 1 then
+				spike.AnimState:OverrideSymbol("spike01", "spider_spike", "spike0"..tostring(variations[i + 1]))
+			end
+        end
+    end
+end
+
+local function spider_moon_common_init(inst)
+	inst.Transform:SetScale(1.25, 1.25, 1.25)
+end
+
+local function create_moon()
+    local inst = create_common("spider_moon", "DS_spider_moon", "spider_moon", spider_moon_common_init)
+
+    if not TheWorld.ismastersim then
+        return inst
+    end
+
+	inst.DoSpikeAttack = DoSpikeAttack
+
+    inst.components.health:SetMaxHealth(TUNING.SPIDER_MOON_HEALTH)
+
+    inst.components.combat:SetDefaultDamage(TUNING.SPIDER_MOON_DAMAGE)
+    inst.components.combat:SetAttackPeriod(TUNING.SPIDER_MOON_ATTACK_PERIOD)
+    inst.components.combat:SetRange(TUNING.SPIDER_WARRIOR_ATTACK_RANGE, TUNING.SPIDER_WARRIOR_HIT_RANGE)
+    inst.components.combat:SetRetargetFunction(1, Retarget)
+    inst.components.combat:SetHurtSound("turnoftides/creatures/together/spider_moon/hit_response")
+
+    inst.components.locomotor.walkspeed = TUNING.SPIDER_HIDER_WALK_SPEED
+    inst.components.locomotor.runspeed = TUNING.SPIDER_HIDER_RUN_SPEED
+
+    inst.components.sanityaura.aura = -TUNING.SANITYAURA_MED
     return inst
 end
 
 return Prefab("spider_hider", create_hider, hiderassets, prefabs),
     Prefab("spider_spitter", create_spitter, spitterassets, prefabs),
-    Prefab("spider_dropper", create_dropper, dropperassets, prefabs)
+    Prefab("spider_dropper", create_dropper, dropperassets, prefabs),
+    Prefab("spider_moon", create_moon, moon_assets, prefabs)

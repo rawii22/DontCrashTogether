@@ -17,6 +17,7 @@ local events=
     CommonHandlers.OnAttacked(true),
     CommonHandlers.OnDeath(),
     CommonHandlers.OnLocomote(false,true),
+    CommonHandlers.OnHop(),
     EventHandler("doattack", function(inst, data) 
         if not inst.components.health:IsDead() and not inst.sg:HasStateTag("busy") then 
             if data.target:HasTag("cattoyairborne") then
@@ -228,6 +229,9 @@ local states=
                 if inst.vomit and inst.vomit.components.inventoryitem and inst.vomit.components.inventoryitem.ondropfn then
                     inst.vomit.components.inventoryitem.ondropfn(inst.vomit)
                 end
+				if inst.vomit.components.weighable ~= nil then
+					inst.vomit.components.weighable.prefab_override_owner = inst.prefab
+				end
                 if inst.vomit then
                     local downvec = TheCamera:GetDownVec()
                     local face = math.atan2(downvec.z, downvec.x) * (180/math.pi)
@@ -525,5 +529,6 @@ CommonStates.AddSleepStates(states,
     },
 })
 CommonStates.AddFrozenStates(states)
+CommonStates.AddHopStates(states, true, {pre = "walK_pre", loop = "jump_atk", pst = "walk_pst"})
   
 return StateGraph("catcoon", states, events, "idle", actionhandlers)

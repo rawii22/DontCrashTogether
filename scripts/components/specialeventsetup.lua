@@ -33,9 +33,11 @@ self.halloween_bat_grave_spawn_chance = 0 -- this is an accumulating chance for 
 --[[ Post initialization ]]
 --------------------------------------------------------------------------
 
-local CURRENT_HALLOWEEN = 2018
+local CURRENT_HALLOWEEN = os.date("%Y")
 
 function self:OnPostInit()
+	require("prefabs/oceanfishdef").SpecialEventSetup()
+
 	if IsSpecialEventActive(SPECIAL_EVENTS.HALLOWED_NIGHTS) then
 		-- retrofitting code to support changing from halloweentrinkets as a bool to as a number
 		
@@ -49,7 +51,7 @@ function self:OnPostInit()
 						local trinket_num = tonumber(split_table[1])
 						if trinket_num ~= nil and trinket_num >= HALLOWEDNIGHTS_TINKET_START and trinket_num <= HALLOWEDNIGHTS_TINKET_END then
 							count = count + 1
-							if count > 10 then
+							if count > 15 then
 								print ("[SpecialEventSetup] Enough Halloween Trinkets founds, no need to add more.")
 								self.halloweentrinkets = CURRENT_HALLOWEEN
 								break

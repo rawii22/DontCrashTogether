@@ -178,7 +178,7 @@ FrontEnd = Class(function(self, name)
 
 	self:HideTitle()
 
-	self.gameinterface = CreateEntity()
+	self.gameinterface = CreateEntity("GameInterface")
 	self.gameinterface.entity:AddSoundEmitter()
 	self.gameinterface.entity:AddGraphicsOptions()
 	self.gameinterface.entity:AddTwitchOptions()
@@ -614,6 +614,10 @@ function FrontEnd:UpdateConsoleOutput()
 end
 
 function FrontEnd:Update(dt)
+    if DEBUGGER_ENABLED then
+        Debuggee.poll()
+    end
+
     if CHEATS_ENABLED then
         ProbeReload(TheInput:IsKeyDown(KEY_F6))
     end
@@ -962,6 +966,16 @@ end
 
 function FrontEnd:GetActiveScreen()
     return #self.screenstack > 0 and self.screenstack[#self.screenstack] or nil
+end
+
+function FrontEnd:GetOpenScreenOfType(screenname)
+	for _,v in pairs(self.screenstack) do
+		if v.name == screenname then
+			return v
+		end
+	end
+
+	return nil
 end
 
 function FrontEnd:GetScreenStackSize()

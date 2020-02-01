@@ -1,3 +1,5 @@
+local SourceModifierList = require("util/sourcemodifierlist")
+
 local function onpercent(self)
     if self.inst.components.combat ~= nil then
         self.inst.components.combat.panic_thresh = self.inst.components.combat.panic_thresh
@@ -63,15 +65,19 @@ local Health = Class(function(self, inst)
     self.takingfiredamagetime = 0
     --self.takingfiredamagelow = nil
     self.fire_damage_scale = 1
+    self.externalfiredamagemultipliers = SourceModifierList(inst)
     self.fire_timestart = 1
     self.firedamageinlastsecond = 0
     self.firedamagecaptimer = 0
     self.nofadeout = false
     self.penalty = 0
-    self.absorb = 0
-    self.playerabsorb = 0
-    self.destroytime = nil
 
+    self.absorb = 0 -- DEPRECATED, please use externalabsorbmodifiers instead
+    self.playerabsorb = 0 -- DEPRECATED, please use externalabsorbmodifiers instead
+
+    self.externalabsorbmodifiers = SourceModifierList(inst, 0, SourceModifierList.additive)
+
+    self.destroytime = nil
     self.canmurder = true
     self.canheal = true
 end,
@@ -136,14 +142,19 @@ end
 
 local FIRE_TIMEOUT = .5
 
+function Health:GetFireDamageScale()
+    return self.fire_damage_scale * self.externalfiredamagemultipliers:Get()
+end
+
 function Health:DoFireDamage(amount, doer, instant)
     --V2C: "not instant" generally means that we are burning or being set on fire at the same time
-    if not self.invincible and (not instant or self.fire_damage_scale > 0) then
+    local mult = self:GetFireDamageScale()
+    if not self.invincible and (not instant or mult > 0) then
         local time = GetTime()
         if not self.takingfiredamage then
             self.takingfiredamage = true
             self.takingfiredamagestarttime = time
-            if (self.fire_timestart > 1 and not instant) or self.fire_damage_scale <= 0 then
+            if (self.fire_timestart > 1 and not instant) or mult <= 0 then
                 self.takingfiredamagelow = true
             end
             self.inst:StartUpdatingComponent(self)
@@ -154,7 +165,7 @@ function Health:DoFireDamage(amount, doer, instant)
         self.lastfiredamagetime = time
 
         if (instant or time - self.takingfiredamagestarttime > self.fire_timestart) and amount > 0 then
-            if self.fire_damage_scale > 0 then
+            if mult > 0 then
                 if self.takingfiredamagelow then
                     self.takingfiredamagelow = nil
                     self.inst:PushEvent("changefiredamage", { low = false })
@@ -170,7 +181,7 @@ function Health:DoFireDamage(amount, doer, instant)
                     amount = TUNING.MAX_FIRE_DAMAGE_PER_SECOND - self.firedamageinlastsecond
                 end
 
-                self:DoDelta(-amount * self.fire_damage_scale, false, doer ~= nil and (doer.nameoverride or doer.prefab) or "fire", nil, doer)
+                self:DoDelta(-amount * mult, false, doer ~= nil and (doer.nameoverride or doer.prefab) or "fire", nil, doer)
                 self.inst:PushEvent("firedamage")
 
                 self.firedamageinlastsecond = self.firedamageinlastsecond + amount
@@ -356,7 +367,7 @@ function Health:DoDelta(amount, overtime, cause, ignore_invincible, afflicter, i
     elseif not ignore_invincible and (self.invincible or self.inst.is_teleporting) then
         return 0
     elseif amount < 0 and not ignore_absorb then
-        amount = amount - amount * (self.playerabsorb ~= 0 and afflicter ~= nil and afflicter:HasTag("player") and self.playerabsorb + self.absorb or self.absorb)
+        amount = amount * math.clamp(1 - (self.playerabsorb ~= 0 and afflicter ~= nil and afflicter:HasTag("player") and self.playerabsorb + self.absorb or self.absorb), 0, 1) * math.clamp(1 - self.externalabsorbmodifiers:Get(), 0, 1)
     end
 
     local old_percent = self:GetPercent()

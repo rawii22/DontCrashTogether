@@ -134,6 +134,7 @@ local function mosquito()
     inst:AddTag("mosquito")
     inst:AddTag("insect")
     inst:AddTag("flying")
+    inst:AddTag("ignorewalkableplatformdrowning")
     inst:AddTag("smallcreature")
     inst:AddTag("cattoyairborne")
 
@@ -141,6 +142,8 @@ local function mosquito()
     inst.AnimState:SetBuild("mosquito")
     inst.AnimState:PlayAnimation("idle")
     inst.AnimState:SetRayTestOnBB(true)
+
+    MakeInventoryFloatable(inst)
 
     MakeFeedableSmallLivestockPristine(inst)
 
@@ -159,6 +162,7 @@ local function mosquito()
     inst.components.locomotor:SetTriggersCreep(false)
     inst.components.locomotor.walkspeed = TUNING.MOSQUITO_WALKSPEED
     inst.components.locomotor.runspeed = TUNING.MOSQUITO_RUNSPEED
+    inst.components.locomotor.pathcaps = { allowocean = true }
     inst:SetStateGraph("SGmosquito")
 
     inst.sounds = sounds
@@ -170,6 +174,7 @@ local function mosquito()
     inst:AddComponent("inventoryitem")
     inst.components.inventoryitem.canbepickedup = false
     inst.components.inventoryitem.canbepickedupalive = true
+    inst.components.inventoryitem.pushlandedevents = false
 
     ---------------------
 

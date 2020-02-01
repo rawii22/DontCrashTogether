@@ -16,15 +16,16 @@ local function fn()
     inst.AnimState:SetBuild("log")
     inst.AnimState:PlayAnimation("idle")
 
+    MakeInventoryFloatable(inst, "med", 0.1, 0.75)
+
     inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
         return inst
     end
 
-    inst:AddComponent("edible")
+	inst:AddComponent("edible")
     inst.components.edible.foodtype = FOODTYPE.WOOD
-    inst.components.edible.woodiness = 10
     inst.components.edible.healthvalue = 0
     inst.components.edible.hungervalue = 0
 

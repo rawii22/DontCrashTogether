@@ -1,15 +1,27 @@
 local function onpercent(self)
-    self.inst:RemoveTag("fresh")
-    self.inst:RemoveTag("stale")
-    self.inst:RemoveTag("spoiled")
     local percent = self:GetPercent()
     if percent >= .5 then
-        self.inst:AddTag("fresh")
+        if not self.inst:HasTag("fresh") then
+            self.inst:RemoveTag("stale")
+            self.inst:RemoveTag("spoiled")
+            self.inst:AddTag("fresh")
+            self.inst:PushEvent("forceperishchange")
+        end
     elseif percent > .2 then
-        self.inst:AddTag("stale")
-    else
+        if not self.inst:HasTag("stale") then
+            self.inst:RemoveTag("fresh")
+            self.inst:RemoveTag("spoiled")
+            self.inst:AddTag("stale")
+            self.inst:PushEvent("forceperishchange")
+        end
+    elseif not self.inst:HasTag("spoiled") then
+        self.inst:RemoveTag("fresh")
+        self.inst:RemoveTag("stale")
         self.inst:AddTag("spoiled")
+        self.inst:PushEvent("forceperishchange")
     end
+    --V2C: force clients to refresh spoilage icons when tags change,
+    --     since the percent value may not change enough to be dirty
 end
 
 local Perishable = Class(function(self, inst)
@@ -44,8 +56,11 @@ function Perishable:OnRemoveEntity()
 end
 
 local function Update(inst, dt)
-    if inst.components.perishable then
-		
+	local self = inst.components.perishable
+    if self ~= nil then
+		dt = self.start_dt or dt
+		self.start_dt = nil
+
 		local modifier = 1
 		local owner = inst.components.inventoryitem and inst.components.inventoryitem.owner or nil
         if not owner and inst.components.occupier then
@@ -53,35 +68,38 @@ local function Update(inst, dt)
         end
 
 		if owner then
-			if owner:HasTag("fridge") then
+			if owner.components.preserver ~= nil then
+				modifier = owner.components.preserver:GetPerishRateMultiplier(inst) or modifier
+			elseif owner:HasTag("fridge") then
 				if inst:HasTag("frozen") and not owner:HasTag("nocool") and not owner:HasTag("lowcool") then
 					modifier = TUNING.PERISH_COLD_FROZEN_MULT
 				else
 					modifier = TUNING.PERISH_FRIDGE_MULT
 				end
+            elseif owner:HasTag("foodpreserver") then
+                modifier = TUNING.PERISH_FOOD_PRESERVER_MULT
 			elseif owner:HasTag("spoiler") then
-				modifier = TUNING.PERISH_GROUND_MULT 
+				modifier = TUNING.PERISH_GROUND_MULT
 			elseif owner:HasTag("cage") and inst:HasTag("small_livestock") then
                 modifier = TUNING.PERISH_CAGE_MULT
             end
 		else
-			modifier = TUNING.PERISH_GROUND_MULT 
+			modifier = TUNING.PERISH_GROUND_MULT
 		end
 
 		if inst:GetIsWet() then
 			modifier = modifier * TUNING.PERISH_WET_MULT
 		end
 
-		
 		if TheWorld.state.temperature < 0 then
-			if inst:HasTag("frozen") and not inst.components.perishable.frozenfiremult then
+			if inst:HasTag("frozen") and not self.frozenfiremult then
 				modifier = TUNING.PERISH_COLD_FROZEN_MULT
 			else
 				modifier = modifier * TUNING.PERISH_WINTER_MULT
 			end
 		end
 
-		if inst.components.perishable.frozenfiremult then
+		if self.frozenfiremult then
 			modifier = modifier * TUNING.PERISH_FROZEN_FIRE_MULT
 		end
 
@@ -89,34 +107,32 @@ local function Update(inst, dt)
 			modifier = modifier * TUNING.PERISH_SUMMER_MULT
 		end
 
-        modifier = modifier * inst.components.perishable.localPerishMultiplyer
+        modifier = modifier * self.localPerishMultiplyer
 
 		modifier = modifier * TUNING.PERISH_GLOBAL_MULT
 		
-		local old_val = inst.components.perishable.perishremainingtime
+		local old_val = self.perishremainingtime
 		local delta = dt or (10 + math.random()*FRAMES*8)
-		if inst.components.perishable.perishremainingtime then 
-			inst.components.perishable.perishremainingtime = inst.components.perishable.perishremainingtime - delta*modifier
-	        if math.floor(old_val*100) ~= math.floor(inst.components.perishable.perishremainingtime*100) then
-		        inst:PushEvent("perishchange", {percent = inst.components.perishable:GetPercent()})
+		if self.perishremainingtime then 
+			self.perishremainingtime = math.min(self.perishtime, self.perishremainingtime - delta*modifier)
+	        if math.floor(old_val*100) ~= math.floor(self.perishremainingtime*100) then
+		        inst:PushEvent("perishchange", {percent = self:GetPercent()})
 		    end
 		end
 
-		-- Cool off hot foods over time (faster if in a fridge)
-		if inst.components.edible and inst.components.edible.temperaturedelta and inst.components.edible.temperaturedelta > 0 then
-			if owner and owner:HasTag("fridge") then
-				if not owner:HasTag("nocool") then
-					inst.components.edible.temperatureduration = inst.components.edible.temperatureduration - 1
-				end
-			elseif TheWorld.state.temperature < TUNING.OVERHEAT_TEMP - 5 then
-				inst.components.edible.temperatureduration = inst.components.edible.temperatureduration - .25
-			end
-			if inst.components.edible.temperatureduration < 0 then inst.components.edible.temperatureduration = 0 end
-		end
-        
+        --Cool off hot foods over time (faster if in a fridge)
+        --Skip and retain heat in containers with "nocool" tag
+        if inst.components.edible ~= nil and inst.components.edible.temperaturedelta ~= nil and inst.components.edible.temperaturedelta > 0 and not (owner ~= nil and owner:HasTag("nocool")) then
+            if owner ~= nil and owner:HasTag("fridge") then
+                inst.components.edible:AddChill(1)
+            elseif TheWorld.state.temperature < TUNING.OVERHEAT_TEMP - 5 then
+                inst.components.edible:AddChill(.25)
+            end
+        end
+
         --trigger the next callback
-        if inst.components.perishable.perishremainingtime and inst.components.perishable.perishremainingtime <= 0 then
-			inst.components.perishable:Perish()
+        if self.perishremainingtime and self.perishremainingtime <= 0 then
+			self:Perish()
         end
     end
 end
@@ -222,7 +238,8 @@ function Perishable:StartPerishing()
     end
 
     local dt = 10 + math.random()*FRAMES*8
-    self.updatetask = self.inst:DoPeriodicTask(dt, Update, math.random()*2, dt)
+	self.start_dt = math.random()*2
+    self.updatetask = self.inst:DoPeriodicTask(dt, Update, self.start_dt, dt)
 end
 
 function Perishable:Perish()
@@ -278,9 +295,14 @@ function Perishable:OnSave()
 end
 
 function Perishable:OnLoad(data)
-    if data ~= nil and data.time ~= nil then
-        self.perishremainingtime = data.time
-        if not data.paused then
+    if data ~= nil then
+		if data.time ~= nil then
+	        self.perishremainingtime = data.time
+		end
+
+        if data.paused then
+            self:StopPerishing()
+		elseif data.time ~= nil then
             self:StartPerishing()
         end
     end

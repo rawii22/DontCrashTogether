@@ -82,7 +82,10 @@ local function SetSmall(inst)
         inst.components.freezable:SetResistance(2)
     end
 
-    inst.GroundCreepEntity:SetRadius(5)
+    local my_x, my_y, my_z = inst.Transform:GetWorldPosition()
+    if TheWorld.Map:GetPlatformAtPoint(my_x, my_z) == nil then
+        inst.GroundCreepEntity:SetRadius(5)
+    end
 end
 
 local function SetMedium(inst)
@@ -99,8 +102,11 @@ local function SetMedium(inst)
         inst.components.freezable:SetShatterFXLevel(4)
         inst.components.freezable:SetResistance(3)
     end
-
-    inst.GroundCreepEntity:SetRadius(9)
+    
+    local my_x, my_y, my_z = inst.Transform:GetWorldPosition()
+    if TheWorld.Map:GetPlatformAtPoint(my_x, my_z) == nil then
+        inst.GroundCreepEntity:SetRadius(9)
+    end
 end
 
 local function SetLarge(inst)
@@ -118,7 +124,10 @@ local function SetLarge(inst)
         inst.components.freezable:SetResistance(4)
     end
 
-    inst.GroundCreepEntity:SetRadius(9)
+    local my_x, my_y, my_z = inst.Transform:GetWorldPosition()
+    if TheWorld.Map:GetPlatformAtPoint(my_x, my_z) == nil then
+        inst.GroundCreepEntity:SetRadius(9)
+    end
 end
 
 local function PlayLegBurstSound(inst)
@@ -400,6 +409,12 @@ local function OnHaunt(inst)
     return false
 end
 
+local function OnLoadPostPass(inst)
+    if inst.components.growable ~= nil and inst:GetCurrentPlatform() ~= nil then
+		inst.components.growable:StopGrowing()
+    end
+end
+
 local function MakeSpiderDenFn(den_level)
     return function()
         local inst = CreateEntity()
@@ -447,6 +462,7 @@ local function MakeSpiderDenFn(den_level)
         inst.components.childspawner.childname = "spider"
         inst.components.childspawner:SetRegenPeriod(TUNING.SPIDERDEN_REGEN_TIME)
         inst.components.childspawner:SetSpawnPeriod(TUNING.SPIDERDEN_RELEASE_TIME)
+        inst.components.childspawner.allowboats = true
 
         inst.components.childspawner.emergencychildname = "spider_warrior"
         inst.components.childspawner.emergencychildrenperplayer = 1
@@ -513,6 +529,12 @@ local function MakeSpiderDenFn(den_level)
 
         inst.OnEntitySleep = OnEntitySleep
         inst.OnEntityWake = OnEntityWake
+		inst.OnLoadPostPass = OnLoadPostPass
+
+		if not POPULATING then
+			inst:DoTaskInTime(0, OnLoadPostPass)
+		end
+
         return inst
     end
 end

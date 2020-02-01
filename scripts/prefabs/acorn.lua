@@ -68,12 +68,15 @@ local function fn()
     inst.AnimState:SetBuild("acorn")
     inst.AnimState:PlayAnimation("idle")
 
+    inst:AddTag("deployedplant")
     inst:AddTag("icebox_valid")
     inst:AddTag("cattoy")
     inst:AddTag("show_spoilage")
 
     --cookable (from cookable component) added to pristine state for optimization
     inst:AddTag("cookable")
+
+    MakeInventoryFloatable(inst, "small", 0.15)
 
     inst.entity:SetPristine()
 
@@ -134,6 +137,8 @@ local function cooked()
     inst.AnimState:SetBuild("acorn")
     inst.AnimState:PlayAnimation("cooked")
 
+    MakeInventoryFloatable(inst, "small", 0.1)
+
     inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
@@ -144,6 +149,8 @@ local function cooked()
     inst.components.edible.hungervalue = TUNING.CALORIES_TINY
     inst.components.edible.healthvalue = TUNING.HEALING_TINY
     inst.components.edible.foodtype = "SEEDS"
+
+    inst:AddComponent("tradable")
 
     inst:AddComponent("perishable")
     inst.components.perishable:SetPerishTime(TUNING.PERISH_FAST)

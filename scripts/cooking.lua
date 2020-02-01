@@ -52,6 +52,9 @@ end
 local fruits = {"pomegranate", "dragonfruit", "cave_banana"}
 AddIngredientValues(fruits, {fruit=1}, true)
 
+AddIngredientValues({"wormlight"}, {fruit=1})
+AddIngredientValues({"wormlight_lesser"}, {fruit=.5})
+
 AddIngredientValues({"berries"}, {fruit=.5}, true)
 AddIngredientValues({"berries_juicy"}, {fruit=.5}, true)
 AddIngredientValues({"durian"}, {fruit=1, monster=1}, true)
@@ -59,7 +62,7 @@ AddIngredientValues({"durian"}, {fruit=1, monster=1}, true)
 AddIngredientValues({"honey", "honeycomb"}, {sweetener=1}, true)
 AddIngredientValues({"royal_jelly"}, {sweetener=3}, true)
 
-local veggies = {"carrot", "corn", "pumpkin", "eggplant", "cutlichen"}
+local veggies = {"carrot", "corn", "pumpkin", "eggplant", "cutlichen", "asparagus", "onion", "garlic", "tomato", "potato", "pepper"}
 AddIngredientValues(veggies, {veggie=1}, true)
 
 local mushrooms = {"red_cap", "green_cap", "blue_cap"}
@@ -70,25 +73,46 @@ AddIngredientValues({"monstermeat"}, {meat=1, monster=1}, true, true)
 AddIngredientValues({"froglegs", "drumstick"}, {meat=.5}, true)
 AddIngredientValues({"smallmeat"}, {meat=.5}, true, true)
 
-AddIngredientValues({"fish", "eel"}, {meat=.5,fish=1}, true)
+AddIngredientValues({"eel"}, {meat=.5,fish=1}, true)
+AddIngredientValues({"fish"}, {meat=1,fish=1}, true)
 
+AddIngredientValues({"pondeel"}, {meat=.5,fish=1}, true)
+AddIngredientValues({"pondfish"}, {meat=.5,fish=.5}, false)
+AddIngredientValues({"fishmeat_small"}, {meat=.5,fish=.5}, true)
+AddIngredientValues({"fishmeat"}, {meat=1,fish=1}, true)
+local oceanfishdefs = require("prefabs/oceanfishdef")
+for _, fish_def in pairs(oceanfishdefs.fish) do
+	if fish_def.cooker_ingredient_value ~= nil then
+		AddIngredientValues({fish_def.prefab.."_inv"}, fish_def.cooker_ingredient_value, false)
+	end
+end
+
+AddIngredientValues({"kelp"}, {veggie=.5}, true, true)
 
 AddIngredientValues({"mandrake"}, {veggie=1, magic=1}, true)
 AddIngredientValues({"egg"}, {egg=1}, true)
 AddIngredientValues({"tallbirdegg"}, {egg=4}, true)
 AddIngredientValues({"bird_egg"}, {egg=1}, true)
 AddIngredientValues({"butterflywings"}, {decoration=2})
+AddIngredientValues({"moonbutterflywings"}, {decoration=2})
 AddIngredientValues({"butter"}, {fat=1, dairy=1})
 AddIngredientValues({"twigs"}, {inedible=1})
+AddIngredientValues({"lightninggoathorn"}, {inedible=1})
 
 AddIngredientValues({"ice"}, {frozen=1})
 AddIngredientValues({"mole"}, {meat=.5})
 AddIngredientValues({"cactus_meat"}, {veggie=1}, true)
+AddIngredientValues({"rock_avocado_fruit_ripe"}, {veggie=1}, true)
 AddIngredientValues({"watermelon"}, {fruit=1}, true)
 AddIngredientValues({"cactus_flower"}, {veggie=.5})
 AddIngredientValues({"acorn_cooked"}, {seed=1})
 AddIngredientValues({"goatmilk"}, {dairy=1})
 -- AddIngredientValues({"seeds"}, {seed=1}, true)
+
+AddIngredientValues({"nightmarefuel"}, {inedible=1, magic=1})
+AddIngredientValues({"voltgoathorn"}, {inedible=1})
+AddIngredientValues({"boneshard"}, {inedible=1})
+
 
 
 --our naming conventions aren't completely consistent, sadly
@@ -106,6 +130,17 @@ end
 local foods = require("preparedfoods")
 for k,recipe in pairs (foods) do
 	AddCookerRecipe("cookpot", recipe)
+	AddCookerRecipe("portablecookpot", recipe)
+end
+
+local portable_foods = require("preparedfoods_warly")
+for k,recipe in pairs (portable_foods) do
+	AddCookerRecipe("portablecookpot", recipe)
+end
+
+local spicedfoods = require("spicedfoods")
+for k, recipe in pairs(spicedfoods) do
+    AddCookerRecipe("portablespicer", recipe)
 end
 
 local function GetIngredientValues(prefablist)

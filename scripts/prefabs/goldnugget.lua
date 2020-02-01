@@ -29,6 +29,11 @@ local function fn()
     inst:AddTag("molebait")
     inst:AddTag("quakedebris")
 
+	if not IsSpecialEventActive(SPECIAL_EVENTS.YOTP) then
+	    inst:AddTag("minigameitem")
+	end
+
+
     inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
@@ -43,6 +48,8 @@ local function fn()
     inst:AddComponent("inspectable")
 
     inst:AddComponent("inventoryitem")
+    inst.components.inventoryitem:SetSinks(true)
+
     inst:AddComponent("stackable")
     inst:AddComponent("bait")
 
@@ -105,7 +112,9 @@ local function luckyfn()
     inst.AnimState:PlayAnimation("idle")
     inst.AnimState:OverrideSymbol("nugget", "gold_nugget", "lucky_goldnugget")
 
-    inst:AddTag("minigameitem")
+	if IsSpecialEventActive(SPECIAL_EVENTS.YOTP) then
+	    inst:AddTag("minigameitem")
+	end
 
     inst.entity:SetPristine()
 
@@ -122,6 +131,8 @@ local function luckyfn()
     inst:AddComponent("inspectable")
 
     inst:AddComponent("inventoryitem")
+    inst.components.inventoryitem:SetSinks(true)
+
     inst:AddComponent("stackable")
 
     MakeHauntableLaunch(inst)

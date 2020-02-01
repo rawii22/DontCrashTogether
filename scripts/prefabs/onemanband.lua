@@ -25,17 +25,42 @@ local function band_update( inst )
     local owner = inst.components.inventoryitem and inst.components.inventoryitem.owner
     if owner and owner.components.leader then
         local x,y,z = owner.Transform:GetWorldPosition()
-        local ents = TheSim:FindEntities(x,y,z, TUNING.ONEMANBAND_RANGE, {"pig"}, {'werepig'})
+        local ents = TheSim:FindEntities(x,y,z, TUNING.ONEMANBAND_RANGE, nil, {"werepig", "player"}, {"pig", "merm"})
         for k,v in pairs(ents) do
             if v.components.follower and not v.components.follower.leader  and not owner.components.leader:IsFollower(v) and owner.components.leader.numfollowers < 10 then
-                owner.components.leader:AddFollower(v)
-                --owner.components.sanity:DoDelta(-TUNING.SANITY_MED)
+
+                if v:HasTag("merm") then
+                    if v:HasTag("mermguard") then
+                        if owner:HasTag("merm") and not owner:HasTag("mermdisguise") then
+                            owner.components.leader:AddFollower(v)
+                        end
+                    else
+                        if owner:HasTag("merm") or (TheWorld.components.mermkingmanager and TheWorld.components.mermkingmanager:HasKing()) then
+                            owner.components.leader:AddFollower(v)
+                        end
+                    end
+                else
+                    owner.components.leader:AddFollower(v)
+                end
             end
         end
 
         for k,v in pairs(owner.components.leader.followers) do
-            if k:HasTag("pig") and k.components.follower then
-                k.components.follower:AddLoyaltyTime(3)
+            if k.components.follower then
+                if k:HasTag("pig") then
+                    k.components.follower:AddLoyaltyTime(3)
+
+                elseif k:HasTag("merm") then
+                    if k:HasTag("mermguard") then
+                        if owner:HasTag("merm") and not owner:HasTag("mermdisguise") then
+                            k.components.follower:AddLoyaltyTime(3)
+                        end
+                    else
+                        if owner:HasTag("merm") or (TheWorld.components.mermkingmanager and TheWorld.components.mermkingmanager:HasKing()) then
+                            k.components.follower:AddLoyaltyTime(3)
+                        end
+                    end
+                end
             end
         end
     else -- This is for haunted one man band
@@ -110,6 +135,7 @@ local function fn()
     inst:AddComponent("inspectable")
 
     inst:AddComponent("inventoryitem")
+    inst.components.inventoryitem:SetSinks(true)
 
     inst:AddComponent("fueled")
     inst.components.fueled.fueltype = FUELTYPE.ONEMANBAND

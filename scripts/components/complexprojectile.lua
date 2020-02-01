@@ -84,8 +84,8 @@ function ComplexProjectile:CalculateTrajectory(startPos, endPos, speed)
     end
 
     local cosangleXspeed = math.cos(angle) * speed
-    self.velocity.x = dx / range * cosangleXspeed
-    self.velocity.z = dz / range * cosangleXspeed
+    self.velocity.x = cosangleXspeed
+    self.velocity.z = 0.0
     self.velocity.y = math.sin(angle) * speed
 end
 
@@ -94,9 +94,11 @@ function ComplexProjectile:Launch(targetPos, attacker, owningweapon)
     self.owningweapon = owningweapon or self
     self.attacker = attacker
 
+	self.inst:ForceFacePoint(targetPos:Get())
+
     local offset = self.launchoffset
     if attacker ~= nil and offset ~= nil then
-        local facing_angle = attacker.Transform:GetRotation() * DEGREES
+        local facing_angle = self.inst.Transform:GetRotation() * DEGREES
         pos.x = pos.x + offset.x * math.cos(facing_angle)
         pos.y = pos.y + offset.y
         pos.z = pos.z - offset.x * math.sin(facing_angle)
@@ -113,6 +115,14 @@ function ComplexProjectile:Launch(targetPos, attacker, owningweapon)
     targetPos.y = self.targetoffset ~= nil and self.targetoffset.y or 0
 
     self:CalculateTrajectory(pos, targetPos, self.horizontalSpeed)
+
+	-- if the attacker is standing on a moving platform, then inherit it's velocity too
+	local attacker_platform = attacker ~= nil and attacker:GetCurrentPlatform() or nil
+	if attacker_platform ~= nil then
+		local vx, vy, vz = attacker_platform.Physics:GetVelocity()
+	    self.velocity.x = self.velocity.x + vx
+	    self.velocity.z = self.velocity.z + vz
+	end
 
     if self.onlaunchfn ~= nil then
         self.onlaunchfn(self.inst)

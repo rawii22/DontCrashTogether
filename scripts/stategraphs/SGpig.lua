@@ -22,6 +22,7 @@ local events =
     CommonHandlers.OnAttack(),
     CommonHandlers.OnAttacked(true),
     CommonHandlers.OnDeath(),
+    CommonHandlers.OnHop(),
     EventHandler("transformnormal", function(inst)
         if not inst.components.health:IsDead() then
             inst.sg:GoToState("transformNormal")
@@ -44,7 +45,7 @@ local states =
             inst.Physics:Stop()
             inst.SoundEmitter:PlaySound("dontstarve/pig/oink")
 
-            if inst.components.follower:GetLeader() ~= nil and inst.components.follower:GetLoyaltyPercent() < .05 then
+            if inst.components.follower:GetLeader() ~= nil and inst.components.follower:GetLoyaltyPercent() < 0.05 then
                 inst.AnimState:PlayAnimation("hungry")
                 inst.SoundEmitter:PlaySound("dontstarve/wilson/hungry")
             elseif inst:HasTag("guard") then
@@ -53,7 +54,7 @@ local states =
                 inst.AnimState:PlayAnimation("idle_scared")
             elseif inst.components.combat:HasTarget() then
                 inst.AnimState:PlayAnimation("idle_angry")
-            elseif inst.components.follower:GetLeader() ~= nil and inst.components.follower:GetLoyaltyPercent() > .3 then
+            elseif inst.components.follower:GetLeader() ~= nil and inst.components.follower:GetLoyaltyPercent() > 0.3 then
                 inst.AnimState:PlayAnimation("idle_happy")
             else
                 inst.AnimState:PlayAnimation("idle_creepy")
@@ -203,6 +204,9 @@ local states =
             TimeEvent(10 * FRAMES, function(inst)
                 inst:PerformBufferedAction()
             end),
+            TimeEvent(2*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve/pig/eat") end),
+            TimeEvent(11*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve/beefalo/chew") end),
+            TimeEvent(21*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve/beefalo/chew") end),
         },
 
         events =
@@ -287,5 +291,6 @@ CommonStates.AddSimpleState(states, "refuse", "pig_reject", { "busy" })
 CommonStates.AddFrozenStates(states)
 CommonStates.AddSimpleActionState(states, "pickup", "pig_pickup", 10 * FRAMES, { "busy" })
 CommonStates.AddSimpleActionState(states, "gohome", "pig_pickup", 4 * FRAMES, { "busy" })
+CommonStates.AddHopStates(states, true, { pre = "boat_jump_pre", loop = "boat_jump_loop", pst = "boat_jump_pst"})
 
 return StateGraph("pig", states, events, "idle", actionhandlers)

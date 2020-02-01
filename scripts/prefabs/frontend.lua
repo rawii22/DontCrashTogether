@@ -79,6 +79,8 @@ local assets =
     Asset("IMAGE", "images/bg_redux_dark_bottom.tex"),
     Asset("ATLAS", "images/bg_redux_dark_bottom_solid.xml"),
     Asset("IMAGE", "images/bg_redux_dark_bottom_solid.tex"),
+	Asset("ATLAS", "images/bg_redux_dark_bottom_vignette1.xml"),
+	Asset("IMAGE", "images/bg_redux_dark_bottom_vignette1.tex"),
 
     --character portraits
     Asset("ATLAS", "images/saveslot_portraits.xml"),
@@ -150,15 +152,6 @@ local assets =
 
     Asset("ANIM", "anim/puff_spawning.zip"),
 
-    Asset("DYNAMIC_ATLAS", "images/thankyou_item_popup.xml"),
-    Asset("PKGREF", "images/thankyou_item_popup.tex"),
-    Asset("DYNAMIC_ATLAS", "images/thankyou_item_event.xml"),
-    Asset("PKGREF", "images/thankyou_item_event.tex"),
-    Asset("DYNAMIC_ATLAS", "images/thankyou_item_event2.xml"),
-    Asset("PKGREF", "images/thankyou_item_event2.tex"),
-    Asset("DYNAMIC_ATLAS", "images/thankyou_item_popup_rog.xml"),
-    Asset("PKGREF", "images/thankyou_item_popup_rog.tex"),
-
 	-- hard coded MotD for upsell (TODO: maybe try to fix this once we do proper MotD for non-Steam)
    	Asset("DYNAMIC_ATLAS", "images/stats_panel_motd.xml"),
    	Asset("PKGREF", "images/stats_panel_motd.tex"),
@@ -177,6 +170,44 @@ local assets =
     Asset("PKGREF", "anim/dynamic/box_shared_spiral.dyn"),
     Asset("DYNAMIC_ANIM", "anim/dynamic/box_shared.zip"),
     Asset("PKGREF", "anim/dynamic/box_shared.dyn"),
+
+    
+    Asset("DYNAMIC_ANIM", "anim/dynamic/box_bolt.zip"),
+    Asset("PKGREF", "anim/dynamic/box_bolt.dyn"),
+
+    
+    --Mini Game Assets
+    Asset("ANIM", "anim/crow.zip"),
+    Asset("ANIM", "anim/crow_build.zip"),
+    Asset("ANIM", "anim/robin_winter_build.zip"),
+    Asset("ANIM", "anim/explode.zip"),
+    Asset("ANIM", "anim/minigametile.zip"),
+    Asset("DYNAMIC_ANIM", "anim/dynamic/oddment_crow.zip"),
+    Asset("DYNAMIC_ANIM", "anim/dynamic/oddment_snowbird.zip"),
+    Asset("DYNAMIC_ANIM", "anim/dynamic/oddment_chevron_wrapper.zip"),
+    Asset("DYNAMIC_ANIM", "anim/dynamic/oddment_dotted_wrapper.zip"),
+    Asset("DYNAMIC_ANIM", "anim/dynamic/oddment_flower_wrapper.zip"),
+    Asset("DYNAMIC_ANIM", "anim/dynamic/oddment_foil_wrapper.zip"),
+    Asset("DYNAMIC_ANIM", "anim/dynamic/oddment_paper_wrapper.zip"),
+    Asset("DYNAMIC_ANIM", "anim/dynamic/oddment_striped_wrapper.zip"),
+    Asset("DYNAMIC_ANIM", "anim/dynamic/oddment_bluestriped_wrapper.zip"),
+    Asset("DYNAMIC_ANIM", "anim/dynamic/oddment_roastturkey.zip"),
+    Asset("DYNAMIC_ANIM", "anim/dynamic/oddment_gravy.zip"),
+    Asset("DYNAMIC_ANIM", "anim/dynamic/oddment_berrysauce.zip"),
+    Asset("DYNAMIC_ANIM", "anim/dynamic/oddment_pumpkinpie.zip"),
+    Asset("PKGREF", "anim/dynamic/oddment_crow.dyn"),
+    Asset("PKGREF", "anim/dynamic/oddment_snowbird.dyn"),
+    Asset("PKGREF", "anim/dynamic/oddment_chevron_wrapper.dyn"),
+    Asset("PKGREF", "anim/dynamic/oddment_dotted_wrapper.dyn"),
+    Asset("PKGREF", "anim/dynamic/oddment_flower_wrapper.dyn"),
+    Asset("PKGREF", "anim/dynamic/oddment_foil_wrapper.dyn"),
+    Asset("PKGREF", "anim/dynamic/oddment_paper_wrapper.dyn"),
+    Asset("PKGREF", "anim/dynamic/oddment_striped_wrapper.dyn"),
+    Asset("PKGREF", "anim/dynamic/oddment_bluestriped_wrapper.dyn"),
+    Asset("PKGREF", "anim/dynamic/oddment_roastturkey.dyn"),
+    Asset("PKGREF", "anim/dynamic/oddment_gravy.dyn"),
+    Asset("PKGREF", "anim/dynamic/oddment_berrysauce.dyn"),
+    Asset("PKGREF", "anim/dynamic/oddment_pumpkinpie.dyn"),
 }
 
 --Including these here as well as global to ensure the exporter's resizing dependency works
@@ -186,6 +217,14 @@ for item,data in pairs(MISC_ITEMS) do
 		table.insert(assets, Asset("PKGREF", "anim/dynamic/" .. data.box_build .. ".dyn"))
 	end
 end
+
+
+local SkinGifts = require("skin_gifts")
+for gifttype,data in pairs(SkinGifts.popupdata) do
+    table.insert(assets, Asset("DYNAMIC_ATLAS", data.atlas))
+    table.insert(assets, Asset("PKGREF", data.atlas:gsub(".xml", ".tex")))
+end
+
 
 if IsConsole() then
 	if TRUE_DEDICATED_SERVER == false then

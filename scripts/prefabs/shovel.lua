@@ -4,6 +4,7 @@ local assets =
     Asset("ANIM", "anim/goldenshovel.zip"),
     Asset("ANIM", "anim/swap_shovel.zip"),
     Asset("ANIM", "anim/swap_goldenshovel.zip"),
+    Asset("ANIM", "anim/floating_items.zip"),
 }
 
 local function onequip(inst, owner)
@@ -40,6 +41,16 @@ local function common_fn(bank, build)
     inst.AnimState:SetBank(bank)
     inst.AnimState:SetBuild(build)
     inst.AnimState:PlayAnimation("idle")
+
+    --tool (from tool component) added to pristine state for optimization
+    inst:AddTag("tool")
+
+    if TheNet:GetServerGameMode() ~= "quagmire" then
+        --weapon (from weapon component) added to pristine state for optimization
+        inst:AddTag("weapon")
+    end
+
+    MakeInventoryFloatable(inst, "med", 0.05, {0.8, 0.4, 0.8})
 
     inst.entity:SetPristine()
 
@@ -79,15 +90,28 @@ local function common_fn(bank, build)
     return inst
 end
 
-local function onequipgold(inst, owner)
-    owner.AnimState:OverrideSymbol("swap_object", "swap_goldenshovel", "swap_goldenshovel")
+local function onequipgold(inst, owner)local skin_build = inst:GetSkinBuild()
+    if skin_build ~= nil then
+        owner:PushEvent("equipskinneditem", inst:GetSkinName())
+        owner.AnimState:OverrideItemSkinSymbol("swap_object", skin_build, "swap_goldenshovel", inst.GUID, "swap_goldenshovel")
+    else
+        owner.AnimState:OverrideSymbol("swap_object", "swap_goldenshovel", "swap_goldenshovel")    
+    end
     owner.SoundEmitter:PlaySound("dontstarve/wilson/equip_item_gold")
     owner.AnimState:Show("ARM_carry")
     owner.AnimState:Hide("ARM_normal")
 end
 
 local function normal()
-    return common_fn("shovel", "shovel")
+    local inst = common_fn("shovel", "shovel")
+
+    if not TheWorld.ismastersim then
+        return inst
+    end
+
+    inst.components.floater:SetBankSwapOnFloat(true, 7, {sym_build = "swap_shovel"})
+
+    return inst
 end
 
 local function golden()
@@ -101,6 +125,8 @@ local function golden()
     inst.components.weapon.attackwear = 1 / TUNING.GOLDENTOOLFACTOR
 
     inst.components.equippable:SetOnEquip(onequipgold)
+
+    inst.components.floater:SetBankSwapOnFloat(true, 7, {sym_build = "swap_goldenshovel"})
 
     return inst
 end

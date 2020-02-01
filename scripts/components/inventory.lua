@@ -192,10 +192,12 @@ function Inventory:OnLoad(data, newents)
 end
 
 function Inventory:DropActiveItem()
+	local active_item = nil
     if self.activeitem ~= nil then
-        self:DropItem(self.activeitem)
+        active_item = self:DropItem(self.activeitem)
         self:SetActiveItem(nil)
     end
+	return active_item
 end
 
 function Inventory:ReturnActiveActionItem(item)
@@ -666,7 +668,7 @@ function Inventory:GiveItem(inst, slot, src_pos)
         inst.components.inventoryitem:RemoveFromOwner(true)
     end
 
-    local objectDestroyed = inst.components.inventoryitem:OnPickup(self.inst)
+    local objectDestroyed = inst.components.inventoryitem:OnPickup(self.inst, src_pos)
     if objectDestroyed then
         return
     end
@@ -733,8 +735,8 @@ function Inventory:GiveItem(inst, slot, src_pos)
                     leftovers = self.itemslots[slot].components.stackable:Put(inst, src_pos)
                 end
             else
-                inst.components.inventoryitem:OnPutInInventory(self.inst)
                 self.itemslots[slot] = inst
+                inst.components.inventoryitem:OnPutInInventory(self.inst)
                 self.inst:PushEvent("itemget", { item = inst, slot = slot, src_pos = src_pos })
             end
 
@@ -990,7 +992,36 @@ function Inventory:Has(item, amount) --Note(Peter): We don't care about v.skinna
         local overflow_enough, overflow_found = overflow:Has(item, amount)
         num_found = num_found + overflow_found
     end
-	
+
+    return num_found >= amount, num_found
+end
+
+function Inventory:HasItemWithTag(tag, amount)
+    local num_found = 0
+    for k, v in pairs(self.itemslots) do
+        if v and v:HasTag(tag) then
+            if v.components.stackable ~= nil then
+                num_found = num_found + v.components.stackable:StackSize()
+            else
+                num_found = num_found + 1
+            end
+        end
+    end
+
+    if self.activeitem and self.activeitem:HasTag(tag) then
+        if self.activeitem.components.stackable ~= nil then
+            num_found = num_found + self.activeitem.components.stackable:StackSize()
+        else
+            num_found = num_found + 1
+        end
+    end
+
+    local overflow = self:GetOverflowContainer()
+    if overflow ~= nil then
+        local overflow_enough, overflow_found = overflow:HasItemWithTag(tag, amount)
+        num_found = num_found + overflow_found
+    end
+
     return num_found >= amount, num_found
 end
 
@@ -1515,7 +1546,7 @@ function Inventory:ControllerUseItemOnSceneFromInvTile(item, target, actioncode,
         elseif item.components.inventoryitem:GetGrandOwner() ~= self.inst then
             --V2C: This is now invalid as playercontroller will now send this
             --     case to the proper call to move items between controllers.
-        elseif actioncode == nil or CanEntitySeeTarget(self.inst, target) then
+        elseif actioncode == nil or target == nil or CanEntitySeeTarget(self.inst, target) then
             act = self.inst.components.playercontroller:GetItemUseAction(item, target)
         end
 
@@ -1572,6 +1603,10 @@ function Inventory:EquipActionItem(item)
         item.components.equippable ~= nil and
         item.components.equippable.equipslot == EQUIPSLOTS.HANDS then
         if not item.components.equippable:IsEquipped() then
+            if item.components.stackable ~= nil and item.components.stackable.stacksize > 1 and not item.components.equippable.equipstack then
+                local stack = item.components.stackable:Get(item.components.stackable.stacksize - 1)
+                self:GiveItem(stack)
+            end
             self:Equip(item)
         end
         if self:GetActiveItem() == item then
@@ -1684,7 +1719,12 @@ function Inventory:GetEquippedMoistureRate(slot)
 end
  
 function Inventory:GetWaterproofness(slot)
+    if self.inst.components.moisture ~= nil and self.inst.components.moisture:GetWaterproofInventory() then
+        return 1
+    end
+
     local waterproofness = 0
+
     if slot then
         local item = self:GetItemInSlot(slot)
         if item and item.components.waterproofer then

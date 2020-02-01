@@ -1,9 +1,12 @@
 local Widget = Class(function(self, name)
+	name = name or "widget"
     self.children = {}
     self.callbacks = {}
-    self.name = name or "widget"
+    self.name = name
+
     self.inst = CreateEntity()
     self.inst.widget = self
+	self.inst.name = name
 
     self.inst:AddTag("widget")
     self.inst:AddTag("UI")
@@ -627,8 +630,12 @@ function Widget:SetFocus()
   --  print ("SET FOCUS ", self)
     if self.focus_forward and type(self.focus_forward) == "function" then
         local widg = self.focus_forward()
-        widg:SetFocus()
-        return
+		if widg ~= nil then
+	        widg:SetFocus()
+		    return
+		else
+			print ("Warning: Widget:SetFocus called on '"..tostring(self).. "' failled to find widget to focus_forward to.")
+		end
     elseif self.focus_forward then
         self.focus_forward:SetFocus()
         return

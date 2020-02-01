@@ -65,6 +65,12 @@ local function OnDeploy(inst, pt, deployer)
     end
 end
 
+local function OnMutate(inst, transformed_inst)
+	if transformed_inst ~= nil then
+		transformed_inst.sg:GoToState("idle")
+	end
+end
+
 local function fn()
     local inst = CreateEntity()
 
@@ -80,10 +86,12 @@ local function fn()
 
     inst:AddTag("butterfly")
     inst:AddTag("flying")
+    inst:AddTag("ignorewalkableplatformdrowning")
     inst:AddTag("insect")
     inst:AddTag("smallcreature")
     inst:AddTag("cattoyairborne")
     inst:AddTag("wildfireprotected")
+    inst:AddTag("deployedplant")
 
     --pollinator (from pollinator component) added to pristine state for optimization
     inst:AddTag("pollinator")
@@ -96,6 +104,8 @@ local function fn()
     inst.AnimState:SetRayTestOnBB(true)
 
     inst.DynamicShadow:SetSize(.8, .5)
+
+    MakeInventoryFloatable(inst)
 
     MakeFeedableSmallLivestockPristine(inst)
 
@@ -117,6 +127,7 @@ local function fn()
     inst.components.inventoryitem.canbepickedup = false
     inst.components.inventoryitem.canbepickedupalive = true
     inst.components.inventoryitem.nobounce = true
+    inst.components.inventoryitem.pushlandedevents = false
 
     ------------------
     inst:AddComponent("pollinator")
@@ -170,6 +181,11 @@ local function fn()
     end
 
     MakeFeedableSmallLivestock(inst, TUNING.BUTTERFLY_PERISH_TIME, OnPickedUp, OnDropped)
+
+	inst:AddComponent("halloweenmoonmutable")
+	inst.components.halloweenmoonmutable:SetPrefabMutated("moonbutterfly")
+	inst.components.halloweenmoonmutable:SetOnMutateFn(OnMutate)
+	inst.components.halloweenmoonmutable.push_attacked_on_new_inst = false
 
     return inst
 end

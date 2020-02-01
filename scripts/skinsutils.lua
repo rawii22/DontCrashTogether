@@ -26,6 +26,8 @@ SKIN_RARITY_COLORS.HeirloomDistinguished  = SKIN_RARITY_COLORS.HeirloomElegant
 
 DEFAULT_SKIN_COLOR = SKIN_RARITY_COLORS["Common"]
 
+SKIN_DEBUGGING = false
+
 local SKIN_AFFINITY_INFO = require("skin_affinity_info")
 
 EVENT_ICONS =
@@ -34,7 +36,8 @@ EVENT_ICONS =
 	event_ice = {"ICE", "WINTER"},
 	event_yotv = {"VARG"},
 	event_quagmire = {"VICTORIAN"},
-	event_hallowed = {"HALLOWED"}
+	event_hallowed = {"HALLOWED"},
+	event_yule = {"YULE"}
 }
 
 local function GetSpecialItemCategories()
@@ -54,7 +57,7 @@ end
 
 -- for use in sort functions
 -- return true if rarity1 should go first in the list
-local rarity_order =
+RARITY_ORDER =
 {
 	ProofOfPurchase = 1,
 	Timeless = 2,
@@ -83,7 +86,7 @@ function CompareRarities(item_key_a, item_key_b)
 	local rarity1 = GetRarityForItem(item_key_a)
 	local rarity2 = GetRarityForItem(item_key_b)
 
-	return rarity_order[rarity1] < rarity_order[rarity2]
+	return RARITY_ORDER[rarity1] < RARITY_ORDER[rarity2]
 end
 
 function GetNextRarity(rarity)
@@ -164,6 +167,18 @@ function GetPackTotalItems(item_key)
     return #output_items
 end
 
+function _IsPackInsideOther( pack_a, pack_b )
+	local a_items = GetPurchasePackOutputItems(pack_a)
+	local b_items = GetPurchasePackOutputItems(pack_b)
+	
+	for _,item in ipairs( a_items ) do
+		if not table.contains( b_items, item ) then
+			return false
+		end
+	end
+	return true
+end
+
 function _GetSubPacks(item_key)
     local sub_packs = {}
 	local output_items = GetPurchasePackOutputItems(item_key)
@@ -196,6 +211,23 @@ function _GetSubPacks(item_key)
 		end
 	end
 	
+	--Ugh, packs such as pack_character_wormwood, which have a unique item, plus one other, have one sub pack, which makes us think it's a bundle, but it's not really...
+	if GetTableSize(sub_packs) == 1 then
+		sub_packs = {}
+	end
+
+	--Now coalesce sub packs into the the largest sub packs to avoid overlap
+	for sub_pack_a,_ in pairs( sub_packs ) do
+		for sub_pack_b,_ in pairs( sub_packs ) do
+			if sub_pack_a ~= sub_pack_b then
+				if _IsPackInsideOther( sub_pack_a, sub_pack_b ) then
+					sub_packs[sub_pack_a] = nil
+					break
+				end
+			end
+		end
+	end
+	
 	return sub_packs
 end
 
@@ -213,7 +245,11 @@ function IsItemInAnyPack(item_key)
 end
 
 
-function GetPackTotalSets(item_key)
+function GetPackTotalSets(item_key)	
+	if item_key == "pack_starter_2019" then --don't show invalid skin sets because Wurt conufuses it
+		return 0
+	end
+
     local sub_packs = _GetSubPacks(item_key)
     
     local count = 0
@@ -227,30 +263,32 @@ function IsPackABundle(item_key)
     local sub_packs = _GetSubPacks(item_key)
 
     local value = 0
-    
-    if IsSteam() then
-        local iap_defs = TheItems:GetIAPDefs()
-        for _,iap in pairs(iap_defs) do
-            if sub_packs[iap.item_type] then
-                value = value + iap.cents
-            end
-        end
-    elseif IsRail() then
-        local iap_defs = TheItems:GetIAPDefs()
-        for _,iap in pairs(iap_defs) do
-            if sub_packs[iap.item_type] then
-                value = value + tonumber(iap.rail_price)
-            end
-        end
-    else
-        print("Error!!! Figure out iap for this platform.")
-    end
-    
+
+	local iap_defs = TheItems:GetIAPDefs()
+	for _,iap in pairs(iap_defs) do
+		if sub_packs[iap.item_type] then
+			if iap.virtual_currency_cost ~= nil then
+				value = value + iap.virtual_currency_cost
+			elseif IsSteam() then
+				value = value + iap.cents
+			elseif IsRail() then
+				value = value + tonumber(iap.rail_price)
+			else
+				print("Error!!! Figure out iap for this platform.")
+			end
+		end
+	end    
     return (value > 0), value 
 end
 
-local getPriceFromIAPDef = function( iap_def, sale_active )
-	if IsSteam() then
+function GetPriceFromIAPDef( iap_def, sale_active )
+	if iap_def.iap_type == IAP_TYPE_VIRTUAL then
+		if sale_active then
+			return iap_def.virtual_currency_sale_cost
+		else
+			return iap_def.virtual_currency_cost
+		end
+	elseif IsSteam() then
 		if sale_active then
 			return iap_def.sale_cents
 		else
@@ -265,12 +303,15 @@ local getPriceFromIAPDef = function( iap_def, sale_active )
 	end
 end
 
-function BuildPriceStr( value, currency_code, sale_active )
-    if type(value) ~= "number" then
-		value = getPriceFromIAPDef( value, sale_active )
-    end
+function BuildPriceStr( value, iap_def, sale_active )
+	if type(value) ~= "number" then
+		value = GetPriceFromIAPDef( value, sale_active )
+	end
 
-	if IsSteam() then
+	if iap_def.iap_type == IAP_TYPE_VIRTUAL then
+		return string.format( "%0.0f %s", value, STRINGS.UI.PURCHASEPACKSCREEN.VIRTUAL_CURRENCY_SHORT )
+	elseif IsSteam() then
+		local currency_code = iap_def.currency_code
 		if currency_code == "JPY" or
 			currency_code == "IDR" or
 			currency_code == "VND" or
@@ -290,11 +331,11 @@ function BuildPriceStr( value, currency_code, sale_active )
 		
 			return string.format( "%s %1.2f", currency_code, value / 100 )
 		end
-    elseif IsRail() then
-        return tostring(value) .. " RMB"
-    else
-        print("Error!!! Figure out the pricing for the new platform.")
-    end
+	elseif IsRail() then
+		return tostring(value) .. " RMB"
+	else
+		print("Error!!! Figure out the pricing for the new platform.")
+	end
 end
 
 function IsSaleActive( iap_def )
@@ -310,9 +351,9 @@ end
 
 function GetPackSavings(iap_def, total_value, sale_active )
     if IsSteam() then
-        return math.floor(100 * (1 - (getPriceFromIAPDef(iap_def, sale_active) / total_value)))
+        return math.floor(100 * (1 - (GetPriceFromIAPDef(iap_def, sale_active) / total_value)))
     elseif IsRail() then
-        return math.floor(100 * (1 - (tonumber(getPriceFromIAPDef(iap_def, sale_active)) / total_value)))
+        return math.floor(100 * (1 - (tonumber(GetPriceFromIAPDef(iap_def, sale_active)) / total_value)))
     else
         print("Error!!! Figure out iap for this platform.")
     end
@@ -356,6 +397,9 @@ function GetBoxBuildForItem(item_key)
 end
 
 function OwnsSkinPack(item_key)
+	if IsPurchasePackCurrency(item_key) then
+		return false
+	end
 	for _,v in pairs(GetPurchasePackOutputItems(item_key)) do
 		if not TheInventory:CheckOwnership(v) then
 			return false
@@ -363,6 +407,18 @@ function OwnsSkinPack(item_key)
 	end
 
 	return true
+end
+
+function IsPurchasePackCurrency(item_key)
+	if MISC_ITEMS[item_key] and MISC_ITEMS[item_key].output_klei_currency_cost then
+		return true
+	else
+		return false
+	end
+end
+
+function GetPurchasePackCurrencyOutput(item_key)
+    return MISC_ITEMS[item_key] and MISC_ITEMS[item_key].output_klei_currency_cost or nil
 end
 
 function GetPurchasePackDisplayItems(item_key)
@@ -592,10 +648,15 @@ function IsPackRestrictedDueToOwnership(item_type)
 	for _,v in pairs(GetPurchasePackOutputItems(item_type)) do
 		local data = GetSkinData(v)
 		if data.type == "base" and pack_includes_character[data.base_prefab] == nil and not IsCharacterOwned(data.base_prefab) then
-			return true, data.base_prefab
+			local pack_data = GetSkinData(item_type)
+			if pack_data.warning_only_on_restricted then
+				return "warning", data.base_prefab
+			else
+				return "error", data.base_prefab			
+			end
 		end
 	end
-	return false
+	return ""
 end
 
 function IsUserCommerceBuyAllowedOnItem(item_type)
@@ -700,14 +761,17 @@ local function _ItemStringRedirect(item)
     return item
 end
 function GetSkinName(item)
-    item = _ItemStringRedirect(item)
-	local nameStr = STRINGS.SKIN_NAMES[item] or STRINGS.SKIN_NAMES["missing"]
-	local alt = STRINGS.SKIN_NAMES[item.."_alt"]
-	if alt then
-		nameStr = GetRandomItem({nameStr, alt})
+	if SKIN_DEBUGGING then
+		return item
+	else
+	    item = _ItemStringRedirect(item)
+		local nameStr = STRINGS.SKIN_NAMES[item] or STRINGS.SKIN_NAMES["missing"]
+		local alt = STRINGS.SKIN_NAMES[item.."_alt"]
+		if alt then
+			nameStr = GetRandomItem({nameStr, alt})
+		end
+		return nameStr
 	end
-
-	return nameStr
 end
 
 function GetSkinDescription(item)
@@ -831,9 +895,9 @@ end
 function CompareItemDataForSortByRelease(item_key_a, item_key_b)
     if item_key_a == item_key_b then
         return false
-    elseif IsDefaultSkin(item_key_a) then
+    elseif IsDefaultSkin(item_key_a) and not IsDefaultSkin(item_key_b) then
         return true
-    elseif IsDefaultSkin(item_key_b) then
+    elseif not IsDefaultSkin(item_key_a) and IsDefaultSkin(item_key_b) then
         return false
     elseif GetReleaseGroup(item_key_a) ~= GetReleaseGroup(item_key_b) then
         return CompareReleaseGroup(item_key_a, item_key_b)
@@ -847,9 +911,9 @@ end
 function CompareItemDataForSortByName(item_key_a, item_key_b)
     if item_key_a == item_key_b then
         return false
-    elseif IsDefaultSkin(item_key_a) then
+    elseif IsDefaultSkin(item_key_a) and not IsDefaultSkin(item_key_b) then
         return true
-    elseif IsDefaultSkin(item_key_b) then
+    elseif not IsDefaultSkin(item_key_a) and IsDefaultSkin(item_key_b) then
         return false
     else
         return GetLexicalSortLiteral(item_key_a) < GetLexicalSortLiteral(item_key_b)
@@ -859,9 +923,9 @@ end
 function CompareItemDataForSortByRarity(item_key_a, item_key_b)
     if item_key_a == item_key_b then
         return false
-    elseif IsDefaultSkin(item_key_a) then
+    elseif IsDefaultSkin(item_key_a) and not IsDefaultSkin(item_key_b) then
         return true
-    elseif IsDefaultSkin(item_key_b) then
+    elseif not IsDefaultSkin(item_key_a) and IsDefaultSkin(item_key_b) then
         return false
     elseif GetRarityForItem(item_key_a) ~= GetRarityForItem(item_key_b) then
 		return CompareRarities(item_key_a, item_key_b)
@@ -876,9 +940,9 @@ function CompareItemDataForSortByCount(item_key_a, item_key_b, item_counts)
 
 	if item_key_a == item_key_b then
         return false
-    elseif IsDefaultSkin(item_key_a) then
+    elseif IsDefaultSkin(item_key_a) and not IsDefaultSkin(item_key_b) then
         return true
-    elseif IsDefaultSkin(item_key_b) then
+    elseif not IsDefaultSkin(item_key_a) and IsDefaultSkin(item_key_b) then
         return false
     elseif count_a ~= count_b then
 		return count_a >= count_b
@@ -923,10 +987,10 @@ function GetInventorySkinsList( do_sort )
 	end
 
 	if do_sort then
-table.sort(skins_list, function(a,b)
-			return CompareItemDataForSortByRarity(a.item, b.item)
-			end)
-		end
+		table.sort(skins_list, function(a,b)
+			return CompareItemDataForSortByRarity( a.item, b.item )
+		end)
+	end
 
     return skins_list
 end
@@ -1559,4 +1623,66 @@ function DisplayInventoryFailedPopup( screen )
 		})
 		TheFrontEnd:PushScreen(unowned_popup)		
     end
+end
+
+local ghost_preview_y_offset = -25
+local ghost_preview_scale = 0.75
+local skintypesbycharacter = nil
+
+function GetSkinModes(character)
+	if skintypesbycharacter == nil then
+		skintypesbycharacter = {
+			woodie = {
+				{ type = "normal_skin", play_emotes = true },								{ type = "ghost_skin", anim_bank = "ghost", idle_anim = "idle", scale = ghost_preview_scale, offset = { 0, ghost_preview_y_offset } },
+				{ type = "werebeaver_skin", anim_bank = "werebeaver", scale = 0.82 },		{ type = "ghost_werebeaver_skin", anim_bank = "ghost", idle_anim = "idle", scale = ghost_preview_scale, offset = { 0, ghost_preview_y_offset } },
+				{ type = "weregoose_skin",  anim_bank = "weregoose", scale = 0.82 },		{ type = "ghost_weregoose_skin", anim_bank = "ghost", idle_anim = "idle", scale = ghost_preview_scale, offset = { 0, ghost_preview_y_offset } },
+				{ type = "weremoose_skin", anim_bank = "weremoose", scale = 0.82 },			{ type = "ghost_weremoose_skin", anim_bank = "ghost", idle_anim = "idle", scale = ghost_preview_scale, offset = { 0, ghost_preview_y_offset } }
+			},
+
+			wolfgang = {
+				{ type = "normal_skin", play_emotes = true },
+				{ type = "wimpy_skin", play_emotes = true , scale = 0.9 },
+				{ type = "mighty_skin", play_emotes = true , scale = 1.25 },
+				{ type = "ghost_skin", anim_bank = "ghost", idle_anim = "idle", scale = ghost_preview_scale, offset = { 0, ghost_preview_y_offset } }
+			},
+
+			wormwood = {
+				{ type = "normal_skin", play_emotes = true },
+				{ type = "stage_2", play_emotes = true },
+				{ type = "stage_3", play_emotes = true },
+				{ type = "stage_4", play_emotes = true },
+				{ type = "ghost_skin", anim_bank = "ghost", idle_anim = "idle", scale = ghost_preview_scale, offset = { 0, ghost_preview_y_offset } }
+			},
+
+			wurt = {
+				{ type = "normal_skin", play_emotes = true },
+				{ type = "powerup", play_emotes = true },
+				{ type = "ghost_skin", anim_bank = "ghost", idle_anim = "idle", scale = ghost_preview_scale, offset = { 0, ghost_preview_y_offset } }
+			},
+
+			default = {
+				{ type = "normal_skin", play_emotes = true },
+				{ type = "ghost_skin", anim_bank = "ghost", idle_anim = "idle", scale = ghost_preview_scale, offset = { 0, ghost_preview_y_offset } }
+			}
+		}
+	end
+	return skintypesbycharacter[character] or skintypesbycharacter.default
+end
+
+function GetSkinModeFromBuild(player)
+	--this relies on builds not being shared across states
+	local build = player.AnimState:GetBuild()
+
+	if PREFAB_SKINS[player.prefab] == nil then return nil end
+
+	for _,skin in pairs(PREFAB_SKINS[player.prefab]) do
+		local skindata = GetSkinData(skin)
+		for skintype,skinbuild in pairs(skindata.skins) do
+			if build == skinbuild then
+				 return skintype
+			end
+		end
+	end
+
+	return nil
 end

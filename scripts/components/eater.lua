@@ -20,6 +20,7 @@ local Eater = Class(function(self, inst)
     self.eater = false
     self.strongstomach = false
     self.preferseating = { FOODGROUP.OMNI }
+    --self.perferseatingtags = nil
     self.caneat = { FOODGROUP.OMNI }
     self.oneatfn = nil
     self.lasteattime = nil
@@ -99,12 +100,21 @@ function Eater:SetCanEatRaw()
     self.inst:AddTag(FOODTYPE.RAW.."_eater")
 end
 
+function Eater:SetPrefersEatingTag(tag)
+    if self.preferseatingtags == nil then
+        self.preferseatingtags = { tag }
+    else
+        table.insert(self.preferseatingtags, tag)
+    end
+end
+
 function Eater:SetOnEatFn(fn)
     self.oneatfn = fn
 end
 
 function Eater:DoFoodEffects(food)
-    return not (self.strongstomach and food:HasTag("monstermeat"))
+    return not ((self.strongstomach and food:HasTag("monstermeat")) or 
+                (self.inst.components.foodaffinity and self.inst.components.foodaffinity:HasPrefabAffinity(food)))
 end
 
 function Eater:GetEdibleTags()
@@ -136,39 +146,28 @@ function Eater:Eat(food, feeder)
     -- their mouth, they bail and "spit it out" so to speak.
     if self:PrefersToEat(food) then
         local stack_mult = self.eatwholestack and food.components.stackable ~= nil and food.components.stackable:StackSize() or 1
+        local base_mult = self.inst.components.foodmemory ~= nil and self.inst.components.foodmemory:GetFoodMultiplier(food.prefab) or 1
 
-        local iswoodiness = false
-        if self.inst.components.beaverness ~= nil then
-            local delta = food.components.edible:GetWoodiness(self.inst)
+        if self.inst.components.health ~= nil and
+            (food.components.edible.healthvalue >= 0 or self:DoFoodEffects(food)) then
+            local delta = food.components.edible:GetHealth(self.inst) * base_mult * self.healthabsorption
             if delta ~= 0 then
-                self.inst.components.beaverness:DoDelta(delta * stack_mult)
-                iswoodiness = true
+                self.inst.components.health:DoDelta(delta * stack_mult, nil, food.prefab)
             end
         end
 
-        --If gained woodiness from eating, then don't gain any other stats
-        if not iswoodiness then
-            if self.inst.components.health ~= nil and
-                (food.components.edible.healthvalue >= 0 or self:DoFoodEffects(food)) then
-                local delta = food.components.edible:GetHealth(self.inst) * self.healthabsorption
-                if delta ~= 0 then
-                    self.inst.components.health:DoDelta(delta * stack_mult, nil, food.prefab)
-                end
+        if self.inst.components.hunger ~= nil then
+            local delta = food.components.edible:GetHunger(self.inst) * base_mult * self.hungerabsorption
+            if delta ~= 0 then
+                self.inst.components.hunger:DoDelta(delta * stack_mult)
             end
+        end
 
-            if self.inst.components.hunger ~= nil then
-                local delta = food.components.edible:GetHunger(self.inst) * self.hungerabsorption
-                if delta ~= 0 then
-                    self.inst.components.hunger:DoDelta(delta * stack_mult)
-                end
-            end
-
-            if self.inst.components.sanity ~= nil and
-                (food.components.edible.sanityvalue >= 0 or self:DoFoodEffects(food)) then
-                local delta = food.components.edible:GetSanity(self.inst) * self.sanityabsorption
-                if delta ~= 0 then
-                    self.inst.components.sanity:DoDelta(delta * stack_mult)
-                end
+        if self.inst.components.sanity ~= nil and
+            (food.components.edible.sanityvalue >= 0 or self:DoFoodEffects(food)) then
+            local delta = food.components.edible:GetSanity(self.inst) * base_mult * self.sanityabsorption
+            if delta ~= 0 then
+                self.inst.components.sanity:DoDelta(delta * stack_mult)
             end
         end
 
@@ -201,6 +200,10 @@ function Eater:Eat(food, feeder)
 
         self.lasteattime = GetTime()
 
+        if self.inst.components.foodmemory ~= nil and not food:HasTag("potion") then
+            self.inst.components.foodmemory:RememberFood(food.prefab)
+        end
+
         return true
     end
 end
@@ -222,9 +225,23 @@ function Eater:TestFood(food, testvalues)
 end
 
 function Eater:PrefersToEat(inst)
-    --V2C: fruitcake hack. see how long this code stays untouched - _-"
-    return not (inst.prefab == "winter_food4" and self.inst:HasTag("player"))
-        and self:TestFood(inst, self.preferseating)
+    if inst.prefab == "winter_food4" and self.inst:HasTag("player") then
+        --V2C: fruitcake hack. see how long this code stays untouched - _-"
+        return false
+    elseif self.preferseatingtags ~= nil then
+        --V2C: now it has the warly hack for only eating prepared foods ;-D
+        local preferred = false
+        for i, v in ipairs(self.preferseatingtags) do
+            if inst:HasTag(v) then
+                preferred = true
+                break
+            end
+        end
+        if not preferred then
+            return false
+        end
+    end
+    return self:TestFood(inst, self.preferseating)
 end
 
 function Eater:CanEat(inst)

@@ -4,7 +4,7 @@ local HealthWarningPopup = require "screens/healthwarningpopup"
 local Stats = require("stats")
 
 require "scheduler"
-require "skinsutils"
+--require "skinsutils"
 
 local DEBUG_MODE = BRANCH == "dev"
 
@@ -307,6 +307,17 @@ function SpawnPrefab(name, skin, skin_id, creator)
     return Ents[guid]
 end
 
+function ReplacePrefab(original_inst, name, skin, skin_id, creator)
+    local x,y,z = original_inst.Transform:GetWorldPosition()
+    
+    local replacement_inst = SpawnPrefab(name, skin, skin_id, creator)
+    replacement_inst.Transform:SetPosition(x,y,z)
+
+    original_inst:Remove()
+
+    return replacement_inst
+end
+
 function SpawnSaveRecord(saved, newents)
     --print(string.format("~~~~~~~~~~~~~~~~~~~~~SpawnSaveRecord [%s, %s, %s]", tostring(saved.id), tostring(saved.prefab), tostring(saved.data)))
     local inst = SpawnPrefab(saved.prefab, saved.skinname, saved.skin_id)
@@ -351,10 +362,13 @@ function SpawnSaveRecord(saved, newents)
     return inst
 end
 
-function CreateEntity()
+function CreateEntity(name)
     local ent = TheSim:CreateEntity()
     local guid = ent:GetGUID()
     local scr = EntityScript(ent)
+    if name ~= nil then
+        scr.name = name
+    end
     Ents[guid] = scr
     NumEnts = NumEnts + 1
     return scr
@@ -717,6 +731,7 @@ function SaveGame(isshutdown, cb)
         save.map.persistdata, new_refs = ground:GetPersistData()
         save.meta = ground.meta
         save.map.hideminimap = ground.hideminimap
+		save.map.has_ocean = ground.has_ocean
 
         if new_refs ~= nil then
             for k, v in pairs(new_refs) do
@@ -925,6 +940,7 @@ function Start()
     require("gamelogic")
 
     known_assert(TheSim:CanWriteConfigurationDirectory(), "CONFIG_DIR_WRITE_PERMISSION")
+    known_assert(TheSim:CanReadConfigurationDirectory(), "CONFIG_DIR_READ_PERMISSION")
 
     --load the user's custom commands into the game
     TheSim:GetPersistentString("../customcommands.lua",

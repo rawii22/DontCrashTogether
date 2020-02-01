@@ -9,6 +9,12 @@ end
 local function FinalOffset3(inst)
     inst.AnimState:SetFinalOffset(3)
 end
+
+local function GroundOrientation(inst)
+    inst.AnimState:SetOrientation(ANIM_ORIENTATION.OnGround)
+    inst.AnimState:SetLayer(LAYER_BACKGROUND)
+end
+
 local fx =
 {
     {
@@ -44,8 +50,17 @@ local fx =
         bank = "splash",
         build = "splash",
         anim = "splash",
+        sound = "turnoftides/common/together/water/splash/bird",
         fn = FinalOffset1,
     },
+    {
+        name = "ink_splash",
+        bank = "squid_watershoot",
+        build = "squid_watershoot",
+        anim = "splash",
+        sound = "turnoftides/common/together/water/splash/bird",
+        fn = FinalOffset1,
+    },    
     {
         name = "frogsplash",
         bank = "splash",
@@ -92,6 +107,36 @@ local fx =
         anim = "melted",
     },
     {
+        name = "icing_splat_fx",
+        bank = "warg_gingerbread_splat",
+        build = "warg_gingerbread_splat",
+        anim = "idle",
+    },
+    {
+        name = "icing_splash_fx_full",
+        bank = "warg_gingerbread_splash",
+        build = "warg_gingerbread_splash",
+        anim = "full",
+    },
+    {
+        name = "icing_splash_fx_med",
+        bank = "warg_gingerbread_splash",
+        build = "warg_gingerbread_splash",
+        anim = "med",
+    },
+    {
+        name = "icing_splash_fx_low",
+        bank = "warg_gingerbread_splash",
+        build = "warg_gingerbread_splash",
+        anim = "low",
+    },
+    {
+        name = "icing_splash_fx_melted", 
+        bank = "warg_gingerbread_splash", 
+        build = "warg_gingerbread_splash", 
+        anim = "melted",
+    },
+    {
         name = "small_puff",
         bank = "small_puff",
         build = "smoke_puff_small",
@@ -128,6 +173,18 @@ local fx =
         end,
     },
     {
+        name = "shadow_puff",
+        bank = "sand_puff",
+        build = "sand_puff",
+        anim = "forage_out",
+        sound = "dontstarve/common/deathpoof",
+        tint = Vector3(0, 0, 0),
+        tintalpha = .5,
+        fn = function(inst)
+            inst.AnimState:SetFinalOffset(2)
+        end,
+    },
+    {
         name = "shadow_puff_large_front",
         bank = "sand_puff",
         build = "sand_puff",
@@ -154,10 +211,11 @@ local fx =
         end,
     },
     {
-        name = "splash_ocean",
+        name = "splash_ocean", -- this is for the old ocean
         bank = "splash",
         build = "splash_ocean",
         anim = "idle",
+        sound = "turnoftides/common/together/water/splash/bird",
     },
     {
         name = "maxwell_smoke",
@@ -292,6 +350,12 @@ local fx =
         build = "tree_leaf_fx_quagmire_withered",
         anim = "chop",
         sound = "dontstarve_DLC001/fall/leaf_rustle",
+    },
+    {
+        name = "tree_petal_fx_chop",
+        bank = "tree_petal_fx",
+        build = "tree_petal_fx",
+        anim = "chop",
     },
     {
         name = "dr_warm_loop_1",
@@ -490,6 +554,169 @@ local fx =
         fn = FinalOffset1,
     },
     {
+        name = "werebeaver_shock_fx",
+        bank = "shock_fx",
+        build = "shock_fx",
+        anim = "werebeaver_shock",
+        sound = "dontstarve_DLC001/common/shocked",
+        autorotate = true,
+        fn = FinalOffset1,
+    },
+    {
+        name = "weremoose_shock_fx",
+        bank = "shock_fx",
+        build = "shock_fx",
+        anim = "weremoose_shock",
+        sound = "dontstarve_DLC001/common/shocked",
+        eightfaced = true,
+        autorotate = true,
+        fn = FinalOffset1,
+    },
+    {
+        name = "weregoose_shock_fx",
+        bank = "shock_fx",
+        build = "shock_fx",
+        anim = "weregoose_shock",
+        sound = "dontstarve_DLC001/common/shocked",
+        eightfaced = true,
+        autorotate = true,
+        fn = FinalOffset1,
+    },
+    {
+        name = "weregoose_feathers1",
+        bank = "weregoose_fx",
+        build = "weregoose_fx",
+        anim = "trail1",
+        fn = function(inst)
+            if inst.entity:GetParent() ~= nil then
+                inst.Transform:SetPosition(inst.Transform:GetWorldPosition())
+                inst.entity:SetParent(nil)
+            end
+        end,
+    },
+    {
+        name = "weregoose_feathers2",
+        bank = "weregoose_fx",
+        build = "weregoose_fx",
+        anim = "trail2",
+        fn = function(inst)
+            if inst.entity:GetParent() ~= nil then
+                inst.Transform:SetPosition(inst.Transform:GetWorldPosition())
+                inst.entity:SetParent(nil)
+            end
+        end,
+    },
+    {
+        name = "weregoose_feathers3",
+        bank = "weregoose_fx",
+        build = "weregoose_fx",
+        anim = "trail3",
+        fn = function(inst)
+            if inst.entity:GetParent() ~= nil then
+                inst.Transform:SetPosition(inst.Transform:GetWorldPosition())
+                inst.entity:SetParent(nil)
+            end
+        end,
+    },
+    {
+        name = "weregoose_splash",
+        bank = "splash_weregoose_fx",
+        build = "splash_water_drop",
+        anim = "idle",
+        sound = "turnoftides/common/together/water/splash/bird",
+        fn = function(inst)
+            inst.AnimState:SetOceanBlendParams(TUNING.OCEAN_SHADER.EFFECT_TINT_AMOUNT)
+            if inst.entity:GetParent() ~= nil then
+                inst.Transform:SetPosition(inst.Transform:GetWorldPosition())
+                inst.entity:SetParent(nil)
+            end
+        end,
+    },
+    {
+        name = "weregoose_splash_med1",
+        bank = "splash_weregoose_fx",
+        build = "splash_water_drop",
+        anim = "stationary",
+        sound = "turnoftides/common/together/water/splash/bird",
+        fn = function(inst)
+            inst.AnimState:SetOceanBlendParams(TUNING.OCEAN_SHADER.EFFECT_TINT_AMOUNT)
+            if inst.entity:GetParent() ~= nil then
+                inst.Transform:SetPosition(inst.Transform:GetWorldPosition())
+                inst.entity:SetParent(nil)
+            end
+        end,
+    },
+    {
+        name = "weregoose_splash_med2",
+        bank = "splash_weregoose_fx",
+        build = "splash_water_drop",
+        anim = "stationary2",
+        sound = "turnoftides/common/together/water/splash/bird",
+        fn = function(inst)
+            inst.AnimState:SetOceanBlendParams(TUNING.OCEAN_SHADER.EFFECT_TINT_AMOUNT)
+            if inst.entity:GetParent() ~= nil then
+                inst.Transform:SetPosition(inst.Transform:GetWorldPosition())
+                inst.entity:SetParent(nil)
+            end
+        end,
+    },
+    {
+        name = "weregoose_splash_less1",
+        bank = "splash_weregoose_fx",
+        build = "splash_water_drop",
+        anim = "stationary_small",
+        sound = "turnoftides/common/together/water/splash/bird",
+        fn = function(inst)
+            inst.AnimState:SetOceanBlendParams(TUNING.OCEAN_SHADER.EFFECT_TINT_AMOUNT)
+            if inst.entity:GetParent() ~= nil then
+                inst.Transform:SetPosition(inst.Transform:GetWorldPosition())
+                inst.entity:SetParent(nil)
+            end
+        end,
+    },
+    {
+        name = "weregoose_splash_less2",
+        bank = "splash_weregoose_fx",
+        build = "splash_water_drop",
+        anim = "stationary_small2",
+        sound = "turnoftides/common/together/water/splash/bird",
+        fn = function(inst)
+            inst.AnimState:SetOceanBlendParams(TUNING.OCEAN_SHADER.EFFECT_TINT_AMOUNT)
+            if inst.entity:GetParent() ~= nil then
+                inst.Transform:SetPosition(inst.Transform:GetWorldPosition())
+                inst.entity:SetParent(nil)
+            end
+        end,
+    },
+    {
+        name = "weregoose_ripple1",
+        bank = "splash_weregoose_fx",
+        build = "splash_water_drop",
+        anim = "no_splash",
+        fn = function(inst)
+            inst.AnimState:SetLayer(LAYER_WORLD_BACKGROUND)
+            inst.AnimState:SetOceanBlendParams(TUNING.OCEAN_SHADER.EFFECT_TINT_AMOUNT)
+            if inst.entity:GetParent() ~= nil then
+                inst.Transform:SetPosition(inst.Transform:GetWorldPosition())
+                inst.entity:SetParent(nil)
+            end
+        end,
+    },
+    {
+        name = "weregoose_ripple2",
+        bank = "splash_weregoose_fx",
+        build = "splash_water_drop",
+        anim = "no_splash2",
+        fn = function(inst)
+            inst.AnimState:SetLayer(LAYER_WORLD_BACKGROUND)
+            inst.AnimState:SetOceanBlendParams(TUNING.OCEAN_SHADER.EFFECT_TINT_AMOUNT)
+            if inst.entity:GetParent() ~= nil then
+                inst.Transform:SetPosition(inst.Transform:GetWorldPosition())
+                inst.entity:SetParent(nil)
+            end
+        end,
+    },
+    {
         name = "groundpound_fx",
         bank = "bearger_ground_fx",
         build = "bearger_ground_fx",
@@ -614,6 +841,37 @@ local fx =
         bank = "werebeaver_fx",
         build = "werebeaver_fx",
         anim = "transform_back",
+        sound = "dontstarve/common/deathpoof",
+    },
+    {
+        name = "weremoose_transform_fx",
+        bank = "weremoose_poof_fx",
+        build = "weremoose_poof_fx",
+        anim = "transform",
+    },
+    {
+        name = "weremoose_transform2_fx",
+        bank = "weremoose_poof_fx",
+        build = "weremoose_poof_fx",
+        anim = "transform2",
+        sound = "dontstarve/common/deathpoof",
+    },
+    {
+        name = "weremoose_revert_fx",
+        bank = "weremoose_poof_fx",
+        build = "weremoose_poof_fx",
+        anim = "revert",
+        sound = "dontstarve/common/deathpoof",
+    },
+    {
+        name = "weregoose_transform_fx",
+        bank = "weregoose_fx",
+        build = "werebeaver_fx",
+        anim = "transform_back",
+        sound = "dontstarve/common/deathpoof",
+        fn = function(inst)
+            inst.AnimState:OverrideSymbol("were_fur01", "weregoose_fx", "were_fur01")
+        end,
     },
     {
         name = "attune_out_fx",
@@ -726,6 +984,24 @@ local fx =
         build = "redpouch",
         anim = "unwrap",
     },
+    {
+        name = "redpouch_yotc_unwrap",
+        bank = "redpouch",
+        build = "redpouch",
+        anim = "unwrap",
+    },    
+    {
+        name = "yotc_seedpacket_unwrap",
+        bank = "bundle",
+        build = "bundle",
+        anim = "unwrap",
+    },    
+    {
+        name = "yotc_seedpacket_rare_unwrap",
+        bank = "bundle",
+        build = "bundle",
+        anim = "unwrap",
+    },    
     {
         name = "wetpouch_unwrap",
         bank = "wetpouch",
@@ -907,6 +1183,15 @@ local fx =
         fn = FinalOffset3,
     },
     {
+        name = "halloween_moonpuff",
+        bank = "fx_moon_tea",
+        build = "moon_tea_fx",
+        anim = "puff",
+        bloom = true,
+        sound = "dontstarve/common/fireAddFuel",
+        fn = FinalOffset3,
+    },
+    {
         name = "mudpuddle_splash",
         bank = "mudsplash",
         build = "mudsplash",
@@ -921,7 +1206,293 @@ local fx =
         anim = "anim",
         fn = FinalOffset1,
     },
+    {
+        name = "fx_boat_crackle",
+        bank = "fx_boat_crack",
+        build = "fx_boat_crackle",
+        anim = "crackle",
+    },
+    {
+        name = "fx_boat_pop",
+        bank = "fx_boat_pop",
+        build = "fx_boat_pop",
+        anim = "pop",
+    },
+    {
+        name = "boat_mast_sink_fx",
+        bank = "mast_01",
+        build = "boat_mast2",
+        anim = "sink",
+    },
+    {
+        name = "boat_malbatross_mast_sink_fx",
+        bank = "mast_malbatross",
+        build = "boat_mast_malbatross_build",
+        anim = "sink",
+    },
+    {
+        name = "mining_moonglass_fx",
+        bank = "glass_mining_fx",
+        build = "glass_mining_fx",
+        anim = "anim",
+    },
+    {
+        name = "splash_sink",
+        bank = "splash_water_drop",
+        build = "splash_water_drop",
+        anim = "idle_sink",
+        fn = function(inst) inst.AnimState:SetOceanBlendParams(TUNING.OCEAN_SHADER.EFFECT_TINT_AMOUNT) end,
+        sound = "turnoftides/common/together/water/splash/small",
+    },
+    {
+        name = "ocean_splash_med1",
+        bank = "splash_weregoose_fx",
+        build = "splash_water_drop",
+        anim = "stationary",
+        sound = "turnoftides/common/together/water/splash/bird",
+        fn = function(inst)
+            inst.AnimState:SetOceanBlendParams(TUNING.OCEAN_SHADER.EFFECT_TINT_AMOUNT)
+			inst.AnimState:SetFinalOffset(3)
+        end,
+    },
+    {
+        name = "ocean_splash_med2",
+        bank = "splash_weregoose_fx",
+        build = "splash_water_drop",
+        anim = "stationary2",
+        sound = "turnoftides/common/together/water/splash/bird",
+        fn = function(inst)
+            inst.AnimState:SetOceanBlendParams(TUNING.OCEAN_SHADER.EFFECT_TINT_AMOUNT)
+			inst.AnimState:SetFinalOffset(3)
+        end,
+    },
+    {
+        name = "ocean_splash_small1",
+        bank = "splash_weregoose_fx",
+        build = "splash_water_drop",
+        anim = "stationary_small",
+        sound = "turnoftides/common/together/water/splash/bird",
+        fn = function(inst)
+            inst.AnimState:SetOceanBlendParams(TUNING.OCEAN_SHADER.EFFECT_TINT_AMOUNT)
+			inst.AnimState:SetFinalOffset(3)
+        end,
+    },
+    {
+        name = "ocean_splash_small2",
+        bank = "splash_weregoose_fx",
+        build = "splash_water_drop",
+        anim = "stationary_small2",
+        sound = "turnoftides/common/together/water/splash/bird",
+        fn = function(inst)
+            inst.AnimState:SetOceanBlendParams(TUNING.OCEAN_SHADER.EFFECT_TINT_AMOUNT)
+			inst.AnimState:SetFinalOffset(3)
+        end,
+    },
+    {
+        name = "ocean_splash_ripple1",
+        bank = "splash_weregoose_fx",
+        build = "splash_water_drop",
+        anim = "no_splash",
+        fn = function(inst)
+            inst.AnimState:SetLayer(LAYER_WORLD_BACKGROUND)
+            inst.AnimState:SetOceanBlendParams(TUNING.OCEAN_SHADER.EFFECT_TINT_AMOUNT)
+        end,
+    },
+    {
+        name = "ocean_splash_ripple2",
+        bank = "splash_weregoose_fx",
+        build = "splash_water_drop",
+        anim = "no_splash2",
+        fn = function(inst)
+            inst.AnimState:SetLayer(LAYER_WORLD_BACKGROUND)
+            inst.AnimState:SetOceanBlendParams(TUNING.OCEAN_SHADER.EFFECT_TINT_AMOUNT)
+        end,
+    },
+    {
+        name = "washashore_puddle_fx",
+        bank = "water_puddle",
+        build = "water_puddle",
+        anim = "puddle",
+        fn = function(inst) inst.AnimState:SetLayer(LAYER_WORLD_BACKGROUND) inst.AnimState:SetOrientation(ANIM_ORIENTATION.OnGround) end,
+    },
+    {
+        name = "round_puff_fx_sm",
+        bank = "round_puff_fx",
+        build = "round_puff_fx",
+        anim = "puff_sm",
+        sound = "dontstarve/characters/woodie/moose/hit",
+        fn = FinalOffset1,
+    },
+    {
+        name = "round_puff_fx_lg",
+        bank = "round_puff_fx",
+        build = "round_puff_fx",
+        anim = "puff_lg",
+        sound = "dontstarve/characters/woodie/moose/hit",
+        fn = FinalOffset1,
+    },
+    {
+        name = "round_puff_fx_hi",
+        bank = "round_puff_fx",
+        build = "round_puff_fx",
+        anim = "puff_hi",
+    },
+	{
+		name = "wood_splinter_jump",
+		bank = "cookiecutter_fx",
+		build = "cookiecutter_fx",
+		anim = "wood_splinter_jump",
+	},
+	{
+		name = "wood_splinter_drill",
+		bank = "cookiecutter_fx",
+		build = "cookiecutter_fx",
+		anim = "wood_splinter_drill",
+	}, 
+
+    {
+        name = "splash_green_small",
+        bank = "pond_splash_fx",
+        build = "pond_splash_fx",
+        anim = "pond_splash",        
+        sound = "turnoftides/common/together/water/splash/small",
+        fn = FinalOffset1,
+    }, 
+    {
+        name = "splash_green",
+        bank = "pond_splash_fx",
+        build = "pond_splash_fx",
+        anim = "pond_splash",
+        sound = "turnoftides/common/together/water/splash/medium",
+        fn = function(inst) inst.Transform:SetScale(2,2,2) inst.AnimState:SetFinalOffset(1) end,
+    },   
+    {
+        name = "splash_green_large",
+        bank = "pond_splash_fx",
+        build = "pond_splash_fx",
+        anim = "pond_splash",
+        sound = "turnoftides/common/together/water/splash/large",
+        fn = function(inst) inst.Transform:SetScale(4,4,4) inst.AnimState:SetFinalOffset(1) end,
+    },   
+--[[  There is art for these. They are just not used anywhere
+    {
+        name = "splash_teal",
+        bank = "pond_splash_fx",
+        build = "pond_splash_fx",
+        anim = "cave_splash",
+    },      
+    {
+        name = "splash_black",
+        bank = "pond_splash_fx",
+        build = "pond_splash_fx",
+        anim = "swamp_splash",
+    }, 
+    ]]
+    {
+        name = "merm_king_splash",
+        bank = "merm_king_splash",
+        build = "merm_king_splash",
+        anim = "merm_king_splash",
+        fn = FinalOffset1,
+    },
+    {
+        name = "merm_splash",
+        bank = "merm_splash",
+        build = "merm_splash",
+        anim = "merm_splash",
+        fn = FinalOffset1,
+    },
+    {
+        name = "merm_spawn_fx",
+        bank = "merm_spawn_fx",
+        build = "merm_spawn_fx",
+        anim = "splash",
+        fn = FinalOffset1,
+    },
+    {
+        name = "ink_puddle_land",
+        bank = "squid_puddle",
+        build = "squid_puddle",
+        anim = "puddle_dry",
+        fn = GroundOrientation,
+    },
+    {
+        name = "ink_puddle_water",
+        bank = "squid_puddle",
+        build = "squid_puddle",
+        anim = "puddle_wet",
+        fn = GroundOrientation,
+    },        
+    {
+        name = "flotsam_puddle",
+        bank = "flotsam",
+        build = "flotsam",
+        anim = "puddle",
+        sound = "dontstarve/creatures/monkey/poopsplat",
+        fn = function(inst)
+            inst.AnimState:SetLayer(LAYER_WORLD_BACKGROUND)
+			inst.AnimState:SetOrientation(ANIM_ORIENTATION.OnGround)
+        end,
+    },
+    {
+        name = "flotsam_break",
+        bank = "flotsam",
+        build = "flotsam",
+        anim = "break",
+    },
+    {
+        name = "winters_feast_depletefood",
+        bank = "winters_feast_table_fx",
+        build = "winters_feast_table_fx",
+        anim = "1",
+		bloom = true,
+        fn = function(inst)
+			inst.AnimState:SetLightOverride(1)
+            inst.AnimState:PlayAnimation(math.random(1, 5))
+            inst.AnimState:SetFinalOffset(3)
+        end,
+    },
+    {
+        name = "winters_feast_food_depleted",
+        bank = "winters_feast_table_fx",
+        build = "winters_feast_table_fx",
+        anim = "burst",
+        --sound = ,
+        fn = function(inst)
+            inst.AnimState:SetLightOverride(1)
+            inst.AnimState:SetFinalOffset(3)
+        end,
+    },
+    {
+        name = "miniboatlantern_loseballoon",
+        bank = "lantern_boat",
+        build = "yotc_lantern_boat",
+        anim = "balloon_fly",
+        fn = function(inst)
+            inst.Transform:SetSixFaced()
+        end,
+    },
 }
+
+for cratersteamindex = 1, 4 do
+    table.insert(fx, {
+        name = "crater_steam_fx"..cratersteamindex,
+        bank = "crater_steam",
+        build = "crater_steam",
+        anim = "steam"..cratersteamindex,
+        fn = FinalOffset1,
+    })
+end
+
+for slowsteamindex = 1, 5 do
+    table.insert(fx, {
+        name = "slow_steam_fx"..slowsteamindex,
+        bank = "slow_steam",
+        build = "slow_steam",
+        anim = "steam"..slowsteamindex,
+        fn = FinalOffset1,
+    })
+end
 
 for j = 0, 3, 3 do
     for i = 1, 3 do

@@ -77,6 +77,20 @@ local function doreset()
     })
 end
 
+function c_mermking()
+    c_spawn("mermthrone")
+    c_spawn("mermking")
+end
+
+function c_mermthrone()
+    c_spawn("mermthrone_construction")
+    c_give("kelp", 20)
+    c_give("beefalowool", 15)
+    c_give("pigskin", 10)
+    c_give("carrot", 4)
+    c_spawn("merm")
+end
+
 -- * Roll back *count* number of saves (default 1)
 -- * c_rollback() or c_rollback(1) will roll back to the
 --   last save file, if it's been longer than 30 seconds
@@ -155,6 +169,9 @@ end
 function c_spawn(prefab, count, dontselect)
     count = count or 1
     local inst = nil
+
+    prefab = string.lower(prefab)
+
     for i = 1, count do
         inst = DebugSpawn(prefab)
         if inst.components.skinner ~= nil and IsRestrictedCharacter(prefab) then
@@ -218,7 +235,7 @@ end
 function c_listplayers()
     local isdedicated = not TheNet:GetServerIsClientHosted()
     local index = 1
-    for i, v in ipairs(TheNet:GetClientTable()) do
+    for i, v in ipairs(TheNet:GetClientTable() or {}) do
         if not isdedicated or v.performance == nil then
             print(string.format("%s[%d] (%s) %s <%s>", v.admin and "*" or " ", index, v.userid, v.name, v.prefab))
             index = index + 1
@@ -343,11 +360,16 @@ function c_sethunger(n)
     end
 end
 
-function c_setbeaverness(n)
+function c_setwereness(n)
     local player = ConsoleCommandPlayer()
-    if player ~= nil and player.components.beaverness ~= nil and not player:HasTag("playerghost") then
-        SuUsed("c_setbeaverness", true)
-        player.components.beaverness:SetPercent(math.min(n, 1))
+    if player ~= nil and player.components.wereness ~= nil and not player:HasTag("playerghost") then
+        SuUsed("c_setwereness", true)
+        if type(n) == "number" then
+            player.components.wereness:SetPercent(math.min(n, 1))
+        else
+            player.components.wereness:SetWereMode(n)
+            player.components.wereness:SetPercent(1, true)
+        end
     end
 end
 
@@ -381,6 +403,9 @@ end
 -- Put an item(s) in the player's inventory
 function c_give(prefab, count, dontselect)
     local MainCharacter = ConsoleCommandPlayer()
+
+    prefab = string.lower(prefab)
+
     if MainCharacter ~= nil then
         for i = 1, count or 1 do
             local inst = DebugSpawn(prefab)
@@ -421,6 +446,9 @@ end
 function c_teleport(x, y, z, inst)
     inst = ListingOrConsolePlayer(inst)
     if inst ~= nil then
+		if x == nil then
+			x, y, z = ConsoleWorldPosition():Get()
+		end
         inst.Transform:SetPosition(x, y, z)
         SuUsed("c_teleport", true)
     end
@@ -669,7 +697,13 @@ function c_findtag(tag, radius, inst)
 end
 
 function c_gonext(name)
-    return c_goto(c_findnext(name))
+    if name ~= nil then
+        local next = c_findnext(string.lower(name))
+        if next ~= nil and next.Transform ~= nil then
+            return c_goto(next)
+        end
+    end
+    return nil
 end
 
 function c_printtextureinfo( filename )
@@ -820,6 +854,14 @@ function c_summonbearger()
     print("Summoning bearger for player ", player)
     if player then 
         TheWorld.components.beargerspawner:SummonMonster(player)
+    end
+end
+
+function c_summonmalbatross()
+    local player = ConsoleCommandPlayer()
+    if player then
+        print("Summoning malbatross at the fish shoal nearest to", player)
+        TheWorld.components.malbatrossspawner:Summon(player)
     end
 end
 
@@ -1166,4 +1208,166 @@ end
 
 function c_stopvote()
     TheNet:StopVote()
+end
+
+function c_makeboat()
+	local x, y, z = ConsoleWorldPosition():Get()
+
+	local inst = SpawnPrefab("boat")
+	inst.Transform:SetPosition(x, y, z)
+
+	local inst = SpawnPrefab("mast")
+	inst.Transform:SetPosition(x, y, z)
+	inst = SpawnPrefab("steeringwheel")
+	inst.Transform:SetPosition(x + 3.25, y, z)
+	inst = SpawnPrefab("anchor")
+	inst.Transform:SetPosition(x + 2.25, y, z + 2.25)
+
+	inst = SpawnPrefab("oar")
+	inst.Transform:SetPosition(x + 1, y, z - 2)
+	inst = SpawnPrefab("oar_driftwood")
+	inst.Transform:SetPosition(x + 1, y, z - 1.25)
+
+
+	inst = SpawnPrefab("mast_item")
+	inst.Transform:SetPosition(x - 1, y, z + 1.25)
+	inst = SpawnPrefab("boatpatch")
+	inst.Transform:SetPosition(x, y, z + 1.25)
+	inst.components.stackable:SetStackSize(5)
+
+	inst = SpawnPrefab("lantern")
+	inst.Transform:SetPosition(x - 3.25, y, z)
+	
+	inst = SpawnPrefab("oceanfishingrod")
+	inst.Transform:SetPosition(x - 3.25, y, z + 1.25)
+	
+end
+
+function c_makeboatspiral()
+    local items = {
+        boat_item = 1,
+        steeringwheel_item = 1,
+        anchor_item = 1,
+        mast_item = 2,
+        oar = 3,
+        oar_driftwood = 1,
+        propelomatic_item = 1,
+		miniflare = 3,
+		backpack = 3,
+		redmooneye = 1,
+        axe = 1,
+        hammer = 1,
+        pickaxe = 1,
+        meat_dried = {5, 5, 5},
+        boatpatch = 3,
+        torch = 4,
+        log = {20, 20}, 
+        boards = {10, 10}, 
+		lantern = 1,
+        goldnugget = {5,5},
+        rocks = {20,20},
+        researchlab = 1,
+    }
+
+    local chord = 1.5
+    local away_step = 0.25
+    local theta = 0
+
+    for prefab, stacks in pairs(items) do
+		stacks = type(stacks) == "table" and stacks or {stacks}
+		for _, count in pairs(stacks) do
+			for i = 1, count, 1 do            
+				local inst = DebugSpawn(prefab)
+				if inst ~= nil then
+
+					local away = away_step * theta
+
+					local x,y,z = inst.Transform:GetWorldPosition()
+					local spiral_x = math.cos(theta) * away
+					local spiral_z = math.sin(theta) * away
+
+					x = x + spiral_x
+					z = z + spiral_z
+					inst.Transform:SetPosition(x, y, z)
+
+					if away == 0 then
+						away = away_step
+					end
+
+					theta = theta + chord / away
+
+					if i == 1 and inst.components.stackable ~= nil then
+						inst.components.stackable:SetStackSize(count)
+						break
+					end
+				end
+			end
+		end
+    end
+end
+
+function c_autoteleportplayers()
+    TheWorld.auto_teleport_players = not TheWorld.auto_teleport_players
+    print("auto_teleport_players:", TheWorld.auto_teleport_players)
+end
+
+function c_dumpentities()
+
+    local ent_counts = {}
+
+	local first = true
+
+	local total = 0
+    for k,v in pairs(Ents) do        
+        local name = v.prefab or (v.widget and v.widget.name) or v.name
+
+        if(type(name) == "table") then
+            name = tostring(name)
+        end
+
+
+		if name == nil then
+			name = "NONAME"
+		end
+        local count = ent_counts[name]
+        if count == nil then 
+            count = 1
+        else
+            count = count + 1
+        end
+        ent_counts[name] = count
+		total = total + 1
+    end
+
+    local sorted_ent_counts = {}
+
+    for ent, count in pairs(ent_counts) do
+        table.insert(sorted_ent_counts, {ent, count})
+    end
+
+    table.sort(sorted_ent_counts, function(a,b) return a[2] > b[2] end )
+
+	
+    print("Entity, Count")
+    for k,v in ipairs(sorted_ent_counts) do
+        print(v[1] .. ",", v[2])
+    end
+	print("Total: ", total)
+end
+
+-- Nuke any controller mappings, for when people get in a hairy situation with a controller mapping that is totally busted.
+function ResetControllersAndQuitGame()
+    print("ResetControllersAndQuitGame requested")
+    if not InGamePlay() then
+	-- Nuke any controller configurations from our profile
+	-- and clear the setting in the ini file
+	TheSim:SetSetting("misc", "controller_popup", tostring(nil))
+	Profile:SetValue("controller_popup",nil)
+	Profile:SetValue("controls",{})
+	Profile:Save()
+	-- And quit the game, we want a restart
+	RequestShutdown()	
+    else
+	print("ResetControllersAndQuitGame can only be called from the frontend")
+    end
 end

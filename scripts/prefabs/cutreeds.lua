@@ -16,6 +16,8 @@ local function fn()
     inst.AnimState:SetBuild("cutreeds")
     inst.AnimState:PlayAnimation("idle")
 
+    MakeInventoryFloatable(inst, "med", nil, 0.6)
+
     inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
@@ -29,7 +31,6 @@ local function fn()
 
     inst:AddComponent("edible")
     inst.components.edible.foodtype = FOODTYPE.ROUGHAGE
-    inst.components.edible.woodiness = 1
     inst.components.edible.healthvalue = TUNING.HEALING_TINY
     inst.components.edible.hungervalue = TUNING.CALORIES_TINY/2
 

@@ -7,6 +7,7 @@ local Container = Class(function(self, inst)
     self._isopen = false
     self._numslots = 0
     self.acceptsstacks = true
+    self.usespecificslotsforitems = false
     self.issidewidget = false
     self.type = nil
     self.widget = nil
@@ -195,6 +196,16 @@ function Container:CanTakeItemInSlot(item, slot)
         and (self.itemtestfn == nil or self:itemtestfn(item, slot))
 end
 
+function Container:GetSpecificSlotForItem(item)
+    if self.usespecificslotsforitems and self.itemtestfn ~= nil then
+        for i = 1, self:GetNumSlots() do
+            if self:itemtestfn(item, i) then
+                return i
+            end
+        end
+    end
+end
+
 function Container:AcceptsStacks()
     return self.acceptsstacks
 end
@@ -268,6 +279,16 @@ function Container:Has(prefab, amount)
         return self.inst.components.container:Has(prefab, amount)
     elseif self.classified ~= nil then
         return self.classified:Has(prefab, amount)
+    else
+        return amount <= 0, 0
+    end
+end
+
+function Container:HasItemWithTag(tag, amount)
+    if self.inst.components.container ~= nil then
+        return self.inst.components.container:HasTag(tag, amount)
+    elseif self.classified ~= nil then
+        return self.classified:HasItemWithTag(tag, amount)
     else
         return amount <= 0, 0
     end
@@ -375,6 +396,14 @@ function Container:SwapActiveItemWithSlot(slot)
         self.inst.components.container:SwapActiveItemWithSlot(slot)
     elseif self.classified ~= nil then
         self.classified:SwapActiveItemWithSlot(slot)
+    end
+end
+
+function Container:SwapOneOfActiveItemWithSlot(slot)
+    if self.inst.components.container ~= nil then
+        self.inst.components.container:SwapOneOfActiveItemWithSlot(slot)
+    elseif self.classified ~= nil then
+        self.classified:SwapOneOfActiveItemWithSlot(slot)
     end
 end
 

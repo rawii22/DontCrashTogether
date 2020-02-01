@@ -23,6 +23,8 @@ local function fn()
 
     inst:AddTag("catfood")
 
+    MakeInventoryFloatable(inst, "small", 0.15, 0.6)
+
     inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
@@ -34,6 +36,8 @@ local function fn()
     inst.components.edible.hungervalue = TUNING.CALORIES_SMALL
     inst.components.edible.sanityvalue = TUNING.SANITY_SMALL
     -- inst.components.edible.foodtype = "MEAT"
+
+    inst:AddComponent("tradable")
 
     inst:AddComponent("perishable")
     inst.components.perishable:SetPerishTime(TUNING.PERISH_FAST)

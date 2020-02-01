@@ -3,6 +3,7 @@ local assets =
     Asset("ANIM", "anim/ds_pig_basic.zip"),
     Asset("ANIM", "anim/ds_pig_actions.zip"),
     Asset("ANIM", "anim/ds_pig_attacks.zip"),
+    Asset("ANIM", "anim/ds_pig_boat_jump.zip"),
     Asset("ANIM", "anim/pig_build.zip"),
     Asset("ANIM", "anim/pigspotted_build.zip"),
     Asset("ANIM", "anim/pig_guard_build.zip"),
@@ -48,7 +49,7 @@ end
 local function ShouldAcceptItem(inst, item)
     if item.components.equippable ~= nil and item.components.equippable.equipslot == EQUIPSLOTS.HEAD then
         return true
-    elseif item.components.edible ~= nil then
+    elseif inst.components.eater:CanEat(item) then
         local foodtype = item.components.edible.foodtype
         if foodtype == FOODTYPE.MEAT or foodtype == FOODTYPE.HORRIBLE then
             return inst.components.follower.leader == nil or inst.components.follower:GetLoyaltyPercent() <= TUNING.PIG_FULL_LOYALTY_PERCENT
@@ -67,10 +68,24 @@ local function OnGetItemFromPlayer(inst, giver, item)
     --I eat food
     if item.components.edible ~= nil then
         --meat makes us friends (unless I'm a guard)
-        if item.components.edible.foodtype == FOODTYPE.MEAT or item.components.edible.foodtype == FOODTYPE.HORRIBLE then
+        if (    item.components.edible.foodtype == FOODTYPE.MEAT or
+                item.components.edible.foodtype == FOODTYPE.HORRIBLE
+            ) and
+            item.components.inventoryitem ~= nil and
+            (   --make sure it didn't drop due to pockets full
+                item.components.inventoryitem:GetGrandOwner() == inst or
+                --could be merged into a stack
+                (   not item:IsValid() and
+                    inst.components.inventory:FindItem(function(obj)
+                        return obj.prefab == item.prefab
+                            and obj.components.stackable ~= nil
+                            and obj.components.stackable:IsStack()
+                    end) ~= nil)
+            ) then
             if inst.components.combat:TargetIs(giver) then
                 inst.components.combat:SetTarget(nil)
-            elseif giver.components.leader ~= nil and not (inst:HasTag("guard") or giver:HasTag("monster")) then
+            elseif giver.components.leader ~= nil and not (inst:HasTag("guard") or giver:HasTag("monster") or giver:HasTag("merm")) then
+
 				if giver.components.minigame_participator == nil then
 	                giver:PushEvent("makefriend")
 	                giver.components.leader:AddFollower(inst)
@@ -187,6 +202,11 @@ local function NormalRetargetFn(inst)
 		table.insert(exclude_tags, "player") -- prevent spectators from auto-targeting webber
 	end
 
+    local oneof_tags = {"monster"}
+    if not inst:HasTag("merm") then
+        table.insert(oneof_tags, "merm")
+    end
+
     return not inst:IsInLimbo()
         and FindEntity(
                 inst,
@@ -195,8 +215,9 @@ local function NormalRetargetFn(inst)
                     return (guy.LightWatcher == nil or guy.LightWatcher:IsInLight())
                         and inst.components.combat:CanTarget(guy)
                 end,
-                { "monster", "_combat" }, -- see entityreplica.lua
-                exclude_tags
+                { "_combat" }, -- see entityreplica.lua
+                exclude_tags,
+                oneof_tags
             )
         or nil
 end
@@ -238,10 +259,6 @@ local function OnItemLose(inst, data)
 end
 
 local function SetupPigToken(inst)
-	if not IsSpecialEventActive(SPECIAL_EVENTS.YOTP) then
-		return -- todo: remove this once post-yotp gameplay is done
-	end
-
 	if not inst._pigtokeninitialized then
 		inst._pigtokeninitialized = true
 		if math.random() <= (IsSpecialEventActive(SPECIAL_EVENTS.YOTP) and TUNING.PIG_TOKEN_CHANCE_YOTP or TUNING.PIG_TOKEN_CHANCE) then
@@ -251,10 +268,6 @@ local function SetupPigToken(inst)
 end
 
 local function ReplacePigToken(inst)
-	if not IsSpecialEventActive(SPECIAL_EVENTS.YOTP) then
-		return -- todo: remove this once post-yotp gameplay is done
-	end
-
 	if inst._pigtokeninitialized then
 		local item = GetPigToken(inst)
 		local should_get_item = math.random() <= (IsSpecialEventActive(SPECIAL_EVENTS.YOTP) and TUNING.PIG_TOKEN_CHANCE_YOTP or TUNING.PIG_TOKEN_CHANCE)
@@ -332,7 +345,13 @@ local function GuardRetargetFn(inst)
             end
         end
     end
-    return FindEntity(defenseTarget, defendDist, nil, { "monster" }, { "INLIMBO" })
+
+    local oneof_tags = {"monster"}
+    if not inst:HasTag("merm") then
+        table.insert(oneof_tags, "merm")
+    end
+
+    return FindEntity(defenseTarget, defendDist, nil, {}, { "INLIMBO" }, oneof_tags)
 end
 
 local function GuardKeepTargetFn(inst, target)
@@ -405,14 +424,14 @@ local function WerepigRetargetFn(inst)
                 and not (guy.sg ~= nil and guy.sg:HasStateTag("transform"))
         end,
         { "_combat" }, --See entityreplica.lua (re: "_combat" tag)
-        { "werepig", "alwaysblock", "beaver" }
+        { "werepig", "alwaysblock", "wereplayer" }
     )
 end
 
 local function WerepigKeepTargetFn(inst, target)
     return inst.components.combat:CanTarget(target)
            and not target:HasTag("werepig")
-           and not target:HasTag("beaver")
+           and not target:HasTag("wereplayer")
            and not (target.sg ~= nil and target.sg:HasStateTag("transform"))
 end
 
@@ -431,7 +450,7 @@ local function MoonpigRetargetFn(inst)
                         and not (guy.sg ~= nil and guy.sg:HasStateTag("transform"))
                 end,
                 { "_combat" }, --See entityreplica.lua (re: "_combat" tag)
-                { "werepig", "alwaysblock", "beaver", "moonbeast" }
+                { "werepig", "alwaysblock", "wereplayer", "moonbeast" }
             )
         or nil
 end
@@ -679,6 +698,10 @@ local function normal()
         return inst
     end
 
+    -- boat hopping setup
+    inst.components.locomotor:SetAllowPlatformHopping(true)
+    inst:AddComponent("embarker")
+
     inst.build = builds[math.random(#builds)]
     inst.AnimState:SetBuild(inst.build)
     inst.components.werebeast:SetOnNormalFn(SetNormalPig)
@@ -694,6 +717,10 @@ local function guard()
     if not TheWorld.ismastersim then
         return inst
     end
+
+    -- boat hopping setup
+    inst.components.locomotor:SetAllowPlatformHopping(true)
+    inst:AddComponent("embarker")
 
     inst.build = guardbuilds[math.random(#guardbuilds)]
     inst.AnimState:SetBuild(inst.build)

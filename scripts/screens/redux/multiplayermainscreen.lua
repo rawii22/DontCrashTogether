@@ -32,6 +32,8 @@ local PurchasePackScreen = require "screens/redux/purchasepackscreen"
 local SHOW_DST_DEBUG_HOST_JOIN = BRANCH == "dev"
 local SHOW_QUICKJOIN = false
 
+local IS_BETA = BRANCH == "staging"
+
 local function PlayBannerSound(inst, self, sound)
     if self.bannersoundsenabled then
         TheFrontEnd:GetSound():PlaySound(sound)
@@ -40,26 +42,42 @@ end
 
 function MakeBanner(self)
 	local banner_height = 350
+	local title_str = nil
 
 	local baner_root = Widget("banner_root")
 	baner_root:SetPosition(0, RESOLUTION_Y / 2 - banner_height / 2 + 1 )
 
 	local anim = baner_root:AddChild(UIAnim())
-	
-	if IsFestivalEventActive(FESTIVAL_EVENTS.LAVAARENA) then
+
+	if IS_BETA then
+        anim:GetAnimState():SetBuild("dst_menu_inker")
+        anim:GetAnimState():SetBank("dst_menu_inker")
+        anim:GetAnimState():PlayAnimation("loop", true)
+        anim:SetScale(.667)
+		title_str = STRINGS.UI.MAINSCREEN.MAINBANNER_ROT_BETA_TITLE
+	elseif IsFestivalEventActive(FESTIVAL_EVENTS.LAVAARENA) then
 		anim:GetAnimState():SetBuild("dst_menu_lavaarena_s2")
 		anim:GetAnimState():SetBank("dst_menu_lavaarena_s2")
 		anim:GetAnimState():PlayAnimation("idle", true)
 		anim:SetScale(0.48)
 		anim:SetPosition(0, -160)
 	elseif IsSpecialEventActive(SPECIAL_EVENTS.HALLOWED_NIGHTS) then
-		anim:GetAnimState():SetBuild("dst_menu_halloween")
+		--[[anim:GetAnimState():SetBuild("dst_menu_halloween")
 		anim:GetAnimState():SetBank("dst_menu_halloween")
 		anim:GetAnimState():PlayAnimation("anim", true)
 		anim:SetScale(0.67)
-		anim:SetPosition(183, 40)
+		anim:SetPosition(183, 40)]]
+		anim:GetAnimState():SetBuild("dst_menu_wurt")
+		anim:GetAnimState():SetBank("dst_menu_wurt")
+        anim:GetAnimState():PlayAnimation("loop", true)
+        anim:SetScale(.667)
 	elseif IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) then
-		local anim_bg = baner_root:AddChild(UIAnim())
+        anim:GetAnimState():SetBuild("dst_menu_inker_winter")
+        anim:GetAnimState():SetBank("dst_menu_inker_winter")
+        anim:GetAnimState():PlayAnimation("loop", true)
+        anim:SetScale(.667)
+
+--[[	local anim_bg = baner_root:AddChild(UIAnim())
 		anim_bg:GetAnimState():SetBuild("dst_menu_feast_bg")
 		anim_bg:GetAnimState():SetBank("dst_menu_bg")
 		anim_bg:SetScale(0.7)
@@ -71,18 +89,41 @@ function MakeBanner(self)
 		anim:GetAnimState():SetBank("dst_menu")
 		anim:SetScale(0.7)
 		anim:GetAnimState():PlayAnimation("loop", true)
-	elseif IsSpecialEventActive(SPECIAL_EVENTS.YOTP) then
+]]
+
+	elseif IsSpecialEventActive(SPECIAL_EVENTS.YOTC) then
 		local anim_bg = baner_root:AddChild(UIAnim())
-		anim_bg:GetAnimState():SetBuild("dst_menu_pig_bg")
-		anim_bg:GetAnimState():SetBank("dst_menu_pig_bg")
+		anim_bg:GetAnimState():SetBuild("dst_menu_carrat_bg")
+		anim_bg:GetAnimState():SetBank("dst_carrat_bg")
 		anim_bg:SetScale(0.7)
 		anim_bg:GetAnimState():PlayAnimation("loop", true)
 		anim_bg:MoveToBack()
         
-		anim:GetAnimState():SetBuild("dst_menu_pigs")
-		anim:GetAnimState():SetBank("dst_menu_pigs")
-		anim:SetScale(2/3)
+		anim:GetAnimState():SetBuild("dst_menu_carrat")
+		anim:GetAnimState():SetBank("dst_carrat")
+        anim:GetAnimState():PlayAnimation("loop", true)
+        anim:SetScale(0.6)
 
+        local colors ={
+            "blue",
+            "brown",
+            "pink",
+            "purple",
+            "yellow",
+            "green",
+            "white",
+            nil, -- normal?
+            }
+
+        local color = colors[math.random(1,#colors)]
+
+        if color then
+            anim:GetAnimState():OverrideSymbol("ear1", "dst_menu_carrat_swaps", color.."_ear1")
+            anim:GetAnimState():OverrideSymbol("ear2", "dst_menu_carrat_swaps", color.."_ear2")
+            anim:GetAnimState():OverrideSymbol("tail", "dst_menu_carrat_swaps", color.."_tail")        
+        end
+
+--[[
         local function onanimover(inst)
             inst.AnimState:PlayAnimation("loop")
 
@@ -96,14 +137,16 @@ function MakeBanner(self)
             inst:DoTaskInTime(151 * FRAMES, PlayBannerSound, self, "dontstarve/pig/come_at_me")
             inst:DoTaskInTime(161 * FRAMES, PlayBannerSound, self, "dontstarve/pig/come_at_me")
         end
+
         anim.inst:ListenForEvent("animover", onanimover)
         onanimover(anim.inst)
+    ]]
 	else
-		--[[anim:GetAnimState():SetBuild("dst_menu")
+		anim:GetAnimState():SetBuild("dst_menu")
 		anim:GetAnimState():SetBank("dst_menu")
 		anim:GetAnimState():PlayAnimation("loop", true)
 		anim:SetScale(0.63)
-		anim:SetPosition(347, 85)]]
+		anim:SetPosition(347, 85)
         --[[anim:GetAnimState():SetBuild("dst_menu_winona")
         anim:GetAnimState():SetBank("dst_menu_winona")
         anim:GetAnimState():PlayAnimation("loop", true)
@@ -114,11 +157,21 @@ function MakeBanner(self)
         anim:GetAnimState():PlayAnimation("loop", true)
         anim:SetScale(.667)
         anim:SetPosition(0, 0)]]
-        anim:GetAnimState():SetBuild("dst_menu_willow")
+        --[[anim:GetAnimState():SetBuild("dst_menu_willow")
         anim:GetAnimState():SetBank("dst_menu_willow")
         anim:GetAnimState():PlayAnimation("loop", true)
         anim:SetScale(.667)
-        anim:SetPosition(0, 0)
+        anim:SetPosition(0, 0)]]
+        --[[anim:GetAnimState():SetBuild("dst_menu_wormwood")
+        anim:GetAnimState():SetBank("dst_menu_wormwood")
+        anim:GetAnimState():PlayAnimation("loop", true)
+        anim:SetScale(.667)
+        anim:SetPosition(0, 0)]]
+        --[[anim:GetAnimState():SetBuild("dst_menu_warly")
+        anim:GetAnimState():SetBank("dst_menu_warly")
+        anim:GetAnimState():PlayAnimation("loop", true)
+        anim:SetScale(.667)
+        anim:SetPosition(0, 0)]]
 	end
 
 	if IsFestivalEventActive(FESTIVAL_EVENTS.LAVAARENA) then
@@ -132,41 +185,25 @@ function MakeBanner(self)
 		self.logo:SetTint(unpack(FRONTEND_TITLE_COLOUR))
 	end
 	
+	if title_str then
+		if title_str ~= nil then
+			local x = 165
+			local y = -140
+			local text_width = 880
 
-	local body_str = nil
-	local title_str = nil
+			local font_size = 22
+			local title = baner_root:AddChild(Text(self.info_font, font_size, title_str, UICOLOURS.HIGHLIGHT_GOLD))
+			title:SetRegionSize(text_width, 2*(font_size + 2))
+			title:SetHAlign(ANCHOR_RIGHT)
+			title:SetPosition(x, y + 4)
 
-	if body_str ~= nil then
-		local font_size = 20
-		body = baner_root:AddChild(Text(self.info_font, font_size, "", UICOLOURS.GOLD_SELECTED))
-		body:SetMultilineTruncatedString(body_str, 10, 200, nil, true)
-		body:SetHAlign(ANCHOR_LEFT)
-		local w, h = body:GetRegionSize()
-		local body_x, body_y = x + w/2 - cell_size.width/2 + text_padding, y -cell_size.height / 2 + h/2 + text_padding
-		body:SetPosition(body_x, body_y)
-
-		local shadow = baner_root:AddChild(Text(self.info_font, font_size, "", UICOLOURS.BLACK))
-		shadow:SetMultilineTruncatedString(body_str, 10, cell_size.width - text_padding * 2, nil, true)
-		shadow:SetHAlign(ANCHOR_LEFT)
-		shadow:SetPosition(body_x + 1.5, body_y - 1.5)
-		shadow:MoveToBack()
+			local shadow = baner_root:AddChild(Text(self.info_font, font_size, title_str, UICOLOURS.BLACK))
+			shadow:SetRegionSize(text_width, 2*(font_size + 2))
+			shadow:SetHAlign(ANCHOR_RIGHT)
+			shadow:SetPosition(x + 1.5, y - 1.5)
+			shadow:MoveToBack()
+		end
 	end
-
-	if title_str ~= nil then
-		local font_size = 32
-		local title = baner_root:AddChild(Text(self.info_font, font_size, title_str, UICOLOURS.HIGHLIGHT_GOLD))
-		title:SetRegionSize(cell_size.width - text_padding * 2, font_size + 2)
-		title:SetHAlign(ANCHOR_LEFT)
-		title:SetPosition(x, y + cell_size.height / 2 - font_size / 2 - text_padding + 4)
-
-		local shadow = baner_root:AddChild(Text(self.info_font, font_size, title_str, UICOLOURS.BLACK))
-		shadow:SetRegionSize(cell_size.width - text_padding * 2, font_size + 2)
-		shadow:SetHAlign(ANCHOR_LEFT)
-		shadow:SetPosition(x + 1.5, y + cell_size.height / 2 - font_size / 2 - text_padding + 4 - 1.5)
-		shadow:MoveToBack()
-	end
-
-
 
 	return baner_root
 end
@@ -692,20 +729,23 @@ function MultiplayerMainScreen:OnBecomeActive()
 end
 
 function MultiplayerMainScreen:FinishedFadeIn()
-	
     if HasNewSkinDLCEntitlements() then
-        if IsSteam() then
+        if IsSteam() or IsRail() then
             local popup_screen = PopupDialogScreen( STRINGS.UI.PURCHASEPACKSCREEN.GIFT_RECEIVED_TITLE, STRINGS.UI.PURCHASEPACKSCREEN.GIFT_RECEIVED_BODY,
                     {
-                        {text=STRINGS.UI.PURCHASEPACKSCREEN.OK, cb = function() TheFrontEnd:PopScreen() MakeSkinDLCPopup() end },
+                        { text=STRINGS.UI.PURCHASEPACKSCREEN.OK, cb = function()
+                                TheFrontEnd:PopScreen()
+                                MakeSkinDLCPopup( function() self:FinishedFadeIn() end )
+                            end
+                        },
                     }
                 )
 
             TheFrontEnd:PushScreen( popup_screen )
         else
-            MakeSkinDLCPopup()
+            MakeSkinDLCPopup( function() self:FinishedFadeIn() end )
         end
-	else
+    else
 		--Do new entitlement items
 		local items = {}
 		local entitlement_items = TheInventory:GetUnopenedEntitlementItems()

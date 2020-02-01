@@ -16,6 +16,8 @@ local function fn()
     inst.AnimState:SetBuild("phlegm")
     inst.AnimState:PlayAnimation("idle")
 
+    MakeInventoryFloatable(inst, "med", nil, 0.75)
+
     inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
@@ -24,6 +26,7 @@ local function fn()
 
     inst:AddComponent("inspectable")
     inst:AddComponent("inventoryitem")
+
     inst:AddComponent("stackable")
     inst.components.stackable.maxsize = TUNING.STACK_SIZE_SMALLITEM
 
@@ -32,6 +35,8 @@ local function fn()
     inst.components.edible.hungervalue = TUNING.CALORIES_SMALL
     inst.components.edible.sanityvalue = -TUNING.SANITY_MED
     inst.components.edible.foodtype = FOODTYPE.GENERIC
+
+    inst:AddComponent("tradable")
 
     MakeHauntableLaunch(inst)
 

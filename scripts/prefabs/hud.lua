@@ -13,6 +13,9 @@ local assets =
     Asset("ATLAS", "images/fx3.xml"),
     Asset("IMAGE", "images/fx3.tex"),
 
+    Asset("ATLAS", "images/fx4.xml"),
+    Asset("IMAGE", "images/fx4.tex"),
+
     Asset("ANIM", "anim/sand_over.zip"),
     Asset("ANIM", "anim/mind_control_overlay.zip"),
 
@@ -21,15 +24,22 @@ local assets =
     Asset("ANIM", "anim/moon_phases.zip"),
     Asset("ANIM", "anim/cave_clock.zip"),
 
-    Asset("ANIM", "anim/health.zip"),
-    Asset("ANIM", "anim/health_effigy.zip"),
-    Asset("ANIM", "anim/sanity.zip"),
-    Asset("ANIM", "anim/sanity_ghost.zip"),
+    Asset("PKGREF", "anim/health.zip"),
+    Asset("PKGREF", "anim/health_effigy.zip"),
+    Asset("PKGREF", "anim/sanity.zip"),
+    Asset("PKGREF", "anim/sanity_ghost.zip"),
     Asset("ANIM", "anim/sanity_arrow.zip"),
-    Asset("ANIM", "anim/effigy_topper.zip"),
+    Asset("PKGREF", "anim/effigy_topper.zip"),
     Asset("ANIM", "anim/effigy_button.zip"),
-    Asset("ANIM", "anim/hunger.zip"),
-    Asset("ANIM", "anim/beaver_meter.zip"),
+    Asset("PKGREF", "anim/hunger.zip"),
+    Asset("PKGREF", "anim/beaver_meter.zip"),
+    Asset("ANIM", "anim/status_meter.zip"),
+    Asset("ANIM", "anim/status_health.zip"),
+    Asset("ANIM", "anim/status_hunger.zip"),
+    Asset("ANIM", "anim/status_sanity.zip"),
+    Asset("ANIM", "anim/status_wet.zip"),
+    Asset("ANIM", "anim/status_boat.zip"),
+    Asset("ANIM", "anim/status_were.zip"),
     Asset("ANIM", "anim/hunger_health_pulse.zip"),
     Asset("ANIM", "anim/spoiled_meter.zip"),
     Asset("ANIM", "anim/recharge_meter.zip"),
@@ -53,8 +63,11 @@ local assets =
     Asset("IMAGE", "images/serverbrowser.tex"),
     --
 
-    Asset("ANIM", "anim/wet_meter_player.zip"), 
+    Asset("PKGREF", "anim/wet_meter_player.zip"),     
     Asset("ANIM", "anim/wet_meter.zip"),
+
+    Asset("PKGREF", "anim/boat_meter.zip"),
+    Asset("PKGREF", "anim/boat_meter_leak.zip"),
 
     Asset("ANIM", "anim/tab_gift.zip"),
 
@@ -81,6 +94,11 @@ local assets =
     Asset("ANIM", "anim/ringmeter.zip"),
 
     Asset("SOUND", "sound/together.fsb"),
+
+	Asset("DYNAMIC_ATLAS", "images/bg_redux_wardrobe_bg.xml"),
+    Asset("PKGREF", "images/bg_redux_wardrobe_bg.tex"),
+
+    Asset("ANIM", "anim/ink_over.zip"),
 }
 
 local prefabs =

@@ -67,6 +67,9 @@ local function onhammered(inst, worker)
         inst.components.burnable:Extinguish()
     end
     inst.SoundEmitter:KillSound("loop")
+    if inst.components.harvestable ~= nil then
+        inst.components.harvestable:Harvest()
+    end
     inst.components.lootdropper:DropLoot()
     local fx = SpawnPrefab("collapse_small")
     fx.Transform:SetPosition(inst.Transform:GetWorldPosition())
@@ -240,6 +243,7 @@ local function fn()
 
     inst:AddComponent("childspawner")
     inst.components.childspawner.childname = "bee"
+    inst.components.childspawner.allowwater = true
     SeasonalSpawnChanges(inst, TheWorld.state.season)
     inst:WatchWorldState("season", SeasonalSpawnChanges)
 

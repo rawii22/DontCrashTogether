@@ -2,6 +2,7 @@ local assets =
 {
     Asset("ANIM", "anim/cane.zip"),
     Asset("ANIM", "anim/swap_cane.zip"),
+    Asset("ANIM", "anim/floating_items.zip"),
 }
 
 local function onequip(inst, owner)
@@ -40,6 +41,12 @@ local function fn()
     inst.AnimState:SetBank("cane")
     inst.AnimState:SetBuild("swap_cane")
     inst.AnimState:PlayAnimation("idle")
+
+    --weapon (from weapon component) added to pristine state for optimization
+    inst:AddTag("weapon")
+
+    local swap_data = {sym_build = "swap_cane"}
+    MakeInventoryFloatable(inst, "med", 0.05, {0.85, 0.45, 0.85}, true, 1, swap_data)
 
     inst.entity:SetPristine()
 

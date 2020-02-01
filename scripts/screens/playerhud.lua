@@ -13,8 +13,10 @@ local FumeOver = require "widgets/fumeover"
 local SandOver = require "widgets/sandover"
 local SandDustOver = require "widgets/sanddustover"
 local MindControlOver = require "widgets/mindcontrolover"
+local InkOver = require "widgets/inkover"
 local GogglesOver = require "widgets/gogglesover"
 local BatOver = require "widgets/batover"
+local FlareOver = require "widgets/flareover"
 local EndOfMatchPopup = require "widgets/redux/endofmatchpopup"
 local PopupNumber = require "widgets/popupnumber"
 local RingMeter = require "widgets/ringmeter"
@@ -28,7 +30,7 @@ local TargetIndicator = require "widgets/targetindicator"
 
 local EventAnnouncer = require "widgets/eventannouncer"
 local GiftItemPopUp = require "screens/giftitempopup"
-local WardrobePopupScreen = require "screens/wardrobepopup"
+local GridWardrobePopupScreen = require "screens/redux/wardrobepopupgridloadout"
 local ScarecrowClothingPopupScreen = require "screens/scarecrowclothingpopup"
 local PlayerAvatarPopup = require "widgets/playeravatarpopup"
 local DressupAvatarPopup = require "widgets/dressupavatarpopup"
@@ -89,6 +91,30 @@ function PlayerHud:CreateOverlays(owner)
 
     self.vig:SetClickable(false)
 
+    self.drops_vig = self.overlayroot:AddChild(UIAnim())
+    self.drops_vig:GetAnimState():SetBuild("paddle_over")
+    self.drops_vig:GetAnimState():SetBank("sail_over")
+    self.drops_vig:GetAnimState():PlayAnimation("over", true)
+
+    self.drops_vig:SetHAnchor(ANCHOR_MIDDLE)
+    self.drops_vig:SetVAnchor(ANCHOR_MIDDLE)
+    self.drops_vig:SetScaleMode(SCALEMODE_FIXEDSCREEN_NONDYNAMIC)
+
+    self.drops_vig:SetClickable(false)
+    self.drops_vig:Hide()
+    self.drops_alpha= 0 
+
+    self.inst:ListenForEvent("moisturedelta", function(inst, data)         
+            if data.new > data.old then
+                self.dropsplash = true
+                if self.droptask then
+                    self.droptask:Cancel()
+                    self.droptask = nil
+                end
+                self.droptask = self.inst:DoTaskInTime(3,function() self.dropsplash = nil end)
+            end
+        end, owner)
+
     self.storm_root = self.over_root:AddChild(Widget("storm_root"))
     self.storm_overlays = self.storm_root:AddChild(Widget("storm_overlays"))
     self.sanddustover = self.storm_overlays:AddChild(SandDustOver(owner))
@@ -106,9 +132,12 @@ function PlayerHud:CreateOverlays(owner)
     self.fireover = self.overlayroot:AddChild(FireOver(owner))
     self.heatover = self.overlayroot:AddChild(HeatOver(owner))
     self.fumeover = self.overlayroot:AddChild(FumeOver(owner))
+    self.flareover = self.overlayroot:AddChild(FlareOver(owner))
+
+    self.InkOver = self.overlayroot:AddChild(InkOver(owner))
 
     self.clouds = self.under_root:AddChild(UIAnim())
-	self.clouds.cloudcolour = GetGameModeProperty("cloudcolour") or {1, 1, 1}
+    self.clouds.cloudcolour = GetGameModeProperty("cloudcolour") or {1, 1, 1}
     self.clouds:SetClickable(false)
     self.clouds:SetHAnchor(ANCHOR_MIDDLE)
     self.clouds:SetVAnchor(ANCHOR_MIDDLE)
@@ -123,7 +152,7 @@ function PlayerHud:CreateOverlays(owner)
     self.eventannouncer:SetHAnchor(ANCHOR_MIDDLE)
     self.eventannouncer:SetVAnchor(ANCHOR_TOP)
     self.eventannouncer = self.eventannouncer:AddChild(EventAnnouncer(owner))
-	self.eventannouncer:SetPosition(0, GetGameModeProperty("eventannouncer_offset") or 0)
+    self.eventannouncer:SetPosition(0, GetGameModeProperty("eventannouncer_offset") or 0)
 end
 
 function PlayerHud:OnDestroy()
@@ -243,7 +272,17 @@ end
 
 local function OpenContainerWidget(self, container, side)
     local containerwidget = ContainerWidget(self.owner)
-    self.controls[side and "containerroot_side" or "containerroot"]:AddChild(containerwidget)
+	local parent = side and self.controls.containerroot_side
+					or (container.replica.container ~= nil and container.replica.container.type == "hand_inv") and self.controls.inv.hand_inv
+					or self.controls.containerroot
+
+	parent:AddChild(containerwidget)
+
+    --self.controls[side and "containerroot_side" or "containerroot"]:AddChild(containerwidget)
+    --self.controls.bottom_root:AddChild(containerwidget)
+    --self.controls.inv.hand_inv:AddChild(containerwidget)
+	
+	containerwidget:MoveToBack()
     containerwidget:Open(container, self.owner)
     self.controls.containers[container] = containerwidget
 end
@@ -285,18 +324,18 @@ function PlayerHud:TogglePlayerAvatarPopup(player_name, data, show_net_profile, 
     )
 end
 
---ThePlayer.HUD:ShowEndOfMatchPopup({victory=true})	
+--ThePlayer.HUD:ShowEndOfMatchPopup({victory=true}) 
 function PlayerHud:ShowEndOfMatchPopup(data)
-	self.inst:DoTaskInTime(data.victory and 2.5 or 0, function()
-		if self.endofmatchpopup == nil then
-			local popupdata =
-			{
-				title = data.victory and STRINGS.UI.HUD.LAVAARENA_WIN_TITLE or STRINGS.UI.HUD.LAVAARENA_LOSE_TITLE,
-				body = data.victory and STRINGS.UI.HUD.LAVAARENA_WIN_BODY or STRINGS.UI.HUD.LAVAARENA_LOSE_BODY,
-			}
-			self.endofmatchpopup = self.root:AddChild(EndOfMatchPopup(self.owner, popupdata))
-		end
-	end)
+    self.inst:DoTaskInTime(data.victory and 2.5 or 0, function()
+        if self.endofmatchpopup == nil then
+            local popupdata =
+            {
+                title = data.victory and STRINGS.UI.HUD.LAVAARENA_WIN_TITLE or STRINGS.UI.HUD.LAVAARENA_LOSE_TITLE,
+                body = data.victory and STRINGS.UI.HUD.LAVAARENA_WIN_BODY or STRINGS.UI.HUD.LAVAARENA_LOSE_BODY,
+            }
+            self.endofmatchpopup = self.root:AddChild(EndOfMatchPopup(self.owner, popupdata))
+        end
+    end)
 end
 
 function PlayerHud:OpenScreenUnderPause(screen)
@@ -355,19 +394,26 @@ function PlayerHud:OpenWardrobeScreen(target)
 
     if target ~= nil then
         self.wardrobepopup =
-			ScarecrowClothingPopupScreen(
-				target,
-				self.owner,
-				Profile
-			)
+            ScarecrowClothingPopupScreen(
+                target,
+                self.owner,
+                Profile
+            )
     else
         self.wardrobepopup =
-			WardrobePopupScreen(
-				self.owner,
-				Profile,
-				self.recentgifts ~= nil and self.recentgifts.item_types or nil,
-				self.recentgifts ~= nil and self.recentgifts.item_ids or nil
-			)
+            GridWardrobePopupScreen(
+                self.owner,
+                Profile,
+                self.recentgifts ~= nil and self.recentgifts.item_types or nil,
+                self.recentgifts ~= nil and self.recentgifts.item_ids or nil
+            )
+    end
+
+    if not TheWorld.ismastersim then
+        local map = TheFrontEnd:GetOpenScreenOfType("MapScreen")
+        if map ~= nil and self.controls ~= nil then
+            self.controls:HideMap()
+        end
     end
 
     self:ClearRecentGifts()
@@ -376,15 +422,25 @@ function PlayerHud:OpenWardrobeScreen(target)
 end
 
 function PlayerHud:CloseWardrobeScreen()
-    --Hack for holding offset when transitioning from giftitempopup to wardrobepopup
-    TheCamera:PopScreenHOffset(self)
-    self:ClearRecentGifts()
+    local activescreen = TheFrontEnd:GetActiveScreen()
 
-    if self.wardrobepopup ~= nil then
-        if self.wardrobepopup.inst:IsValid() then
-            TheFrontEnd:PopScreen(self.wardrobepopup)
+    if activescreen == nil then return end
+    
+    if activescreen.name ~= "ItemServerContactPopup" then
+        --Hack for holding offset when transitioning from giftitempopup to wardrobepopup
+        TheCamera:PopScreenHOffset(self)
+        self:ClearRecentGifts()
+
+        if self.wardrobepopup ~= nil then
+            if self.wardrobepopup.inst:IsValid() then
+                TheFrontEnd:PopScreen(self.wardrobepopup)
+            end
+            self.wardrobepopup = nil
         end
-        self.wardrobepopup = nil
+    else
+        self.inst:DoTaskInTime(.2, function()
+            self:CloseWardrobeScreen()
+        end)
     end
 end
 
@@ -455,6 +511,10 @@ function PlayerHud:GoInsane()
     self.vig:GetAnimState():PlayAnimation("insane", true)
 end
 
+function PlayerHud:GoEnlightened()
+    self.vig:GetAnimState():PlayAnimation("basic", true)
+end
+
 function PlayerHud:SetMainCharacter(maincharacter)
     if maincharacter then
         maincharacter.HUD = self
@@ -465,9 +525,14 @@ function PlayerHud:SetMainCharacter(maincharacter)
 
         self.inst:ListenForEvent("gosane", function() self:GoSane() end, self.owner)
         self.inst:ListenForEvent("goinsane", function() self:GoInsane() end, self.owner)
+        self.inst:ListenForEvent("goenlightened", function() self:GoEnlightened() end, self.owner)
 
-        if self.owner.replica.sanity ~= nil and self.owner.replica.sanity:IsCrazy() then
-            self:GoInsane()
+        if self.owner.replica.sanity ~= nil then
+            if self.owner.replica.sanity:IsCrazy() then
+                self:GoInsane()
+            elseif self.owner.replica.sanity:IsEnlightened() then
+                self:GoEnlightened()
+            end
         end
         self.controls.crafttabs:UpdateRecipes()
 
@@ -796,6 +861,36 @@ function PlayerHud:OnRawKey(key, down)
     end
 end
 
+local DROPS_ALPHA_INCREASE_RATE = 0.01
+local DROPS_ALPHA_DECREASE_RATE = 0.05
+function PlayerHud:UpdateDrops(camera)
+  
+    if self.dropsplash  then
+        if self.drops_alpha >= 1 then
+            return
+        end
+
+        if self.drops_alpha <= 0 then
+            self.drops_vig:Show()
+            self.drops_alpha = DROPS_ALPHA_INCREASE_RATE
+        elseif self.drops_alpha < 1 then
+            self.drops_alpha = self.drops_alpha + DROPS_ALPHA_INCREASE_RATE
+        end
+
+        self.drops_vig.inst.AnimState:SetMultColour(1, 1, 1, self.drops_alpha)
+    elseif self.drops_alpha > 0 then
+        if self.drops_alpha > 0 then
+            self.drops_alpha = self.drops_alpha - DROPS_ALPHA_DECREASE_RATE
+            self.drops_vig.inst.AnimState:SetMultColour(1, 1, 1, self.drops_alpha)
+        end
+
+        if self.drops_alpha <= 0 then
+            self.drops_alpha = 0
+            self.drops_vig:Hide()
+        end
+    end
+end
+
 function PlayerHud:UpdateClouds(camera)
     --this is kind of a weird place to do all of this, but the anim *is* a hud asset...
     if camera.distance and not camera.dollyzoom then
@@ -822,12 +917,12 @@ function PlayerHud:UpdateClouds(camera)
     end
 end
 
-function PlayerHud:AddTargetIndicator(target)
+function PlayerHud:AddTargetIndicator(target, data)
     if not self.targetindicators then
         self.targetindicators = {}
     end
 
-    local ti = self.under_root:AddChild(TargetIndicator(self.owner, target))
+    local ti = self.under_root:AddChild(TargetIndicator(self.owner, target, data))
     table.insert(self.targetindicators, ti)
 end
 

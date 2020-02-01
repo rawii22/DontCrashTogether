@@ -420,11 +420,19 @@ local function OnTimerDone(inst, data)
         --morph staff
         inst.components.pickable:ChangeProduct(MORPHED_STAFF)
         if inst._staffinst ~= nil then
+            local new_staff = SpawnPrefab(MORPHED_STAFF, inst._staffinst.morph_skin, inst._staffinst.skin_id, "RESIG") or nil
             inst._staffinst:Remove()
-            inst._staffinst = nil
+            inst._staffinst = new_staff
+            inst:AddChild(new_staff)
+            new_staff.Transform:SetPosition(0, 0, 0)
+            new_staff:RemoveFromScene()
+        
+            inst.AnimState:OverrideItemSkinSymbol("swap_staffs", inst._staffinst:GetSkinBuild(), GetStaffSymbol(MORPHED_STAFF), inst._staffinst.GUID, "staffs")
+        else
+            inst.AnimState:OverrideSymbol("swap_staffs", "staffs", GetStaffSymbol(MORPHED_STAFF))
         end
         inst._staffuse = nil
-        inst.AnimState:OverrideSymbol("swap_staffs", "staffs", GetStaffSymbol(MORPHED_STAFF))
+
 
         ShowColdStar(inst)
 
@@ -598,6 +606,7 @@ local function fn()
     inst:AddTag("moonbase")
     inst:AddTag("event_trigger")
     inst:AddTag("antlion_sinkhole_blocker")
+    inst:AddTag("NPC_workable")
 
     inst._music = net_tinybyte(inst.GUID, "moonbase._music", "musicdirty")
 

@@ -34,6 +34,12 @@ local SEASON_DANGER_MUSIC =
 
 local TRIGGERED_DANGER_MUSIC =
 {
+
+    malbatross =
+    {
+        "saltydog/music/malbatross",
+    },
+        
     moonbase =
     {
         "dontstarve/music/music_epicfight_moonbase",
@@ -90,6 +96,17 @@ local TRIGGERED_DANGER_MUSIC =
     },
 }
 
+local BUSYTHEMES = {
+    FOREST = 1,
+    CAVE = 2,
+    RUINS = 3,
+    OCEAN = 4,
+    LUNARISLAND = 5,
+    FEAST = 6,
+    RACE = 7,
+    TRAINING = 8,
+}
+
 --------------------------------------------------------------------------
 --[[ Member variables ]]
 --------------------------------------------------------------------------
@@ -106,6 +123,7 @@ local _triggeredlevel = nil
 local _isday = nil
 local _isbusydirty = nil
 local _isbusyruins = nil
+local _busytheme = nil
 local _extendtime = nil
 local _soundemitter = nil
 local _activatedplayer = nil --cached for activation/deactivation only, NOT for logic use
@@ -117,6 +135,11 @@ local _activatedplayer = nil --cached for activation/deactivation only, NOT for 
 local function IsInRuins(player)
     return player.components.areaaware ~= nil
         and player.components.areaaware:CurrentlyInTag("Nightmare")
+end
+
+local function IsOnLunarIsland(player)
+    return player.components.areaaware ~= nil
+        and player.components.areaaware:CurrentlyInTag("lunacyarea")
 end
 
 local function StopBusy(inst, istimeout)
@@ -138,27 +161,119 @@ local function StopBusy(inst, istimeout)
 end
 
 local function StartBusy(player)
+    if not (_iscave or _isday) then        
+        return
+    elseif _busytask ~= nil then
+        _extendtime = GetTime() + 15
+    elseif _dangertask == nil and (_extendtime == 0 or GetTime() >= _extendtime) and _isenabled then
+
+        if _iscave then
+            if IsInRuins(player) then
+                if _busytheme ~= BUSYTHEMES.RUINS then
+                    _soundemitter:KillSound("busy")
+                    _soundemitter:PlaySound("dontstarve/music/music_work_ruins", "busy")
+                end
+                _busytheme = BUSYTHEMES.RUINS
+            else
+                if _busytheme ~= BUSYTHEMES.CAVE then
+                    _soundemitter:KillSound("busy")
+                    _soundemitter:PlaySound("dontstarve/music/music_work_cave", "busy")
+                end
+                _busytheme = BUSYTHEMES.CAVE
+            end
+        else
+            if IsOnLunarIsland(player) then                    
+                if _busytheme ~= BUSYTHEMES.LUNARISLAND then
+                    _soundemitter:KillSound("busy")
+                    _soundemitter:PlaySound("turnoftides/music/working", "busy")
+                end
+                _busytheme = BUSYTHEMES.LUNARISLAND
+            else
+                if _busytheme ~= BUSYTHEMES.FOREST then
+                    _soundemitter:KillSound("busy")
+                    _soundemitter:PlaySound(SEASON_BUSY_MUSIC[inst.state.season], "busy")
+                end
+                _busytheme = BUSYTHEMES.FOREST
+            end
+        end
+        
+        _soundemitter:SetParameter("busy", "intensity", 1)
+        _busytask = inst:DoTaskInTime(15, StopBusy, true)
+        _extendtime = 0
+    end
+end
+
+local function StartOcean(player)
     if not (_iscave or _isday) then
         return
     elseif _busytask ~= nil then
         _extendtime = GetTime() + 15
     elseif _dangertask == nil and (_extendtime == 0 or GetTime() >= _extendtime) and _isenabled then
-        if _isbusydirty then
-            _isbusydirty = false
+
+        if _busytheme ~= BUSYTHEMES.OCEAN then
             _soundemitter:KillSound("busy")
-            if _iscave then
-                _isbusyruins = IsInRuins(player)
-                _soundemitter:PlaySound(_isbusyruins and "dontstarve/music/music_work_ruins" or "dontstarve/music/music_work_cave", "busy")
-            else
-                _soundemitter:PlaySound(SEASON_BUSY_MUSIC[inst.state.season], "busy")
-            end
-        elseif _iscave and _isbusyruins ~= IsInRuins(player) then
-            _isbusyruins = not _isbusyruins
-            _soundemitter:KillSound("busy")
-            _soundemitter:PlaySound(_isbusyruins and "dontstarve/music/music_work_ruins" or "dontstarve/music/music_work_cave", "busy")
+            _soundemitter:PlaySound("turnoftides/music/sailing", "busy")
         end
+        _busytheme = BUSYTHEMES.OCEAN
+
         _soundemitter:SetParameter("busy", "intensity", 1)
-        _busytask = inst:DoTaskInTime(15, StopBusy, true)
+        _busytask = inst:DoTaskInTime(30, StopBusy, true)
+        _extendtime = 0
+    end
+end
+
+local function StartFeasting(player)
+    if _busytask ~= nil then
+        _extendtime = 0
+        _busytask:Cancel()
+        _busytask = nil
+        _busytask = inst:DoTaskInTime(5, StopBusy, true)
+    elseif _dangertask == nil and (_extendtime == 0 or GetTime() >= _extendtime) and _isenabled then
+
+        if _busytheme ~= BUSYTHEMES.FEAST then
+            _soundemitter:KillSound("busy")
+            _soundemitter:PlaySound("wintersfeast2019/music/feast", "busy")
+        end
+        _busytheme = BUSYTHEMES.FEAST
+
+        _soundemitter:SetParameter("busy", "intensity", 1)
+        _busytask = inst:DoTaskInTime(5, StopBusy, true)
+        _extendtime = 0
+    end
+end
+
+local function StartRacing(player)
+    if _dangertask == nil and (_extendtime == 0 or GetTime() >= _extendtime) and _isenabled then
+        if _busytask then
+            _busytask:Cancel()
+            _busytask = nil
+        end
+        if _busytheme ~= BUSYTHEMES.RACE then
+            _soundemitter:KillSound("busy")
+            _soundemitter:PlaySound("yotc_2020/music/race", "busy")
+        end
+        _busytheme = BUSYTHEMES.RACE
+
+        _soundemitter:SetParameter("busy", "intensity", 1)
+        _busytask = inst:DoTaskInTime(5, StopBusy, true)
+        _extendtime = 0
+    end
+end
+
+local function StartTraining(player)
+    if _dangertask == nil and (_extendtime == 0 or GetTime() >= _extendtime) and _isenabled and _busytheme ~= BUSYTHEMES.RACE then
+        if _busytask then
+            _busytask:Cancel()
+            _busytask = nil
+        end
+        if _busytheme ~= BUSYTHEMES.TRAINING then
+            _soundemitter:KillSound("busy")
+            _soundemitter:PlaySound("yotc_2020/music/training", "busy")
+        end
+        _busytheme = BUSYTHEMES.TRAINING
+
+        _soundemitter:SetParameter("busy", "intensity", 1)
+        _busytask = inst:DoTaskInTime(5, StopBusy, true)
         _extendtime = 0
     end
 end
@@ -227,6 +342,18 @@ local function StartTriggeredDanger(player, data)
     end
 end
 
+local function StartTriggeredWater(player, data)
+    if player:GetCurrentPlatform() then
+        StartOcean(player)
+    end
+end
+
+local function StartTriggeredFeasting(player, data)
+    if player and player.sg and player.sg:HasStateTag("feasting") then
+        StartFeasting(player)
+    end
+end
+
 local function CheckAction(player)
     if player:HasTag("attack") then
         local target = player.replica.combat:GetTarget()
@@ -287,13 +414,28 @@ local function OnInsane()
     end
 end
 
+local function OnEnlightened()
+	-- TEMP
+    if _dangertask == nil and _isenabled then
+        _soundemitter:PlaySound("dontstarve/sanity/gonecrazy_stinger")
+        StopBusy()
+        --Repurpose this as a delay before stingers or busy can start again
+        _extendtime = GetTime() + 15
+    end
+end
+
 local function StartPlayerListeners(player)
     inst:ListenForEvent("buildsuccess", StartBusy, player)
     inst:ListenForEvent("gotnewitem", ExtendBusy, player)
     inst:ListenForEvent("performaction", CheckAction, player)
     inst:ListenForEvent("attacked", OnAttacked, player)
     inst:ListenForEvent("goinsane", OnInsane, player)
+    inst:ListenForEvent("goenlightened", OnEnlightened, player)
     inst:ListenForEvent("triggeredevent", StartTriggeredDanger, player)
+    inst:ListenForEvent("boatspedup", StartTriggeredWater, player)
+    inst:ListenForEvent("isfeasting", StartTriggeredFeasting, player)
+    inst:ListenForEvent("playracemusic", StartRacing, player)   
+    inst:ListenForEvent("playtrainingmusic", StartTraining, player)
 end
 
 local function StopPlayerListeners(player)
@@ -302,7 +444,12 @@ local function StopPlayerListeners(player)
     inst:RemoveEventCallback("performaction", CheckAction, player)
     inst:RemoveEventCallback("attacked", OnAttacked, player)
     inst:RemoveEventCallback("goinsane", OnInsane, player)
+    inst:RemoveEventCallback("goenlightened", OnEnlightened, player)
     inst:RemoveEventCallback("triggeredevent", StartTriggeredDanger, player)
+    inst:RemoveEventCallback("boatspedup", StartTriggeredWater, player)
+    inst:RemoveEventCallback("isfeasting", StartTriggeredFeasting, player)
+    inst:RemoveEventCallback("playracemusic", StartRacing, player)
+    inst:RemoveEventCallback("playtrainingmusic", StartTraining, player)
 end
 
 local function OnPhase(inst, phase)
@@ -331,7 +478,7 @@ local function OnPhase(inst, phase)
 end
 
 local function OnSeason()
-    _isbusydirty = true
+    _busytheme = nil
 end
 
 local function StartSoundEmitter()

@@ -284,18 +284,30 @@ local function runontimeout(inst)
     inst.sg:GoToState("run")
 end
 
-CommonStates.AddRunStates = function(states, timelines, anims, softstop)
+CommonStates.AddRunStates = function(states, timelines, anims, softstop, delaystart, fns)
     table.insert(states, State
     {
         name = "run_start",
         tags = { "moving", "running", "canrotate" },
 
         onenter = function(inst)
-            inst.components.locomotor:RunForward()
+			if fns ~= nil and fns.startonenter ~= nil then
+				fns.startonenter(inst)
+			end
+			if not delaystart then
+	            inst.components.locomotor:RunForward()
+			end
             inst.AnimState:PlayAnimation(get_loco_anim(inst, anims ~= nil and anims.startrun or nil, "run_pre"))
+			if fns ~= nil and fns.startonenter ~= nil then
+				fns.startonenter(inst)
+			end
         end,
 
         timeline = timelines ~= nil and timelines.starttimeline or nil,
+
+		onupdate = fns ~= nil and fns.startonupdate or nil,
+
+		onexit = fns ~= nil and fns.startonexit or nil,
 
         events =
         {
@@ -309,6 +321,9 @@ CommonStates.AddRunStates = function(states, timelines, anims, softstop)
         tags = { "moving", "running", "canrotate" },
 
         onenter = function(inst)
+			if fns ~= nil and fns.runonenter ~= nil then
+				fns.runonenter(inst)
+			end
             inst.components.locomotor:RunForward()
             local anim_to_play = get_loco_anim(inst, anims ~= nil and anims.run or nil, "run_loop")
             inst.AnimState:PlayAnimation(anim_to_play, true)
@@ -316,6 +331,10 @@ CommonStates.AddRunStates = function(states, timelines, anims, softstop)
         end,
 
         timeline = timelines ~= nil and timelines.runtimeline or nil,
+
+		onupdate = fns ~= nil and fns.runonupdate or nil,
+
+		onexit = fns ~= nil and fns.runonexit or nil,
 
         ontimeout = runontimeout,
     })
@@ -326,15 +345,25 @@ CommonStates.AddRunStates = function(states, timelines, anims, softstop)
         tags = { "idle" },
 
         onenter = function(inst)
+			if fns ~= nil and fns.endonenter ~= nil then
+				fns.endonenter(inst)
+			end
             inst.components.locomotor:StopMoving()
             if softstop == true or (type(softstop) == "function" and softstop(inst)) then
                 inst.AnimState:PushAnimation(get_loco_anim(inst, anims ~= nil and anims.stoprun or nil, "run_pst"), false)
             else
                 inst.AnimState:PlayAnimation(get_loco_anim(inst, anims ~= nil and anims.stoprun or nil, "run_pst"))
             end
+			if fns ~= nil and fns.endonenter ~= nil then
+				fns.endonenter(inst)
+			end
         end,
 
         timeline = timelines ~= nil and timelines.endtimeline or nil,
+
+		onupdate = fns ~= nil and fns.endonupdate or nil,
+
+		onexit = fns ~= nil and fns.endonexit or nil,
 
         events =
         {
@@ -359,18 +388,27 @@ local function walkontimeout(inst)
     inst.sg:GoToState("walk")
 end
 
-CommonStates.AddWalkStates = function(states, timelines, anims, softstop)
+CommonStates.AddWalkStates = function(states, timelines, anims, softstop, delaystart, fns)
     table.insert(states, State
     {
         name = "walk_start",
         tags = { "moving", "canrotate" },
 
         onenter = function(inst)
-            inst.components.locomotor:WalkForward()
+			if fns ~= nil and fns.startonenter ~= nil then -- this has to run before WalkForward so that startonenter has a chance to update the walk speed
+				fns.startonenter(inst)
+			end
+			if not delaystart then
+	            inst.components.locomotor:WalkForward()
+			end
             inst.AnimState:PlayAnimation(get_loco_anim(inst, anims ~= nil and anims.startwalk or nil, "walk_pre"))
         end,
 
         timeline = timelines ~= nil and timelines.starttimeline or nil,
+
+		onupdate = fns ~= nil and fns.startonupdate or nil,
+
+		onexit = fns ~= nil and fns.startonexit or nil,
 
         events =
         {
@@ -384,12 +422,19 @@ CommonStates.AddWalkStates = function(states, timelines, anims, softstop)
         tags = { "moving", "canrotate" },
 
         onenter = function(inst)
+			if fns ~= nil and fns.walkonenter ~= nil then
+				fns.walkonenter(inst)
+			end
             inst.components.locomotor:WalkForward()
             inst.AnimState:PlayAnimation(get_loco_anim(inst, anims ~= nil and anims.walk or nil, "walk_loop"), true)
             inst.sg:SetTimeout(inst.AnimState:GetCurrentAnimationLength())
         end,
 
         timeline = timelines ~= nil and timelines.walktimeline or nil,
+
+		onupdate = fns ~= nil and fns.walkonupdate or nil,
+
+		onexit = fns ~= nil and fns.walkonexit or nil,
 
         ontimeout = walkontimeout,
     })
@@ -400,6 +445,9 @@ CommonStates.AddWalkStates = function(states, timelines, anims, softstop)
         tags = { "canrotate" },
 
         onenter = function(inst)
+			if fns ~= nil and fns.exitonenter ~= nil then
+				fns.exitonenter(inst)
+			end
             inst.components.locomotor:StopMoving()
             if softstop == true or (type(softstop) == "function" and softstop(inst)) then
                 inst.AnimState:PushAnimation(get_loco_anim(inst, anims ~= nil and anims.stopwalk or nil, "walk_pst"), false)
@@ -409,6 +457,10 @@ CommonStates.AddWalkStates = function(states, timelines, anims, softstop)
         end,
 
         timeline = timelines ~= nil and timelines.endtimeline or nil,
+
+		onupdate = fns ~= nil and fns.endonupdate or nil,
+
+		onexit = fns ~= nil and fns.endonexit or nil,
 
         events =
         {
@@ -420,6 +472,352 @@ end
 --------------------------------------------------------------------------
 CommonStates.AddSimpleWalkStates = function(states, anim, timelines)
     CommonStates.AddWalkStates(states, timelines, { startwalk = anim, walk = anim, stopwalk = anim }, true)
+end
+
+--------------------------------------------------------------------------
+CommonHandlers.OnHop = function()
+    return EventHandler("onhop", 
+        function(inst)
+            if (inst.components.health == nil or not inst.components.health:IsDead()) and (inst.sg:HasStateTag("moving") or inst.sg:HasStateTag("idle")) then
+                if not inst.sg:HasStateTag("jumping") then
+                    if inst.components.embarker and inst.components.embarker.antic and inst:HasTag("swimming") then
+                        inst.sg:GoToState("hop_antic")
+                    else
+                        inst.sg:GoToState("hop_pre")
+                    end
+                end
+            elseif inst.components.embarker then
+                inst.components.embarker:Cancel()
+            end
+        end)
+end
+
+CommonStates.AddHopStates = function(states, wait_for_pre, anims, timelines, land_sound, landed_in_water_state)
+	anims = anims or {}
+    timelines = timelines or {}
+
+    table.insert(states, State
+    {
+        name = "hop_pre",
+        tags = { "doing", "nointerrupt", "busy", "jumping", "autopredict", "nomorph", "nosleep" },
+
+        onenter = function(inst)
+            inst.AnimState:PlayAnimation(anims.pre or "jump_pre", false)
+            local embark_x, embark_z = inst.components.embarker:GetEmbarkPosition()
+            inst:ForceFacePoint(embark_x, 0, embark_z)
+            if not wait_for_pre then
+				inst.sg.statemem.not_interrupted = true
+                inst.sg:GoToState("hop_loop", inst.sg.statemem.queued_post_land_state)
+            end
+        end,
+
+        timeline = timelines.hop_pre or nil,
+
+        events =
+        {
+            EventHandler("animover", 
+                function(inst) 
+                    if wait_for_pre then
+						inst.sg.statemem.not_interrupted = true
+                        inst.sg:GoToState("hop_loop", inst.sg.statemem.queued_post_land_state)
+                    end
+                end),
+        },
+
+		onexit = function(inst)
+			if not inst.sg.statemem.not_interrupted then
+	            inst.components.embarker:Cancel()
+			end
+		end,
+    })
+
+    table.insert(states, State
+    {
+        name = "hop_loop",
+        tags = { "doing", "nointerrupt", "busy", "jumping", "autopredict", "nomorph", "nosleep" },
+
+        onenter = function(inst, queued_post_land_state)
+			inst.sg.statemem.queued_post_land_state = queued_post_land_state
+            inst.AnimState:PlayAnimation(anims.loop or "jump_loop", true)
+			inst.sg.statemem.collisionmask = inst.Physics:GetCollisionMask()
+	        inst.Physics:SetCollisionMask(COLLISION.GROUND)
+			if not TheWorld.ismastersim then
+	            inst.Physics:SetLocalCollisionMask(COLLISION.GROUND)
+			end
+            inst.components.embarker:StartMoving()
+            inst:AddTag("ignorewalkableplatforms")
+        end,
+
+        timeline = timelines.hop_loop or nil,
+
+        events =
+        {
+            EventHandler("done_embark_movement", function(inst)
+                local px, _, pz = inst.Transform:GetWorldPosition()
+				inst.sg.statemem.not_interrupted = true
+                inst.sg:GoToState("hop_pst", {landed_in_water = not TheWorld.Map:IsPassableAtPoint(px, 0, pz), queued_post_land_state = inst.sg.statemem.queued_post_land_state} )
+            end),
+        },
+
+		onexit = function(inst)
+            inst.Physics:ClearLocalCollisionMask()
+			if inst.sg.statemem.collisionmask ~= nil then
+	            inst.Physics:SetCollisionMask(inst.sg.statemem.collisionmask)
+			end
+            inst:RemoveTag("ignorewalkableplatforms")
+			if not inst.sg.statemem.not_interrupted then
+	            inst.components.embarker:Cancel()
+			end
+
+			inst:RemoveTag("busy")
+			if inst.components.locomotor.isrunning then
+                inst:PushEvent("locomote")
+			end
+		end,
+    })
+
+    table.insert(states, State
+    {
+        name = "hop_pst",
+        tags = { "doing", "nointerrupt", "jumping", "autopredict", "nomorph", "nosleep" },
+
+        onenter = function(inst, data)
+            inst.AnimState:PlayAnimation(anims.pst or "jump_pst", false)
+
+            inst.components.embarker:Embark()
+			inst:RemoveTag("busy")
+
+            local nextstate = "hop_pst_complete"
+			if data ~= nil then
+				nextstate = (
+                                data.landed_in_water and landed_in_water_state ~= nil and
+                                (
+                                    type(landed_in_water_state) ~= "function" and landed_in_water_state or
+                                    landed_in_water_state(inst)
+                                )
+                            )
+							 or data.queued_post_land_state
+							 or nextstate
+			end
+            if wait_for_pre then
+                inst.sg.statemem.nextstate = nextstate
+            else
+                inst.sg:GoToState(nextstate)
+            end
+        end,
+
+        timeline = timelines.hop_pst or nil,
+
+        events =
+        {
+            EventHandler("animover", function(inst)
+                if wait_for_pre then
+                    inst.sg:GoToState(inst.sg.statemem.nextstate)
+                end
+            end),
+        },
+
+		onexit = function(inst)
+			-- here for now, should be moved into timeline
+            if land_sound and TheWorld.Map:GetPlatformAtPoint(inst.Transform:GetWorldPosition()) ~= nil then
+	            --For now we just have the land on boat sound
+                inst.SoundEmitter:PlaySound(land_sound)
+            end
+		end
+    })  
+
+    table.insert(states, State
+    {
+        name = "hop_pst_complete",
+        tags = {"autopredict", "nomorph", "nosleep" },
+
+        onenter = function(inst)
+			if inst.components.locomotor.isrunning then
+                inst:DoTaskInTime(0,
+                    function()
+                        if inst.sg.currentstate.name == "hop_pst_complete" then
+                            inst.sg:GoToState("idle")
+                        end
+                    end)
+            else
+                inst.sg:GoToState("idle")
+            end
+        end,
+    })
+end
+
+CommonStates.AddAmphibiousCreatureHopStates = function(states, config, anims, timelines, updates)
+	config = config or {}
+	anims = anims or {}
+	timelines = timelines or {}
+
+	local onenters = (config ~= nil and config.onenters ~= nil) and config.onenters or nil
+	local onexits = (config ~= nil and config.onexits ~= nil) and config.onexits or nil
+
+	local base_hop_pre_timeline = {
+        TimeEvent(config.swimming_clear_collision_frame or 0, function(inst) 
+			if inst.sg.statemem.swimming then
+				inst.Physics:ClearCollidesWith(COLLISION.LIMITS)
+			end
+		end),
+	}
+	timelines.hop_pre = timelines.hop_pre == nil and base_hop_pre_timeline or JoinArrays(timelines.hop_pre, base_hop_pre_timeline)
+
+    table.insert(states, State
+	{
+        name = "hop_pre",
+        tags = { "doing", "busy", "jumping", "canrotate" },
+
+        onenter = function(inst)
+			inst.sg.statemem.swimming = inst:HasTag("swimming")
+            inst.AnimState:PlayAnimation("jump")
+			if not inst.sg.statemem.swimming then		      
+				inst.Physics:ClearCollidesWith(COLLISION.LIMITS)
+			end
+			if inst.components.embarker:HasDestination() then
+	            inst.sg:SetTimeout(18 * FRAMES)
+                inst.components.embarker:StartMoving()
+			else
+	            inst.sg:SetTimeout(18 * FRAMES)
+                if inst.landspeed then
+                    inst.components.locomotor.runspeed = inst.landspeed 
+                end                
+                inst.components.locomotor:RunForward()
+			end
+
+			if onenters ~= nil and onenters.hop_pre ~= nil then
+				onenters.hop_pre(inst)
+			end
+        end,
+
+	    onupdate = function(inst,dt)                
+			if inst.components.embarker:HasDestination() then
+				if inst.sg.statemem.embarked then
+					inst.components.embarker:Embark()
+					inst.components.locomotor:FinishHopping()
+					inst.sg:GoToState("hop_pst", false)                    
+				elseif inst.sg.statemem.timeout then
+					inst.components.embarker:Cancel()
+					inst.components.locomotor:FinishHopping()
+
+					local x, y, z = inst.Transform:GetWorldPosition()
+					inst.sg:GoToState("hop_pst", not TheWorld.Map:IsVisualGroundAtPoint(x, y, z) and TheWorld.Map:GetPlatformAtPoint(x, z) == nil)
+				end
+            elseif inst.sg.statemem.timeout or  
+                   (inst.sg.statemem.tryexit and inst.sg.statemem.swimming == TheWorld.Map:IsVisualGroundAtPoint(inst.Transform:GetWorldPosition())) or 
+                   (not inst.components.locomotor.dest and not inst.components.locomotor.wantstomoveforward) then 
+				inst.components.embarker:Cancel()
+				inst.components.locomotor:FinishHopping()
+				local x, y, z = inst.Transform:GetWorldPosition()
+				inst.sg:GoToState("hop_pst", not TheWorld.Map:IsVisualGroundAtPoint(x, y, z) and TheWorld.Map:GetPlatformAtPoint(x, z) == nil)
+			end
+		end,
+
+        timeline = timelines.hop_pre,
+
+		ontimeout = function(inst)
+			inst.sg.statemem.timeout = true          
+		end,
+
+        events =
+        {
+            EventHandler("done_embark_movement", function(inst)
+				if not inst.AnimState:IsCurrentAnimation("jump_loop") then
+					inst.AnimState:PlayAnimation("jump_loop", false)
+				end
+				inst.sg.statemem.embarked = true
+            end),     
+            EventHandler("animover", function(inst)       
+				if not inst.AnimState:IsCurrentAnimation("jump_loop") then
+					if inst.AnimState:AnimDone() then                    
+						if not inst.components.embarker:HasDestination() then                                                               
+							inst.sg.statemem.tryexit = true
+						end                    
+					end 
+					inst.AnimState:PlayAnimation("jump_loop", false)
+				end
+            end),
+        },
+
+		onexit = function(inst)
+            inst.Physics:CollidesWith(COLLISION.LIMITS) 
+			if inst.components.embarker:HasDestination() then
+				inst.components.embarker:Cancel()
+				inst.components.locomotor:FinishHopping()
+			end
+
+			if onexits ~= nil and onexits.hop_pre ~= nil then
+				onexits.hop_pre(inst)
+			end
+		end,
+    })
+
+    table.insert(states, State
+	{
+        name = "hop_pst",
+        tags = { "busy", "jumping" },
+
+        onenter = function(inst, land_in_water)
+			if land_in_water then
+				inst.components.amphibiouscreature:OnEnterOcean()	            
+			else
+				inst.components.amphibiouscreature:OnExitOcean()	            
+			end
+
+			if onenters ~= nil and onenters.hop_pst ~= nil then
+				onenters.hop_pst(inst)
+			end
+
+            inst.AnimState:PlayAnimation("jump_pst")
+        end,
+
+        timeline = timelines.hop_pst,
+
+        events =
+        {
+            EventHandler("animover", function(inst)
+                if inst.AnimState:AnimDone() then
+                    inst.sg:GoToState("idle")
+                end
+            end),
+        },
+
+        onexit = function(inst)
+			if onexits ~= nil and onexits.hop_pst ~= nil then
+				onexits.hop_pst(inst)
+			end
+		end,
+    })
+
+    table.insert(states, State
+    {
+        name = "hop_antic",
+        tags = { "doing", "busy", "jumping", "canrotate" },
+
+        onenter = function(inst)
+            inst.components.locomotor:StopMoving()
+            inst.sg.statemem.swimming = inst:HasTag("swimming")
+
+            inst.AnimState:PlayAnimation("jump_antic")    
+
+            inst.sg:SetTimeout(30 * FRAMES)
+
+			if onenters ~= nil and onenters.hop_antic ~= nil then
+				onenters.hop_antic(inst)
+			end
+        end,
+
+        timeline = timelines.hop_antic,
+
+        ontimeout = function(inst)
+            inst.sg:GoToState("hop_pre")
+        end,
+        onexit = function(inst)
+			if onexits ~= nil and onexits.hop_antic ~= nil then
+				onexits.hop_antic(inst)
+			end
+        end,        
+    })
 end
 
 --------------------------------------------------------------------------
@@ -483,7 +881,7 @@ CommonStates.AddSleepStates = function(states, timelines, fns)
         name = "wake",
         tags = { "busy", "waking" },
 
-        onenter = function(inst)
+        onenter = function(inst)        
             if inst.components.locomotor ~= nil then
                 inst.components.locomotor:StopMoving()
             end
@@ -518,7 +916,7 @@ local function onenterfrozenpre(inst)
     if inst.components.locomotor ~= nil then
         inst.components.locomotor:StopMoving()
     end
-    inst.AnimState:PlayAnimation("frozen")
+    inst.AnimState:PlayAnimation("frozen", true)
     inst.SoundEmitter:PlaySound("dontstarve/common/freezecreature")
     inst.AnimState:OverrideSymbol("swap_frozen", "frozen", "frozen")
 end
@@ -1019,4 +1417,220 @@ CommonStates.AddFossilizedStates = function(states, timelines, fns)
 
         onexit = fns ~= nil and fns.unfossilized_onexit or nil,
     })
+end
+
+--------------------------------------------------------------------------
+
+CommonStates.AddRowStates = function(states, is_client)
+    table.insert(states, State
+    {
+        name = "row",
+        tags = { "rowing", "doing" },
+
+        onenter = function(inst)
+            local locomotor = inst.components.locomotor
+            local target_pos = nil
+            if locomotor.bufferedaction then
+                target_pos = locomotor.bufferedaction:GetActionPoint()
+                if target_pos == nil then
+                    target_pos = locomotor.bufferedaction.target:GetPosition()
+                    inst:ForceFacePoint(target_pos:Get())
+                end
+            else
+                target_pos = Vector3(inst.Transform:GetWorldPosition())                
+            end
+            inst:AddTag("is_rowing")
+            inst.AnimState:PlayAnimation("row_pre")
+            locomotor:Stop()
+
+            local my_x, my_y, my_z = inst.Transform:GetWorldPosition()
+            local boat_x, boat_y, boat_z = 0, 0, 0
+            local boat = TheWorld.Map:GetPlatformAtPoint(my_x, my_z)
+            if boat ~= nil then
+                boat_x, boat_y, boat_z = boat.Transform:GetWorldPosition()
+            end
+
+            if is_client then
+                inst:PerformPreviewBufferedAction()                
+            end
+    
+            local target_x, target_z = nil,nil
+
+            if inst.components.playercontroller.isclientcontrollerattached then
+                local dir_x, dir_z = VecUtil_Normalize(my_x - boat_x, my_z - boat_z)
+                target_x, target_z = my_x + dir_x, my_z + dir_z
+            else
+                target_x, target_z = target_pos.x, target_pos.z
+            end                   
+
+            local delta_target_x, delta_target_z = target_x- my_x, target_z - my_z
+            local delta_boat_x, delta_boat_z = my_x - boat_x, my_z - boat_z
+
+            local camera_down_vec = TheCamera:GetDownVec()
+            local camera_right_vec = TheCamera:GetRightVec()
+
+            local camera_up_x, camera_up_z = -camera_down_vec.x, -camera_down_vec.z
+            local camera_right_x, camera_right_z = camera_right_vec.x, camera_right_vec.z
+
+            local delta_target_x_camera, delta_target_z_camera = delta_target_x * camera_right_x + delta_target_z * camera_right_z, delta_target_x * camera_up_x + delta_target_z * camera_up_z
+            local delta_boat_x_camera, delta_boat_z_camera = delta_boat_x * camera_right_x + delta_boat_z * camera_right_z, delta_boat_x * camera_up_x + delta_boat_z * camera_up_z
+            
+            local target_anim = "row_medium"
+            local debug_id = ""
+            local is_facing_horizontal = math.abs(delta_target_x_camera) > math.abs(delta_target_z_camera)
+            local is_on_upper_half = delta_boat_z_camera > 0
+            local is_on_right_side = delta_boat_x_camera > 0
+            local is_facing_right = delta_target_x_camera > 0
+            local is_facing_up = delta_target_z_camera > 0
+
+            if is_facing_horizontal then
+                if is_on_upper_half then
+                    if is_facing_right then
+                        target_anim = "row_medium_off"
+                        debug_id = "is_facing_horizontal, is_on_upper_half, is_facing_right"
+                    else
+                        target_anim = "row_medium_off"
+                        debug_id = "is_facing_horizontal, is_on_upper_half, is_facing_left"
+                    end
+                else
+                    if is_facing_right then
+                        target_anim = "row_medium"
+                        debug_id = "is_facing_horizontal, is_on_lower_half, is_facing_right"
+                    else
+                        target_anim = "row_medium"
+                        debug_id = "is_facing_horizontal, is_on_lower_half, is_facing_left"
+                    end                    
+                end
+            else
+                if is_on_right_side then
+                    if is_facing_up then
+                        target_anim = "row_medium"
+                        debug_id = "is_facing_vertical, is_on_right_side, is_facing_up"
+                    else
+                        target_anim = "row_medium_off"
+                        debug_id = "is_facing_vertical, is_on_right_side, is_facing_down"
+                    end
+                else
+                    if is_facing_up then
+                        target_anim = "row_medium_off"
+                        debug_id = "is_facing_vertical, is_on_left_side, is_facing_up"
+                    else
+                        target_anim = "row_medium"
+                        debug_id = "is_facing_vertical, is_on_left_side, is_facing_down"
+                    end                    
+                end                
+            end
+
+            inst.AnimState:PushAnimation(target_anim, false) 
+
+            inst:ForceFacePoint(target_x, 0, target_z)
+        end, 
+
+        onexit = function(inst)
+            inst:RemoveTag("is_rowing")
+        end,
+
+        timeline =
+        {
+            TimeEvent(5 * FRAMES, function(inst)      
+                if not is_client then    
+                    inst.SoundEmitter:PlaySound("turnoftides/common/together/water/splash/small")
+                end
+            end),
+
+            TimeEvent(8 * FRAMES, function(inst)      
+                if not is_client then    
+                    inst:PerformBufferedAction()   
+                end
+            end),
+
+            TimeEvent(13 * FRAMES, function(inst)          
+                inst.sg:RemoveStateTag("rowing")
+            end),            
+        },
+
+        events = 
+        {
+            EventHandler("unequip", function(inst) inst.sg:GoToState("idle") end),
+            EventHandler("animqueueover", function(inst)
+                inst.sg:GoToState("row_idle")
+            end),          
+        },
+
+        ontimeout = function(inst)
+            if is_client then
+                inst:ClearBufferedAction()
+                inst.sg:GoToState("idle")
+            end
+        end,        
+    })
+
+    table.insert(states, State
+    {
+        name = "row_fail",
+        tags = { "busy", "row_fail" },
+
+        onenter = function(inst)
+            if is_client then
+                inst:PerformPreviewBufferedAction()  
+            else
+                inst:PerformBufferedAction()
+            end
+
+            inst:AddTag("is_row_failing")
+            inst.components.locomotor:Stop()
+            inst.AnimState:PlayAnimation("row_fail_pre") 
+            inst.AnimState:PushAnimation("row_fail", false) 
+        end,    
+
+        onexit = function(inst)
+            inst:RemoveTag("is_row_failing")                
+        end,       
+
+        timeline =
+        {
+            TimeEvent(5 * FRAMES, function(inst)      
+                if not is_client then    
+                    inst.SoundEmitter:PlaySound("turnoftides/common/together/water/splash/small")
+                end
+            end),
+
+            TimeEvent(13 * FRAMES, function(inst)      
+                if not is_client then     
+                    inst.SoundEmitter:PlaySound("turnoftides/common/together/water/splash/small")
+                end
+            end),            
+        },
+
+        events = 
+        {
+            EventHandler("unequip", function(inst) inst.sg:GoToState("idle") end),
+            EventHandler("animqueueover", function(inst)
+                inst.sg:GoToState("row_idle")
+            end),          
+        },
+
+        ontimeout = function(inst)
+            if is_client then
+                inst:ClearBufferedAction()
+                inst.sg:GoToState("idle")
+            end
+        end,             
+    })
+
+
+    table.insert(states, State
+    {
+        name = "row_idle",
+
+        onenter = function(inst)
+            inst.sg:SetTimeout(4 * FRAMES)
+        end,    
+
+        ontimeout = function(inst)   
+            inst.AnimState:PlayAnimation("row_idle_pst")         
+            inst.sg:GoToState("idle", true)
+        end,                    
+    })
+
 end

@@ -4,10 +4,17 @@ local assets =
     Asset("ANIM", "anim/goldenpickaxe.zip"),
     Asset("ANIM", "anim/swap_pickaxe.zip"),
     Asset("ANIM", "anim/swap_goldenpickaxe.zip"),
+    Asset("ANIM", "anim/floating_items.zip"),
 }
 
 local function onequip(inst, owner)
-    owner.AnimState:OverrideSymbol("swap_object", "swap_pickaxe", "swap_pickaxe")
+    local skin_build = inst:GetSkinBuild()
+    if skin_build ~= nil then
+        owner:PushEvent("equipskinneditem", inst:GetSkinName())
+        owner.AnimState:OverrideItemSkinSymbol("swap_object", skin_build, "swap_pickaxe", inst.GUID, "swap_pickaxe")
+    else
+        owner.AnimState:OverrideSymbol("swap_object", "swap_pickaxe", "swap_pickaxe")
+    end
     owner.AnimState:Show("ARM_carry")
     owner.AnimState:Hide("ARM_normal")
 end
@@ -15,6 +22,10 @@ end
 local function onunequip(inst, owner)
     owner.AnimState:Hide("ARM_carry")
     owner.AnimState:Show("ARM_normal")
+    local skin_build = inst:GetSkinBuild()
+    if skin_build ~= nil then
+        owner:PushEvent("unequipskinneditem", inst:GetSkinName())
+    end
 end
 
 local function common_fn(bank, build)
@@ -32,6 +43,14 @@ local function common_fn(bank, build)
     inst.AnimState:PlayAnimation("idle")
 
     inst:AddTag("sharp")
+
+    --tool (from tool component) added to pristine state for optimization
+    inst:AddTag("tool")
+
+    --weapon (from weapon component) added to pristine state for optimization
+    inst:AddTag("weapon")
+
+    MakeInventoryFloatable(inst, "med", 0.05, {0.75, 0.4, 0.75})
 
     inst.entity:SetPristine()
 
@@ -69,14 +88,28 @@ local function common_fn(bank, build)
 end
 
 local function onequipgold(inst, owner)
-    owner.AnimState:OverrideSymbol("swap_object", "swap_goldenpickaxe", "swap_goldenpickaxe")
+    local skin_build = inst:GetSkinBuild()
+    if skin_build ~= nil then
+        owner:PushEvent("equipskinneditem", inst:GetSkinName())
+        owner.AnimState:OverrideItemSkinSymbol("swap_object", skin_build, "swap_goldenpickaxe", inst.GUID, "swap_goldenpickaxe")
+    else
+        owner.AnimState:OverrideSymbol("swap_object", "swap_goldenpickaxe", "swap_goldenpickaxe")
+    end
     owner.SoundEmitter:PlaySound("dontstarve/wilson/equip_item_gold")
     owner.AnimState:Show("ARM_carry")
     owner.AnimState:Hide("ARM_normal")
 end
 
 local function normal()
-    return common_fn("pickaxe", "pickaxe")
+    local inst = common_fn("pickaxe", "pickaxe")
+
+    if not TheWorld.ismastersim then
+        return inst
+    end
+
+    inst.components.floater:SetBankSwapOnFloat(true, -11, {sym_build = "swap_pickaxe"})
+
+    return inst
 end
 
 local function golden()
@@ -90,6 +123,8 @@ local function golden()
     inst.components.weapon.attackwear = 1 / TUNING.GOLDENTOOLFACTOR
 
     inst.components.equippable:SetOnEquip(onequipgold)
+
+    inst.components.floater:SetBankSwapOnFloat(true, -11, {sym_build = "swap_goldenpickaxe"})
 
     return inst
 end

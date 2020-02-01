@@ -43,12 +43,18 @@ local prefabs =
 	"pomegranate_seeds",
 	"dragonfruit_seeds",
 	"watermelon_seeds",
+    "potato_seeds",
+    "tomato_seeds",
+    "asparagus_seeds",
+    "onion_seeds",
+    "garlic_seeds",
+    "pepper_seeds",
 	"butterfly",
 	"robin",
 	"robin_winter",
 	"canary",
 	"crow",
-	"fish",
+	"pondfish",
 	"transistor",
 	"froglegs",
 	"batwing",
@@ -114,6 +120,8 @@ local friendGiftPrefabs =
 	{ -- tier 1 (basic seeds)
 		"carrot_seeds",
 		"corn_seeds",
+        "potato_seeds",
+        "tomato_seeds",
 	},
 	{ -- tier 2 (basic, generic stuff)
 		"flint",
@@ -139,6 +147,10 @@ local friendGiftPrefabs =
 		"pomegranate_seeds",
 		"dragonfruit_seeds",
 		"watermelon_seeds",
+        "asparagus_seeds",
+        "onion_seeds",
+        "garlic_seeds",
+        "pepper_seeds",
 	},
 	{ --tier 5 (food)
 		"ice",
@@ -149,7 +161,7 @@ local friendGiftPrefabs =
 		"red_cap",
 		"blue_cap",
 		"green_cap",
-		"fish",
+		"pondfish",
 		"froglegs",
 	},
 	{ --tier 6 (live animals + tumbleweed)
@@ -382,6 +394,10 @@ local function fn()
 
 	inst:AddComponent("locomotor")
 	inst.components.locomotor.walkspeed = 3
+
+    -- boat hopping
+    inst.components.locomotor:SetAllowPlatformHopping(true)
+    inst:AddComponent("embarker")
 
 	inst:WatchWorldState("israining", OnIsRaining)
 

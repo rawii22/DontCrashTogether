@@ -457,6 +457,7 @@ local function fn()
     inst.DynamicShadow:SetSize(6, 3.5)
     inst.Transform:SetSixFaced()
     inst.Transform:SetScale(1.3, 1.3, 1.3)
+
     MakeFlyingGiantCharacterPhysics(inst, 500, 1.4)
 
     inst.AnimState:SetBank("dragonfly")
@@ -471,6 +472,7 @@ local function fn()
     inst:AddTag("scarytoprey")
     inst:AddTag("largecreature")
     inst:AddTag("flying")
+    inst:AddTag("ignorewalkableplatformdrowning")
 
     inst.Light:Enable(false)
     inst.Light:SetRadius(2)
@@ -561,7 +563,7 @@ local function fn()
 
     inst.components.locomotor:EnableGroundSpeedMultiplier(false)
     inst.components.locomotor:SetTriggersCreep(false)
-    inst.components.locomotor.pathcaps = { ignorewalls = true }
+    inst.components.locomotor.pathcaps = { ignorewalls = true, allowocean = true }
     inst.components.locomotor.walkspeed = TUNING.DRAGONFLY_SPEED
 
     inst.components.rampingspawner.getspawnposfn = GetLavaePos

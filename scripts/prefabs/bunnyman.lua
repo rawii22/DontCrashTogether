@@ -4,6 +4,7 @@ local assets =
     Asset("ANIM", "anim/manrabbit_actions.zip"),
     Asset("ANIM", "anim/manrabbit_attacks.zip"),
     Asset("ANIM", "anim/manrabbit_build.zip"),
+    Asset("ANIM", "anim/manrabbit_boat_jump.zip"),
 
     Asset("ANIM", "anim/manrabbit_beard_build.zip"),
     Asset("ANIM", "anim/manrabbit_beard_basic.zip"),
@@ -30,7 +31,7 @@ local SHARE_TARGET_DIST = 30
 
 local function IsCrazyGuy(guy)
     local sanity = guy ~= nil and guy.replica.sanity or nil
-    return sanity ~= nil and sanity:GetPercentNetworked() <= (guy:HasTag("dappereffects") and TUNING.DAPPER_BEARDLING_SANITY or TUNING.BEARDLING_SANITY)
+    return sanity ~= nil and sanity:IsInsanityMode() and sanity:GetPercentNetworked() <= (guy:HasTag("dappereffects") and TUNING.DAPPER_BEARDLING_SANITY or TUNING.BEARDLING_SANITY)
 end
 
 local function ontalk(inst)
@@ -68,7 +69,7 @@ local function ShouldAcceptItem(inst, item)
             item.components.equippable.equipslot == EQUIPSLOTS.HEAD
         ) or
         (   --accept food, but not too many carrots for loyalty!
-            item.components.edible ~= nil and
+            inst.components.eater:CanEat(item) and
             (   (item.prefab ~= "carrot" and item.prefab ~= "carrot_cooked") or
                 inst.components.follower.leader == nil or
                 inst.components.follower:GetLoyaltyPercent() <= .9
@@ -79,7 +80,20 @@ end
 local function OnGetItemFromPlayer(inst, giver, item)
     --I eat food
     if item.components.edible ~= nil then
-        if item.prefab == "carrot" or item.prefab == "carrot_cooked" then
+        if (    item.prefab == "carrot" or
+                item.prefab == "carrot_cooked"
+            ) and
+            item.components.inventoryitem ~= nil and
+            (   --make sure it didn't drop due to pockets full
+                item.components.inventoryitem:GetGrandOwner() == inst or
+                --could be merged into a stack
+                (   not item:IsValid() and
+                    inst.components.inventory:FindItem(function(obj)
+                        return obj.prefab == item.prefab
+                            and obj.components.stackable ~= nil
+                            and obj.components.stackable:IsStack()
+                    end) ~= nil)
+            ) then
             if inst.components.combat:TargetIs(giver) then
                 inst.components.combat:SetTarget(nil)
             elseif giver.components.leader ~= nil then
@@ -127,7 +141,7 @@ local function OnNewTarget(inst, data)
 end
 
 local function is_meat(item)
-    return item.components.edible ~= nil  and item.components.edible.foodtype == FOODTYPE.MEAT
+    return item.components.edible ~= nil and item.components.edible.foodtype == FOODTYPE.MEAT and not item:HasTag("smallcreature")
 end
 
 local function NormalRetargetFn(inst)
@@ -241,6 +255,10 @@ local function fn()
     inst:AddComponent("locomotor") -- locomotor must be constructed before the stategraph
     inst.components.locomotor.runspeed = TUNING.PIG_RUN_SPEED * 2.2 -- account for them being stopped for part of their anim
     inst.components.locomotor.walkspeed = TUNING.PIG_WALK_SPEED * 1.9 -- account for them being stopped for part of their anim
+
+    -- boat hopping setup
+    inst.components.locomotor:SetAllowPlatformHopping(true)
+    inst:AddComponent("embarker")
 
     inst:AddComponent("bloomer")
 
