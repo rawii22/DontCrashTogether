@@ -1969,7 +1969,7 @@ return
         {
             SLEEPING = "It's sleeping.",
             DEAD = "Considered a delicacy in some countries.",
-            GENERIC = "A amphibian tetrapod.",
+            GENERIC = "An amphibian tetrapod.",
         },
         FROGGLEBUNWICH = "It was an interesting choice to serve it as a sandwich.",
         FROGLEGS = "They're still twitching a bit.",

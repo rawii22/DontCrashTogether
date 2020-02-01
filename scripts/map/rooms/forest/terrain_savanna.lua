@@ -1,4 +1,3 @@
-
 AddRoom("BGSavanna", {
 					colour={r=.8,g=.8,b=.2,a=.50},
 					value = GROUND.SAVANNA,
@@ -7,10 +6,11 @@ AddRoom("BGSavanna", {
 					                distributepercent = .1,
 					                distributeprefabs=
 					                {
-										spiderden=0.001,
-										perma_grass =0.09,
-										rabbithole=0.025,
-										flower=0.003,
+										spiderden = 0.001,
+										perma_grass = 0.09,
+										rabbithole = 0.025,
+										flower = 0.003,
+										wheat = 0.1,
 					                },
 					            }
 					})
@@ -25,22 +25,25 @@ AddRoom("Plain", {
 					                {
 					                	rock1 = 0.05,
 					                    perma_grass = 0.5,
-					                    rabbithole= 0.25, 
-					                    green_mushroom = .005,
+					                    rabbithole = 0.25, 
+					                    green_mushroom = 0.005,
+										wheat = 0.75,
 					                },
 					            }
 					})
 	-- Rabbit holes, Beefalow hurds if bigger
-AddRoom("BarePlain", {					colour={r=.5,g=.5,b=.45,a=.50},
+AddRoom("BarePlain", {
+					colour={r=.5,g=.5,b=.45,a=.50},
 					value = GROUND.SAVANNA,
 					tags = {"ExitPiece", "Chester_Eyebone"},
 					contents =  {
 					                distributepercent = 0.1,
-					                distributeprefabs=
+					                distributeprefabs =
 					                {
 					                    perma_grass = 0.8,
-					                    rabbithole=0.4,
---					                    beefalo=0.2
+					                    rabbithole = 0.4,
+--					                    beefalo = 0.2,
+										wheat = 0.8,
 					                },
 					            }
 					})

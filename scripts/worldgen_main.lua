@@ -391,10 +391,10 @@ function GenerateNew(debug, world_gen_data)
 
         if savedata == nil then
             if try >= maxtries then
-                print("An error occured during world and we give up! [was ",try," of ",maxtries,"]")
+                print("An error occured during world gen and we give up! [was ",try," of ",maxtries,"]")
                 return nil
             else
-                print("An error occured during world gen we will retry! [was ",try," of ",maxtries,"]")
+                print("An error occured during world gen and we will retry! [was ",try," of ",maxtries,"]")
             end
             try = try + 1
 

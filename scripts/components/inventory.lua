@@ -990,7 +990,7 @@ function Inventory:Has(item, amount) --Note(Peter): We don't care about v.skinna
         local overflow_enough, overflow_found = overflow:Has(item, amount)
         num_found = num_found + overflow_found
     end
-
+	
     return num_found >= amount, num_found
 end
 
