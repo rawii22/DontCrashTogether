@@ -36,8 +36,14 @@ local function onunequip(inst, owner)
     inst.components.fueled:StopConsuming()
 end
 
-local function onequip_grass(inst, owner) 
-    owner.AnimState:OverrideSymbol("swap_object", "swap_parasol", "swap_parasol")
+local function onequip_grass(inst, owner)
+    local skin_build = inst:GetSkinBuild()
+    if skin_build ~= nil then
+        owner:PushEvent("equipskinneditem", inst:GetSkinName())
+        owner.AnimState:OverrideItemSkinSymbol("swap_object", skin_build, "swap_parasol", inst.GUID, "swap_parasol")
+    else
+        owner.AnimState:OverrideSymbol("swap_object", "swap_parasol", "swap_parasol")
+    end
     owner.AnimState:Show("ARM_carry")
     owner.AnimState:Hide("ARM_normal")
 
@@ -45,6 +51,11 @@ local function onequip_grass(inst, owner)
 end
 
 local function onunequip_grass(inst, owner)
+    local skin_build = inst:GetSkinBuild()
+    if skin_build ~= nil then
+        owner:PushEvent("unequipskinneditem", inst:GetSkinName())
+    end
+
     owner.AnimState:Hide("ARM_carry")
     owner.AnimState:Show("ARM_normal")
 
@@ -85,6 +96,7 @@ local function common_fn(name)
     inst:AddTag("nopunch")
     inst:AddTag("umbrella")
 
+
     --waterproofer (from waterproofer component) added to pristine state for optimization
     inst:AddTag("waterproofer")
 
@@ -95,6 +107,8 @@ local function common_fn(name)
     if not TheWorld.ismastersim then
         return inst
     end
+
+    inst:AddComponent("tradable")
 
     inst:AddComponent("waterproofer")
     inst:AddComponent("inspectable")

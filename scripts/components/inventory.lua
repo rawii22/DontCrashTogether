@@ -112,7 +112,7 @@ function Inventory:OnSave()
         end
     end
 
-    if self.activeitem and not (self.activeitem.components.equippable and self.equipslots[self.activeitem.components.equippable.equipslot] == self.activeitem) then
+    if self.activeitem and self.activeitem.persists and not (self.activeitem.components.equippable and self.equipslots[self.activeitem.components.equippable.equipslot] == self.activeitem) then
         data.activeitem, refs = self.activeitem:GetSaveRecord()
         if refs then
             for k,v in pairs(refs) do
@@ -964,7 +964,9 @@ function Inventory:GetOverflowContainer()
         return
     end
     local item = self:GetEquippedItem(EQUIPSLOTS.BODY)
-    return item ~= nil and item.components.container or nil
+    return (item ~= nil and item.components.container ~= nil and item.components.container.canbeopened)
+        and item.components.container
+        or nil
 end
 
 function Inventory:Has(item, amount) --Note(Peter): We don't care about v.skinname for inventory Has requests.

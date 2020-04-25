@@ -1102,10 +1102,13 @@ AddGameDebugKey(KEY_9, function()
     else
         if not ThePlayer.shownothightlight then
             ThePlayer.shownothightlight = true
+            TheWorld.speechdisabled = true
         else
+            TheWorld.speechdisabled = nil
             ThePlayer.shownothightlight = nil
         end
         ThePlayer.HUD:Toggle()
+
     end
 end)
 
@@ -1130,7 +1133,7 @@ local function DebugRMB(x,y)
                 MouseCharacter:Remove()
             end
         else
-            local ents = TheSim:FindEntities(pos.x, pos.y, pos.z, 5, nil, {"wall"})
+            local ents = TheSim:FindEntities(pos.x, pos.y, pos.z, 5, nil, {"wall", "INLIMBO"})
             for k,v in pairs(ents) do
                 if v.components.health and v ~= DebugKeyPlayer() then
                     v.components.health:Kill()

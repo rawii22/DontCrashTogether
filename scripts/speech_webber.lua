@@ -161,6 +161,9 @@ return{
 
             --MapRecorder/MapExplorer
             WRONGWORLD = "Is it upside down? Nope. It's just wrong.",
+			
+			--MapSpotRevealer/messagebottle
+			MESSAGEBOTTLEMANAGER_NOT_FOUND = "We should wait until we get outside.",--Likely trying to read messagebottle treasure map in caves
         },
         WRAPBUNDLE =
         {
@@ -214,6 +217,10 @@ return{
 		{
 			TOO_SMALL = "This little guy's too small!",
 		},
+        BEGIN_QUEST =
+        {
+            ONEGHOST = "only_used_by_wendy",
+        },
 	},
 	ACTIONFAIL_GENERIC = "Mom told me never to do that.",
 	ANNOUNCE_BOAT_LEAK = "The boat is crying!",
@@ -491,6 +498,11 @@ return{
 	},
 
 	ANNOUNCE_WEIGHT = "Weight: {weight}",
+	ANNOUNCE_WEIGHT_HEAVY  = "Weight: {weight}\nWoah, that's heavy!",
+
+	-- these are just for testing for now, no need to write real strings yet
+	ANNOUNCE_WINCH_CLAW_MISS = "Oops! We missed it.",
+	ANNOUNCE_WINCH_CLAW_NO_ITEM = "Aww... nothing.",
 
     --Wurt announce strings
 --fallback to speech_wilson.lua     ANNOUNCE_KINGCREATED = "only_used_by_wurt",
@@ -517,6 +529,28 @@ return{
     ANNOUNCE_CARRAT_ERROR_FELL_ASLEEP = "This is no time for a nap!",    
     ANNOUNCE_CARRAT_ERROR_WALKING = "Come on, you've got to run faster!",    
     ANNOUNCE_CARRAT_ERROR_STUNNED = "Oh no! Snap out of it!",
+
+    ANNOUNCE_GHOST_QUEST = "only_used_by_wendy",
+--fallback to speech_wilson.lua     ANNOUNCE_GHOST_HINT = "only_used_by_wendy",
+--fallback to speech_wilson.lua     ANNOUNCE_GHOST_TOY_NEAR = {
+--fallback to speech_wilson.lua         "only_used_by_wendy",
+--fallback to speech_wilson.lua     },
+--fallback to speech_wilson.lua 	ANNOUNCE_SISTURN_FULL = "only_used_by_wendy",
+--fallback to speech_wilson.lua     ANNOUNCE_ABIGAIL_DEATH = "only_used_by_wendy",
+--fallback to speech_wilson.lua     ANNOUNCE_ABIGAIL_RETRIEVE = "only_used_by_wendy",
+--fallback to speech_wilson.lua 	ANNOUNCE_ABIGAIL_LOW_HEALTH = "only_used_by_wendy",
+    ANNOUNCE_ABIGAIL_SUMMON = 
+	{
+--fallback to speech_wilson.lua 		LEVEL1 = "only_used_by_wendy",
+--fallback to speech_wilson.lua 		LEVEL2 = "only_used_by_wendy",
+--fallback to speech_wilson.lua 		LEVEL3 = "only_used_by_wendy",
+	},
+
+    ANNOUNCE_GHOSTLYBOND_LEVELUP = 
+	{
+--fallback to speech_wilson.lua 		LEVEL2 = "only_used_by_wendy",
+--fallback to speech_wilson.lua 		LEVEL3 = "only_used_by_wendy",
+	},
 
 	BATTLECRY =
 	{
@@ -557,6 +591,11 @@ return{
         ABIGAIL_FLOWER =
         {
             GENERIC ="Pretty petals!",
+			LEVEL1 = "Can she hear us in there?",
+			LEVEL2 = "C'mon Abigail, Wendy misses you!",
+			LEVEL3 = "Helloooo? Do you want to come out now?",
+
+			-- deprecated
             LONG = "I think it's listening to us!",
             MEDIUM = "It's getting creepy!",
             SOON = "It gives us itches and skritches up our spine!",
@@ -1059,7 +1098,24 @@ return{
 		MAXWELLPHONOGRAPH = "We could listen to that forever!",
 		BOOMERANG = "Boomerangarangarang!",
 		PIGGUARD = "We wouldn't want to cross that one.",
-		ABIGAIL = "That's no party poltergeist!",
+		ABIGAIL =
+		{
+            LEVEL1 =
+            {
+                "We're a bit old for playing peek-a-boo.",
+                "We're a bit old for playing peek-a-boo.",
+            },
+            LEVEL2 = 
+            {
+                "We're a bit old for playing peek-a-boo.",
+                "We're a bit old for playing peek-a-boo.",
+            },
+            LEVEL3 = 
+            {
+                "We're a bit old for playing peek-a-boo.",
+                "We're a bit old for playing peek-a-boo.",
+            },
+		},
 		ADVENTURE_PORTAL = "Something wicked this way comes.",
 		AMULET = "It's a fine necklace, I suppose.",
 		ANIMAL_TRACK = "Whatever it is, it travels single file.",
@@ -1308,6 +1364,8 @@ return{
         CHESSPIECE_ANCHOR = "Anchors away!",
         CHESSPIECE_MOON = "Almost as pretty as the real thing.",
         CHESSPIECE_CARRAT = "It makes us feel content.",
+        CHESSPIECE_MALBATROSS = "Not such a big bad bird now!",
+        CHESSPIECE_CRABKING = "He didn't seem very happy.",
         CHESSJUNK1 = "A mess of chess.",
         CHESSJUNK2 = "A mess of chess.",
         CHESSJUNK3 = "A mess of chess.",
@@ -2213,6 +2271,18 @@ return{
         TRINKET_44 = "The plant is so pretty!", -- Broken Terrarium ONI trinket
         TRINKET_45 = "It doesn't get any good channels.", -- Odd Radio ONI trinket
         TRINKET_46 = "What's it for?", -- Hairdryer ONI trinket
+
+        -- The numbers align with the trinket numbers above.
+        LOST_TOY_1  = "We think those might belong to someone else.",
+        LOST_TOY_2  = "We think those might belong to someone else.",
+        LOST_TOY_7  = "We think those might belong to someone else.",
+        LOST_TOY_10 = "We think those might belong to someone else.",
+        LOST_TOY_11 = "We think those might belong to someone else.",
+        LOST_TOY_14 = "We think those might belong to someone else.",
+        LOST_TOY_18 = "We think those might belong to someone else.",
+        LOST_TOY_19 = "We think those might belong to someone else.",
+        LOST_TOY_42 = "We think those might belong to someone else.",
+        LOST_TOY_43 = "We think those might belong to someone else.",
         
         HALLOWEENCANDY_1 = "Oh, Wendy! We'll trade you for your choco pigs!",
         HALLOWEENCANDY_2 = "Haha ew! It's weird!",
@@ -2976,6 +3046,9 @@ return{
         MOON_ALTAR_ROCK_GLASS = "Oh no, someone's trapped inside that rock!",
         MOON_ALTAR_ROCK_SEED = "Oh no, someone's trapped inside that rock!",
 
+        MOON_ALTAR_CROWN = "It wants to go back home.",
+        MOON_ALTAR_COSMIC = "We think it says we're getting closer.",
+
         SEAFARING_PROTOTYPER =
         {
             GENERIC = "There's all kinds of fun things you can do at sea.",
@@ -3071,12 +3144,20 @@ return{
 		OCEANFISHINGLURE_SPOON_RED = "Ouch! It's sharp!",
 		OCEANFISHINGLURE_SPOON_GREEN = "Ouch! It's sharp!",
 		OCEANFISHINGLURE_SPOON_BLUE = "Ouch! It's sharp!",
+		OCEANFISHINGLURE_HERMIT_RAIN = "Do fish know when it's raining?",
+		OCEANFISHINGLURE_HERMIT_SNOW = "Fishing in the snow might be fun!",
+		OCEANFISHINGLURE_HERMIT_DROWSY = "It makes our head feel fuzzy... fuzzier than normal.",
+		OCEANFISHINGLURE_HERMIT_HEAVY = "We're gonna catch the biggest fish with this!",
 
 		OCEANFISH_SMALL_1 = "It's so little!",
 		OCEANFISH_SMALL_2 = "Aww, just a little guy.",
 		OCEANFISH_SMALL_3 = "It's kind of cute. Too bad we're gonna eat it.",
 		OCEANFISH_SMALL_4 = "We know we can catch a bigger fish!",
 		OCEANFISH_SMALL_5 = "Woah, this fish is weird!",
+		OCEANFISH_SMALL_6 = "What if we got a pile of these and jumped in it?",
+		OCEANFISH_SMALL_7 = "Wendy got mad when we said it reminded us of her...",
+		OCEANFISH_SMALL_8 = "Ow! Owie! Hot!!",
+
 		OCEANFISH_MEDIUM_1 = "Eww, it'd covered in mud!",
 		OCEANFISH_MEDIUM_2 = "You'd be pretty tasty with some chips.",
 		OCEANFISH_MEDIUM_3 = "Yikes, this one's all prickly!",
@@ -3084,6 +3165,7 @@ return{
 		OCEANFISH_MEDIUM_5 = "Does this count as eating our vegetables?",
 		OCEANFISH_MEDIUM_6 = "It looks like it has whiskers!",
 		OCEANFISH_MEDIUM_7 = "It looks like it has whiskers!",
+		OCEANFISH_MEDIUM_8 = "It's a fishsicle!",
 
 		PONDFISH = "It could stand to be fried.",
 		PONDEEL = "Fresh water-snake.",
@@ -3097,13 +3179,18 @@ return{
 		FISH_BOX = "It's like an aquarium! Except we eat the fish...",
         POCKET_SCALE = "Wonder how heavy our fish is!",
 
+		TACKLECONTAINER = "It's like a toybox, but for fishing stuff!",
+		SUPERTACKLECONTAINER = "We can put way more fishing stuff in there!",
+
 		TROPHYSCALE_FISH =
 		{
 			GENERIC = "Woah! We should find a big fish to put in there!",
 			HAS_ITEM = "Weight: {weight}\nCaught by: {owner}",
+			HAS_ITEM_HEAVY = "Weight: {weight}\nCaught by: {owner}\nWe've never seen such a heavy fish!",
 			BURNING = "Oh no oh no!",
 			BURNT = "Aww...",
 			OWNER = "Weight: {weight}\nCaught by: {owner}\nWe did it!",
+			OWNER_HEAVY = "Weight: {weight}\nCaught by: {owner}\nWe caught it all by ourselves!",
 		},
 
 		OCEANFISHABLEFLOTSAM = "Yuck, it's just a big chunk of mud!",
@@ -3112,7 +3199,72 @@ return{
 		SEAFOODGUMBO = "We could eat it forever!",
 		SURFNTURF = "Eww, healthy!",
 
+        WOBSTER_SHELLER = "We'd better stay away from the pinchy bits.", 
+        WOBSTER_DEN = "Wonder what lives in there?",
+        WOBSTER_SHELLER_DEAD = "It's not moving anymore.",
+        WOBSTER_SHELLER_DEAD_COOKED = "Yum, yum, yum!",
+
+        LOBSTERBISQUE = "We want to pour it all over our tongues!",
+        LOBSTERDINNER = "We have to eat it with our eyes closed. Too many legs!",
+
+        WOBSTER_MOONGLASS = "That's not how they usually look, is it?",
+        MOONGLASS_WOBSTER_DEN = "We hear something tip-tapping in there.",
+
+		TRIDENT = "We don't know how to play, but we can try!",
+		
+		WINCH =
+		{
+			GENERIC = "We're going hunting for treasure!",
+			RETRIEVING_ITEM = "We got something!",
+			HOLDING_ITEM = "Is it something good?",
+		},
+
+        HERMITHOUSE = {
+            GENERIC = "We hope this makes her feel happier!",
+            BUILTUP = "She must be sad living here all alone...",
+        }, 
+        
+        SHELL_CLUSTER = "Any pretty shells in there?",
+        --
+		SINGINGSHELL_OCTAVE3 =
+		{
+			GENERIC = "We thought we saw something skitter inside it!",
+		},
+		SINGINGSHELL_OCTAVE4 =
+		{
+			GENERIC = "It makes us want to hum along.",
+		},
+		SINGINGSHELL_OCTAVE5 =
+		{
+			GENERIC = "Do you know any songs?",
+        },
+
+        CHUM = "We like feeding the fish!",
+
+        SUNKENCHEST =
+        {
+            GENERIC = "Whew... we thought there might be an angry clam inside.",
+            LOCKED = "It won't let us in!",
+        },
+
+        RESKIN_TOOL = "Awww do we have to clean?",
+        MOON_FISSURE_PLUGGED = "Woah! Why didn't we think of that?",
+
+
 		----------------------- ROT STRINGS GO ABOVE HERE ------------------
+
+		GHOSTLYELIXIR_SLOWREGEN = "Hey, you didn't tell me you were making crafts!",
+		GHOSTLYELIXIR_FASTREGEN = "Hey, you didn't tell me you were making crafts!",
+		GHOSTLYELIXIR_SHIELD = "Hey, you didn't tell me you were making crafts!",
+		GHOSTLYELIXIR_ATTACK = "Hey, you didn't tell me you were making crafts!",
+		GHOSTLYELIXIR_SPEED = "Hey, you didn't tell me you were making crafts!",
+		GHOSTLYELIXIR_RETALIATION = "Hey, you didn't tell me you were making crafts!",
+		SISTURN =
+		{
+			GENERIC = "It's a little Abigail house!",
+			SOME_FLOWERS = "We can find more flowers!",
+			LOTS_OF_FLOWERS = "We feel warm and fuzzy... well, more than usual.",
+		},
 
         --Wortox
 --fallback to speech_wilson.lua         WORTOX_SOUL = "only_used_by_wortox", --only wortox can inspect souls
@@ -3214,6 +3366,45 @@ return{
         MERM_PRINCE = "Wow, becoming a king looks easy!",
 
         SQUID = "Wish we had eyes like that!",
+
+		GHOSTFLOWER = "This seems like something Wendy would like.",
+        SMALLGHOST = "Hey little guy! Wanna play?",
+
+        CRABKING = 
+        {
+            GENERIC = "He looks pretty crabby!",
+            INERT = "Someone forgot to decorate their sandcastle.",
+        },
+		CRABKING_CLAW = "Aaah! Leave us alone!",
+		
+		MESSAGEBOTTLE = "There's something inside!",
+		MESSAGEBOTTLEEMPTY = "It's like the jars grandma used for her preserves.",
+
+        MEATRACK_HERMIT =
+        {
+            DONE = "Ma'am! It's food time!",
+            DRYING = "Is it done yet?",
+            DRYINGINRAIN = "It's hard to dry when it's raining.",
+            GENERIC = "Maybe we could share some meat?",
+            BURNT = "It burned away.",
+            DONE_NOTMEAT = "Ma'am! It's food time!",
+            DRYING_NOTMEAT = "Is it done yet? I'm hungry.",
+            DRYINGINRAIN_NOTMEAT = "It's hard to dry when it's raining.",
+        },
+        BEEBOX_HERMIT =
+        {
+            READY = "Hey Ms. Old Lady! Look at all the honey they made!",
+            FULLHONEY = "Hey Ms. Old Lady! Look at all the honey they made!",
+            GENERIC = "We hear a lot of buzzing inside...",
+            NOHONEY = "There's no honey inside.",
+            SOMEHONEY = "Work faster, bees!",
+            BURNT = "The site of The Great Honey Fire.",
+        },
+
+        HERMITCRAB = "She reminds me of grandma... but meaner.",
+
+        HERMIT_PEARL = "We'll take really good care of it!",
+        HERMIT_CRACKED_PEARL = "We hope Ms. Pearl isn't too mad at us...",
     },
 
     DESCRIBE_GENERIC = "Can we play with it?",

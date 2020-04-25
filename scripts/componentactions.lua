@@ -184,6 +184,12 @@ local COMPONENT_ACTIONS =
                 table.insert(actions, ACTIONS.HARVEST)
             end
         end,
+        
+        cyclable = function(inst, doer, actions, right)
+            if right and inst:HasTag("cancycle") then
+                table.insert(actions, ACTIONS.CYCLE)
+            end
+        end,
 
         dryer = function(inst, doer, actions)
             if inst:HasTag("dried") and not inst:HasTag("burnt") then 
@@ -390,6 +396,16 @@ local COMPONENT_ACTIONS =
             end
         end,
 
+        questowner = function(inst, doer, actions, right)
+            if right and (inst.CanBeActivatedBy_Client == nil or inst:CanBeActivatedBy_Client(doer)) then
+                if inst:HasTag("questing") then
+                    table.insert(actions, ACTIONS.ABANDON_QUEST)
+                else
+                    table.insert(actions, ACTIONS.BEGIN_QUEST)
+                end
+            end
+        end,
+
         talkable = function(inst, doer, actions)
             if inst:HasTag("maxwellnottalking") then
                 table.insert(actions, ACTIONS.TALKTO)
@@ -459,7 +475,7 @@ local COMPONENT_ACTIONS =
                     end
                 end
             end            
-        end,
+		end,
 
         writeable = function(inst, doer, actions)
             if inst:HasTag("writeable") then
@@ -676,6 +692,12 @@ local COMPONENT_ACTIONS =
             end
         end,
 
+		ghostlyelixir = function(inst, doer, target, actions)
+			if target:HasTag("ghostlyelixirable") then
+                table.insert(actions, ACTIONS.GIVE)
+			end
+		end,
+
 		halloweenpotionmoon = function(inst, doer, target, actions)
 			if not target:HasTag("DECOR") then
 				table.insert(actions, ACTIONS.HALLOWEENMOONMUTATE)
@@ -875,13 +897,19 @@ local COMPONENT_ACTIONS =
         end,
 
         stackable = function(inst, doer, target, actions)
-            if inst.prefab == target.prefab and inst.skinname == target.skinname and
+            if inst.prefab == target.prefab and inst.AnimState:GetSkinBuild() == target.AnimState:GetSkinBuild() and --inst.skinname == target.skinname (this does not work on clients, so we're going to use the AnimState hack instead)
                 target.replica.stackable ~= nil and
                 not target.replica.stackable:IsFull() and
                 target.replica.inventoryitem ~= nil and
                 not target.replica.inventoryitem:IsHeld() then
                 table.insert(actions, ACTIONS.COMBINESTACK)
             end
+        end,
+
+        summoningitem = function(inst, doer, target, actions, right)
+			if not target.inlimbo and target.replica.follower ~= nil and target.replica.follower:GetLeader() == doer and doer:HasTag("ghostfriend_summoned") then
+				table.insert(actions, ACTIONS.CASTUNSUMMON)
+			end
         end,
 
 		tacklesketch = function(inst, doer, target, actions)
@@ -918,7 +946,7 @@ local COMPONENT_ACTIONS =
                     not (target.replica.inventoryitem ~= nil and target.replica.inventoryitem:IsGrandOwner(doer))) then
                 table.insert(actions, ACTIONS.GIVE)
             end
-        end,
+		end,
 
 		itemweigher = function(inst, doer, target, actions)
 			for _,v in pairs(TROPHYSCALE_TYPES) do
@@ -944,6 +972,12 @@ local COMPONENT_ACTIONS =
                 end
             end
         end,
+
+		ghostlyelixir = function(inst, doer, target, actions)
+			if target:HasTag("ghostlyelixirable") then
+                table.insert(actions, ACTIONS.GIVE)
+			end
+		end,
 
         vasedecoration = function(inst, doer, target, actions)
             if target:HasTag("vase") and
@@ -1147,6 +1181,14 @@ local COMPONENT_ACTIONS =
 				end
             end
         end,
+
+		oceanthrowable = function(inst, doer, pos, actions, right)
+            if right then
+                if CanCastFishingNetAtPoint(doer, pos.x, pos.z) then
+                    table.insert(actions, ACTIONS.OCEAN_TOSS)
+                end
+            end
+        end,
 		
 		spellcaster = function(inst, doer, pos, actions, right)
             if right then
@@ -1285,6 +1327,15 @@ local COMPONENT_ACTIONS =
 
         end,
 
+        oceanthrowable = function(inst, doer, target, actions, right)
+            if right and
+                not (doer.components.playercontroller ~= nil and
+                    doer.components.playercontroller.isclientcontrollerattached) and
+                TheWorld.Map:IsOceanAtPoint(target:GetPosition():Get()) then
+                table.insert(actions, ACTIONS.OCEAN_TOSS)
+            end
+        end,
+
         spellcaster = function(inst, doer, target, actions, right)
             if right and (
                     inst:HasTag("castontargets") or
@@ -1313,7 +1364,7 @@ local COMPONENT_ACTIONS =
                     end
                 end
             end
-        end,
+		end,
 
         unsaddler = function(inst, doer, target, actions, right)
             if target:HasTag("saddled") and not right then
@@ -1375,7 +1426,7 @@ local COMPONENT_ACTIONS =
                     table.insert(actions, ACTIONS.RUMMAGE)
                 end
             end
-        end,
+		end,
 
         deployable = function(inst, doer, actions)
             if doer.components.playercontroller ~= nil and not doer.components.playercontroller.deploy_mode then
@@ -1484,6 +1535,12 @@ local COMPONENT_ACTIONS =
             end
         end,
 
+        mapspotrevealer = function(inst, doer, actions, right)
+            if doer:HasTag("player") then
+                table.insert(actions, ACTIONS.TEACH)
+            end
+        end,
+
         machine = function(inst, doer, actions, right)
             if right and not inst:HasTag("cooldown") and
                 not inst:HasTag("fueldepleted") and
@@ -1536,6 +1593,14 @@ local COMPONENT_ACTIONS =
             if inst:HasTag("castfrominventory") then
                 table.insert(actions, ACTIONS.CASTSPELL)
             end
+        end,
+
+        summoningitem = function(inst, doer, actions)
+			if doer:HasTag("ghostfriend_notsummoned") then
+				table.insert(actions, ACTIONS.CASTSUMMON)
+			elseif doer:HasTag("ghostfriend_summoned") then
+				table.insert(actions, ACTIONS.COMMUNEWITHSUMMONED)
+			end
         end,
 
         talkable = function(inst, doer, actions)

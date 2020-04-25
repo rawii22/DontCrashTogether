@@ -161,6 +161,9 @@ return{
 
             --MapRecorder/MapExplorer
             WRONGWORLD = "It's... not right...",
+			
+			--MapSpotRevealer/messagebottle
+			MESSAGEBOTTLEMANAGER_NOT_FOUND = "The world is too dark... I can't see it clearly.",--Likely trying to read messagebottle treasure map in caves
         },
         WRAPBUNDLE =
         {
@@ -214,6 +217,10 @@ return{
 		{
 			TOO_SMALL = "It was taken too soon...",
 		},
+        BEGIN_QUEST =
+        {
+            ONEGHOST = "I can only ferry one soul to their destination at a time...",
+        },
 	},
 	ACTIONFAIL_GENERIC = "I can't do anything right.",
 	ANNOUNCE_BOAT_LEAK = "Our boat weeps salty tears.",
@@ -491,6 +498,11 @@ return{
 	},
 
 	ANNOUNCE_WEIGHT = "Weight: {weight}",
+	ANNOUNCE_WEIGHT_HEAVY  = "Weight: {weight}\nBurdened with yet another terrible weight...",
+
+	-- these are just for testing for now, no need to write real strings yet
+	ANNOUNCE_WINCH_CLAW_MISS = "Everything always seems just out of my grasp...",
+	ANNOUNCE_WINCH_CLAW_NO_ITEM = "Just emptiness.",
 
     --Wurt announce strings
 --fallback to speech_wilson.lua     ANNOUNCE_KINGCREATED = "only_used_by_wurt",
@@ -517,6 +529,32 @@ return{
     ANNOUNCE_CARRAT_ERROR_FELL_ASLEEP = "Wake up, you silly Carrat!",    
     ANNOUNCE_CARRAT_ERROR_WALKING = "Must you drag your heels so?",    
     ANNOUNCE_CARRAT_ERROR_STUNNED = "Why won't you move?",
+
+    ANNOUNCE_GHOST_QUEST = "You need me to... find something you've lost?",
+    ANNOUNCE_GHOST_HINT = "Are you showing me the way?",
+    ANNOUNCE_GHOST_TOY_NEAR = {
+        "It's close... I can feel it...",
+        "It's calling to me... it's nearby...",
+        "We're almost there...",
+        "Your journey is almost over.",
+        "Am I getting warmer?",
+    },
+	ANNOUNCE_SISTURN_FULL = "Now Abigail can find her way back to me faster.",
+    ANNOUNCE_ABIGAIL_DEATH = "No... don't leave me alone again!",
+    ANNOUNCE_ABIGAIL_RETRIEVE = "I'm sorry... it's not safe for you out here.",
+	ANNOUNCE_ABIGAIL_LOW_HEALTH = "Be careful, Abigail!",
+    ANNOUNCE_ABIGAIL_SUMMON = 
+	{
+		LEVEL1 = "I know you're tired, but I can't do this alone...",
+		LEVEL2 = "I need your help, Abigail...",
+		LEVEL3 = "You've rested in peace long enough, dear sister.",
+	},
+
+    ANNOUNCE_GHOSTLYBOND_LEVELUP = 
+	{
+		LEVEL2 = "You seem to have brightened up a bit, Abigail.",
+		LEVEL3 = "Abigail has always been my guiding light in the darkness...",
+	},
 
 	BATTLECRY =
 	{
@@ -557,7 +595,12 @@ return{
         ABIGAIL_FLOWER =
         {
             GENERIC ="It's still so pretty.",
-            LONG = "It was my sister's flower. She's gone far away.",
+			LEVEL1 = "It was my sister's flower. She's gone far away.",
+			LEVEL2 = "I can sense Abigail's spirit growing stronger.",
+			LEVEL3 = "Abigail! Are you ready to play?",
+
+			-- deprecated
+            LONG = "",
             MEDIUM = "I can sense Abigail's presence growing stronger.",
             SOON = "Abigail is almost here!",
             HAUNTED_POCKET = "Abigail is ready to play, but she needs some space.",
@@ -999,7 +1042,7 @@ return{
             BURNT = "It didn't cook well.",
         },
         SLURTLE = "It is mindlessly chasing after rocks.",
-        SLURTLE_SHELLPIECES = "Pieces of broken slurtle dreams.",
+        SLURTLE_SHELLPIECES = "Pieces of broken dreams.",
         SLURTLEHAT = "It certainly didn't help the original owner.",
         SLURTLEHOLE = "The slurtles pop out when they outgrow it.",
         SLURTLESLIME = "It shimmers with slimy anticipation.",
@@ -1059,7 +1102,24 @@ return{
 		MAXWELLPHONOGRAPH = "Shall we have a danse macabre?",
 		BOOMERANG = "Death returns to the sender.",
 		PIGGUARD = "This little piggie looks mean.",
-		ABIGAIL = "That's my twin sister, Abigail.",
+		ABIGAIL =
+		{
+            LEVEL1 =
+            {
+                "It was so lonely without you here.",
+                "That's my twin sister, Abigail.",
+            },
+            LEVEL2 = 
+            {
+                "We'll never be apart again.",
+                "That's my twin sister, Abigail.",
+            },
+            LEVEL3 = 
+            {
+                "Let's play, Abigail!",
+                "That's my twin sister, Abigail.",
+            },
+		},
 		ADVENTURE_PORTAL = "What technological terror is this?",
 		AMULET = "I wonder who used to own this.",
 		ANIMAL_TRACK = "Signs of the beast.",
@@ -1308,6 +1368,8 @@ return{
         CHESSPIECE_ANCHOR = "Why did we sculpt an anchor.",
         CHESSPIECE_MOON = "I'd prefer to look at this over the real thing.",
         CHESSPIECE_CARRAT = "If only I could feel so serene.",
+        CHESSPIECE_MALBATROSS = "No more will she soar over the gloomy shoals.",
+        CHESSPIECE_CRABKING = "We put him out of his misery.",
         CHESSJUNK1 = "Cold, dead artificial life.",
         CHESSJUNK2 = "Cold, dead artificial life.",
         CHESSJUNK3 = "Cold, dead artificial life.",
@@ -2213,6 +2275,18 @@ return{
         TRINKET_44 = "Some breaks cannot be mended.", -- Broken Terrarium ONI trinket
         TRINKET_45 = "It is so colorful...", -- Odd Radio ONI trinket
         TRINKET_46 = "I simply do not know what it is.", -- Hairdryer ONI trinket
+
+        -- The numbers align with the trinket numbers above.
+        LOST_TOY_1  = "I get the feeling... that this meant a great deal to someone.",
+        LOST_TOY_2  = "I get the feeling... that this meant a great deal to someone.",
+        LOST_TOY_7  = "I get the feeling... that this meant a great deal to someone.",
+        LOST_TOY_10 = "I get the feeling... that this meant a great deal to someone.",
+        LOST_TOY_11 = "I get the feeling... that this meant a great deal to someone.",
+        LOST_TOY_14 = "I get the feeling... that this meant a great deal to someone.",
+        LOST_TOY_18 = "I get the feeling... that this meant a great deal to someone.",
+        LOST_TOY_19 = "I get the feeling... that this meant a great deal to someone.",
+        LOST_TOY_42 = "I get the feeling... that this meant a great deal to someone.",
+        LOST_TOY_43 = "I get the feeling... that this meant a great deal to someone.",
         
         HALLOWEENCANDY_1 = "Oh... it's... g-good.",
         HALLOWEENCANDY_2 = "The most delicious lie.",
@@ -2976,6 +3050,9 @@ return{
         MOON_ALTAR_ROCK_GLASS = "I sense a presence within...",
         MOON_ALTAR_ROCK_SEED = "I sense a presence within...",
 
+        MOON_ALTAR_CROWN = "You're safe now.",
+        MOON_ALTAR_COSMIC = "The whispers... are getting louder...",
+
         SEAFARING_PROTOTYPER =
         {
             GENERIC = "Thinking on the waves makes me nauseous.",
@@ -3071,12 +3148,20 @@ return{
 		OCEANFISHINGLURE_SPOON_RED = "A paltry last meal for the fish.",
 		OCEANFISHINGLURE_SPOON_GREEN = "A paltry last meal for the fish.",
 		OCEANFISHINGLURE_SPOON_BLUE = "A paltry last meal for the fish.",
+		OCEANFISHINGLURE_HERMIT_RAIN = "The rain will mask my tears of boredom...",
+		OCEANFISHINGLURE_HERMIT_SNOW = "How miserable.",
+		OCEANFISHINGLURE_HERMIT_DROWSY = "Perhaps it's poisoned?",
+		OCEANFISHINGLURE_HERMIT_HEAVY = "I'll never catch a fish as heavy as my heart.",
 
 		OCEANFISH_SMALL_1 = "It didn't have enough time to grow.",
 		OCEANFISH_SMALL_2 = "I'm afraid you've splished your last splash.",
 		OCEANFISH_SMALL_3 = "I suppose it will do for now.",
 		OCEANFISH_SMALL_4 = "All my efforts reap only the smallest rewards.",
 		OCEANFISH_SMALL_5 = "It looks oddly... crunchy?",
+		OCEANFISH_SMALL_6 = "It already reeks of decay.",
+		OCEANFISH_SMALL_7 = "Hmph. I see no resemblance.",
+		OCEANFISH_SMALL_8 = "The sun has set on your time in this world.",
+
 		OCEANFISH_MEDIUM_1 = "What a horrendous looking creature.",
 		OCEANFISH_MEDIUM_2 = "I'm afraid your time is up.",
 		OCEANFISH_MEDIUM_3 = "It fought hard to live. A shame, really.",
@@ -3084,6 +3169,7 @@ return{
 		OCEANFISH_MEDIUM_5 = "Its existence must be so confusing.",
 		OCEANFISH_MEDIUM_6 = "It's almost too pretty to eat. Almost.",
 		OCEANFISH_MEDIUM_7 = "It's almost too pretty to eat. Almost.",
+		OCEANFISH_MEDIUM_8 = "It has no warmth... like my life without Abigail.",
 
 		PONDFISH = "It was flopping around desperately for life. The poor fool.",
 		PONDEEL = "An eel.",
@@ -3097,13 +3183,18 @@ return{
 		FISH_BOX = "It feels a bit cruel to trap them within sight of freedom.",
         POCKET_SCALE = "What is the weight of my actions?",
 
+		TACKLECONTAINER = "At least I won't have to carry bait in my pockets anymore.",
+		SUPERTACKLECONTAINER = "I don't see what's so spectacular about it.",
+
 		TROPHYSCALE_FISH =
 		{
 			GENERIC = "If my fish was as heavy as my heart, I'd surely win.",
 			HAS_ITEM = "Weight: {weight}\nCaught by: {owner}",
+			HAS_ITEM_HEAVY = "Weight: {weight}\nCaught by: {owner}\nNot even the strongest are guaranteed survival.",
 			BURNING = "Nothing is safe.",
 			BURNT = "How sad.",
 			OWNER = "Weight: {weight}\nCaught by: {owner}\nOh... I... I did it...",
+			OWNER_HEAVY = "Weight: {weight}\nCaught by: {owner}\nDo you miss your family, fishy?",
 		},
 
 		OCEANFISHABLEFLOTSAM = "Nothing but grass and muck.",
@@ -3112,7 +3203,72 @@ return{
 		SEAFOODGUMBO = "A sea once teeming with life. No more.",
 		SURFNTURF = "It could be worse.",
 
+        WOBSTER_SHELLER = "Its hard exterior shelters it from the cruel outside world.", 
+        WOBSTER_DEN = "A damp and dreary home.",
+        WOBSTER_SHELLER_DEAD = "It's met its maker. I've met my lunch.",
+        WOBSTER_SHELLER_DEAD_COOKED = "It's a feast!",
+
+        LOBSTERBISQUE = "I would like a spoon.",
+        LOBSTERDINNER = "Its death will give me life.",
+
+        WOBSTER_MOONGLASS = "This world has made it hard, and sharp.",
+        MOONGLASS_WOBSTER_DEN = "What lives within that cold glass mound?",
+
+		TRIDENT = "It was stolen from the sea, but it still holds power over the waves.",
+		
+		WINCH =
+		{
+			GENERIC = "I doubt I'll find anything of interest.",
+			RETRIEVING_ITEM = "It's pulling something from the depths...",
+			HOLDING_ITEM = "This is what I have to show for my efforts.",
+		},
+
+        HERMITHOUSE = {
+            GENERIC = "Perhaps broken things can be fixed... over time...",
+            BUILTUP = "It's hardly worth saving.",
+        }, 
+        
+        SHELL_CLUSTER = "They're all clumped together... it seems a shame to separate them...",
+        --
+		SINGINGSHELL_OCTAVE3 =
+		{
+			GENERIC = "I wish I had a song left in my heart to sing.",
+		},
+		SINGINGSHELL_OCTAVE4 =
+		{
+			GENERIC = "They are rather pretty...",
+		},
+		SINGINGSHELL_OCTAVE5 =
+		{
+			GENERIC = "Abigail, do you remember collecting shells on the beach?",
+        },
+
+        CHUM = "I had a pet fish once... it didn't last very long.",
+
+        SUNKENCHEST =
+        {
+            GENERIC = "No treasure could replace what I've lost.",
+            LOCKED = "Of course. It's locked.",
+        },
+
+        RESKIN_TOOL = "Change is... not always terrible.",
+        MOON_FISSURE_PLUGGED = "They're trapped... for now.",
+
+
 		----------------------- ROT STRINGS GO ABOVE HERE ------------------
+
+		GHOSTLYELIXIR_SLOWREGEN = "It's all I can do to help...",
+		GHOSTLYELIXIR_FASTREGEN = "You have to take your medicine, Abigail.",
+		GHOSTLYELIXIR_SHIELD = "This time... I can protect you.",
+		GHOSTLYELIXIR_ATTACK = "Abigail was always the strong one.",
+		GHOSTLYELIXIR_SPEED = "It's quite sugary.",
+		GHOSTLYELIXIR_RETALIATION = "It has a bitter aftertaste.",
+		SISTURN =
+		{
+			GENERIC = "It's a memorial to my sister... but it's so bare...",
+			SOME_FLOWERS = "Abigail always loved flowers...",
+			LOTS_OF_FLOWERS = "I won't let you fade away, Abigail. Never.",
+		},
 
         --Wortox
 --fallback to speech_wilson.lua         WORTOX_SOUL = "only_used_by_wortox", --only wortox can inspect souls
@@ -3214,6 +3370,45 @@ return{
         MERM_PRINCE = "Are you ready to shoulder the burdens of leadership?",
 
         SQUID = "Bright eyes for dark times.",
+
+		GHOSTFLOWER = "I promise to use it well.",
+        SMALLGHOST = "Another life cut short.",
+
+        CRABKING = 
+        {
+            GENERIC = "One of us will be sent to a watery grave...",
+            INERT = "A crumbling edifice of sand... it's not even decorated.",
+        },
+		CRABKING_CLAW = "It wants to drag me down to the icy depths of the sea.",
+		
+		MESSAGEBOTTLE = "I wonder what poor forgotten soul sent that.",
+		MESSAGEBOTTLEEMPTY = "It holds nothing but emptiness.",
+
+        MEATRACK_HERMIT =
+        {
+            DONE = "The drying is over.",
+            DRYING = "It sways in the drying wind.",
+            DRYINGINRAIN = "The rain is keeping it from drying.",
+            GENERIC = "One can't survive long without food...",
+            BURNT = "It's done drying. Forever.",
+            DONE_NOTMEAT = "The drying is over.",
+            DRYING_NOTMEAT = "It sways in the drying wind.",
+            DRYINGINRAIN_NOTMEAT = "The rain is keeping it from drying.",
+        },
+        BEEBOX_HERMIT =
+        {
+            READY = "Their toils have been fruitful!",
+            FULLHONEY = "Their toils have been fruitful!",
+            GENERIC = "There are only memories of sweetness here.",
+            NOHONEY = "Work, bees!",
+            SOMEHONEY = "Toil on.",
+            BURNT = "Burnt honey.",
+        },
+
+        HERMITCRAB = "It's a tragic fate, to be left behind by those you love.",
+
+        HERMIT_PEARL = "I will be its caretaker.",
+        HERMIT_CRACKED_PEARL = "I seem to leave only misery in my wake...",
     },
 
     DESCRIBE_GENERIC = "Sigh... I don't know.",

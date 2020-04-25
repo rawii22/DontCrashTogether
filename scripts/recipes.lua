@@ -45,6 +45,7 @@ Recipe("mermwatchtower", {Ingredient("boards", 5), Ingredient("tentaclespots", 1
 Recipe("turf_marsh", {Ingredient("cutreeds", 1), Ingredient("spoiled_food", 2)}, RECIPETABS.TOWN,  TECH.SCIENCE_TWO, nil, nil, nil, nil, "merm_builder")
 
 Recipe("spidereggsack", {Ingredient("silk", 12), Ingredient("spidergland", 6), Ingredient("papyrus", 6)}, RECIPETABS.TOWN, TECH.NONE, nil, nil, nil, nil, "spiderwhisperer")
+Recipe("sisturn", {Ingredient("cutstone", 3), Ingredient("boards", 3), Ingredient("ash", 1)}, RECIPETABS.TOWN, TECH.NONE, "sisturn_placer", nil, nil, nil, "ghostlyfriend")
 
 Recipe("treasurechest", {Ingredient("boards", 3)}, RECIPETABS.TOWN, TECH.SCIENCE_ONE, "treasurechest_placer",1)
 Recipe("homesign", {Ingredient("boards", 1)}, RECIPETABS.TOWN, TECH.SCIENCE_ONE, "homesign_placer")
@@ -64,7 +65,7 @@ Recipe("pighouse", {Ingredient("boards", 4), Ingredient("cutstone", 3), Ingredie
 Recipe("rabbithouse", {Ingredient("boards", 4), Ingredient("carrot", 10), Ingredient("manrabbit_tail", 4)}, RECIPETABS.TOWN, TECH.SCIENCE_TWO, "rabbithouse_placer")
 Recipe("birdcage", {Ingredient("papyrus", 2), Ingredient("goldnugget", 6), Ingredient("seeds", 2)}, RECIPETABS.TOWN, TECH.SCIENCE_TWO, "birdcage_placer")
 Recipe("scarecrow", {Ingredient("pumpkin", 1), Ingredient("boards", 3), Ingredient("cutgrass", 3)}, RECIPETABS.TOWN, TECH.SCIENCE_ONE, "scarecrow_placer", 1.5)
-Recipe("tacklestation", {Ingredient("driftwood_log", 4), Ingredient("transistor", 1), Ingredient("spoiled_fish", 1)}, RECIPETABS.TOWN, TECH.SCIENCE_ONE, "tacklestation_placer")
+Recipe("tacklestation", {Ingredient("driftwood_log", 1), Ingredient("transistor", 1), Ingredient("boneshard", 1)}, RECIPETABS.TOWN, TECH.SCIENCE_ONE, "tacklestation_placer")
 Recipe("trophyscale_fish", {Ingredient("ice", 4), Ingredient("boards", 2), Ingredient("cutstone", 1)}, RECIPETABS.TOWN,  TECH.SCIENCE_TWO, "trophyscale_fish_placer")
 
 Recipe("turf_road", {Ingredient("turf_rocky", 1), Ingredient("boards", 1)}, RECIPETABS.TOWN,  TECH.SCIENCE_TWO)
@@ -72,6 +73,7 @@ Recipe("turf_woodfloor", {Ingredient("boards", 1)}, RECIPETABS.TOWN, TECH.SCIENC
 Recipe("turf_checkerfloor", {Ingredient("marble", 1)}, RECIPETABS.TOWN, TECH.SCIENCE_TWO)
 Recipe("turf_carpetfloor", {Ingredient("boards", 1), Ingredient("beefalowool", 1)}, RECIPETABS.TOWN, TECH.SCIENCE_TWO)
 Recipe("turf_dragonfly", {Ingredient("dragon_scales", 1), Ingredient("cutstone", 2)}, RECIPETABS.TOWN, TECH.SCIENCE_TWO, nil, nil, nil, 6)
+Recipe("turf_shellbeach", {Ingredient("slurtle_shellpieces", 3)}, RECIPETABS.TOWN,  TECH.LOST)
 
 Recipe("pottedfern", {Ingredient("foliage", 5), Ingredient("slurtle_shellpieces", 1)}, RECIPETABS.TOWN, TECH.SCIENCE_TWO, "pottedfern_placer", 0.9)
 Recipe("succulent_potted", {Ingredient("succulent_picked", 5), Ingredient("cutstone", 1)}, RECIPETABS.TOWN, TECH.LOST, "succulent_potted_placer", 0.9)
@@ -172,7 +174,7 @@ Recipe("lightning_rod", {Ingredient("goldnugget", 4), Ingredient("cutstone", 1)}
 Recipe("firesuppressor", {Ingredient("gears", 2),Ingredient("ice", 15),Ingredient("transistor", 2)}, RECIPETABS.SCIENCE,  TECH.SCIENCE_TWO, "firesuppressor_placer")
 
 --MAGIC
-Recipe("abigail_flower", {Ingredient("petals", 6), Ingredient("nightmarefuel", 1)}, RECIPETABS.MAGIC, TECH.NONE, nil, nil, nil, nil, "ghostlyfriend")
+Recipe("abigail_flower", {Ingredient("ghostflower", 1), Ingredient("nightmarefuel", 1)}, RECIPETABS.MAGIC, TECH.NONE, nil, nil, nil, nil, "ghostlyfriend")
 Recipe("wereitem_goose", {Ingredient("monstermeat", 3), Ingredient("seeds", 3)}, RECIPETABS.MAGIC, TECH.NONE, nil, nil, nil, nil, "werehuman")
 Recipe("wereitem_beaver", {Ingredient("monstermeat", 3), Ingredient("log", 2)}, RECIPETABS.MAGIC, TECH.NONE, nil, nil, nil, nil, "werehuman")
 Recipe("wereitem_moose", {Ingredient("monstermeat", 3), Ingredient("cutgrass", 2)}, RECIPETABS.MAGIC, TECH.NONE, nil, nil, nil, nil, "werehuman")
@@ -215,6 +217,7 @@ Recipe("telebase", {Ingredient("nightmarefuel", 4), Ingredient("livinglog", 4), 
 Recipe("sentryward", {Ingredient("purplemooneye", 1), Ingredient("compass", 1), Ingredient("boards", 2)}, RECIPETABS.MAGIC, TECH.MAGIC_TWO, "sentryward_placer", 1.5)
 Recipe("moondial", {Ingredient("bluemooneye", 1), Ingredient("moonrocknugget", 2), Ingredient("ice", 2)}, RECIPETABS.MAGIC,  TECH.MAGIC_TWO, "moondial_placer")
 Recipe("townportal", {Ingredient("orangemooneye", 1), Ingredient("townportaltalisman", 1), Ingredient("cutstone", 3)}, RECIPETABS.MAGIC, TECH.LOST, "townportal_placer")
+Recipe("reskin_tool", {Ingredient("livinglog", 3), Ingredient("petals_evil", 6)}, RECIPETABS.MAGIC, TECH.MAGIC_THREE)
 
 --REFINE
 Recipe("rope", {Ingredient("cutgrass", 3)}, RECIPETABS.REFINE, TECH.SCIENCE_ONE)
@@ -252,6 +255,7 @@ Recipe("beemine", {Ingredient("boards", 1),Ingredient("bee", 4),Ingredient("flin
 Recipe("trap_teeth", {Ingredient("log", 1),Ingredient("rope", 1),Ingredient("houndstooth", 1)}, RECIPETABS.WAR,  TECH.SCIENCE_TWO)
 Recipe("armordragonfly", {Ingredient("dragon_scales", 1), Ingredient("armorwood", 1), Ingredient("pigskin", 3)}, RECIPETABS.WAR,  TECH.SCIENCE_TWO)
 Recipe("staff_tornado", {Ingredient("goose_feather", 10), Ingredient("lightninggoathorn", 1), Ingredient("gears", 1)}, RECIPETABS.WAR,  TECH.SCIENCE_TWO)
+Recipe("trident", {Ingredient("gnarwail_horn", 3), Ingredient("kelp", 4), Ingredient("twigs", 2)}, RECIPETABS.WAR, TECH.LOST)
 
 
 --DRESSUP
@@ -347,6 +351,14 @@ Recipe("winona_spotlight",    {Ingredient("sewing_tape", 1), Ingredient("goldnug
 Recipe("winona_battery_low",  {Ingredient("sewing_tape", 1), Ingredient("log", 2), 		  Ingredient("nitre", 2)}, 	    CUSTOM_RECIPETABS.ENGINEERING, TECH.NONE, "winona_battery_low_placer",  TUNING.WINONA_ENGINEERING_SPACING, nil, nil, "handyperson")
 Recipe("winona_battery_high", {Ingredient("sewing_tape", 1), Ingredient("boards", 2), 	  Ingredient("transistor", 2)}, CUSTOM_RECIPETABS.ENGINEERING, TECH.NONE, "winona_battery_high_placer", TUNING.WINONA_ENGINEERING_SPACING, nil, nil, "handyperson")
 
+----elixirbrewing----
+Recipe("ghostlyelixir_slowregen",	{Ingredient("spidergland", 1), 	Ingredient("ghostflower", 1)}, CUSTOM_RECIPETABS.ELIXIRBREWING, TECH.NONE, nil, nil, nil, nil, "elixirbrewer")
+Recipe("ghostlyelixir_fastregen",	{Ingredient("reviver", 1),		Ingredient("ghostflower", 3)}, CUSTOM_RECIPETABS.ELIXIRBREWING, TECH.NONE, nil, nil, nil, nil, "elixirbrewer")
+Recipe("ghostlyelixir_shield",		{Ingredient("log", 1),			Ingredient("ghostflower", 1)}, CUSTOM_RECIPETABS.ELIXIRBREWING, TECH.NONE, nil, nil, nil, nil, "elixirbrewer")
+Recipe("ghostlyelixir_retaliation",	{Ingredient("livinglog", 1),	Ingredient("ghostflower", 3)}, CUSTOM_RECIPETABS.ELIXIRBREWING, TECH.NONE, nil, nil, nil, nil, "elixirbrewer")
+Recipe("ghostlyelixir_attack",		{Ingredient("stinger", 1), 		Ingredient("ghostflower", 3)}, CUSTOM_RECIPETABS.ELIXIRBREWING, TECH.NONE, nil, nil, nil, nil, "elixirbrewer")
+Recipe("ghostlyelixir_speed",		{Ingredient("honey", 1), 		Ingredient("ghostflower", 1)}, CUSTOM_RECIPETABS.ELIXIRBREWING, TECH.NONE, nil, nil, nil, nil, "elixirbrewer")
+
 ----NATURE----
 Recipe("livinglog", 	{Ingredient(CHARACTER_INGREDIENT.HEALTH, 20)}, CUSTOM_RECIPETABS.NATURE, TECH.NONE, nil, nil, nil, nil, "plantkin")
 Recipe("armor_bramble", {Ingredient("livinglog", 2), Ingredient("boneshard", 4)}, CUSTOM_RECIPETABS.NATURE, TECH.NONE, nil, nil, nil, nil, "plantkin")
@@ -369,6 +381,7 @@ Recipe("fish_box",			   {Ingredient("cutstone", 1), 		Ingredient("rope", 3)}, RE
     function(pt)
        return TheWorld.Map:GetPlatformAtPoint(pt.x, 0, pt.z, - 0.5) ~= nil
     end)
+Recipe("winch",				   {Ingredient("boards", 2), Ingredient("cutstone", 1), Ingredient("rope", 2)}, RECIPETABS.SEAFARING, TECH.LOST, "winch_placer", 1.5)
 
 --Recipe("fishingnet", {Ingredient("silk", 6)}, RECIPETABS.SEAFARING, TECH.SEAFARING_ONE, nil, nil, true)
 Recipe("chesspiece_anchor_sketch", {Ingredient("papyrus", 1)}, RECIPETABS.SEAFARING, TECH.SEAFARING_TWO)
@@ -392,6 +405,8 @@ Recipe("chesspiece_butterfly_builder", 	{Ingredient(TECH_INGREDIENT.SCULPTING, 2
 Recipe("chesspiece_anchor_builder",     {Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_anchor.tex")
 Recipe("chesspiece_moon_builder", 	    {Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_moon.tex")
 Recipe("chesspiece_carrat_builder",     {Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_carrat.tex")
+Recipe("chesspiece_malbatross_builder", {Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_malbatross.tex")
+Recipe("chesspiece_crabking_builder",   {Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_crabking.tex")
 
 ----CRITTERS----
 Recipe("critter_kitten_builder", 		{Ingredient("coontail", 1),      Ingredient("fishsticks", 1)}, 	   RECIPETABS.ORPHANAGE, TECH.ORPHANAGE_ONE, nil, nil, true)
@@ -442,7 +457,6 @@ Recipe("halloween_experiment_moon", 	{Ingredient("moonbutterflywings", 1), Ingre
 Recipe("halloween_experiment_root", 	{Ingredient("batwing", 1), 			  Ingredient("livinglog", 1),		  Ingredient(CHARACTER_INGREDIENT.SANITY, 20)}, RECIPETABS.MADSCIENCE, TECH.MADSCIENCE_ONE, nil, nil, true, nil, nil, nil, "livingtree_root.tex")
 
 ----WINTERSFEASTCOOKING-----
---placeholder ingredients and override icons
 Recipe("wintercooking_berrysauce",		{Ingredient("wintersfeastfuel", 1), Ingredient("mosquitosack", 2)}, RECIPETABS.WINTERSFEASTCOOKING, TECH.WINTERSFEASTCOOKING_ONE, nil, nil, true, nil, nil, nil, "berrysauce.tex")
 Recipe("wintercooking_bibingka",		{Ingredient("wintersfeastfuel", 1), Ingredient("foliage", 2)}, RECIPETABS.WINTERSFEASTCOOKING, TECH.WINTERSFEASTCOOKING_ONE, nil, nil, true, nil, nil, nil, "bibingka.tex")
 Recipe("wintercooking_cabbagerolls",	{Ingredient("wintersfeastfuel", 1), Ingredient("cutreeds", 2)}, RECIPETABS.WINTERSFEASTCOOKING, TECH.WINTERSFEASTCOOKING_ONE, nil, nil, true, nil, nil, nil, "cabbagerolls.tex")
@@ -477,17 +491,53 @@ Recipe("oceanfishingbobber_robin_winter",	{Ingredient("feather_robin_winter", 1)
 Recipe("oceanfishingbobber_canary",			{Ingredient("feather_canary", 1)}, RECIPETABS.FISHING, TECH.LOST, nil, nil, true)
 Recipe("oceanfishingbobber_goose",			{Ingredient("goose_feather", 1)}, RECIPETABS.FISHING, TECH.LOST, nil, nil, true)
 Recipe("oceanfishingbobber_malbatross",		{Ingredient("malbatross_feather", 1)}, RECIPETABS.FISHING, TECH.LOST, nil, nil, true)
+
 Recipe("oceanfishinglure_spoon_red",		{Ingredient("flint", 2), Ingredient("red_cap", 1)}, RECIPETABS.FISHING, TECH.FISHING_ONE, nil, nil, true)
 Recipe("oceanfishinglure_spoon_green",		{Ingredient("flint", 2), Ingredient("green_cap", 1)}, RECIPETABS.FISHING, TECH.FISHING_ONE, nil, nil, true)
 Recipe("oceanfishinglure_spoon_blue",		{Ingredient("flint", 2), Ingredient("blue_cap", 1)}, RECIPETABS.FISHING, TECH.FISHING_ONE, nil, nil, true)
 Recipe("oceanfishinglure_spinner_red",		{Ingredient("flint", 1), Ingredient("beefalowool", 1), Ingredient("red_cap", 1)}, RECIPETABS.FISHING, TECH.FISHING_ONE, nil, nil, true)
 Recipe("oceanfishinglure_spinner_green",	{Ingredient("flint", 1), Ingredient("beefalowool", 1), Ingredient("green_cap", 1)}, RECIPETABS.FISHING, TECH.FISHING_ONE, nil, nil, true)
 Recipe("oceanfishinglure_spinner_blue",		{Ingredient("flint", 1), Ingredient("beefalowool", 1), Ingredient("blue_cap", 1)}, RECIPETABS.FISHING, TECH.FISHING_ONE, nil, nil, true)
+Recipe("oceanfishinglure_hermit_rain",		{Ingredient("cookiecuttershell", 1), Ingredient("mosquitosack", 1)}, RECIPETABS.FISHING, TECH.LOST, nil, nil, true)
+Recipe("oceanfishinglure_hermit_snow",		{Ingredient("cookiecuttershell", 1), Ingredient("ice", 1)}, RECIPETABS.FISHING, TECH.LOST, nil, nil, true)
+Recipe("oceanfishinglure_hermit_drowsy",	{Ingredient("cookiecuttershell", 1), Ingredient("stinger", 1)}, RECIPETABS.FISHING, TECH.LOST, nil, nil, true)
+Recipe("oceanfishinglure_hermit_heavy",		{Ingredient("cookiecuttershell", 1), Ingredient("beefalowool", 1)}, RECIPETABS.FISHING, TECH.LOST, nil, nil, true)
+
+----HERMITCRABSHOP-----
+
+
+Recipe("hermitshop_hermit_bundle_shells", {Ingredient("messagebottleempty", 1)}, RECIPETABS.HERMITCRABSHOP, TECH.HERMITCRABSHOP_ONE, nil, nil, true, nil, nil, nil, "hermit_bundle.tex", nil, "hermit_bundle_shells")
+Recipe("hermitshop_winch_blueprint", {Ingredient("messagebottleempty", 1)}, RECIPETABS.HERMITCRABSHOP, TECH.HERMITCRABSHOP_ONE, nil, nil, true, nil, nil, nil, "blueprint.tex", nil, "winch_blueprint")
+Recipe("hermitshop_turf_shellbeach_blueprint", {Ingredient("messagebottleempty", 3)}, RECIPETABS.HERMITCRABSHOP, TECH.HERMITCRABSHOP_ONE, nil, nil, true, nil, nil, nil, "blueprint.tex", nil, "turf_shellbeach_blueprint")
+
+Recipe("hermitshop_oceanfishingbobber_crow", {Ingredient("messagebottleempty", 1)}, RECIPETABS.HERMITCRABSHOP, TECH.HERMITCRABSHOP_THREE, nil, nil, true, nil, nil, nil, nil, nil, "oceanfishingbobber_crow")
+Recipe("hermitshop_oceanfishingbobber_robin", {Ingredient("messagebottleempty", 1)}, RECIPETABS.HERMITCRABSHOP, TECH.HERMITCRABSHOP_THREE, nil, nil, true, nil, nil, nil, nil, nil, "oceanfishingbobber_robin")
+Recipe("hermitshop_oceanfishingbobber_robin_winter", {Ingredient("messagebottleempty", 1)}, RECIPETABS.HERMITCRABSHOP, TECH.HERMITCRABSHOP_THREE, nil, nil, true, nil, nil, nil, nil, nil, "oceanfishingbobber_robin_winter")
+Recipe("hermitshop_oceanfishingbobber_canary", {Ingredient("messagebottleempty", 1)}, RECIPETABS.HERMITCRABSHOP, TECH.HERMITCRABSHOP_THREE, nil, nil, true, nil, nil, nil, nil, nil, "oceanfishingbobber_canary")
+Recipe("hermitshop_tacklecontainer", {Ingredient("messagebottleempty", 3)}, RECIPETABS.HERMITCRABSHOP, TECH.HERMITCRABSHOP_THREE, nil, nil, true, nil, nil, nil, nil, nil, "tacklecontainer")
+
+Recipe("hermitshop_oceanfishinglure_hermit_rain", {Ingredient("messagebottleempty", 2)}, RECIPETABS.HERMITCRABSHOP, TECH.HERMITCRABSHOP_FIVE, nil, nil, true, nil, nil, nil, nil, nil, "oceanfishinglure_hermit_rain")
+Recipe("hermitshop_oceanfishinglure_hermit_snow", {Ingredient("messagebottleempty", 2)}, RECIPETABS.HERMITCRABSHOP, TECH.HERMITCRABSHOP_FIVE, nil, nil, true, nil, nil, nil, nil, nil, "oceanfishinglure_hermit_snow")
+Recipe("hermitshop_oceanfishinglure_hermit_drowsy", {Ingredient("messagebottleempty", 2)}, RECIPETABS.HERMITCRABSHOP, TECH.HERMITCRABSHOP_FIVE, nil, nil, true, nil, nil, nil, nil, nil, "oceanfishinglure_hermit_drowsy")
+Recipe("hermitshop_oceanfishinglure_hermit_heavy", {Ingredient("messagebottleempty", 2)}, RECIPETABS.HERMITCRABSHOP, TECH.HERMITCRABSHOP_FIVE, nil, nil, true, nil, nil, nil, nil, nil, "oceanfishinglure_hermit_heavy")
+
+Recipe("hermitshop_oceanfishingbobber_goose", {Ingredient("messagebottleempty", 3)}, RECIPETABS.HERMITCRABSHOP, TECH.HERMITCRABSHOP_SEVEN, nil, nil, true, nil, nil, nil, nil, nil, "oceanfishingbobber_goose")
+Recipe("hermitshop_oceanfishingbobber_malbatross", {Ingredient("messagebottleempty", 3)}, RECIPETABS.HERMITCRABSHOP, TECH.HERMITCRABSHOP_SEVEN, nil, nil, true, nil, nil, nil, nil, nil, "oceanfishingbobber_malbatross")
+Recipe("hermitshop_chum", {Ingredient("messagebottleempty", 3)}, RECIPETABS.HERMITCRABSHOP, TECH.HERMITCRABSHOP_SEVEN,          nil, nil, true, nil, nil, nil, "chum.tex", nil, "chum")
+
+Recipe("hermitshop_supertacklecontainer", {Ingredient("messagebottleempty", 8)}, RECIPETABS.HERMITCRABSHOP, TECH.LOST, nil, nil, true, nil, nil, nil, nil, nil, "supertacklecontainer")
+
 
 ----UNCRAFTABLE----
 --NOTE: These recipes are not supposed to be craftable!
 Recipe("pighead",  {Ingredient("pigskin", 4), 	   Ingredient("twigs", 4)}, nil, TECH.LOST, nil, nil, true)
 Recipe("mermhead", {Ingredient("pondfish", 1), Ingredient("spoiled_food", 4), Ingredient("twigs", 4)}, nil, TECH.LOST, nil, nil, true)
+Recipe("sunkenchest",{Ingredient("slurtle_shellpieces", 5)}, nil, TECH.LOST, nil, nil, true)
+
+--Hermit shop material recipes
+Recipe("tacklecontainer", {Ingredient("cookiecuttershell", 2), Ingredient("rope", 1)}, nil, TECH.LOST, nil, nil, true)
+Recipe("chum", {Ingredient("spoiled_food", 2)}, nil, TECH.LOST, nil, nil, true)
+Recipe("supertacklecontainer", {Ingredient("cookiecuttershell", 3), Ingredient("rope", 2)}, nil, TECH.LOST, nil, nil, true)
 
 --this is so you can use deconstruction staff on the deployed item
 Recipe("portablecookpot", {Ingredient("goldnugget", 2), Ingredient("charcoal",   6), Ingredient("twigs", 6)}, nil, TECH.LOST, nil, nil, true)
@@ -514,12 +564,16 @@ Recipe("yotc_carrat_gym_reaction",   	{Ingredient("lucky_goldnugget", 4)},nil, T
 Recipe("yotc_carrat_gym_stamina",		{Ingredient("lucky_goldnugget", 4)},nil, TECH.LOST, nil, nil, true)
 Recipe("yotc_carrat_scale",			    {Ingredient("lucky_goldnugget", 1)}, nil, TECH.LOST, nil, nil, true)
 
-
 ----CONSTRUCTION PLANS----
 CONSTRUCTION_PLANS =
 {
     ["multiplayer_portal_moonrock_constr"] = { Ingredient("purplemooneye", 1), Ingredient("moonrocknugget", 20) },
-    ["mermthrone_construction"] = { Ingredient("kelp", 20), Ingredient("pigskin", 10), Ingredient("beefalowool", 15) },
+	["mermthrone_construction"] = { Ingredient("kelp", 20), Ingredient("pigskin", 10), Ingredient("beefalowool", 15) },
+	["hermithouse_construction1"] = { Ingredient("cookiecuttershell", 10), Ingredient("boards", 10) },
+	["hermithouse_construction2"] = { Ingredient("marble", 10), Ingredient("rope", 10) },
+	["hermithouse_construction3"] = { Ingredient("moonrocknugget", 5),   Ingredient("cactus_flower", 10) },
 }
 
 mod_protect_Recipe = true
+
+

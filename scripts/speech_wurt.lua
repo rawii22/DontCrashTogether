@@ -161,6 +161,9 @@ return{
 
             --MapRecorder/MapExplorer
             WRONGWORLD = "Map don't match this place...",
+			
+			--MapSpotRevealer/messagebottle
+			MESSAGEBOTTLEMANAGER_NOT_FOUND = "Grrr, can't read! Too dark here!",--Likely trying to read messagebottle treasure map in caves
         },
         WRAPBUNDLE =
         {
@@ -214,6 +217,10 @@ return{
 		{
 			TOO_SMALL = "Glurph... this fish too small!",
 		},
+        BEGIN_QUEST =
+        {
+            ONEGHOST = "only_used_by_wendy",
+        },
 	},
 	ACTIONFAIL_GENERIC = "Grrr... can't do it, florpt.",
 	ANNOUNCE_BOAT_LEAK = "Yay! Boat getting wetter!",
@@ -491,6 +498,11 @@ return{
 	},
 
 	ANNOUNCE_WEIGHT = "Weight: {weight}",
+	ANNOUNCE_WEIGHT_HEAVY  = "Weight: {weight}\nGlurgh... is so heavy!",
+
+	-- these are just for testing for now, no need to write real strings yet
+	ANNOUNCE_WINCH_CLAW_MISS = "Aww, no fair!",
+	ANNOUNCE_WINCH_CLAW_NO_ITEM = "Glurgh... gotta start over.",
 
     --Wurt announce strings
     ANNOUNCE_KINGCREATED = "Mermfolk have new King!",
@@ -517,6 +529,28 @@ return{
     ANNOUNCE_CARRAT_ERROR_FELL_ASLEEP = "No sleepy! Gotta win!",    
     ANNOUNCE_CARRAT_ERROR_WALKING = "Not move fast enough, florp!",    
     ANNOUNCE_CARRAT_ERROR_STUNNED = "What wrong, why you not going?!",
+
+    ANNOUNCE_GHOST_QUEST = "only_used_by_wendy",
+--fallback to speech_wilson.lua     ANNOUNCE_GHOST_HINT = "only_used_by_wendy",
+--fallback to speech_wilson.lua     ANNOUNCE_GHOST_TOY_NEAR = {
+--fallback to speech_wilson.lua         "only_used_by_wendy",
+--fallback to speech_wilson.lua     },
+--fallback to speech_wilson.lua 	ANNOUNCE_SISTURN_FULL = "only_used_by_wendy",
+--fallback to speech_wilson.lua     ANNOUNCE_ABIGAIL_DEATH = "only_used_by_wendy",
+--fallback to speech_wilson.lua     ANNOUNCE_ABIGAIL_RETRIEVE = "only_used_by_wendy",
+--fallback to speech_wilson.lua 	ANNOUNCE_ABIGAIL_LOW_HEALTH = "only_used_by_wendy",
+    ANNOUNCE_ABIGAIL_SUMMON = 
+	{
+--fallback to speech_wilson.lua 		LEVEL1 = "only_used_by_wendy",
+--fallback to speech_wilson.lua 		LEVEL2 = "only_used_by_wendy",
+--fallback to speech_wilson.lua 		LEVEL3 = "only_used_by_wendy",
+	},
+
+    ANNOUNCE_GHOSTLYBOND_LEVELUP = 
+	{
+--fallback to speech_wilson.lua 		LEVEL2 = "only_used_by_wendy",
+--fallback to speech_wilson.lua 		LEVEL3 = "only_used_by_wendy",
+	},
 
 	BATTLECRY =
 	{
@@ -557,6 +591,11 @@ return{
         ABIGAIL_FLOWER =
         {
             GENERIC ="It not quite as ugly as most flowers.",
+			LEVEL1 = "Abby-gill hiding.",
+			LEVEL2 = "She sure taking her time, flort.",
+			LEVEL3 = "Come out!",
+
+			-- deprecated
             LONG = "Pretty.",
             MEDIUM = "Hmm?",
             SOON = "Something happening!",
@@ -1059,7 +1098,24 @@ return{
 		MAXWELLPHONOGRAPH = "Music comes out of it, florp!",
 		BOOMERANG = "Come-back stick!",
 		PIGGUARD = "Glurp, he even scarier than others.",
-		ABIGAIL = "You... nice?",
+		ABIGAIL =
+		{
+            LEVEL1 =
+            {
+                "You... nice?",
+                "You... nice?",
+            },
+            LEVEL2 = 
+            {
+                "You... nice?",
+                "You... nice?",
+            },
+            LEVEL3 = 
+            {
+                "You... nice?",
+                "You... nice?",
+            },
+		},
 		ADVENTURE_PORTAL = "Where this go?",
 		AMULET = "Pretty magic rock!",
 		ANIMAL_TRACK = "Tracks!",
@@ -1308,6 +1364,8 @@ return{
         CHESSPIECE_ANCHOR = "Why made anchor for land, florpt?",
         CHESSPIECE_MOON = "It look just like real thing!",
         CHESSPIECE_CARRAT = "Veggie rat look happy.",
+        CHESSPIECE_MALBATROSS = "It very fancy looking statue.",
+        CHESSPIECE_CRABKING = "Glurgh, he made crab lady sad!",
         CHESSJUNK1 = "It all broken.",
         CHESSJUNK2 = "Didn't do it!!",
         CHESSJUNK3 = "It all messed up.",
@@ -2213,6 +2271,18 @@ return{
         TRINKET_44 = "Someone broke plant house.", -- Broken Terrarium ONI trinket
         TRINKET_45 = "What it do?", -- Odd Radio ONI trinket
         TRINKET_46 = "Hm...", -- Hairdryer ONI trinket
+
+        -- The numbers align with the trinket numbers above.
+        LOST_TOY_1  = "Huh? Can't pick it up!",
+        LOST_TOY_2  = "Huh? Can't pick it up!",
+        LOST_TOY_7  = "Huh? Can't pick it up!",
+        LOST_TOY_10 = "Huh? Can't pick it up!",
+        LOST_TOY_11 = "Huh? Can't pick it up!",
+        LOST_TOY_14 = "Huh? Can't pick it up!",
+        LOST_TOY_18 = "Huh? Can't pick it up!",
+        LOST_TOY_19 = "Huh? Can't pick it up!",
+        LOST_TOY_42 = "Huh? Can't pick it up!",
+        LOST_TOY_43 = "Huh? Can't pick it up!",
         
         HALLOWEENCANDY_1 = "These even better than regular apple, flort!",
         HALLOWEENCANDY_2 = "Made corn even better?!",
@@ -2664,9 +2734,9 @@ return{
 		QUAGMIRE_SALMON_COOKED = "Nooooooo!!",
 		QUAGMIRE_CRABMEAT = "(Sniff) poor crab...",
 		QUAGMIRE_CRABMEAT_COOKED = "Glurph... can't look.",
-        QUAGMIRE_POT = "This pot holds more ingredients.",
-        QUAGMIRE_POT_SMALL = "Let's get cooking!",
-        QUAGMIRE_POT_HANGER_ITEM = "For suspension-based cookery.",
+        QUAGMIRE_POT = "Is just normal pot.",
+        QUAGMIRE_POT_SMALL = "Bitty pot.",
+        QUAGMIRE_POT_HANGER_ITEM = "It help for cooking.",
 		QUAGMIRE_SUGARWOODTREE = 
 		{
 			GENERIC = "There sweet stuff inside!",
@@ -2747,78 +2817,78 @@ return{
         QUAGMIRE_FOOD_BURNT = "Glurp, didn't mean to burn it!",
         QUAGMIRE_FOOD =
         {
-        	GENERIC = "PLACEHOLDER",
-            MISMATCH = "That's not what it wants.",
-            MATCH = "Science says this will appease the sky God.",
-            MATCH_BUT_SNACK = "It's more of a light snack, really.",
+        	GENERIC = "Should give to big mouth in sky!",
+            MISMATCH = "Don't think it'll like that, florp.",
+            MATCH = "Is good food for sky mouth!",
+            MATCH_BUT_SNACK = "Food seem small for such big mouth.",
         },
         
-        QUAGMIRE_FERN = "Probably chock full of vitamins.",
-        QUAGMIRE_FOLIAGE_COOKED = "We cooked the foliage.",
-        QUAGMIRE_COIN1 = "I'd like more than a penny for my thoughts.",
-        QUAGMIRE_COIN2 = "A decent amount of coin.",
-        QUAGMIRE_COIN3 = "Seems valuable.",
-        QUAGMIRE_COIN4 = "We can use these to reopen the Gateway.",
-        QUAGMIRE_GOATMILK = "Good if you don't think about where it came from.",
-        QUAGMIRE_SYRUP = "Adds sweetness to the mixture.",
-        QUAGMIRE_SAP_SPOILED = "Might as well toss it on the fire.",
-        QUAGMIRE_SEEDPACKET = "Sow what?",
+        QUAGMIRE_FERN = "Is dee-lishuss and newt-rishuss.",
+        QUAGMIRE_FOLIAGE_COOKED = "Yummy yum!",
+        QUAGMIRE_COIN1 = "Can't eat this, florp!",
+        QUAGMIRE_COIN2 = "Ooooh, shiny!",
+        QUAGMIRE_COIN3 = "Look extra fancy.",
+        QUAGMIRE_COIN4 = "This help me get home!",
+        QUAGMIRE_GOATMILK = "Glurgh...",
+        QUAGMIRE_SYRUP = "Sticky sweet!",
+        QUAGMIRE_SAP_SPOILED = "Glurgh... not so good anymore.",
+        QUAGMIRE_SEEDPACKET = "Seeeeeeds!!",
         
-        QUAGMIRE_POT = "This pot holds more ingredients.",
-        QUAGMIRE_POT_SMALL = "Let's get cooking!",
-        QUAGMIRE_POT_SYRUP = "I need to sweeten this pot.",
-        QUAGMIRE_POT_HANGER = "It has hang-ups.",
-        QUAGMIRE_POT_HANGER_ITEM = "For suspension-based cookery.",
-        QUAGMIRE_GRILL = "Now all I need is a backyard to put it in.",
-        QUAGMIRE_GRILL_ITEM = "I'll have to grill someone about this.",
-        QUAGMIRE_GRILL_SMALL = "Barbecurious.",
-        QUAGMIRE_GRILL_SMALL_ITEM = "For grilling small meats.",
-        QUAGMIRE_OVEN = "It needs ingredients to make the science work.",
-        QUAGMIRE_OVEN_ITEM = "For scientifically burning things.",
-        QUAGMIRE_CASSEROLEDISH = "A dish for all seasonings.",
-        QUAGMIRE_CASSEROLEDISH_SMALL = "For making minuscule motleys.",
-        QUAGMIRE_PLATE_SILVER = "A silver plated plate.",
-        QUAGMIRE_BOWL_SILVER = "A bright bowl.",
-        QUAGMIRE_CRATE = "Kitchen stuff.",
+        QUAGMIRE_POT = "Is just normal pot.",
+        QUAGMIRE_POT_SMALL = "Bitty pot.",
+        QUAGMIRE_POT_SYRUP = "Is for sweet stuff.",
+        QUAGMIRE_POT_HANGER = "Put food over fire!",
+        QUAGMIRE_POT_HANGER_ITEM = "It help for cooking.",
+        QUAGMIRE_GRILL = "Make food hot and tasty.",
+        QUAGMIRE_GRILL_ITEM = "Is for making food hot and tasty!",
+        QUAGMIRE_GRILL_SMALL = "Teeny food cooker.",
+        QUAGMIRE_GRILL_SMALL_ITEM = "Teeny food cooker.",
+        QUAGMIRE_OVEN = "Wonder what to cook...",
+        QUAGMIRE_OVEN_ITEM = "Food cooker.",
+        QUAGMIRE_CASSEROLEDISH = "Not good with breakable things...",
+        QUAGMIRE_CASSEROLEDISH_SMALL = "Is so teeny tiny!",
+        QUAGMIRE_PLATE_SILVER = "Shiny!",
+        QUAGMIRE_BOWL_SILVER = "Can see own cute reflection!",
+        QUAGMIRE_CRATE = "Ooooooh, present for me?",
         
-        QUAGMIRE_MERM_CART1 = "Any science in there?", --sammy's wagon
-        QUAGMIRE_MERM_CART2 = "I could use some stuff.", --pipton's cart
-        QUAGMIRE_PARK_ANGEL = "Take that, creature!",
-        QUAGMIRE_PARK_ANGEL2 = "So lifelike.",
-        QUAGMIRE_PARK_URN = "Ashes to ashes.",
-        QUAGMIRE_PARK_OBELISK = "A monumental monument.",
+        QUAGMIRE_MERM_CART1 = "Ooooh, what you have?", --sammy's wagon
+        QUAGMIRE_MERM_CART2 = "You gimme stuff?", --pipton's cart
+        QUAGMIRE_PARK_ANGEL = "Don't like it.",
+        QUAGMIRE_PARK_ANGEL2 = "Is creepy...",
+        QUAGMIRE_PARK_URN = "Cookies inside?",
+        QUAGMIRE_PARK_OBELISK = "Big stone thing.",
         QUAGMIRE_PARK_GATE =
         {
-            GENERIC = "Turns out a key was the key to getting in.",
-            LOCKED = "Locked tight.",
+            GENERIC = "Better be good stuff in here.",
+            LOCKED = "Lemme iiiin!!",
         },
-        QUAGMIRE_PARKSPIKE = "The scientific term is: \"Sharp pointy thing\".",
-        QUAGMIRE_CRABTRAP = "A crabby trap.",
-        QUAGMIRE_TRADER_MERM = "Maybe they'd be willing to trade.",
-        QUAGMIRE_TRADER_MERM2 = "Maybe they'd be willing to trade.",
+        QUAGMIRE_PARKSPIKE = "Look real pointy.",
+        QUAGMIRE_CRABTRAP = "Look like little house!",
+        QUAGMIRE_TRADER_MERM = "Finally find someone normal!",
+        QUAGMIRE_TRADER_MERM2 = "Hello! How you do, florp?",
         
-        QUAGMIRE_GOATMUM = "Reminds me of my old nanny.",
-        QUAGMIRE_GOATKID = "This goat's much smaller.",
+        QUAGMIRE_GOATMUM = "She seem nice enough.",
+        QUAGMIRE_GOATKID = "Hello weird kid! Wanna play?",
         QUAGMIRE_PIGEON =
         {
-            DEAD = "They're dead.",
-            GENERIC = "He's just winging it.",
-            SLEEPING = "It's sleeping, for now.",
+            DEAD = "Ewww, it dead.",
+            GENERIC = "Hello birdy!",
+            SLEEPING = "Sleepy bird.",
         },
-        QUAGMIRE_LAMP_POST = "Huh. Reminds me of home.",
+        QUAGMIRE_LAMP_POST = "Ooooooh, glowy!",
 
-        QUAGMIRE_BEEFALO = "Science says it should have died by now.",
-        QUAGMIRE_SLAUGHTERTOOL = "Laboratory tools for surgical butchery.",
+        QUAGMIRE_BEEFALO = "Where all its fluff?",
+        QUAGMIRE_SLAUGHTERTOOL = "Huh? What this for?",
 
-        QUAGMIRE_SAPLING = "I can't get anything else out of that.",
-        QUAGMIRE_BERRYBUSH = "Those berries are all gone.",
+        QUAGMIRE_SAPLING = "Baby tree!",
+        QUAGMIRE_BERRYBUSH = "Aww, where the berries?!",
 
-        QUAGMIRE_ALTAR_STATUE2 = "What are you looking at?",
-        QUAGMIRE_ALTAR_QUEEN = "A monumental monument.",
-        QUAGMIRE_ALTAR_BOLLARD = "As far as posts go, this one is adequate.",
-        QUAGMIRE_ALTAR_IVY = "Kind of clingy.",
+        QUAGMIRE_ALTAR_STATUE2 = "What red eyes it have...",
+        QUAGMIRE_ALTAR_QUEEN = "She look nice.",
+        QUAGMIRE_ALTAR_BOLLARD = "Not that interesting, florp.",
+        QUAGMIRE_ALTAR_IVY = "Creepy crawly.",
 
-        QUAGMIRE_LAMP_SHORT = "Enlightening.",
+        QUAGMIRE_LAMP_SHORT = "Is fancy light.",
 
         --v2 Winona
         WINONA_CATAPULT = 
@@ -2976,6 +3046,9 @@ return{
         MOON_ALTAR_ROCK_GLASS = "Hello?",
         MOON_ALTAR_ROCK_SEED = "Hello?",
 
+        MOON_ALTAR_CROWN = "Time to go home!",
+        MOON_ALTAR_COSMIC = "It saying something...",
+
         SEAFARING_PROTOTYPER =
         {
             GENERIC = "Make things for water, florp!",
@@ -3071,12 +3144,20 @@ return{
 		OCEANFISHINGLURE_SPOON_RED = "Won't hurt fish, will it?",
 		OCEANFISHINGLURE_SPOON_GREEN = "Won't hurt fish, will it?",
 		OCEANFISHINGLURE_SPOON_BLUE = "Won't hurt fish, will it?",
+		OCEANFISHINGLURE_HERMIT_RAIN = "Can play with fish friends in rain!",
+		OCEANFISHINGLURE_HERMIT_SNOW = "Can play with fish friends in snow!",
+		OCEANFISHINGLURE_HERMIT_DROWSY = "This one not very nice...",
+		OCEANFISHINGLURE_HERMIT_HEAVY = "Ooooooh, can catch big fishy!",
 
 		OCEANFISH_SMALL_1 = "Aww, so little!",
-		OCEANFISH_SMALL_2 = "Will be new pet! And will feed it and love it and-",
+		OCEANFISH_SMALL_2 = "Will be new pet! And will feed it and love it and squeeze it!",
 		OCEANFISH_SMALL_3 = "Hi little fishy!",
 		OCEANFISH_SMALL_4 = "Little baby fishy!",
 		OCEANFISH_SMALL_5 = "Hee-hee, looks silly!",
+		OCEANFISH_SMALL_6 = "Makes crunchy sounds!",
+		OCEANFISH_SMALL_7 = "Is ugly fish, but still like it!",
+		OCEANFISH_SMALL_8 = "Ow! Is hot!",
+
 		OCEANFISH_MEDIUM_1 = "Goopy!",
 		OCEANFISH_MEDIUM_2 = "Has such big pretty eyes!",
 		OCEANFISH_MEDIUM_3 = "Look like it has little spiky crown on head!",
@@ -3084,6 +3165,7 @@ return{
 		OCEANFISH_MEDIUM_5 = "Feel... weird mixed feeling about this one, florp.",
 		OCEANFISH_MEDIUM_6 = "You very pretty, florp.",
 		OCEANFISH_MEDIUM_7 = "Like your scales, flort!",
+		OCEANFISH_MEDIUM_8 = "Brrrr, chilly fishy!",
 
 		PONDFISH = "Awwww, it so cute!",
 		PONDEEL = "Hello long fishy!",
@@ -3097,13 +3179,18 @@ return{
 		FISH_BOX = "This where scale-less keep fish pets, florp?",
         POCKET_SCALE = "Is funny measure thing.",
 
+		TACKLECONTAINER = "What this for?",
+		SUPERTACKLECONTAINER = "Is dangerous, full of fish snacks with hooks on them!",
+
 		TROPHYSCALE_FISH =
 		{
 			GENERIC = "This good home for fish!",
 			HAS_ITEM = "Weight: {weight}\nCaught by: {owner}",
+			HAS_ITEM_HEAVY = "Weight: {weight}\nCaught by: {owner}\nOoooh, so big!",
 			BURNING = "AAAAAH! NOOOO!",
 			BURNT = "(Sniff) Poor fish home...",
 			OWNER = "Weight: {weight}\nCaught by: {owner}\nHee-hee. My fish best.",
+			OWNER_HEAVY = "Weight: {weight}\nCaught by: {owner}\nIs biggest fish ever!",
 		},
 
 		OCEANFISHABLEFLOTSAM = "Oooh! Found mud!",
@@ -3112,7 +3199,72 @@ return{
 		SEAFOODGUMBO = "Fish looks so sad in there...",
 		SURFNTURF = "Blegh! Don't want it!",
 
+        WOBSTER_SHELLER = "No pinching!", 
+        WOBSTER_DEN = "Hey! Come out!",
+        WOBSTER_SHELLER_DEAD = "Is sleeping?",
+        WOBSTER_SHELLER_DEAD_COOKED = "Ewww, it all pink now!",
+
+        LOBSTERBISQUE = "Glurgh... what in this?",
+        LOBSTERDINNER = "Don't want it.",
+
+        WOBSTER_MOONGLASS = "Got moon stuff all over it, florp!",
+        MOONGLASS_WOBSTER_DEN = "Think saw something move in there.",
+
+		TRIDENT = "Pokey poke!",
+		
+		WINCH =
+		{
+			GENERIC = "Treasure grabber!",
+			RETRIEVING_ITEM = "Got something! Got something!",
+			HOLDING_ITEM = "Huh? What is it?",
+		},
+
+        HERMITHOUSE = {
+            GENERIC = "Is very nice home.",
+            BUILTUP = "Crabby lady's house got taller!",
+        }, 
+        
+        SHELL_CLUSTER = "Tried biting, isn't food.",
+        --
+		SINGINGSHELL_OCTAVE3 =
+		{
+			GENERIC = "Is big shell!",
+		},
+		SINGINGSHELL_OCTAVE4 =
+		{
+			GENERIC = "Pretty!",
+		},
+		SINGINGSHELL_OCTAVE5 =
+		{
+			GENERIC = "Think there some kind of bug inside?",
+        },
+
+        CHUM = "Eat up, fishies!",
+
+        SUNKENCHEST =
+        {
+            GENERIC = "Seashell is good for hiding things, florpt!",
+            LOCKED = "Grrr, open up!",
+        },
+
+        RESKIN_TOOL = "Change things to... different things!",
+        MOON_FISSURE_PLUGGED = "Bad moon things can't get out, florp!",
+
+
 		----------------------- ROT STRINGS GO ABOVE HERE ------------------
+
+		GHOSTLYELIXIR_SLOWREGEN = "Ooooh! Me wanna make some too, florp!",
+		GHOSTLYELIXIR_FASTREGEN = "Ooooh! Me wanna make some too, florp!",
+		GHOSTLYELIXIR_SHIELD = "Ooooh! Me wanna make some too, florp!",
+		GHOSTLYELIXIR_ATTACK = "Ooooh! Me wanna make some too, florp!",
+		GHOSTLYELIXIR_SPEED = "Ooooh! Me wanna make some too, florp!",
+		GHOSTLYELIXIR_RETALIATION = "Ooooh! Me wanna make some too, florp!",
+		SISTURN =
+		{
+			GENERIC = "What in jar? Snacks?",
+			SOME_FLOWERS = "Scaleless like putting flowers here.",
+			LOTS_OF_FLOWERS = "So is... not snack jar?",
+		},
 
         --Wortox
 --fallback to speech_wilson.lua         WORTOX_SOUL = "only_used_by_wortox", --only wortox can inspect souls
@@ -3214,6 +3366,45 @@ return{
         MERM_PRINCE = "Need to fatten up if you gonna be proper King!",
 
         SQUID = "Stay still, little squiddies!",
+
+		GHOSTFLOWER = "Spooky!",
+        SMALLGHOST = "Glurp! Y-you not scare me!",
+
+        CRABKING = 
+        {
+            GENERIC = "Glurp... he kinda cranky.",
+            INERT = "Castle not very pretty yet.",
+        },
+		CRABKING_CLAW = "Go away! No pinching!",
+		
+		MESSAGEBOTTLE = "Wicker-lady!! Read what it say!",
+		MESSAGEBOTTLEEMPTY = "There nothing in here!",
+
+        MEATRACK_HERMIT =
+        {
+            DONE = "Crabby lady! Nasty dry stuff ready now!",
+            DRYING = "Crabby lady! Nasty dry stuff ready now!",
+            DRYINGINRAIN = "Not sure this thought through, flort.",
+            GENERIC = "These belong to crabby lady, florp.",
+            BURNT = "Oh well, flort.",
+            DONE_NOTMEAT = "Look even worse than usual, florp.",
+            DRYING_NOTMEAT = "That not look right.",
+            DRYINGINRAIN_NOTMEAT = "Thought you said this make things dry?",
+        },
+        BEEBOX_HERMIT =
+        {
+            READY = "It look full of sweet stuff now!",
+            FULLHONEY = "It look full of sweet stuff now!",
+            GENERIC = "Crabby lady made nice bee house, flort!",
+            NOHONEY = "Aww no sweets inside.",
+            SOMEHONEY = "Don't wanna wait!!",
+            BURNT = "It not buzzing anymore...",
+        },
+
+        HERMITCRAB = "Hee-hee, she funny.",
+
+        HERMIT_PEARL = "Oooooh, so shiny!",
+        HERMIT_CRACKED_PEARL = "D-didn't do it!",
     },
 
     DESCRIBE_GENERIC = "What that?",

@@ -26,7 +26,7 @@ local _scheduledtasks = {}
 --------------------------------------------------------------------------
 
 local GNARWAIL_TEST_RADIUS = 100
-local GNARWAIL_SPAWN_CHANCE = 0.05
+local GNARWAIL_SPAWN_CHANCE = 0.075
 local GNARWAIL_SPAWN_RADIUS = 10
 local GNARWAIL_TIMING = {8, 10} -- min 8, max 10
 local function testforgnarwail(comp, spawnpoint)
@@ -35,9 +35,15 @@ local function testforgnarwail(comp, spawnpoint)
         local offset = FindSwimmableOffset(spawnpoint, math.random()*2*PI, GNARWAIL_SPAWN_RADIUS)
         if offset then
             comp.inst:DoTaskInTime(GetRandomMinMax(GNARWAIL_TIMING[1], GNARWAIL_TIMING[2]), function()
-                local gnarwail = SpawnPrefab("gnarwail")
-                gnarwail.Transform:SetPosition(spawnpoint.x + offset.x, 0, spawnpoint.z + offset.z)
-                gnarwail.sg:GoToState("emerge")
+                local spawn_x = spawnpoint.x + offset.x
+                local spawn_z = spawnpoint.z + offset.z
+
+                -- Make sure a boat didn't roll over our spawn point during the delay
+                if TheWorld.Map:GetPlatformAtPoint(spawn_x, spawn_z) == nil then
+                    local gnarwail = SpawnPrefab("gnarwail")
+                    gnarwail.Transform:SetPosition(spawn_x, 0, spawn_z)
+                    gnarwail.sg:GoToState("emerge")
+                end
             end)
         end
     end
@@ -105,14 +111,13 @@ inst:ListenForEvent("ms_playerleft", OnPlayerLeft, TheWorld)
 --[[ Public member functions ]]
 --------------------------------------------------------------------------
 
-function self:ShouldSpawnANewSchoolForPlayer(player, percent_ocean)
+function self:ShouldSpawnANewSchoolForPlayer(player)
 	local pt = player:GetPosition()
 	local percent_ocean = TheWorld.Map:CalcPercentOceanTilesAtPoint(pt.x, pt.y, pt.z, 25)
 
 	if percent_ocean > 0.1 then
 		local num_school_spawn_blockers = #TheSim:FindEntities(pt.x, pt.y, pt.z, TUNING.SCHOOL_SPAWNER_FISH_CHECK_RADIUS, {"fishschoolspawnblocker"})
 		if math.random() < 1 - num_school_spawn_blockers * TUNING.SCHOOL_SPAWNER_BLOCKER_MOD then
-			local pt = player:GetPosition()
 			local num_fish = #TheSim:FindEntities(pt.x, pt.y, pt.z, TUNING.SCHOOL_SPAWNER_FISH_CHECK_RADIUS, {"oceanfish", "oceanfishable"})
 			local r = math.random()
 			return num_fish == 0 and (r < percent_ocean)
@@ -151,7 +156,7 @@ local function DoSpawnFish(prefab, pos, rot, herd)
 	herd.components.herd:AddMember(fish)
 end
 
-function self:SpawnSchool(spawnpoint, target)
+function self:SpawnSchool(spawnpoint, target, override_spawn_offset)
     local schooldata = PickSchool(spawnpoint)
     if schooldata == nil then
         return
@@ -164,7 +169,8 @@ function self:SpawnSchool(spawnpoint, target)
     local rotation = math.random()*360
 
     local school_rand_angle = math.random()*360
-	local school_spawnpoint = spawnpoint + (FindSwimmableOffset(spawnpoint, school_rand_angle, 20, 12, nil, nil, nil, true)
+    local school_spawnpoint = spawnpoint + (override_spawn_offset
+                                            or FindSwimmableOffset(spawnpoint, school_rand_angle, 20, 12, nil, nil, nil, true)
 											or FindSwimmableOffset(spawnpoint, school_rand_angle, 13, 12, nil, nil, nil, true)
 											or FindSwimmableOffset(spawnpoint, school_rand_angle, 7, 12, nil, nil, nil, true)
 											or Vector3(0,0,0))
@@ -200,6 +206,8 @@ function self:SpawnSchool(spawnpoint, target)
 		herd:Remove()
 		herd = nil
     end
+
+    return count
 end
 
 --------------------------------------------------------------------------

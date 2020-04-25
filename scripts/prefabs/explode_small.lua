@@ -22,8 +22,8 @@ local function MakeExplosion(data)
             inst.Transform:SetScale(data.scale, data.scale, data.scale)
         end
 
-        inst.AnimState:SetBank("explode")
-        inst.AnimState:SetBuild("explode")
+        inst.AnimState:SetBank(data ~= nil and data.bank or "explode")
+        inst.AnimState:SetBuild(data ~= nil and data.build or "explode")
         inst.AnimState:PlayAnimation(data ~= nil and data.anim or "small")
         inst.AnimState:SetBloomEffectHandle("shaders/anim.ksh")
         inst.AnimState:SetLightOverride(1)
@@ -71,6 +71,13 @@ end
 
 local extras =
 {
+    reskin = 
+    {
+        bank = "fx_shadow_dust",
+        build = "reskin_tool_fx",
+        anim = "puff",
+        sound = "dontstarve/common/together/reskin_tool",
+    },
     slurtle =
     {
         sound = "dontstarve/creatures/slurtle/explode",
@@ -90,6 +97,7 @@ local extras =
 }
 
 return Prefab("explode_small", MakeExplosion(), assets),
+    Prefab("explode_reskin", MakeExplosion(extras.reskin), assets),
     Prefab("explode_small_slurtle", MakeExplosion(extras.slurtle), assets),
     Prefab("explode_small_slurtlehole", MakeExplosion(extras.slurtlehole), assets),
     Prefab("explode_firecrackers", MakeExplosion(extras.firecrackers), assets)

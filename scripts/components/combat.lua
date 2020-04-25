@@ -669,7 +669,7 @@ function Combat:CalcDamage(target, weapon, multiplier)
 
     if weapon ~= nil then
         --No playermultiplier when using weapons
-        basedamage = weapon.components.weapon.damage or 0
+        basedamage = weapon.components.weapon:GetDamage(self.inst, target) or 0
         playermultiplier = 1
     else
         basedamage = self.defaultdamage
@@ -697,6 +697,7 @@ function Combat:CalcDamage(target, weapon, multiplier)
         * (multiplier or 1)
         * playermultiplier
         * pvpmultiplier
+		* (self.customdamagemultfn ~= nil and self.customdamagemultfn(self.inst, target, weapon, multiplier) or 1)
         + (bonus or 0)
 end
 

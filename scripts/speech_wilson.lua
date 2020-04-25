@@ -170,6 +170,9 @@ return {
 
             --MapRecorder/MapExplorer
             WRONGWORLD = "This map was made for some other place.",
+			
+			--MapSpotRevealer/messagebottle
+			MESSAGEBOTTLEMANAGER_NOT_FOUND = "I can't make anything out in this lighting!",--Likely trying to read messagebottle treasure map in caves
         },
         WRAPBUNDLE =
         {
@@ -223,6 +226,10 @@ return {
 		{
 			TOO_SMALL = "This one's just a small fry.",
 		},
+        BEGIN_QUEST =
+        {
+            ONEGHOST = "only_used_by_wendy",
+        },
 	},
 	ACTIONFAIL_GENERIC = "I can't do that.",
 	ANNOUNCE_BOAT_LEAK = "We're taking on a lot of water.",
@@ -500,6 +507,11 @@ return {
 	},
 
 	ANNOUNCE_WEIGHT = "Weight: {weight}",
+	ANNOUNCE_WEIGHT_HEAVY  = "Weight: {weight}\nI'm a fishing heavyweight!",
+
+	-- these are just for testing for now, no need to write real strings yet
+	ANNOUNCE_WINCH_CLAW_MISS = "I think I missed the mark.",
+	ANNOUNCE_WINCH_CLAW_NO_ITEM = "Drat! I've come up empty handed.",
 
     --Wurt announce strings
     ANNOUNCE_KINGCREATED = "only_used_by_wurt",
@@ -526,6 +538,28 @@ return {
     ANNOUNCE_CARRAT_ERROR_FELL_ASLEEP = "Don't you dare! Wake up, we have a race to win!",    
     ANNOUNCE_CARRAT_ERROR_WALKING = "Don't walk, RUN!",    
     ANNOUNCE_CARRAT_ERROR_STUNNED = "Get up! GO GO!",
+
+    ANNOUNCE_GHOST_QUEST = "only_used_by_wendy",
+    ANNOUNCE_GHOST_HINT = "only_used_by_wendy",
+    ANNOUNCE_GHOST_TOY_NEAR = {
+        "only_used_by_wendy",
+    },
+	ANNOUNCE_SISTURN_FULL = "only_used_by_wendy",
+    ANNOUNCE_ABIGAIL_DEATH = "only_used_by_wendy",
+    ANNOUNCE_ABIGAIL_RETRIEVE = "only_used_by_wendy",
+	ANNOUNCE_ABIGAIL_LOW_HEALTH = "only_used_by_wendy",
+    ANNOUNCE_ABIGAIL_SUMMON = 
+	{
+		LEVEL1 = "only_used_by_wendy",
+		LEVEL2 = "only_used_by_wendy",
+		LEVEL3 = "only_used_by_wendy",
+	},
+
+    ANNOUNCE_GHOSTLYBOND_LEVELUP = 
+	{
+		LEVEL2 = "only_used_by_wendy",
+		LEVEL3 = "only_used_by_wendy",
+	},
 
 	BATTLECRY =
 	{
@@ -566,6 +600,11 @@ return {
         ABIGAIL_FLOWER =
         {
             GENERIC ="It's hauntingly beautiful.",
+			LEVEL1 = "Do you need some alone time?",
+			LEVEL2 = "I think she's starting to open up to us.",
+			LEVEL3 = "Looks like someone's feeling especially spirited today!",
+
+			-- deprecated
             LONG = "It hurts my soul to look at that thing.",
             MEDIUM = "It's giving me the creeps.",
             SOON = "Something is up with that flower!",
@@ -1068,7 +1107,24 @@ return {
 		MAXWELLPHONOGRAPH = "So that's where the music was coming from.",
 		BOOMERANG = "Aerodynamical!",
 		PIGGUARD = "He doesn't look as friendly as the others.",
-		ABIGAIL = "Awww, she has a cute little bow.",
+		ABIGAIL =
+		{
+            LEVEL1 =
+            {
+                "Awww, she has a cute little bow.",
+                "Awww, she has a cute little bow.",
+            },
+            LEVEL2 = 
+            {
+                "Awww, she has a cute little bow.",
+                "Awww, she has a cute little bow.",
+            },
+            LEVEL3 = 
+            {
+                "Awww, she has a cute little bow.",
+                "Awww, she has a cute little bow.",
+            },
+		},
 		ADVENTURE_PORTAL = "I'm not sure I want to fall for that a second time.",
 		AMULET = "I feel so safe when I get to wear it.",
 		ANIMAL_TRACK = "Tracks left by food. I mean... an animal.",
@@ -1317,6 +1373,8 @@ return {
         CHESSPIECE_ANCHOR = "It's as heavy as it looks.",
         CHESSPIECE_MOON = "I've been feeling pretty inspired lately.",
         CHESSPIECE_CARRAT = "We have a winner!",
+        CHESSPIECE_MALBATROSS = "It's not so bad when it isn't trying to kill you.",
+        CHESSPIECE_CRABKING = "Still not as crabby as Maxwell.",
         CHESSJUNK1 = "A pile of broken chess pieces.",
         CHESSJUNK2 = "Another pile of broken chess pieces.",
         CHESSJUNK3 = "Even more broken chess pieces.",
@@ -2222,6 +2280,18 @@ return {
         TRINKET_44 = "It's some sort of plant specimen.", -- Broken Terrarium ONI trinket
         TRINKET_45 = "It's picking up frequencies from another world.", -- Odd Radio ONI trinket
         TRINKET_46 = "Maybe a tool for testing aerodynamics?", -- Hairdryer ONI trinket
+
+        -- The numbers align with the trinket numbers above.
+        LOST_TOY_1  = "I'm sure there's a perfectly scientific explanation for that.",
+        LOST_TOY_2  = "I'm sure there's a perfectly scientific explanation for that.",
+        LOST_TOY_7  = "I'm sure there's a perfectly scientific explanation for that.",
+        LOST_TOY_10 = "I'm sure there's a perfectly scientific explanation for that.",
+        LOST_TOY_11 = "I'm sure there's a perfectly scientific explanation for that.",
+        LOST_TOY_14 = "I'm sure there's a perfectly scientific explanation for that.",
+        LOST_TOY_18 = "I'm sure there's a perfectly scientific explanation for that.",
+        LOST_TOY_19 = "I'm sure there's a perfectly scientific explanation for that.",
+        LOST_TOY_42 = "I'm sure there's a perfectly scientific explanation for that.",
+        LOST_TOY_43 = "I'm sure there's a perfectly scientific explanation for that.",
         
         HALLOWEENCANDY_1 = "The cavities are probably worth it, right?",
         HALLOWEENCANDY_2 = "What corruption of science grew these?",
@@ -2621,7 +2691,7 @@ return {
         LAVAARENA_STRONGDAMAGERHAT = "It looks like it packs a wallop.",
         LAVAARENA_TIARAFLOWERPETALSHAT = "Looks like it amplifies healing expertise.",
         LAVAARENA_EYECIRCLETHAT = "It has a gaze full of science.",
-        LAVAARENA_RECHARGERHAT = "Those crystals will quickened my abilities.",
+        LAVAARENA_RECHARGERHAT = "Those crystals will quicken my abilities.",
         LAVAARENA_HEALINGGARLANDHAT = "This garland will restore a bit of my vitality.",
         LAVAARENA_CROWNDAMAGERHAT = "That could cause some major destruction.",
 
@@ -2985,6 +3055,9 @@ return {
         MOON_ALTAR_ROCK_GLASS = "There's something trapped inside.",
         MOON_ALTAR_ROCK_SEED = "There's something trapped inside.",
 
+        MOON_ALTAR_CROWN = "I fished it up, now to find a fissure!",
+        MOON_ALTAR_COSMIC = "It feels like it's waiting for something.",
+
         SEAFARING_PROTOTYPER =
         {
             GENERIC = "I think tanks are in order.",
@@ -3080,12 +3153,20 @@ return {
 		OCEANFISHINGLURE_SPOON_RED = "Some smaller fish might find this a-luring!",
 		OCEANFISHINGLURE_SPOON_GREEN = "Some smaller fish might find this a-luring!",
 		OCEANFISHINGLURE_SPOON_BLUE = "Some smaller fish might find this a-luring!",
+		OCEANFISHINGLURE_HERMIT_RAIN = "Soaking myself might help me think like a fish...",
+		OCEANFISHINGLURE_HERMIT_SNOW = "The fish won't snow what hit them!",
+		OCEANFISHINGLURE_HERMIT_DROWSY = "My brain is protected by a thick layer of hard science!",
+		OCEANFISHINGLURE_HERMIT_HEAVY = "This feels a bit heavy handed.",
 
 		OCEANFISH_SMALL_1 = "Looks like the runt of its school.",
 		OCEANFISH_SMALL_2 = "I won't win any bragging rights with this one.",
 		OCEANFISH_SMALL_3 = "It's a bit on the small side.",
 		OCEANFISH_SMALL_4 = "A fish this size won't tide me over for long.",
 		OCEANFISH_SMALL_5 = "I can't wait to pop it in my mouth.",
+		OCEANFISH_SMALL_6 = "You have to sea it to beleaf it.",
+		OCEANFISH_SMALL_7 = "I finally caught this bloomin' fish!",
+		OCEANFISH_SMALL_8 = "It's a scorcher!",
+
 		OCEANFISH_MEDIUM_1 = "I certainly hope it tastes better than it looks.",
 		OCEANFISH_MEDIUM_2 = "I went to a lot of treble to catch it.",
 		OCEANFISH_MEDIUM_3 = "I wasn't lion about my aptitude for fishing!",
@@ -3093,6 +3174,7 @@ return {
 		OCEANFISH_MEDIUM_5 = "This one seems kind of corny.",
 		OCEANFISH_MEDIUM_6 = "Now that's the real McKoi!",
 		OCEANFISH_MEDIUM_7 = "Now that's the real McKoi!",
+		OCEANFISH_MEDIUM_8 = "Ice bream, youse bream.",
 
 		PONDFISH = "Now I shall eat for a day.",
 		PONDEEL = "This will make a delicious meal.",
@@ -3106,13 +3188,18 @@ return {
 		FISH_BOX = "They're stuffed in there like sardines!",
         POCKET_SCALE = "A scaled-down weighing device.",
 
+		TACKLECONTAINER = "This extra storage space has me hooked!",
+		SUPERTACKLECONTAINER = "I had to shell out quite a bit to get this.",
+
 		TROPHYSCALE_FISH =
 		{
 			GENERIC = "I wonder how my catch of the day will measure up!",
 			HAS_ITEM = "Weight: {weight}\nCaught by: {owner}",
+			HAS_ITEM_HEAVY = "Weight: {weight}\nCaught by: {owner}\nWhat a catch!",
 			BURNING = "On a scale of 1 to on fire... that's pretty on fire.",
 			BURNT = "All my bragging rights, gone up in flames!",
 			OWNER = "Not to throw my weight around, buuut...\nWeight: {weight}\nCaught by: {owner}",
+			OWNER_HEAVY = "Weight: {weight}\nCaught by: {owner}\nIt's the one that DIDN'T get away!",
 		},
 
 		OCEANFISHABLEFLOTSAM = "Just some muddy grass.",
@@ -3121,7 +3208,72 @@ return {
 		SEAFOODGUMBO = "It's a jumbo seafood gumbo.",
 		SURFNTURF = "It's perf!",
 
+        WOBSTER_SHELLER = "What a wascally Wobster.", 
+        WOBSTER_DEN = "It's a rock with Wobsters in it.",
+        WOBSTER_SHELLER_DEAD = "You should cook up nicely.",
+        WOBSTER_SHELLER_DEAD_COOKED = "I can't wait to eat you.",
+
+        LOBSTERBISQUE = "Could use more salt, but that's none of my bisque-ness.",
+        LOBSTERDINNER = "If I eat it in the morning is it still dinner?",
+
+        WOBSTER_MOONGLASS = "What a wascally Lunar Wobster.",
+        MOONGLASS_WOBSTER_DEN = "It's a chunk of moonglass with Lunar Wobsters in it.",
+
+		TRIDENT = "This is going to be a blast!",
+		
+		WINCH =
+		{
+			GENERIC = "It'll do in a pinch.",
+			RETRIEVING_ITEM = "I'll let it do the heavy lifting.",
+			HOLDING_ITEM = "What do we have here?",
+		},
+
+        HERMITHOUSE = {
+            GENERIC = "It's just an empty shell of a house.",
+            BUILTUP = "It just needed a little love.",
+        }, 
+        
+        SHELL_CLUSTER = "I bet there's some nice shells in there.",
+        --
+		SINGINGSHELL_OCTAVE3 =
+		{
+			GENERIC = "It's a bit more toned down.",
+		},
+		SINGINGSHELL_OCTAVE4 =
+		{
+			GENERIC = "Is that what the ocean sounds like?",
+		},
+		SINGINGSHELL_OCTAVE5 =
+		{
+			GENERIC = "It's ready for the high C's.",
+        },
+
+        CHUM = "It's a fish meal!",
+
+        SUNKENCHEST =
+        {
+            GENERIC = "The real treasure is the treasure we found along the way.",
+            LOCKED = "It's clammed right up!",
+        },
+
+        RESKIN_TOOL = "I like the dust! It feels scholarly!",
+        MOON_FISSURE_PLUGGED = "It's not very scientific... but pretty effective.",
+
+
 		----------------------- ROT STRINGS GO ABOVE HERE ------------------
+
+		GHOSTLYELIXIR_SLOWREGEN = "Ah yes. Very science-y.",
+		GHOSTLYELIXIR_FASTREGEN = "Ah yes. Very science-y.",
+		GHOSTLYELIXIR_SHIELD = "Ah yes. Very science-y.",
+		GHOSTLYELIXIR_ATTACK = "Ah yes. Very science-y.",
+		GHOSTLYELIXIR_SPEED = "Ah yes. Very science-y.",
+		GHOSTLYELIXIR_RETALIATION = "Ah yes. Very science-y.",
+		SISTURN =
+		{
+			GENERIC = "Some flowers would liven it up a bit.",
+			SOME_FLOWERS = "A few more flowers should do the trick.",
+			LOTS_OF_FLOWERS = "What a brilliant boo-quet!",
+		},
 
         --Wortox
         WORTOX_SOUL = "only_used_by_wortox", --only wortox can inspect souls
@@ -3223,6 +3375,45 @@ return {
         MERM_PRINCE = "They operate on a first-come, first-sovereigned basis.",
 
         SQUID = "I have an inkling they'll come in handy.",
+
+		GHOSTFLOWER = "My scientific brain refuses to perceive it.",
+        SMALLGHOST = "Aww, does someone have a little boo-boo?",
+
+        CRABKING = 
+        {
+            GENERIC = "Yikes! A little too crabby for me.",
+            INERT = "That castle needs a little decoration.",
+        },
+		CRABKING_CLAW = "That's claws for alarm!",
+		
+		MESSAGEBOTTLE = "I wonder if it's for me!",
+		MESSAGEBOTTLEEMPTY = "It's full of nothing.",
+
+        MEATRACK_HERMIT =
+        {
+            DONE = "Jerky time!",
+            DRYING = "Meat takes a while to dry.",
+            DRYINGINRAIN = "Meat takes even longer to dry in rain.",
+            GENERIC = "Those look like they could use some meat.",
+            BURNT = "The rack got dried.",
+            DONE_NOTMEAT = "In laboratory terms, we would call that \"dry\".",
+            DRYING_NOTMEAT = "Drying things is not an exact science.",
+            DRYINGINRAIN_NOTMEAT = "Rain, rain, go away. Be wet again another day.",
+        },
+        BEEBOX_HERMIT =
+        {
+            READY = "It's full of honey.",
+            FULLHONEY = "It's full of honey.",
+            GENERIC = "I'm sure there's a little sweetness to be found inside.",
+            NOHONEY = "It's empty.",
+            SOMEHONEY = "Need to wait a bit.",
+            BURNT = "How did it get burned?!!",
+        },
+
+        HERMITCRAB = "Living by yourshellf must get abalonely.",
+
+        HERMIT_PEARL = "I'll take good care of it.",
+        HERMIT_CRACKED_PEARL = "I... didn't take good care of it.",
     },
 
     DESCRIBE_GENERIC = "It's a... thing.",

@@ -161,6 +161,9 @@ return{
 
             --MapRecorder/MapExplorer
             WRONGWORLD = "I seem to be in the wrong place to use this.",
+			
+			--MapSpotRevealer/messagebottle
+			MESSAGEBOTTLEMANAGER_NOT_FOUND = "I'll extract its secrets once I find some suitable lighting.",--Likely trying to read messagebottle treasure map in caves
         },
         WRAPBUNDLE =
         {
@@ -214,6 +217,10 @@ return{
 		{
 			TOO_SMALL = "It's not worth my time.",
 		},
+        BEGIN_QUEST =
+        {
+            ONEGHOST = "only_used_by_wendy",
+        },
 	},
 	ACTIONFAIL_GENERIC = "That didn't work.",
 	ANNOUNCE_BOAT_LEAK = "We've sprung a leak!",
@@ -491,6 +498,11 @@ return{
 	},
 
 	ANNOUNCE_WEIGHT = "Weight: {weight}",
+	ANNOUNCE_WEIGHT_HEAVY  = "Weight: {weight}\nEr... I don't suppose anyone would help me carry this?",
+
+	-- these are just for testing for now, no need to write real strings yet
+	ANNOUNCE_WINCH_CLAW_MISS = "Foiled again!",
+	ANNOUNCE_WINCH_CLAW_NO_ITEM = "I don't know what I expected.",
 
     --Wurt announce strings
 --fallback to speech_wilson.lua     ANNOUNCE_KINGCREATED = "only_used_by_wurt",
@@ -517,6 +529,28 @@ return{
     ANNOUNCE_CARRAT_ERROR_FELL_ASLEEP = "Wake up, you useless vermin!",    
     ANNOUNCE_CARRAT_ERROR_WALKING = "Faster! Faster I say!",    
     ANNOUNCE_CARRAT_ERROR_STUNNED = "What's the matter? Get going!",
+
+    ANNOUNCE_GHOST_QUEST = "only_used_by_wendy",
+--fallback to speech_wilson.lua     ANNOUNCE_GHOST_HINT = "only_used_by_wendy",
+--fallback to speech_wilson.lua     ANNOUNCE_GHOST_TOY_NEAR = {
+--fallback to speech_wilson.lua         "only_used_by_wendy",
+--fallback to speech_wilson.lua     },
+--fallback to speech_wilson.lua 	ANNOUNCE_SISTURN_FULL = "only_used_by_wendy",
+--fallback to speech_wilson.lua     ANNOUNCE_ABIGAIL_DEATH = "only_used_by_wendy",
+--fallback to speech_wilson.lua     ANNOUNCE_ABIGAIL_RETRIEVE = "only_used_by_wendy",
+--fallback to speech_wilson.lua 	ANNOUNCE_ABIGAIL_LOW_HEALTH = "only_used_by_wendy",
+    ANNOUNCE_ABIGAIL_SUMMON = 
+	{
+--fallback to speech_wilson.lua 		LEVEL1 = "only_used_by_wendy",
+--fallback to speech_wilson.lua 		LEVEL2 = "only_used_by_wendy",
+--fallback to speech_wilson.lua 		LEVEL3 = "only_used_by_wendy",
+	},
+
+    ANNOUNCE_GHOSTLYBOND_LEVELUP = 
+	{
+--fallback to speech_wilson.lua 		LEVEL2 = "only_used_by_wendy",
+--fallback to speech_wilson.lua 		LEVEL3 = "only_used_by_wendy",
+	},
 
 	BATTLECRY =
 	{
@@ -557,6 +591,11 @@ return{
         ABIGAIL_FLOWER =
         {
             GENERIC ="Hm? What a familiar presence.",
+			LEVEL1 = "I can sense strong magic within it.",
+			LEVEL2 = "A powerful bond tethers this spirit to our world.",
+			LEVEL3 = "...I wonder how my brother is doing.",
+
+			-- deprecated
             LONG = "I can sense strong magic within it.",
             MEDIUM = "This enchantment is not of my doing.",
             SOON = "Whatever it is will be arriving soon.",
@@ -1059,7 +1098,24 @@ return{
 		MAXWELLPHONOGRAPH = "That accursed thing!",
 		BOOMERANG = "Beats getting your hands dirty.",
 		PIGGUARD = "Blech. Disgusting brute.",
-		ABIGAIL = "Why won't these mortals just stay dead?",
+		ABIGAIL =
+		{
+            LEVEL1 =
+            {
+                "Quite the precocious poltergeist, aren't you?",
+                "Quite the precocious poltergeist, aren't you?",
+            },
+            LEVEL2 = 
+            {
+                "Quite the precocious poltergeist, aren't you?",
+                "Quite the precocious poltergeist, aren't you?",
+            },
+            LEVEL3 = 
+            {
+                "Quite the precocious poltergeist, aren't you?",
+                "Quite the precocious poltergeist, aren't you?",
+            },
+		},
 		ADVENTURE_PORTAL = "So that's where I left that thing!",
 		AMULET = "It channels the darkest energies of the universe.",
 		ANIMAL_TRACK = "Some dumb beast passed through here.",
@@ -1308,6 +1364,8 @@ return{
         CHESSPIECE_ANCHOR = "How kitsch.",
         CHESSPIECE_MOON = "I'm fairly partial to this one.",
         CHESSPIECE_CARRAT = "If only I had a mantle to set it on.",
+        CHESSPIECE_MALBATROSS = "Such a fowl-tempered bird.",
+        CHESSPIECE_CRABKING = "I am not that crabby!",
         CHESSJUNK1 = "There's a reason I never finished that.",
         CHESSJUNK2 = "That one was a jerk.",
         CHESSJUNK3 = "Didn't like that one's face.",
@@ -2213,6 +2271,18 @@ return{
         TRINKET_44 = "Rosebud.", -- Broken Terrarium ONI trinket
         TRINKET_45 = "At least it's not ragtime.", -- Odd Radio ONI trinket
         TRINKET_46 = "Some harebrained invention of the scientist's, perhaps?", -- Hairdryer ONI trinket
+
+        -- The numbers align with the trinket numbers above.
+        LOST_TOY_1  = "I'd better leave that be.",
+        LOST_TOY_2  = "I'd better leave that be.",
+        LOST_TOY_7  = "I'd better leave that be.",
+        LOST_TOY_10 = "I'd better leave that be.",
+        LOST_TOY_11 = "I'd better leave that be.",
+        LOST_TOY_14 = "I'd better leave that be.",
+        LOST_TOY_18 = "I'd better leave that be.",
+        LOST_TOY_19 = "I'd better leave that be.",
+        LOST_TOY_42 = "I'd better leave that be.",
+        LOST_TOY_43 = "I'd better leave that be.",
         
         HALLOWEENCANDY_1 = "Oh good, it's solid candy. I feared something healthy had snuck in.",
         HALLOWEENCANDY_2 = "Waxy, just like me.",
@@ -2976,6 +3046,9 @@ return{
         MOON_ALTAR_ROCK_GLASS = "The thing inside wants out.",
         MOON_ALTAR_ROCK_SEED = "The thing inside wants out.",
 
+        MOON_ALTAR_CROWN = "This powerful energy... I've seen it before.",
+        MOON_ALTAR_COSMIC = "It is not yet time?",
+
         SEAFARING_PROTOTYPER =
         {
             GENERIC = "Now to see if Higgsbury's ideas hold water.",
@@ -3071,12 +3144,20 @@ return{
 		OCEANFISHINGLURE_SPOON_RED = "At least I don't have to use worms.",
 		OCEANFISHINGLURE_SPOON_GREEN = "At least I don't have to use worms.",
 		OCEANFISHINGLURE_SPOON_BLUE = "At least I don't have to use worms.",
+		OCEANFISHINGLURE_HERMIT_RAIN = "Go fishing in the rain? And ruin my last good suit?",
+		OCEANFISHINGLURE_HERMIT_SNOW = "Why would anyone want to fish while it's snowing?",
+		OCEANFISHINGLURE_HERMIT_DROWSY = "I think Higgsbury already got too close to one of these.",
+		OCEANFISHINGLURE_HERMIT_HEAVY = "I'm reluctant to see what manner of fish would bite THAT.",
 
 		OCEANFISH_SMALL_1 = "This was barely worth my time.",
 		OCEANFISH_SMALL_2 = "Hardly bigger than a minnow.",
 		OCEANFISH_SMALL_3 = "I was hoping for something bigger.",
 		OCEANFISH_SMALL_4 = "Just a cold fish.",
 		OCEANFISH_SMALL_5 = "Its smell oddly reminds me of the theater house...",
+		OCEANFISH_SMALL_6 = "What an ugly thing.",
+		OCEANFISH_SMALL_7 = "It seems more plant than fish.",
+		OCEANFISH_SMALL_8 = "The sunfish! It burns!",
+
 		OCEANFISH_MEDIUM_1 = "It looks positively revolting.",
 		OCEANFISH_MEDIUM_2 = "It has a rather unsettling stare.",
 		OCEANFISH_MEDIUM_3 = "I'd best take care to avoid those spines.",
@@ -3084,6 +3165,7 @@ return{
 		OCEANFISH_MEDIUM_5 = "What an odd creature.",
 		OCEANFISH_MEDIUM_6 = "Don't be koi with me.",
 		OCEANFISH_MEDIUM_7 = "Don't be koi with me.",
+		OCEANFISH_MEDIUM_8 = "Stay frosty, pal.",
 
 		PONDFISH = "Fresh from the murky depths.",
 		PONDEEL = "It slithers all the way down.",
@@ -3097,13 +3179,18 @@ return{
 		FISH_BOX = "Ugh, the smell... the things I do for a decent meal.",
         POCKET_SCALE = "I keep it next to my pocket watch and my pocket comb.",
 
+		TACKLECONTAINER = "Can I really even call it a \"box\"?",
+		SUPERTACKLECONTAINER = "Not the most refined design, but it's functional.",
+
 		TROPHYSCALE_FISH =
 		{
 			GENERIC = "Perhaps I might reign again... as the king of fishing!",
 			HAS_ITEM = "Weight: {weight}\nCaught by: {owner}",
+			HAS_ITEM_HEAVY = "Weight: {weight}\nCaught by: {owner}\nEnjoy your moment while it lasts...",
 			BURNING = "No! NOO!",
 			BURNT = "All my ambitions go up in smoke.",
 			OWNER = "Weight: {weight}\nCaught by: {owner}\nBow down before your fishing master!",
+			OWNER_HEAVY = "Weight: {weight}\nCaught by: {owner}\nImpressive, isn't it?",
 		},
 
 		OCEANFISHABLEFLOTSAM = "Disappointing.",
@@ -3112,7 +3199,72 @@ return{
 		SEAFOODGUMBO = "It looks passable.",
 		SURFNTURF = "A very balanced meal, I suppose.",
 
+        WOBSTER_SHELLER = "I'd prefer it without the sharp, pinching claws.", 
+        WOBSTER_DEN = "What manner of creature lives in there?",
+        WOBSTER_SHELLER_DEAD = "Excellent.",
+        WOBSTER_SHELLER_DEAD_COOKED = "I forgot my bib.",
+
+        LOBSTERBISQUE = "Ah, I do enjoy the finer things.",
+        LOBSTERDINNER = "Finally, something to suit my refined palate.",
+
+        WOBSTER_MOONGLASS = "They didn't look like that when I was in charge.",
+        MOONGLASS_WOBSTER_DEN = "I suppose life finds a way.",
+
+		TRIDENT = "It seems to have struck a chord.",
+		
+		WINCH =
+		{
+			GENERIC = "We are to start dredging up what lies beneath now, are we?",
+			RETRIEVING_ITEM = "It seems I've gotten a hold of something.",
+			HOLDING_ITEM = "Interesting.",
+		},
+
+        HERMITHOUSE = {
+            GENERIC = "What a sad little hovel.",
+            BUILTUP = "It's an improvement.",
+        }, 
+        
+        SHELL_CLUSTER = "That was not worth the effort.",
+        --
+		SINGINGSHELL_OCTAVE3 =
+		{
+			GENERIC = "Hm?",
+		},
+		SINGINGSHELL_OCTAVE4 =
+		{
+			GENERIC = "No, go on, keep playing that same note. It's not irritating at all.",
+		},
+		SINGINGSHELL_OCTAVE5 =
+		{
+			GENERIC = "I've quite lost my taste for music.",
+        },
+
+        CHUM = "Say, that chum doesn't look so good.",
+
+        SUNKENCHEST =
+        {
+            GENERIC = "How whimsical.",
+            LOCKED = "How annoying. It's locked.",
+        },
+
+        RESKIN_TOOL = "Presto change-o! Ahem... old habit.",
+        MOON_FISSURE_PLUGGED = "It's almost genius in its simplicity... but it does smell.",
+
+
 		----------------------- ROT STRINGS GO ABOVE HERE ------------------
+
+		GHOSTLYELIXIR_SLOWREGEN = "It appears someone has been toying with the dark arts and crafts.",
+		GHOSTLYELIXIR_FASTREGEN = "It appears someone has been toying with the dark arts and crafts.",
+		GHOSTLYELIXIR_SHIELD = "It appears someone has been toying with the dark arts and crafts.",
+		GHOSTLYELIXIR_ATTACK = "It appears someone has been toying with the dark arts and crafts.",
+		GHOSTLYELIXIR_SPEED = "It appears someone has been toying with the dark arts and crafts.",
+		GHOSTLYELIXIR_RETALIATION = "It appears someone has been toying with the dark arts and crafts.",
+		SISTURN =
+		{
+			GENERIC = "I can't help but wonder... no, it couldn't be.",
+			SOME_FLOWERS = "Perhaps I should pay my respects as well.",
+			LOTS_OF_FLOWERS = "It has a strangely calming effect.",
+		},
 
         --Wortox
 --fallback to speech_wilson.lua         WORTOX_SOUL = "only_used_by_wortox", --only wortox can inspect souls
@@ -3214,6 +3366,45 @@ return{
         MERM_PRINCE = "Kings are easily made around here.",
 
         SQUID = "I hope they stay close. But not too close.",
+
+		GHOSTFLOWER = "I hope they found peace.",
+        SMALLGHOST = "I'm so sorry.",
+
+        CRABKING = 
+        {
+            GENERIC = "Say, pal, why don't we try to work this out?",
+            INERT = "I suppose we can't just leave well enough alone, can we?",
+        },
+		CRABKING_CLAW = "Best to avoid that.",
+		
+		MESSAGEBOTTLE = "Someone sensibly bottled up their feelings and tossed them out to sea.",
+		MESSAGEBOTTLEEMPTY = "It's empty inside.",
+
+        MEATRACK_HERMIT =
+        {
+            DONE = "Does she even have teeth?",
+            DRYING = "Still moist.",
+            DRYINGINRAIN = "Moist and staying that way.",
+            GENERIC = "Perhaps if she were fed, she'd be less ill-tempered.",
+            BURNT = "It's too brittle to hang meat on now.",
+            DONE_NOTMEAT = "Like the desert.",
+            DRYING_NOTMEAT = "Still moist.",
+            DRYINGINRAIN_NOTMEAT = "Moist and staying that way.",
+        },
+        BEEBOX_HERMIT =
+        {
+            READY = "I've done enough, the old woman can brave the bees herself.",
+            FULLHONEY = "I've done enough, the old woman can brave the bees herself.",
+            GENERIC = "I think she made this herself.",
+            NOHONEY = "Why do the bees not serve me?",
+            SOMEHONEY = "I should wait a bit longer.",
+            BURNT = "Honey roasted.",
+        },
+
+        HERMITCRAB = "I have better things to do than being berated by an old crab.",
+
+        HERMIT_PEARL = "It's... strange to be so trusted.",
+        HERMIT_CRACKED_PEARL = "Ah. I thought I'd run out of people to disappoint.",
     },
 
     DESCRIBE_GENERIC = "You tell me.",

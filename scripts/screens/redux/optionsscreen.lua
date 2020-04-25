@@ -219,11 +219,13 @@ local OptionsScreen = Class(Screen, function(self, prev_screen)
 		netbookmode = TheSim:IsNetbookMode(),
 		vibration = Profile:GetVibrationEnabled(),
 		showpassword = Profile:GetShowPasswordEnabled(),
+		profanityfilterservernames = Profile:GetProfanityFilterServerNamesEanbled(),
         movementprediction = Profile:GetMovementPredictionEnabled(),
 		automods = Profile:GetAutoSubscribeModsEnabled(),
 		wathgrithrfont = Profile:IsWathgrithrFontEnabled(),
 		boatcamera = Profile:IsBoatCameraEnabled(),
         lang_id = Profile:GetLanguageID(),
+		texturestreaming = Profile:GetTextureStreamingEnabled(),
 	}
 
 
@@ -264,10 +266,10 @@ local OptionsScreen = Class(Screen, function(self, prev_screen)
 	self:MakeBackButton()
     self:_RefreshScreenButtons()
 
-    self.dialog = self.root:AddChild(TEMPLATES.RectangleWindow(830, 450))
-    self.dialog:SetPosition(140, -20)
+    self.dialog = self.root:AddChild(TEMPLATES.RectangleWindow(830, 500))
+    self.dialog:SetPosition(140, 5)
     self.panel_root = self.dialog:AddChild(Widget("panel_root"))
-    self.panel_root:SetPosition(-90, 35)
+    self.panel_root:SetPosition(-90, 55)
 
 
 	self:DoInit()
@@ -504,8 +506,10 @@ function OptionsScreen:Save(cb)
 	Profile:SetHUDSize( self.options.hudSize )
 	Profile:SetVibrationEnabled( self.options.vibration )
 	Profile:SetShowPasswordEnabled( self.options.showpassword )
+	Profile:SetProfanityFilterServerNamesEanbled( self.options.profanityfilterservernames )
     Profile:SetMovementPredictionEnabled(self.options.movementprediction)
 	Profile:SetAutoSubscribeModsEnabled( self.options.automods )
+	Profile:SetTextureStreamingEnabled( self.options.texturestreaming )
 
 	Profile:Save( function() if cb then cb() end end)
 end
@@ -964,6 +968,10 @@ function OptionsScreen:_BuildCinematics()
     return root
 end
 
+local function EnabledOptionsIndex(enabled)
+    return enabled and 2 or 1
+end
+
 -- This is the "settings" tab
 function OptionsScreen:_BuildSettings()
     local settingsroot = Widget("ROOT")
@@ -1148,6 +1156,14 @@ function OptionsScreen:_BuildSettings()
 			self:UpdateMenu()
 		end
 
+	self.profanityfilterSpinner = CreateTextSpinner(STRINGS.UI.OPTIONS.SERVER_NAME_PROFANITY_FILTER, enableDisableOptions)
+	self.profanityfilterSpinner.OnChanged =
+		function( _, data )
+			this.working.profanityfilterservernames = data
+			--this:Apply()
+			self:UpdateMenu()
+		end
+
 	self.wathgrithrfontSpinner = CreateTextSpinner(STRINGS.UI.OPTIONS.WATHGRITHRFONT, enableDisableOptions)
 	self.wathgrithrfontSpinner.OnChanged =
 		function( _, data )
@@ -1212,6 +1228,32 @@ function OptionsScreen:_BuildSettings()
             self:UpdateMenu()
         end
 
+	self.texturestreamingSpinner = CreateTextSpinner(STRINGS.UI.OPTIONS.TEXTURESTREAMING, enableDisableOptions)
+	self.texturestreamingSpinner.OnChanged =
+		function( spinner, data )
+			--print(v,data)
+			if not self.shownTextureStreamingWarning then
+				TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.OPTIONS.RESTART_TEXTURE_STREAMING_TITLE, STRINGS.UI.OPTIONS.RESTART_TEXTURE_STREAMING_BODY, 
+				{
+					{text=STRINGS.UI.OPTIONS.OK,     cb = function() 
+																self.shownTextureStreamingWarning = true
+																self.working.texturestreaming = data
+																TheFrontEnd:PopScreen() 
+																self:UpdateMenu()
+															end },
+					{text=STRINGS.UI.OPTIONS.CANCEL, cb = function() 
+																spinner:SetSelectedIndex(EnabledOptionsIndex( self.working.texturestreaming ))
+																spinner:SetHasModification(false)
+																TheFrontEnd:PopScreen() 
+																self:UpdateMenu()	-- not needed but meh
+															end}
+				}))
+			else
+				self.working.texturestreaming = data
+				self:UpdateMenu()	-- not needed but meh
+			end
+		end
+
 	self.automodsSpinner = CreateTextSpinner(STRINGS.UI.OPTIONS.AUTOMODS, enableDisableOptions)
 	self.automodsSpinner.OnChanged =
 		function( _, data )
@@ -1256,14 +1298,11 @@ function OptionsScreen:_BuildSettings()
     table.insert( self.left_spinners, self.musicVolume )
     table.insert( self.left_spinners, self.ambientVolume )
     table.insert( self.left_spinners, self.passwordSpinner)
+    table.insert( self.left_spinners, self.profanityfilterSpinner)
     table.insert( self.left_spinners, self.automodsSpinner )
     table.insert( self.left_spinners, self.wathgrithrfontSpinner)
     table.insert( self.left_spinners, self.hudSize)
     table.insert( self.left_spinners, self.boatcameraSpinner)
-
-	if self.show_datacollection then
-		table.insert( self.left_spinners, self.datacollectionCheckbox)
-	end
 
     table.insert( self.right_spinners, self.screenshakeSpinner )
     table.insert( self.right_spinners, self.distortionSpinner )
@@ -1277,6 +1316,12 @@ function OptionsScreen:_BuildSettings()
 		table.insert( self.right_spinners, self.smallTexturesSpinner )
 		table.insert( self.right_spinners, self.netbookModeSpinner )
         table.insert( self.right_spinners, self.movementpredictionSpinner )
+	end
+
+	table.insert( self.right_spinners, self.texturestreamingSpinner )
+
+	if self.show_datacollection then
+		table.insert( self.left_spinners, self.datacollectionCheckbox)
 	end
 
 	self.grid:UseNaturalLayout()
@@ -1461,10 +1506,12 @@ function OptionsScreen:_BuildControls()
 
     local function CreateScrollableList(items)
         local width = controls_ui.action_label_width + spacing + controls_ui.action_btn_width
-        return ScrollableList(items, width/2, 330, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "GOLD")
+        return ScrollableList(items, width/2, 380, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "GOLD")
     end
 	self.kb_controllist = controlsroot:AddChild(CreateScrollableList(self.kb_controlwidgets))
+	self.kb_controllist:SetPosition(0, -30)
     self.controller_controllist = controlsroot:AddChild(CreateScrollableList(self.controller_controlwidgets))
+    self.controller_controllist:SetPosition(0, -30)
 
     controlsroot.focus_forward = function()
         return self.active_list
@@ -1472,10 +1519,6 @@ function OptionsScreen:_BuildControls()
     return controlsroot
 end
 
-
-local function EnabledOptionsIndex(enabled)
-    return enabled and 2 or 1
-end
 
 function OptionsScreen:InitializeSpinners(first)
 	if show_graphics then
@@ -1511,10 +1554,12 @@ function OptionsScreen:InitializeSpinners(first)
 	self.hudSize:SetSelectedIndex( self.working.hudSize or 5)
 	self.vibrationSpinner:SetSelectedIndex( EnabledOptionsIndex( self.working.vibration ) )
 	self.passwordSpinner:SetSelectedIndex( EnabledOptionsIndex( self.working.showpassword ) )
+	self.profanityfilterSpinner:SetSelectedIndex( EnabledOptionsIndex( self.working.profanityfilterservernames ) )
     self.movementpredictionSpinner:SetSelectedIndex(EnabledOptionsIndex(self.working.movementprediction))
 	self.wathgrithrfontSpinner:SetSelectedIndex( EnabledOptionsIndex( self.working.wathgrithrfont ) )
 	self.boatcameraSpinner:SetSelectedIndex( EnabledOptionsIndex( self.working.boatcamera ) )
-	
+	self.texturestreamingSpinner:SetSelectedIndex( EnabledOptionsIndex( self.working.texturestreaming ) )
+
 	if self.show_datacollection then
 		--self.datacollectionCheckbox: -- the current behaviour does not reuqire this to be (re)initialized at any point after construction
 	end

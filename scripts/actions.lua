@@ -253,6 +253,9 @@ ACTIONS =
 	COMPARE_WEIGHABLE = Action(),
 	WEIGH_ITEM = Action(),
 	START_CARRAT_RACE = Action({ rmb = true }),
+    CASTSUMMON = Action({ rmb=true, mount_valid=true }),
+    CASTUNSUMMON = Action({ mount_valid=true, distance=math.huge }),
+	COMMUNEWITHSUMMONED = Action({ rmb=true, mount_valid=true }),
 
     TOSS = Action({ rmb=true, distance=8, mount_valid=true }),
     NUZZLE = Action(),
@@ -272,12 +275,16 @@ ACTIONS =
     TACKLE = Action({ rmb=true, distance=math.huge }),
 	GIVE_TACKLESKETCH = Action(),
 	REMOVE_FROM_TROPHYSCALE = Action(),
+	CYCLE = Action({ rmb=true, priority=2 }),
 
     CASTAOE = Action({ priority=HIGH_ACTION_PRIORITY, rmb=true, distance=8 }),
 
 	HALLOWEENMOONMUTATE = Action({ priority=-1 }),
 
 	WINTERSFEAST_FEAST = Action({ priority=1 }),
+
+    BEGIN_QUEST = Action(),
+    ABANDON_QUEST = Action(),
 
     --Quagmire
     TILL = Action({ distance=0.5 }),
@@ -289,6 +296,9 @@ ACTIONS =
     SALT = Action(),
 
     BATHBOMB = Action(),
+
+    COMMENT = Action({distance = 4}),
+    WATER_TOSS = Action({ priority=3, rmb=true, customarrivecheck=CheckOceanFishingCastRange, is_relative_to_platform=true, disable_platform_hopping=true}),
 
     -- boats
     RAISE_SAIL = Action({ distance=1.25 }),
@@ -310,7 +320,8 @@ ACTIONS =
     ROW_FAIL = Action({customarrivecheck=function() return true end, disable_platform_hopping=true, skip_locomotor_facing=true}),
     ROW = Action({priority=3, customarrivecheck=CheckRowRange, is_relative_to_platform=true, disable_platform_hopping=true}),
     ROW_CONTROLLER = Action({priority=3, is_relative_to_platform=true, disable_platform_hopping=true, do_not_locomote=true}),    
-	BOARDPLATFORM = Action({ customarrivecheck=CheckIsOnPlatform }),
+    BOARDPLATFORM = Action({ customarrivecheck=CheckIsOnPlatform }),
+    OCEAN_TOSS = Action({priority=3, rmb=true, customarrivecheck=CheckOceanFishingCastRange, is_relative_to_platform=true, disable_platform_hopping=true}),
 }
 
 ACTIONS_BY_ACTION_CODE = {}
@@ -740,7 +751,8 @@ ACTIONS.CHANGE_TACKLE.fn = function(act)
 	return false
 end
 
-ACTIONS.TALKTO.fn = function(act)    local targ = act.target or act.invobject
+ACTIONS.TALKTO.fn = function(act)    
+    local targ = act.target or act.invobject
     if targ and targ.components.talkable then
         act.doer.components.locomotor:Stop()
 
@@ -857,14 +869,15 @@ end
 
 ACTIONS.FERTILIZE.fn = function(act)
     if act.invobject ~= nil and act.invobject.components.fertilizer ~= nil then
-        if act.target ~= nil and not (act.doer ~= nil and act.doer.components.rider ~= nil and act.doer.components.rider:IsRiding()) then
+        if act.target ~= nil and not (act.doer ~= nil and act.doer.components.rider ~= nil and act.doer.components.rider:IsRiding()) then            
             if act.target.components.crop ~= nil and not (act.target.components.crop:IsReadyForHarvest() or act.target:HasTag("withered")) then
                 return act.target.components.crop:Fertilize(act.invobject, act.doer)
-            elseif act.target.components.grower ~= nil and act.target.components.grower:IsEmpty() then
+            elseif act.target.components.grower ~= nil and act.target.components.grower:IsEmpty() then                
                 act.target.components.grower:Fertilize(act.invobject, act.doer)
                 return true
             elseif act.target.components.pickable ~= nil and act.target.components.pickable:CanBeFertilized() then
                 act.target.components.pickable:Fertilize(act.invobject, act.doer)
+                TheWorld:PushEvent("CHEVO_fertilized",{target=act.target,doer=act.doer})
                 return true
             elseif act.target.components.quagmire_fertilizable ~= nil then
                 act.target.components.quagmire_fertilizable:Fertilize(act.invobject, act.doer)
@@ -985,7 +998,7 @@ ACTIONS.ATTACK.strfn = function(act)
                     return "RANGEDSMOTHER"
                 elseif act.doer.replica.combat:CanLightTarget(act.target, act.invobject) then
                     return "RANGEDLIGHT"
-                elseif act.target:HasTag("mole") and act.invobject:HasTag("hammer") then
+                elseif act.target:HasTag("whackable") and act.invobject:HasTag("hammer") then
                     return "WHACK"
                 end
             end
@@ -1118,7 +1131,9 @@ ACTIONS.DRY.fn = function(act)
         local ingredient = act.doer.components.inventory:RemoveItem(act.invobject)
         if not act.target.components.dryer:StartDrying(ingredient) then
             act.doer.components.inventory:GiveItem(ingredient, nil, act.target:GetPosition())
-            return false 
+            return false
+        else
+            TheWorld:PushEvent("CHEVO_starteddrying",{target=act.target,doer=act.doer})
         end
         return true
     end
@@ -1162,8 +1177,10 @@ end
 ACTIONS.GIVE.stroverridefn = function(act)
     --Quagmire & Winter's Feast action strings
     if act.target ~= nil and act.invobject ~= nil then
-		if act.target:HasTag("wintersfeasttable") then
-			return subfmt(STRINGS.ACTIONS.GIVE["PLACE_ITEM"], { item = act.invobject:GetBasicDisplayName() })
+		if act.target:HasTag("ghostlyelixirable") and act.invobject:HasTag("ghostlyelixir") then
+			return subfmt(STRINGS.ACTIONS.GIVE.APPLY, { item = act.invobject:GetBasicDisplayName() })
+		elseif act.target:HasTag("wintersfeasttable") then
+			return subfmt(STRINGS.ACTIONS.GIVE.PLACE_ITEM, { item = act.invobject:GetBasicDisplayName() })
         elseif act.target.nameoverride ~= nil and act.invobject:HasTag("quagmire_stewer") then
             return subfmt(STRINGS.ACTIONS.GIVE[string.upper(act.target.nameoverride)], { item = act.invobject:GetBasicDisplayName() })
         elseif act.target:HasTag("quagmire_altar") then
@@ -1189,7 +1206,9 @@ end
 
 ACTIONS.GIVE.fn = function(act)
     if act.target ~= nil then
-        if act.target.components.trader ~= nil then
+		if act.target.components.ghostlyelixirable ~= nil and act.invobject.components.ghostlyelixir ~= nil then
+            return act.invobject.components.ghostlyelixir:Apply(act.doer, act.target)
+        elseif act.target.components.trader ~= nil then
             local able, reason = act.target.components.trader:AbleToAccept(act.invobject, act.doer)
             if not able then
                 return false, reason
@@ -1288,7 +1307,7 @@ end
 ACTIONS.STORE.fn = function(act)
     local target = act.target
     --V2C: For dropping items onto the object rather than construction widget
-    if target.components.container == nil and target.components.constructionsite ~= nil then
+    if target.components.container == nil and target.components.constructionsite ~= nil then        
         local builder = target.components.constructionsite.builder
         target = builder == act.doer and builder.components.constructionbuilder ~= nil and builder.components.constructionbuilder.constructioninst or nil
         if target == nil then
@@ -1555,6 +1574,13 @@ ACTIONS.INVESTIGATE.fn = function(act)
     end
 end
 
+ACTIONS.COMMENT.fn = function(act)    
+    if act.doer.components.talker ~= nil and act.doer.comment_data then
+        act.doer.components.talker:Say(act.doer.comment_data.speech)
+        act.doer.comment_data = nil
+    end
+end
+
 ACTIONS.GOHOME.fn = function(act)
     --this is gross. make it better later.
     if act.doer.force_onwenthome_message then
@@ -1725,6 +1751,10 @@ ACTIONS.USEKLAUSSACKKEY.fn = function(act)
     end
 end
 
+ACTIONS.TEACH.strfn = function(act)
+	return act.invobject ~= nil and act.invobject.components.mapspotrevealer ~= nil and "READ" or nil
+end
+
 ACTIONS.TEACH.fn = function(act)
     if act.invobject ~= nil then
         local target = act.target or act.doer
@@ -1736,6 +1766,9 @@ ACTIONS.TEACH.fn = function(act)
                 return true
             end
             return success, reason
+		elseif act.invobject.components.mapspotrevealer ~= nil then
+			local success, reason = act.invobject.components.mapspotrevealer:RevealMap(act.doer)
+			return success, reason
         end
     end
 end
@@ -1826,6 +1859,28 @@ ACTIONS.BLINK.fn = function(act)
         act.doer.sg:GoToState("portal_jumpin", act_pos)
         return true
     end
+end
+
+ACTIONS.CASTSUMMON.fn = function(act)
+	if act.invobject ~= nil and act.invobject.components.summoningitem and act.doer ~= nil and act.doer.components.ghostlybond ~= nil then
+		return act.doer.components.ghostlybond:Summon( act.invobject.components.summoningitem.inst )
+	end
+end
+
+ACTIONS.CASTUNSUMMON.fn = function(act)
+	if act.invobject ~= nil and act.invobject.components.summoningitem and act.doer ~= nil and act.doer.components.ghostlybond ~= nil then
+		return act.doer.components.ghostlybond:Recall(false)
+	end
+end
+
+ACTIONS.COMMUNEWITHSUMMONED.strfn = function(act)
+    return act.doer:HasTag("has_aggressive_follower") and "MAKE_DEFENSIVE" or "MAKE_AGGRESSIVE"
+end
+
+ACTIONS.COMMUNEWITHSUMMONED.fn = function(act)
+	if act.invobject ~= nil and act.invobject.components.summoningitem and act.doer ~= nil and act.doer.components.ghostlybond ~= nil then
+		return act.doer.components.ghostlybond:ChangeBehaviour()
+	end
 end
 
 ACTIONS.COMBINESTACK.fn = function(act)
@@ -2020,6 +2075,8 @@ ACTIONS.TOSS.fn = function(act)
         end
     end
 end
+
+ACTIONS.WATER_TOSS.fn = ACTIONS.TOSS.fn
 
 ACTIONS.UPGRADE.fn = function(act)
     if act.invobject and act.target
@@ -2272,6 +2329,12 @@ ACTIONS.CONSTRUCT.fn = function(act)
         if not CanEntitySeeTarget(act.doer, target) then
             return true
         end
+
+        -- DANY: open sound here.
+        if act.doer == ThePlayer then
+            act.doer.SoundEmitter:PlaySound("dontstarve/wilson/chest_open")
+        end
+
         local item = act.invobject
         local success, reason
         if item ~= nil and item.components.constructionplans ~= nil and target.components.constructionsite == nil then
@@ -2327,6 +2390,12 @@ end
 ACTIONS.STOPCONSTRUCTION.fn = function(act)
     if act.doer ~= nil and act.doer.components.constructionbuilder ~= nil then
         act.doer.components.constructionbuilder:StopConstruction()
+
+        -- DANY: close sound here.
+        if act.doer == ThePlayer then
+            act.doer.SoundEmitter:PlaySound("dontstarve/wilson/chest_close")
+        end
+
     end
     return true
 end
@@ -2627,24 +2696,12 @@ ACTIONS.RAISE_ANCHOR.fn = function(act)
     return act.target.components.anchor:AddAnchorRaiser(act.doer)
 end
 
-ACTIONS.RAISE_ANCHOR.strfn = function(act)
-    return STRINGS.ACTIONS.RAISE_ANCHOR
-end
-
 ACTIONS.LOWER_ANCHOR.fn = function(act)
     return act.target.components.anchor:StartLoweringAnchor()
 end
 
-ACTIONS.LOWER_ANCHOR.strfn = function(act)
-    return STRINGS.ACTIONS.LOWER_ANCHOR
-end
-
 ACTIONS.MOUNT_PLANK.fn = function(act)
     return act.target.components.walkingplank:MountPlank(act.doer)
-end
-
-ACTIONS.MOUNT_PLANK.strfn = function(act)
-    return STRINGS.ACTIONS.MOUNT_PLANK
 end
 
 ACTIONS.DISMOUNT_PLANK.fn = function(act)
@@ -2652,16 +2709,8 @@ ACTIONS.DISMOUNT_PLANK.fn = function(act)
     return true
 end
 
-ACTIONS.DISMOUNT_PLANK.strfn = function(act)
-    return STRINGS.ACTIONS.DISMOUNT_PLANK
-end
-
 ACTIONS.ABANDON_SHIP.fn = function(act)
     return act.target.components.walkingplank:AbandonShip(act.doer)
-end
-
-ACTIONS.ABANDON_SHIP.stroverridefn = function(act)
-    return STRINGS.ACTIONS.ABANDON_SHIP
 end
 
 ACTIONS.EXTEND_PLANK.fn = function(act)
@@ -2669,27 +2718,15 @@ ACTIONS.EXTEND_PLANK.fn = function(act)
     return true
 end
 
-ACTIONS.EXTEND_PLANK.strfn = function(act)
-    return STRINGS.ACTIONS.EXTEND_PLANK
-end
-
 ACTIONS.RETRACT_PLANK.fn = function(act)
     act.target.components.walkingplank:Retract()
     return true
-end
-
-ACTIONS.RETRACT_PLANK.strfn = function(act)
-    return STRINGS.ACTIONS.RETRACT_PLANK
 end
 
 ACTIONS.REPAIR_LEAK.fn = function(act)    
     if act.invobject ~= nil and act.target ~= nil and act.target.components.boatleak ~= nil and act.target:HasTag("boat_leak") then
 	    return act.target.components.boatleak:Repair(act.doer, act.invobject)
 	end
-end
-
-ACTIONS.STEER_BOAT.stroverridefn = function(act)
-    return STRINGS.ACTIONS.STEER_BOAT
 end
 
 ACTIONS.STEER_BOAT.fn = function(act)
@@ -2768,9 +2805,60 @@ ACTIONS.REMOVE_FROM_TROPHYSCALE.fn = function(act)
 	end
 end
 
+ACTIONS.CYCLE.strfn = function(act)
+    return (act.target ~= nil and act.target:HasTag("singingshell") and "TUNE")
+        or nil
+end
+
+ACTIONS.CYCLE.fn = function(act)
+	local tar = act.target
+	if tar.components.cyclable ~= nil then
+		if tar.components.cyclable.cancycle then
+			tar.components.cyclable:Cycle(act.doer)
+			return true
+		else
+			return false
+		end
+	end
+end
+
+ACTIONS.OCEAN_TOSS.fn = function(act)
+    if act.invobject and act.doer then
+        if act.invobject.components.oceanthrowable and act.doer.components.inventory then
+            local projectile = act.doer.components.inventory:DropItem(act.invobject, false)
+            if projectile then
+                projectile.components.oceanthrowable:AddProjectile()
+                local pos = nil
+                if act.target then
+                    pos = act.target:GetPosition()
+                    projectile.components.complexprojectile.targetoffset = {x=0,y=1.5,z=0}
+                else
+                    pos = act:GetActionPoint()
+                end
+                projectile.components.complexprojectile:Launch(pos, act.doer)
+                return true
+            end
+        end
+    end
+end
+
 ACTIONS.WINTERSFEAST_FEAST.fn = function(act)
 	return true
 	-- Logic is handled from stategraph; action is never actually performed
+end
+
+ACTIONS.BEGIN_QUEST.fn = function(act)
+    if act.target.components.questowner ~= nil and act.target.components.questowner:CanBeginQuest(act.doer) then
+        local success, message = act.target.components.questowner:BeginQuest(act.doer)
+        return (success ~= false), message
+    end
+end
+
+ACTIONS.ABANDON_QUEST.fn = function(act)
+    if act.target.components.questowner ~= nil and act.target.components.questowner:CanAbandonQuest(act.doer) then
+        local success, message = act.target.components.questowner:AbandonQuest(act.doer)
+        return (success ~= false), message
+    end
 end
 
 ACTIONS.REPLATE.fn = function(act)

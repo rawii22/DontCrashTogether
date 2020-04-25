@@ -50,8 +50,8 @@ function MakeBanner(self)
 	local anim = baner_root:AddChild(UIAnim())
 
 	if IS_BETA then
-        anim:GetAnimState():SetBuild("dst_menu_inker")
-        anim:GetAnimState():SetBank("dst_menu_inker")
+        anim:GetAnimState():SetBuild("dst_menu_shesells")
+        anim:GetAnimState():SetBank("dst_menu_shesells")
         anim:GetAnimState():PlayAnimation("loop", true)
         anim:SetScale(.667)
 		title_str = STRINGS.UI.MAINSCREEN.MAINBANNER_ROT_BETA_TITLE
@@ -142,11 +142,11 @@ function MakeBanner(self)
         onanimover(anim.inst)
     ]]
 	else
-		anim:GetAnimState():SetBuild("dst_menu")
+        --[[anim:GetAnimState():SetBuild("dst_menu")
 		anim:GetAnimState():SetBank("dst_menu")
 		anim:GetAnimState():PlayAnimation("loop", true)
 		anim:SetScale(0.63)
-		anim:SetPosition(347, 85)
+		anim:SetPosition(347, 85)]]
         --[[anim:GetAnimState():SetBuild("dst_menu_winona")
         anim:GetAnimState():SetBank("dst_menu_winona")
         anim:GetAnimState():PlayAnimation("loop", true)
@@ -171,7 +171,32 @@ function MakeBanner(self)
         anim:GetAnimState():SetBank("dst_menu_warly")
         anim:GetAnimState():PlayAnimation("loop", true)
         anim:SetScale(.667)
+        anim:SetPosition(0, 0)]]  
+        --[[anim:GetAnimState():SetBuild("dst_menu_inker")
+        anim:GetAnimState():SetBank("dst_menu_inker")
+        anim:GetAnimState():PlayAnimation("loop2", true)
+        anim:SetScale(.667)
         anim:SetPosition(0, 0)]]
+        --[[
+		local cur_time = os.time() 
+		if cur_time <= 1585810740 and (not IsConsole() or cur_time >= 1585759200) then -- 9:40am to 11:59pm PDT
+			anim:GetAnimState():SetBuild("dst_menu_wes")
+			anim:GetAnimState():SetBank("dst_menu_wes")
+			anim:GetAnimState():PlayAnimation("loop", true)
+			anim:SetScale(.667)
+			anim:SetPosition(0, 0)
+		else
+			anim:GetAnimState():SetBuild("dst_menu_wendy")
+			anim:GetAnimState():SetBank("dst_menu_wendy")
+			anim:GetAnimState():PlayAnimation("loop", true)
+			anim:SetScale(.667)
+			anim:SetPosition(0, 0)
+		end]]
+        anim:GetAnimState():SetBuild("dst_menu_shesells")
+        anim:GetAnimState():SetBank("dst_menu_shesells")
+        anim:GetAnimState():PlayAnimation("loop", true)
+        anim:SetScale(.667)
+        anim:SetPosition(0, 0)
 	end
 
 	if IsFestivalEventActive(FESTIVAL_EVENTS.LAVAARENA) then

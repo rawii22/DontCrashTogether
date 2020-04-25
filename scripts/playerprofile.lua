@@ -38,6 +38,7 @@ local PlayerProfile = Class(function(self)
         self.persistdata.warneddifficultyrog = false
         self.persistdata.controller_popup = false
         self.persistdata.warn_mods_enabled = true
+        self.persistdata.texture_streaming = true
     end
 
     self.dirty = true
@@ -67,6 +68,7 @@ function PlayerProfile:Reset()
         self.persistdata.warneddifficultyrog = false
         self.persistdata.controller_popup = false
         self.persistdata.warn_mods_enabled = true
+        self.persistdata.texture_streaming = true
     end
 
     --self.persistdata.starts = 0 -- save starts?
@@ -621,12 +623,40 @@ function PlayerProfile:SetMovementPredictionEnabled(enabled)
     end
 end
 
+function PlayerProfile:SetTextureStreamingEnabled(enabled)
+    if USE_SETTINGS_FILE then
+        TheSim:SetSetting("misc", "texture_streaming", tostring(enabled))
+    else
+        self:SetValue("texturestreaming", enabled)
+        self.dirty = true
+    end
+end
+
+
 function PlayerProfile:GetMovementPredictionEnabled()
     -- an undefined movementprediction is considered to be enabled
     if USE_SETTINGS_FILE then
         return TheSim:GetSetting("misc", "movementprediction") ~= "false"
     else
         return self:GetValue("movementprediction") ~= false
+    end
+end
+
+function PlayerProfile:SetProfanityFilterServerNamesEanbled(enabled)
+    if USE_SETTINGS_FILE then
+        TheSim:SetSetting("misc", "profanityfilterservernames", tostring(enabled))
+    else
+        self:SetValue("profanityfilterservernames", enabled)
+        self.dirty = true
+    end
+end
+
+function PlayerProfile:GetProfanityFilterServerNamesEanbled()
+    -- an undefined setting is considered to be enabled
+    if USE_SETTINGS_FILE then
+        return TheSim:GetSetting("misc", "profanityfilterservernames") ~= "false"
+    else
+        return self:GetValue("profanityfilterservernames") ~= false
     end
 end
 
@@ -647,6 +677,14 @@ function PlayerProfile:GetAutoSubscribeModsEnabled()
 	end
 end
 
+function PlayerProfile:GetTextureStreamingEnabled()
+ 	if USE_SETTINGS_FILE then
+		return TheSim:GetSetting("misc", "texture_streaming") == "true"
+	else
+		return self:GetValue("texturestreaming")
+	end
+end
+
 -- "enter_tab", "disabled", "tab", "enter", "mouseonly"
 function PlayerProfile:GetConsoleAutocompleteMode()
  	if USE_SETTINGS_FILE then
@@ -664,7 +702,6 @@ function PlayerProfile:GetChatAutocompleteMode()
 		return "enter_tab"
 	end
 end
-
 
 -- gjans: Added this upgrade path 28/03/2016
 local function UpgradeProfilePresets(presets_string)
