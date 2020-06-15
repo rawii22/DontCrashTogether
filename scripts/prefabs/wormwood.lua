@@ -18,12 +18,7 @@ local prefabs =
     "wormwood_plant_fx",
 }
 
-local start_inv =
-{
-    default =
-    {
-    },
-}
+local start_inv = {}
 for k, v in pairs(TUNING.GAMEMODE_STARTING_ITEMS) do
     start_inv[string.lower(k)] = v.WORMWOOD
 end
@@ -244,12 +239,13 @@ end
 local PLANTS_RANGE = 1
 local MAX_PLANTS = 18
 
+local PLANTFX_TAGS = { "wormwood_plant_fx" }
 local function PlantTick(inst)
     if inst.sg:HasStateTag("ghostbuild") or inst.components.health:IsDead() or not inst.entity:IsVisible() then
         return
     end
     local x, y, z = inst.Transform:GetWorldPosition()
-    if #TheSim:FindEntities(x, y, z, PLANTS_RANGE, { "wormwood_plant_fx" }) < MAX_PLANTS then
+    if #TheSim:FindEntities(x, y, z, PLANTS_RANGE, PLANTFX_TAGS) < MAX_PLANTS then
         local map = TheWorld.Map
         local pt = Vector3(0, 0, 0)
         local offset = FindValidPositionByFan(
@@ -266,7 +262,7 @@ local function PlantTick(inst)
                     and tile ~= GROUND.CARPET
                     and tile ~= GROUND.IMPASSABLE
                     and tile ~= GROUND.INVALID
-                    and #TheSim:FindEntities(pt.x, 0, pt.z, .5, { "wormwood_plant_fx" }) < 3
+                    and #TheSim:FindEntities(pt.x, 0, pt.z, .5, PLANTFX_TAGS) < 3
                     and map:IsDeployPointClear(pt, nil, .5)
                     and not map:IsPointNearHole(pt, .4)
             end
@@ -566,6 +562,10 @@ local function master_postinit(inst)
     inst.endtalksound = "dontstarve/characters/wormwood/end"
     --inst.endghosttalksound = nil
 
+    inst.components.health:SetMaxHealth(TUNING.WORMWOOD_HEALTH)
+    inst.components.hunger:SetMax(TUNING.WORMWOOD_HUNGER)
+    inst.components.sanity:SetMax(TUNING.WORMWOOD_SANITY)
+
     inst.customidleanim = customidleanimfn
 
     inst.components.health.fire_damage_scale = TUNING.WORMWOOD_FIRE_DAMAGE
@@ -578,6 +578,8 @@ local function master_postinit(inst)
         --No health from food
         inst.components.eater:SetAbsorptionModifiers(0, 1, 1)
     end
+
+    inst.components.foodaffinity:AddPrefabAffinity("cave_banana_cooked", TUNING.AFFINITY_15_CALORIES_SMALL)
 
     inst.components.burnable:SetBurnTime(TUNING.WORMWOOD_BURN_TIME)
 

@@ -138,7 +138,7 @@ local assets =
     Asset("IMAGE", "images/bg_spiral.tex"),
     Asset("ATLAS", "images/bg_vignette.xml"),
     Asset("IMAGE", "images/bg_vignette.tex"),
-    Asset("ANIM", "anim/sail_over.zip"),
+    --Asset("ANIM", "anim/sail_over.zip"), --unused
     Asset("ANIM", "anim/paddle_over.zip"),
 
 
@@ -271,6 +271,10 @@ local assets =
     Asset("IMAGE", "images/inventoryimages1.tex"),
     Asset("ATLAS", "images/inventoryimages2.xml"),
     Asset("IMAGE", "images/inventoryimages2.tex"),
+    Asset("ATLAS", "images/inventoryimages2.xml"),
+    Asset("IMAGE", "images/inventoryimages2.tex"),
+    Asset("ATLAS", "images/hud.xml"),
+    Asset("IMAGE", "images/hud.tex"),
 
     --oft-used panel bgs
     Asset("DYNAMIC_ATLAS", "images/globalpanels2.xml"),
@@ -291,6 +295,7 @@ local assets =
     Asset("ANIM", "anim/weremoose_basic.zip"),
     Asset("ANIM", "anim/weregoose_basic.zip"),
     Asset("ANIM", "anim/player_idles.zip"),
+    Asset("ANIM", "anim/player_idles_walter.zip"),
 
     Asset("DYNAMIC_ANIM", "anim/dynamic/body_default1.zip"),
     Asset("DYNAMIC_ANIM", "anim/dynamic/hand_default1.zip"),
@@ -300,6 +305,10 @@ local assets =
     Asset("PKGREF", "anim/dynamic/hand_default1.dyn"),
     Asset("PKGREF", "anim/dynamic/legs_default1.dyn"),
     Asset("PKGREF", "anim/dynamic/feet_default1.dyn"),
+
+    Asset("ANIM", "anim/beard.zip"),
+    Asset("DYNAMIC_ANIM", "anim/dynamic/beard_default1.zip"),
+    Asset("PKGREF", "anim/dynamic/beard_default1.dyn"),
 
     Asset("DYNAMIC_ANIM", "anim/dynamic/previous_skin.zip"),
     Asset("PKGREF", "anim/dynamic/previous_skin.dyn"),

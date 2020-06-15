@@ -221,6 +221,12 @@ return{
         {
             ONEGHOST = "only_used_by_wendy",
         },
+		TELLSTORY = 
+		{
+			GENERIC = "only_used_by_walter",
+--fallback to speech_wilson.lua 			NOT_NIGHT = "only_used_by_walter",
+--fallback to speech_wilson.lua 			NO_FIRE = "only_used_by_walter",
+		},
 	},
 	ACTIONFAIL_GENERIC = "Sorry, I can't do that.",
 	ANNOUNCE_BOAT_LEAK = "All this water is making me very anxious.",
@@ -460,6 +466,21 @@ return{
 --fallback to speech_wilson.lua     {
 --fallback to speech_wilson.lua         "only_used_by_wortox",
 --fallback to speech_wilson.lua     },
+
+    --walter specfic
+--fallback to speech_wilson.lua 	ANNOUNCE_SLINGHSOT_OUT_OF_AMMO =
+--fallback to speech_wilson.lua 	{
+--fallback to speech_wilson.lua 		"only_used_by_walter",
+--fallback to speech_wilson.lua 		"only_used_by_walter",
+--fallback to speech_wilson.lua 	},
+--fallback to speech_wilson.lua 	ANNOUNCE_STORYTELLING_ABORT_FIREWENTOUT =
+--fallback to speech_wilson.lua 	{
+--fallback to speech_wilson.lua         "only_used_by_walter",
+--fallback to speech_wilson.lua 	},
+--fallback to speech_wilson.lua 	ANNOUNCE_STORYTELLING_ABORT_NOT_NIGHT =
+--fallback to speech_wilson.lua 	{
+--fallback to speech_wilson.lua         "only_used_by_walter",
+--fallback to speech_wilson.lua 	},
 
     --quagmire event
     QUAGMIRE_ANNOUNCE_NOTRECIPE = "Guess those ingredients don't go together.",
@@ -781,6 +802,16 @@ return{
             REVIVER = "A bit rough around the edges, but you're alright %s!",
             GHOST = "We'll get ya feeling right as rain in no time.",
             FIRESTARTER = "Hey! What do you think you're doin?",
+        },
+
+        WALTER =
+        {
+            GENERIC = "Hey, %s! Nice seeing someone from my neck of the woods!",
+            ATTACKER = "That wasn't very polite, eh?",
+            MURDERER = "\"Sorry\"'s not gonna cut it this time!",
+            REVIVER = "Thanks for havin' my back, %s!",
+            GHOST = "C'mon kiddo, let's get you a heart.",
+            FIRESTARTER = "I thought you said you knew how to build a campfire?",
         },
 
 --fallback to speech_wilson.lua         MIGRATION_PORTAL =
@@ -1367,6 +1398,11 @@ return{
         CHESSPIECE_CARRAT = "Looks well made.",
         CHESSPIECE_MALBATROSS = "I'm not puttin' that anywhere near my base.",
         CHESSPIECE_CRABKING = "That's nicely made.",
+        CHESSPIECE_TOADSTOOL = "Structurally sound.",
+        CHESSPIECE_STALKER = "Nothin' wrong with it now.",
+        CHESSPIECE_KLAUS = "Can't complain about that worksmanship.",
+        CHESSPIECE_BEEQUEEN = "Some nice detail on that.",
+        CHESSPIECE_ANTLION = "Looks almost real, eh?",
         CHESSJUNK1 = "Dead metal.",
         CHESSJUNK2 = "Dead metal.",
         CHESSJUNK3 = "Dead metal.",
@@ -3254,6 +3290,30 @@ return{
 
 		----------------------- ROT STRINGS GO ABOVE HERE ------------------
 
+		-- Walter
+        WOBYBIG = 
+        {
+            "You're almost as shaggy as me, buddy!",
+            "You're almost as shaggy as me, buddy!",
+        },
+        WOBYSMALL = 
+        {
+            "It's nice havin' a dog around.",
+            "It's nice havin' a dog around.",
+        },
+		WALTERHAT = "Lookit that, it's got a little maple leaf on it!",
+		SLINGSHOT = "Maybe he can thin out the bird population a bit.",
+		SLINGSHOTAMMO_ROCK = "Not bad at all!",		
+		SLINGSHOTAMMO_MARBLE = "Not bad at all!",		
+		SLINGSHOTAMMO_THULECITE = "Not bad at all!",	
+        SLINGSHOTAMMO_GOLD = "Not bad at all!",
+        SLINGSHOTAMMO_SLOW = "Not bad at all!",
+        SLINGSHOTAMMO_FREEZE = "Not bad at all!",
+		SLINGSHOTAMMO_POOP = "Not pleasant, but it works.",
+        PORTABLETENT = "I always sleep better in a tent.",
+        PORTABLETENT_ITEM = "A portable tent! Why didn't we think of that, Luce?",
+
+		-- Wendy
 		GHOSTLYELIXIR_SLOWREGEN = "Whoof, smells like week-old sockeye!",
 		GHOSTLYELIXIR_FASTREGEN = "Whoof, smells like week-old sockeye!",
 		GHOSTLYELIXIR_SHIELD = "Whoof, smells like week-old sockeye!",

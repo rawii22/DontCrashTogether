@@ -83,9 +83,11 @@ function Trap:GetDebugString()
         end
     end
 
-    local souls = self.numsouls or self.starvednumsouls
-    if souls ~= nil then
-        str = str.." Souls:"..souls
+    if self.numsouls ~= nil then
+        str = str.." Souls:"..self.numsouls
+    end
+    if self.starvednumsouls ~= nil then
+        str = str.." Starved Souls:"..self.starvednumsouls
     end
 
     return str
@@ -159,9 +161,10 @@ local function CheckTrappable(guy)
     return guy.components.health == nil or not guy.components.health:IsDead()
 end
 
+local TRAP_NO_TAGS = { "INLIMBO", "untrappable" }
 function Trap:OnUpdate(dt)
     if self.isset then
-        local guy = FindEntity(self.inst, self.range, CheckTrappable, { self.targettag }, { "INLIMBO", "untrappable" })
+        local guy = FindEntity(self.inst, self.range, CheckTrappable, { self.targettag }, TRAP_NO_TAGS)
         if guy ~= nil then
             self.target = guy
             self:StopUpdating()
@@ -227,6 +230,7 @@ for k, v in pairs(FOODTYPE) do
     table.insert(BAIT_TAGS, "edible_"..v)
 end
 
+local INLIMBO_TAGS = { "INLIMBO" }
 function Trap:DoSpring()
     self:StopUpdating()
     if self.target ~= nil and not self.target:IsValid() then
@@ -275,7 +279,7 @@ function Trap:DoSpring()
     elseif self.target ~= nil then
         local ismole = self.target:HasTag("mole")
         local x, y, z = self.inst.Transform:GetWorldPosition()
-        local ents = TheSim:FindEntities(x, y, z, 2, nil, { "INLIMBO" }, BAIT_TAGS)
+        local ents = TheSim:FindEntities(x, y, z, 2, nil, INLIMBO_TAGS, BAIT_TAGS)
         for i, v in ipairs(ents) do
             if v.components.bait ~= nil
                 and (ismole and v:HasTag("molebait") or
@@ -336,7 +340,11 @@ function Trap:Harvest(doer)
         end
 
         if self.numsouls ~= nil then
-            doer:PushEvent("harvesttrapsouls", { numsouls = self.numsouls, pos = pos })
+			if doer ~= nil then
+	            doer:PushEvent("harvesttrapsouls", { numsouls = self.numsouls, pos = pos })
+			else
+	            TheWorld:PushEvent("starvedtrapsouls", { numsouls = self.numsouls, trap = self.inst })
+			end
         end
 
         if self.inst:IsValid() then

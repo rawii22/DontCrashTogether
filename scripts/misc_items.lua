@@ -554,6 +554,14 @@ MISC_ITEMS =
 		rarity_modifier = "Woven",
 		release_group = 32,
 	},
+	loading_warly2_trailer =
+	{
+		type = "loading",
+		skin_tags = { "SHORTS", "LOADING", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		release_group = 98,
+	},
 	loading_warly_trailer =
 	{
 		type = "loading",
@@ -658,6 +666,14 @@ MISC_ITEMS =
 		rarity_modifier = "Woven",
 		release_group = 32,
 	},
+	loading_willow2_trailer =
+	{
+		type = "loading",
+		skin_tags = { "SHORTS", "LOADING", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		release_group = 98,
+	},
 	loading_willow_bats =
 	{
 		type = "loading",
@@ -746,6 +762,14 @@ MISC_ITEMS =
 		rarity_modifier = "Woven",
 		release_group = 54,
 	},
+	loading_woodie2_trailer =
+	{
+		type = "loading",
+		skin_tags = { "SHORTS", "LOADING", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		release_group = 98,
+	},
 	loading_woodie_trailer =
 	{
 		type = "loading",
@@ -761,6 +785,14 @@ MISC_ITEMS =
 		rarity = "Classy",
 		rarity_modifier = "Woven",
 		release_group = 43,
+	},
+	loading_wormwood2_trailer =
+	{
+		type = "loading",
+		skin_tags = { "SHORTS", "LOADING", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		release_group = 98,
 	},
 	loading_wormwood_trailer =
 	{
@@ -802,6 +834,16 @@ MISC_ITEMS =
 		rarity_modifier = "Woven",
 		release_group = 51,
 	},
+	mysterybox_beards =
+	{
+		type = "mysterybox",
+		skin_tags = { "MYSTERYBOX", },
+		build_name_override = "mysterybox_classic_4",
+		box_build = "box_mystery_classic",
+		rarity = "Common",
+		rarity_modifier = "Woven",
+		release_group = 97,
+	},
 	mysterybox_classic_4 =
 	{
 		type = "mysterybox",
@@ -810,6 +852,16 @@ MISC_ITEMS =
 		rarity = "Common",
 		rarity_modifier = "Woven",
 		release_group = 50,
+	},
+	mysterybox_fixed =
+	{
+		type = "mysterybox",
+		skin_tags = { "MYSTERYBOX", },
+		build_name_override = "mysterybox_classic_4",
+		box_build = "box_mystery_classic",
+		rarity = "Common",
+		rarity_modifier = "Woven",
+		release_group = 97,
 	},
 	mysterybox_ice_4 =
 	{
@@ -2066,6 +2118,60 @@ MISC_ITEMS =
 		display_items = {  "wx78_victorian", "body_wx78_victorian", "hand_wx78_victorian", "legs_wx78_victorian", },
 		output_items = {  "wx78_victorian", "body_wx78_victorian", "hand_wx78_victorian", "legs_wx78_victorian", },
 		release_group = 46,
+	},
+	pack_walter_deluxe =
+	{
+		type = "purchase",
+		skin_tags = { },
+		featured_pack = true,
+		steam_dlc_id = 1338540,
+		display_order = 1,
+		build_name_override = "pack_common",
+		display_atlas = "images/iap_images_walter_deluxe.xml",
+		display_tex = "walter_deluxe.tex",
+		box_build = "box_shop_plain",
+		display_items = {  "walter_formal", "walterhat_formal", "walter_detective", "walterhat_detective", "walter_survivor", "walterhat_survivor", },
+		output_items = {  "walter_formal", "body_walter_formal", "feet_walter_formal", "legs_walter_formal", "walterhat_formal", "walter_detective", "body_walter_detective", "feet_walter_detective", "legs_walter_detective", "walterhat_detective", "walter_survivor", "body_walter_survivor", "feet_walter_survivor", "walterhat_survivor", },
+		release_group = 99,
+	},
+	pack_walter_detective =
+	{
+		type = "purchase",
+		skin_tags = { },
+		display_order = 4,
+		build_name_override = "walter_detective",
+		display_atlas = "bigportraits/walter_detective.xml",
+		display_tex = "walter_detective_oval.tex",
+		box_build = "box_shop_plain",
+		display_items = {  "walter_detective", "body_walter_detective", "feet_walter_detective", "legs_walter_detective", "walterhat_detective", },
+		output_items = {  "walter_detective", "body_walter_detective", "feet_walter_detective", "legs_walter_detective", "walterhat_detective", },
+		release_group = 99,
+	},
+	pack_walter_formal =
+	{
+		type = "purchase",
+		skin_tags = { },
+		display_order = 5,
+		build_name_override = "walter_formal",
+		display_atlas = "bigportraits/walter_formal.xml",
+		display_tex = "walter_formal_oval.tex",
+		box_build = "box_shop_plain",
+		display_items = {  "walter_formal", "body_walter_formal", "feet_walter_formal", "legs_walter_formal", "walterhat_formal", },
+		output_items = {  "walter_formal", "body_walter_formal", "feet_walter_formal", "legs_walter_formal", "walterhat_formal", },
+		release_group = 99,
+	},
+	pack_walter_survivor =
+	{
+		type = "purchase",
+		skin_tags = { },
+		display_order = 3,
+		build_name_override = "walter_survivor",
+		display_atlas = "bigportraits/walter_survivor.xml",
+		display_tex = "walter_survivor_oval.tex",
+		box_build = "box_shop_plain",
+		display_items = {  "walter_survivor", "body_walter_survivor", "feet_walter_survivor", "walterhat_survivor", },
+		output_items = {  "walter_survivor", "body_walter_survivor", "feet_walter_survivor", "walterhat_survivor", },
+		release_group = 99,
 	},
 	pack_warly_deluxe =
 	{
@@ -5209,6 +5315,54 @@ MISC_ITEMS =
 		rarity = "Common",
 		rarity_modifier = "Woven",
 		release_group = 54,
+	},
+	wilson_beard_formal =
+	{
+		type = "beard",
+		skin_tags = { "FORMAL", "WILSON_BEARD", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		release_group = 97,
+	},
+	wilson_beard_ice =
+	{
+		type = "beard",
+		skin_tags = { "ICE", "WILSON_BEARD", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		release_group = 97,
+	},
+	wilson_beard_rose =
+	{
+		type = "beard",
+		skin_tags = { "ROSE", "WILSON_BEARD", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		release_group = 97,
+	},
+	wilson_beard_shadow =
+	{
+		type = "beard",
+		skin_tags = { "SHADOW", "WILSON_BEARD", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		release_group = 97,
+	},
+	wilson_beard_survivor =
+	{
+		type = "beard",
+		skin_tags = { "SURVIVOR", "WILSON_BEARD", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		release_group = 97,
+	},
+	wilson_beard_victorian =
+	{
+		type = "beard",
+		skin_tags = { "VICTORIAN", "WILSON_BEARD", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		release_group = 97,
 	},
 }
 

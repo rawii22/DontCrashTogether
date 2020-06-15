@@ -281,6 +281,16 @@ function Container:RemoveItemBySlot(slot)
     end
 end
 
+function Container:RemoveAllItems()
+    local collected_items = {}
+    for i = 1, self.numslots do
+        local item = self:RemoveItemBySlot(i)
+        table.insert(collected_items, item)
+    end
+
+    return collected_items
+end
+
 function Container:GetNumSlots()
     return self.numslots
 end
@@ -297,6 +307,17 @@ function Container:GetItemSlot(item)
             return k
         end
     end
+end
+
+function Container:GetAllItems()
+    local collected_items = {}
+    for k,v in pairs(self.slots) do
+        if v ~= nil then
+            table.insert(collected_items, v)
+        end
+    end 
+
+    return collected_items
 end
 
 function Container:Open(doer)
@@ -321,7 +342,7 @@ function Container:Open(doer)
             if self:IsSideWidget() then
                 TheFocalPoint.SoundEmitter:PlaySound("dontstarve/wilson/backpack_open")
             else
-                TheFocalPoint.SoundEmitter:PlaySound("dontstarve/HUD/Together_HUD/container")
+                TheFocalPoint.SoundEmitter:PlaySound("dontstarve/HUD/Together_HUD/container_open")
             end
         elseif self.widget ~= nil
             and self.widget.buttoninfo ~= nil
@@ -349,7 +370,7 @@ function Container:Close()
             if self:IsSideWidget() then
                 TheFocalPoint.SoundEmitter:PlaySound("dontstarve/wilson/backpack_close")
             else
-                TheFocalPoint.SoundEmitter:PlaySound("dontstarve/HUD/Together_HUD/container")
+                TheFocalPoint.SoundEmitter:PlaySound("dontstarve/HUD/Together_HUD/container_close")
             end
         elseif doer.components.playeractionpicker ~= nil then
             doer.components.playeractionpicker:UnregisterContainer(self.inst)

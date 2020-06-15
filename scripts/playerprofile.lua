@@ -562,6 +562,24 @@ function PlayerProfile:IsBoatCameraEnabled()
 	end
 end
 
+function PlayerProfile:SetCampfireStoryCameraEnabled(enabled)
+ 	if USE_SETTINGS_FILE then
+		TheSim:SetSetting("misc", "campfirestorycamera", tostring(enabled))
+	else
+		self:SetValue("campfirestorycamera", enabled)
+		self.dirty = true
+	end
+end
+
+function PlayerProfile:IsCampfireStoryCameraEnabled()
+	-- Default to true if this value hasn't been created yet
+
+ 	if USE_SETTINGS_FILE then
+ 		return TheSim:GetSetting("misc", "campfirestorycamera") ~= "false"
+	else
+		return self:GetValue("campfirestorycamera") ~= false 
+	end
+end
 
 function PlayerProfile:SetHaveWarnedDifficultyRoG()
 	if USE_SETTINGS_FILE then
@@ -651,7 +669,7 @@ function PlayerProfile:SetProfanityFilterServerNamesEanbled(enabled)
     end
 end
 
-function PlayerProfile:GetProfanityFilterServerNamesEanbled()
+function PlayerProfile:GetProfanityFilterServerNamesEnabled()
     -- an undefined setting is considered to be enabled
     if USE_SETTINGS_FILE then
         return TheSim:GetSetting("misc", "profanityfilterservernames") ~= "false"
@@ -674,6 +692,44 @@ function PlayerProfile:GetAutoSubscribeModsEnabled()
 		return TheSim:GetSetting("misc", "autosubscribemods") == "true"
 	else
 		return self:GetValue("autosubscribemods")
+	end
+end
+
+function PlayerProfile:SetAutoLoginEnabled(enabled)
+	if USE_SETTINGS_FILE then
+	   TheSim:SetSetting("misc", "autologin", tostring(enabled))
+   else
+	   self:SetValue("autologin", enabled)
+	   self.dirty = true
+   end
+end
+
+function PlayerProfile:GetAutoLoginEnabled()
+	if USE_SETTINGS_FILE then
+		local autologin = TheSim:GetSetting("misc", "autologin")
+		if autologin == nil then
+			return true
+		end
+		return autologin == "true"
+	else
+		return GetValueOrDefault( self.persistdata.autologin, true )
+	end
+end
+
+function PlayerProfile:SetAutoCavesEnabled(enabled)
+	if USE_SETTINGS_FILE then
+	   TheSim:SetSetting("misc", "autocaves", tostring(enabled))
+   else
+	   self:SetValue("autocaves", enabled)
+	   self.dirty = true
+   end
+end
+
+function PlayerProfile:GetAutoCavesEnabled()
+	if USE_SETTINGS_FILE then
+		return TheSim:GetSetting("misc", "autocaves") == "true"
+	else
+		return GetValueOrDefault( self.persistdata.autocaves, false )
 	end
 end
 
@@ -1085,7 +1141,7 @@ function PlayerProfile:SawControllerPopup()
  	if USE_SETTINGS_FILE then
 		sawPopup = (TheSim:GetSetting("misc", "controller_popup") == "true")
 	else
-		sawPopup = self:GetValueOrDefault(self.persistdata.controller_popup, false)
+		sawPopup = GetValueOrDefault(self.persistdata.controller_popup, false)
 	end
 
 	return sawPopup

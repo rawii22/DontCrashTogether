@@ -178,6 +178,9 @@ earmuffshat_clear_fn = function(inst) basic_clear_fn(inst, "hat_earmuffs" ) end
 ruinshat_init_fn = function(inst, build_name) basic_init_fn(inst, build_name, "hat_ruins" ) end
 ruinshat_clear_fn = function(inst) basic_clear_fn(inst, "hat_ruins" ) end
 
+walterhat_init_fn = function(inst, build_name) basic_init_fn(inst, build_name, "hat_walter" ) end
+walterhat_clear_fn = function(inst) basic_clear_fn(inst, "hat_walter" ) end
+
 researchlab3_init_fn = function(inst, build_name) basic_init_fn(inst, build_name, "researchlab3" ) end
 researchlab3_clear_fn = function(inst) basic_clear_fn(inst, "researchlab3" ) end
 
@@ -787,6 +790,7 @@ end
 --------------------------------------------------------------------------
 --[[ Cane skin functions ]]
 --------------------------------------------------------------------------
+local TRAIL_FLAGS = { "shadowtrail" }
 local function cane_do_trail(inst)
     local owner = inst.components.inventoryitem:GetGrandOwner() or inst
     if not owner.entity:IsVisible() then
@@ -810,7 +814,7 @@ local function cane_do_trail(inst)
             local pt = Vector3(x + offset.x, 0, z + offset.z)
             return map:IsPassableAtPoint(pt:Get())
                 and not map:IsPointNearHole(pt)
-                and #TheSim:FindEntities(pt.x, 0, pt.z, .7, { "shadowtrail" }) <= 0
+                and #TheSim:FindEntities(pt.x, 0, pt.z, .7, TRAIL_FLAGS) <= 0
         end
     )
 
@@ -1373,6 +1377,7 @@ function CreatePrefabSkin(name, info)
     prefab_skin.granted_items       = info.granted_items
 	prefab_skin.marketable			= info.marketable
     prefab_skin.release_group       = info.release_group
+    prefab_skin.linked_beard        = info.linked_beard
 
     if info.torso_tuck_builds ~= nil then
         for _,base_skin in pairs(info.torso_tuck_builds) do

@@ -27,6 +27,8 @@ function Tune(overrides)
 
     local wilson_attack = 34 * multiplayer_attack_modifier
     local wilson_health = 150
+    local wilson_hunger = 150
+    local wilson_sanity = 200
     local calories_per_day = 75
 
     local wilson_attack_period = .1
@@ -55,6 +57,10 @@ function Tune(overrides)
         STACK_SIZE_LARGEITEM = 10,
         STACK_SIZE_MEDITEM = 20,
         STACK_SIZE_SMALLITEM = 40,
+		STACK_SIZE_TINYITEM = 60,
+
+		DEFAULT_TALKER_DURATION = 2.5,
+		MAX_TALKER_DURATION = 8.0,
 
         MAX_FIRE_DAMAGE_PER_SECOND = 120,
 
@@ -64,8 +70,9 @@ function Tune(overrides)
         DARK_SPAWNCUTOFF = 0.1,
         WILSON_HEALTH = wilson_health,
         WILSON_ATTACK_PERIOD = wilson_attack_period,
-        WILSON_HUNGER = 150, --stomach size
+        WILSON_HUNGER = wilson_hunger, --stomach size
         WILSON_HUNGER_RATE = calories_per_day/total_day_time, --calories burnt per day
+        WILSON_SANITY = wilson_sanity,
 
         WX78_MIN_HEALTH = 150,
         WX78_MIN_HUNGER = 150, -- 100 For pax we are increasing this.  Hungers out too easily.
@@ -75,7 +82,9 @@ function Tune(overrides)
         WX78_MAX_HUNGER = 200,
         WX78_MAX_SANITY = 300,
 
-        WILSON_SANITY = 200,
+        WX78_HEALTH = 150, -- this is used for the character descriptions, gameplay uses WX78_MIN_HEALTH 
+        WX78_HUNGER = 150, -- this is used for the character descriptions, gameplay uses WX78_MIN_HUNGER 
+        WX78_SANITY = 150, -- this is used for the character descriptions, gameplay uses WX78_MIN_SANITY 
 
         BALLOON_PILE_DECAY_TIME = total_day_time * 3,
         BALLOON_MAX_COUNT = 100,
@@ -105,7 +114,7 @@ function Tune(overrides)
         HAMBAT_USES = 100,
         BATBAT_USES = 75,
         MULTITOOL_AXE_PICKAXE_USES = 400,
-        RUINS_BAT_USES = 150,
+        RUINS_BAT_USES = 200,
         SADDLEHORN_USES = 10,
         BRUSH_USES = 75,
 
@@ -936,6 +945,7 @@ function Tune(overrides)
         BEE_ATTACK_RANGE = .6,
         BEE_ATTACK_PERIOD = 2,
         BEE_TARGET_DIST = 8,
+        BEE_ALLERGY_EXTRADAMAGE = 10,
 
         BEEMINE_BEES = 4,
         BEEMINE_RADIUS = 3,
@@ -1426,6 +1436,9 @@ function Tune(overrides)
         CATCOONHAT_PERISHTIME = total_day_time*10,
         GOGGLES_PERISHTIME = total_day_time*10,
 
+        WALTERHAT_PERISHTIME = total_day_time*10,
+
+
         GRASS_REGROW_TIME = total_day_time*3,
         SAPLING_REGROW_TIME = total_day_time*4,
         MARSHBUSH_REGROW_TIME = total_day_time*4,
@@ -1657,6 +1670,14 @@ function Tune(overrides)
         CALORIES_LARGE = calories_per_day/2, -- cooked meat
         CALORIES_HUGE = calories_per_day, -- crockpot foods?
         CALORIES_SUPERHUGE = calories_per_day*2, -- crockpot foods?
+
+		-- food affinity multipliers to add 15 calories
+		AFFINITY_15_CALORIES_TINY = 2.6,
+		AFFINITY_15_CALORIES_SMALL = 2.2,
+		AFFINITY_15_CALORIES_MED = 1.6,
+		AFFINITY_15_CALORIES_LARGE = 1.4,
+		AFFINITY_15_CALORIES_HUGE = 1.2,
+		AFFINITY_15_CALORIES_SUPERHUGE = 1.1,
 
         SPOILED_HEALTH = -1,
         SPOILED_HUNGER = -10,
@@ -1904,6 +1925,7 @@ function Tune(overrides)
 
         TENT_USES = 6,
         SIESTA_CANOPY_USES = 6,
+        PORTABLE_TENT_USES = 10,
 
         DAPPER_BEARDLING_SANITY = .3,
         BEARDLING_SANITY = .4,
@@ -2231,9 +2253,12 @@ function Tune(overrides)
         WOLFGANG_HUNGER_RATE_MULT_NORMAL = 1.5,
         WOLFGANG_HUNGER_RATE_MULT_WIMPY = 1,
 
+		WOLFGANG_HEALTH = 200, -- this is used for the character descriptions, gameplay uses WOLFGANG_HEALTH_NORMAL
         WOLFGANG_HEALTH_MIGHTY = 300,
         WOLFGANG_HEALTH_NORMAL = 200,
         WOLFGANG_HEALTH_WIMPY = 150,
+
+		WOLFGANG_SANITY = wilson_sanity,
 
         WOLFGANG_ATTACKMULT_MIGHTY_MAX = 2,
         WOLFGANG_ATTACKMULT_MIGHTY_MIN = 1.25,
@@ -2251,16 +2276,33 @@ function Tune(overrides)
         WEBBER_SANITY = 100,
         WEBBER_HUNGER = 175,
 
+		WENDY_HEALTH = wilson_health,
+		WENDY_HUNGER = wilson_hunger,
+        WENDY_SANITY = wilson_sanity,
+
         WENDY_DAMAGE_MULT = .75,
         WENDY_SANITY_MULT = .75,
 
+		WES_HEALTH = math.ceil(wilson_health * .75),
+		WES_HUNGER = math.ceil(wilson_hunger * .75),
+        WES_SANITY = math.ceil(wilson_sanity * .75),
         WES_DAMAGE_MULT = .75,
 
+		WAXWELL_HEALTH = math.ceil(wilson_health * .5),
+		WAXWELL_HUNGER = wilson_hunger,
+        WAXWELL_SANITY = wilson_sanity,
+
+        WICKERBOTTOM_HEALTH = wilson_health,
+        WICKERBOTTOM_HUNGER = wilson_hunger,
         WICKERBOTTOM_SANITY = 250,
         WICKERBOTTOM_STALE_FOOD_HUNGER = .333,
         WICKERBOTTOM_SPOILED_FOOD_HUNGER = .167,
         WICKERBOTTOM_STALE_FOOD_HEALTH = .25,
         WICKERBOTTOM_SPOILED_FOOD_HEALTH = 0,
+
+		WALTER_HEALTH = 130,
+		WALTER_HUNGER = 110,
+        WALTER_SANITY = wilson_sanity,
 
         FISSURE_CALMTIME_MIN = 600,
         FISSURE_CALMTIME_MAX = 1200,
@@ -2474,10 +2516,16 @@ function Tune(overrides)
         SLEEP_SANITY_PER_TICK = 1,
         SLEEP_HUNGER_PER_TICK = -1,
         SLEEP_HEALTH_PER_TICK = 1,
+        
+        EFFICIENT_SLEEP_SANITY_MULT = 1,
+        EFFICIENT_SLEEP_HUNGER_MULT = 0.5,
+        EFFICIENT_SLEEP_HEALTH_MULT = 1,
+
         SLEEP_TEMP_PER_TICK = 1,
         SLEEP_WETNESS_PER_TICK = -1,
         SLEEP_TARGET_TEMP_TENT = 40,
         SLEEP_TARGET_TEMP_BEDROLL_FURRY = 30,
+
 
         PVP_DAMAGE_MOD = .5,
 
@@ -2817,10 +2865,32 @@ function Tune(overrides)
             WORMWOOD = 200, --TODO
             WARLY = 200, --TODO
             WURT = 200, --TODO
+            WALTER = 200, --TODO
         },
 
 		GAMEMODE_STARTING_ITEMS =
 		{
+		    DEFAULT =
+			{
+				WILSON = {},
+				WILLOW = {"lighter", "bernie_inactive"},
+				WENDY = {"abigail_flower"},
+				WOLFGANG = {},
+				WX78 = {},
+				WICKERBOTTOM = {"papyrus", "papyrus"},
+				WES = {"balloons_empty"},
+				WAXWELL = {"waxwelljournal", "nightmarefuel", "nightmarefuel", "nightmarefuel", "nightmarefuel", "nightmarefuel", "nightmarefuel"},
+				WOODIE = {"lucy"},
+				WATHGRITHR = {"spear_wathgrithr", "wathgrithrhat", "meat", "meat", "meat", "meat"},
+				WEBBER = {"spidereggsack", "monstermeat", "monstermeat"},
+				WINONA = {"sewing_tape", "sewing_tape", "sewing_tape"},
+                WORTOX = {"wortox_soul", "wortox_soul", "wortox_soul", "wortox_soul", "wortox_soul", "wortox_soul"},
+                WORMWOOD = {},
+                WARLY = {"portablecookpot_item", "potato", "potato", "garlic"},
+                WURT = {},
+                WALTER = {"walterhat", "slingshot", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock", "slingshotammo_rock"},
+			},
+
 			LAVAARENA =
 			{
 				WILSON = { "blowdart_lava", "lavaarena_armormedium" },
@@ -2839,6 +2909,7 @@ function Tune(overrides)
                 WORMWOOD = {}, --TODO
                 WARLY = {}, --TODO
                 WURT = {}, -- TODO
+                WALTER = {}, -- TODO
 			},
 			QUAGMIRE =
 			{
@@ -2858,7 +2929,13 @@ function Tune(overrides)
                 WORMWOOD = {}, --TODO
                 WARLY = {}, --TODO
                 WURT = {}, -- TODO
+                WALTER = {}, -- TODO
 			},
+		},
+
+		STARTING_ITEM_IMAGE_OVERRIDE =
+		{
+			-- this was added for mod characters and items. example: balloons_empty = {atlas = "images/inventoryimages2.xml", image = "spidereggsack.tex" },
 		},
 
         LAVAARENA_SURVIVOR_DIFFICULTY =
@@ -2879,6 +2956,7 @@ function Tune(overrides)
             WORMWOOD = 1, --TODO
             WARLY = 1, --TODO
             WURT = 1, -- TODO
+            WALTER = 1, -- TODO
         },
 
 	    LAVAARENA_BERNIE_SCALE = 1.2,
@@ -2943,6 +3021,11 @@ function Tune(overrides)
         ROWING_RADIUS_ITERATIONS = 4,
 
         --v2 Winona
+		WINONA_HEALTH = wilson_health,
+		WINONA_HUNGER = wilson_hunger,
+        WINONA_SANITY = wilson_sanity,
+
+
         WINONA_ENGINEERING_SPACING = 3.2,
         --this is just the default recipe spacing
         --we still want to explicitly define it for engineering recipes because of the fixed range indicators
@@ -2982,6 +3065,9 @@ function Tune(overrides)
         BERNIE_BIG_ATTACK_RANGE = 3,
         BERNIE_BIG_HIT_RANGE = 3.25,
         BERNIE_BIG_COOLDOWN = 6,
+
+		WILLOW_HEALTH = wilson_health,
+		WILLOW_HUNGER = wilson_hunger,
         WILLOW_SANITY = 120,
         WILLOW_SANITY_MODIFIER = 1.1,
         WILLOW_FREEZING_KILL_TIME = 60,
@@ -3388,6 +3474,14 @@ function Tune(overrides)
                 WETNESS = 50,  
             },
 
+            WALTER = 
+            {
+                HEALTH_PENALTY = 0.1,
+                HUNGER = 25,
+                SANITY = 12,
+                WETNESS = 100,
+            },
+
 			CREATURE =
 			{
 				WETNESS = 100,
@@ -3549,6 +3643,10 @@ function Tune(overrides)
         WORTOX_SOULHEAL_RANGE = 8,
 
         --Wormwood
+		WORMWOOD_HEALTH = wilson_health,
+		WORMWOOD_HUNGER = wilson_hunger,
+        WORMWOOD_SANITY = wilson_sanity,
+
         WORMWOOD_BURN_TIME = 4.3,
         WORMWOOD_FIRE_DAMAGE = 1.25,
         ARMORBRAMBLE_DMG = wilson_attack/1.5,
@@ -3577,6 +3675,8 @@ function Tune(overrides)
         },
 
         --v2 Warly
+		WARLY_HEALTH = wilson_health,
+        WARLY_SANITY = wilson_sanity,
         WARLY_HUNGER = 250,
         WARLY_HUNGER_RATE_MODIFIER = 1.2,
         WARLY_SAME_OLD_COOLDOWN = total_day_time * 2,
@@ -3602,6 +3702,10 @@ function Tune(overrides)
         BUFF_WORKEFFECTIVENESS_MODIFIER = 2,
 
         --v2 Woodie
+		WOODIE_HEALTH = wilson_health,
+		WOODIE_HUNGER = wilson_hunger,
+        WOODIE_SANITY = wilson_sanity,
+
         WERE_SANITY_PENALTY = -.1,
         WERE_FULLMOON_DRAIN_TIME_MULTIPLIER = 2,
         WOODCUTTER_LEIF_CHANCE_MOD = 1.5,
@@ -3794,6 +3898,48 @@ function Tune(overrides)
 		GHOSTLYELIXIR_RETALIATION_DURATION = total_day_time,
 
 		GHOSTLYELIXIR_DRIP_FX_DELAY = seg_time / 2,
+
+        -- WALTER
+		SLINGSHOT_DISTANCE = 8,
+		SLINGSHOT_DISTANCE_MAX = 12,
+
+		SLINGSHOT_AMMO_MOVESPEED_MULT = 2/3,
+		SLINGSHOT_AMMO_FREEZE_COLDNESS = 2,
+		SLINGSHOT_AMMO_SHADOWTENTACLE_CHANCE = 0.5,
+
+		SLINGSHOT_AMMO_DAMAGE_ROCKS = wilson_attack * 0.5,		-- 17
+		SLINGSHOT_AMMO_DAMAGE_GOLD = wilson_attack,				-- 34
+		SLINGSHOT_AMMO_DAMAGE_MARBLE = wilson_attack * 1.5,		-- 51
+		SLINGSHOT_AMMO_DAMAGE_THULECITE = wilson_attack * 1.5,	-- 51
+		SLINGSHOT_AMMO_DAMAGE_SLOW = wilson_attack * 0.5,		-- 17
+		SLINGSHOT_AMMO_DAMAGE_TRINKET_1 = wilson_attack * 1.75,	-- 59.5
+
+        WALTER_TREE_SANITY_RADIUS = 10,
+        WALTER_TREE_SANITY_THRESHOLD = 5,
+        WALTER_TREE_SANITY_BONUS = 0.1, -- cancels out health drain while above 50% health
+		WALTER_TREE_SANITY_UPDATE_TIME = 1,
+
+        WALTER_SANITY_DAMAGE_RATE = 2,
+		WALTER_SANITY_DAMAGE_OVERTIME_RATE = 1,
+        WALTER_SANITY_HEALTH_DRAIN = .2,
+
+		WALTERHAT_SANITY_DAMAGE_PROTECTION = .5,
+
+		WALTER_STARTING_WOBY = "wobysmall",
+
+        WOBY_BIG_HUNGER = calories_per_day*4,
+        WOBY_BIG_HUNGER_RATE = (calories_per_day*4)/(total_day_time * 1.5), -- same hunger as beefalo, but a full stomach lasts for a day and a half
+        WOBY_BIG_SPEED =
+        {
+            FAST = 8,
+            MEDIUM = 7,
+            SLOW = 5.5
+        },
+
+        WOBY_BIG_WALK_SPEED = 1.5,
+
+        WOBY_SMALL_HUNGER = 50,
+        WOBY_SMALL_HUNGER_RATE = 50 / (total_day_time * 1.5),
 
         -- Salty dog
         FLOTSAM_SPAWN_MAX = 4,

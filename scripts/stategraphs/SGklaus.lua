@@ -1,5 +1,7 @@
 require("stategraphs/commonstates")
 
+local TRANSITION_PST_MUST_TAGS = { "deergemresistance", "_health", "_combat" }
+local TRANSITION_PST_CANT_TAGS = { "epic", "deer", "INLIMBO" }
 --------------------------------------------------------------------------
 
 local function ShakeIfClose(inst)
@@ -311,6 +313,9 @@ local states =
             TimeEvent(3, function(inst)
                 if not inst:IsUnchained() then
                     inst.sg.statemem.resurrecting = true
+					if inst.brain.stopped then
+						inst.brain:Start()
+					end
                     inst.sg:GoToState("resurrect")
                 end
             end),
@@ -941,7 +946,7 @@ local states =
         onenter = function(inst)
             inst.AnimState:PlayAnimation("transform_pst2")
             local x, y, z = inst.Transform:GetWorldPosition()
-            for i, v in ipairs(TheSim:FindEntities(x, y, z, 30, { "deergemresistance", "_health", "_combat" }, { "epic", "deer", "INLIMBO" })) do
+            for i, v in ipairs(TheSim:FindEntities(x, y, z, 30, TRANSITION_PST_MUST_TAGS, TRANSITION_PST_CANT_TAGS)) do
                 if not v.components.health:IsDead() and inst.components.grouptargeter:IsTargeting(v.components.combat.target) then
                     StartLaughing(inst)
                     break

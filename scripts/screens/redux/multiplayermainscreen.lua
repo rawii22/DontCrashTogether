@@ -12,6 +12,7 @@ local PopupDialogScreen = require "screens/redux/popupdialog"
 local FestivalEventScreen = require "screens/redux/festivaleventscreen"
 local ModsScreen = require "screens/redux/modsscreen"
 local OptionsScreen = require "screens/redux/optionsscreen"
+local CompendiumScreen = require "screens/redux/compendiumscreen"
 local PlayerSummaryScreen = require "screens/redux/playersummaryscreen"
 local QuickJoinScreen = require "screens/redux/quickjoinscreen"
 local ServerListingScreen = require "screens/redux/serverlistingscreen"
@@ -142,41 +143,48 @@ function MakeBanner(self)
         onanimover(anim.inst)
     ]]
 	else
-        --[[anim:GetAnimState():SetBuild("dst_menu")
-		anim:GetAnimState():SetBank("dst_menu")
-		anim:GetAnimState():PlayAnimation("loop", true)
-		anim:SetScale(0.63)
-		anim:SetPosition(347, 85)]]
-        --[[anim:GetAnimState():SetBuild("dst_menu_winona")
-        anim:GetAnimState():SetBank("dst_menu_winona")
-        anim:GetAnimState():PlayAnimation("loop", true)
-        anim:SetScale(0.475)
-        anim:SetPosition(327, -17)]]
-        --[[anim:GetAnimState():SetBuild("dst_menu_wortox")
-        anim:GetAnimState():SetBank("dst_menu_wortox")
-        anim:GetAnimState():PlayAnimation("loop", true)
+		--[[
+		-- default banner
+        local anim_bg = baner_root:AddChild(UIAnim())
+		anim_bg:GetAnimState():SetBuild("dst_menu_v2_bg")
+		anim_bg:GetAnimState():SetBank("dst_menu_v2_bg")
         anim:SetScale(.667)
-        anim:SetPosition(0, 0)]]
-        --[[anim:GetAnimState():SetBuild("dst_menu_willow")
-        anim:GetAnimState():SetBank("dst_menu_willow")
+		anim_bg:GetAnimState():PlayAnimation("loop", true)
+        anim_bg:MoveToBack()
+        
+        anim:GetAnimState():SetBuild("dst_menu_v2")
+        anim:GetAnimState():SetBank("dst_menu_v2")
         anim:GetAnimState():PlayAnimation("loop", true)
         anim:SetScale(.667)
-        anim:SetPosition(0, 0)]]
-        --[[anim:GetAnimState():SetBuild("dst_menu_wormwood")
-        anim:GetAnimState():SetBank("dst_menu_wormwood")
+        anim:SetPosition(0, 0)
+        
+        local creatures = 
+        {
+            "creature_cookie",
+            "creature_squid",
+            "creature_gnarwail",
+            "creature_puffin",
+            "creature_hound",
+            "creature_malbatross",
+        }
+        for _,v in pairs(creatures) do
+            anim:GetAnimState():Hide(v)
+        end
+        local c1 = creatures[math.random(1,#creatures)]
+        local c2 = creatures[math.random(1,#creatures)]
+        local c3 = creatures[math.random(1,#creatures)]
+        --could end up with dupes picked, that's okay, then we'll have only 1 or 2 chosen
+        anim:GetAnimState():Show(c1)
+        anim:GetAnimState():Show(c2)
+        anim:GetAnimState():Show(c3)
+		]]
+
+		anim:GetAnimState():SetBuild("dst_menu_walter")
+        anim:GetAnimState():SetBank("dst_menu_walter")
         anim:GetAnimState():PlayAnimation("loop", true)
         anim:SetScale(.667)
-        anim:SetPosition(0, 0)]]
-        --[[anim:GetAnimState():SetBuild("dst_menu_warly")
-        anim:GetAnimState():SetBank("dst_menu_warly")
-        anim:GetAnimState():PlayAnimation("loop", true)
-        anim:SetScale(.667)
-        anim:SetPosition(0, 0)]]  
-        --[[anim:GetAnimState():SetBuild("dst_menu_inker")
-        anim:GetAnimState():SetBank("dst_menu_inker")
-        anim:GetAnimState():PlayAnimation("loop2", true)
-        anim:SetScale(.667)
-        anim:SetPosition(0, 0)]]
+        anim:SetPosition(0, 0)
+
         --[[
 		local cur_time = os.time() 
 		if cur_time <= 1585810740 and (not IsConsole() or cur_time >= 1585759200) then -- 9:40am to 11:59pm PDT
@@ -191,12 +199,7 @@ function MakeBanner(self)
 			anim:GetAnimState():PlayAnimation("loop", true)
 			anim:SetScale(.667)
 			anim:SetPosition(0, 0)
-		end]]
-        anim:GetAnimState():SetBuild("dst_menu_shesells")
-        anim:GetAnimState():SetBank("dst_menu_shesells")
-        anim:GetAnimState():PlayAnimation("loop", true)
-        anim:SetScale(.667)
-        anim:SetPosition(0, 0)
+        end]]
 	end
 
 	if IsFestivalEventActive(FESTIVAL_EVENTS.LAVAARENA) then
@@ -560,6 +563,9 @@ function MultiplayerMainScreen:OnPlayerSummaryButton()
     end
 end
 
+function MultiplayerMainScreen:OnCompendiumButton()
+    self:_FadeToScreen(CompendiumScreen, {self})
+end
 
 function MultiplayerMainScreen:OnQuickJoinServersButton()
     if self:CheckNewUser(self.OnQuickJoinServersButton, STRINGS.UI.MAINSCREEN.NEWUSER_NO_QUICKJOIN) then
@@ -632,15 +638,17 @@ function MultiplayerMainScreen:MakeMainMenu()
         return btn
     end
 	
-    local browse_button  = MakeMainMenuButton(STRINGS.UI.MAINSCREEN.BROWSE,    function() self:OnBrowseServersButton() end, STRINGS.UI.MAINSCREEN.TOOLTIP_BROWSE, self.tooltip)
-    local host_button    = MakeMainMenuButton(STRINGS.UI.MAINSCREEN.CREATE,    function() self:OnCreateServerButton() end,  STRINGS.UI.MAINSCREEN.TOOLTIP_HOST, self.tooltip)
-    local summary_button = MakeMainMenuButton(STRINGS.UI.PLAYERSUMMARYSCREEN.TITLE, function() self:OnPlayerSummaryButton() end, STRINGS.UI.MAINSCREEN.TOOLTIP_PLAYERSUMMARY, self.tooltip)
-    local options_button = MakeMainMenuButton(STRINGS.UI.MAINSCREEN.OPTIONS,   function() self:Settings() end,              STRINGS.UI.MAINSCREEN.TOOLTIP_OPTIONS, self.tooltip)
-    local quit_button    = MakeMainMenuButton(STRINGS.UI.MAINSCREEN.QUIT,      function() self:Quit() end,                  STRINGS.UI.MAINSCREEN.TOOLTIP_QUIT, self.tooltip)
+    local browse_button		= MakeMainMenuButton(STRINGS.UI.MAINSCREEN.BROWSE,    function() self:OnBrowseServersButton() end, STRINGS.UI.MAINSCREEN.TOOLTIP_BROWSE, self.tooltip)
+    local host_button		= MakeMainMenuButton(STRINGS.UI.MAINSCREEN.CREATE,    function() self:OnCreateServerButton() end,  STRINGS.UI.MAINSCREEN.TOOLTIP_HOST, self.tooltip)
+    local summary_button	= MakeMainMenuButton(STRINGS.UI.PLAYERSUMMARYSCREEN.TITLE, function() self:OnPlayerSummaryButton() end, STRINGS.UI.MAINSCREEN.TOOLTIP_PLAYERSUMMARY, self.tooltip)
+    local compendium_button = MakeMainMenuButton(STRINGS.UI.MAINSCREEN.COMPENDIUM, function() self:OnCompendiumButton() end, STRINGS.UI.MAINSCREEN.TOOLTIP_COMPENDIUM, self.tooltip)
+    local options_button	= MakeMainMenuButton(STRINGS.UI.MAINSCREEN.OPTIONS,   function() self:Settings() end,              STRINGS.UI.MAINSCREEN.TOOLTIP_OPTIONS, self.tooltip)
+    local quit_button		= MakeMainMenuButton(STRINGS.UI.MAINSCREEN.QUIT,      function() self:Quit() end,                  STRINGS.UI.MAINSCREEN.TOOLTIP_QUIT, self.tooltip)
 
 	local menu_items = {
         {widget = quit_button},
         {widget = options_button},
+        {widget = compendium_button},
         {widget = summary_button},
         {widget = host_button},
         {widget = browse_button},
