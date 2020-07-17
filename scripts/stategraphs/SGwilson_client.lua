@@ -408,7 +408,13 @@ local actionhandlers =
         function(inst, action)
             return (action.target == nil or not action.target:HasTag("constructionsite")) and "startconstruct" or "construct"
         end),
-    ActionHandler(ACTIONS.STARTCHANNELING, "startchanneling"),
+    ActionHandler(ACTIONS.STARTCHANNELING, function(inst,action)
+        if action.target and action.target:HasTag("use_channel_longaction") then
+                return "channel_longaction" 
+            else
+                return "startchanneling" 
+            end
+        end),
     ActionHandler(ACTIONS.REVIVE_CORPSE, "dolongaction"),
     ActionHandler(ACTIONS.DISMANTLE, "dolongaction"),
     ActionHandler(ACTIONS.TACKLE, "tackle_pre"),
@@ -2212,6 +2218,31 @@ local states =
 
     State
     {
+        name = "channel_longaction",
+        tags = { "doing", "canrotate", "channeling"},
+
+        onenter = function(inst)
+
+            inst.components.locomotor:Stop()
+
+            inst.AnimState:PlayAnimation("give",false)
+            inst.AnimState:PushAnimation("give_pst",false)  
+
+            if inst:GetBufferedAction() then
+                inst:PerformPreviewBufferedAction()
+            end
+        end,
+
+        events =
+        {
+            EventHandler("animqueueover", function(inst)
+                inst.sg:GoToState("channel_longaction")
+            end),
+        },
+    },
+
+    State
+    {
         name = "use_pocket_scale",
         tags = { "doing" },
 
@@ -2897,17 +2928,23 @@ local states =
     State
     {
         name = "slingshot_shoot",
-        tags = { "doing", "busy", "nointerrupt" },
+        tags = { "attack" },
 
         onenter = function(inst)
             inst.components.locomotor:Stop()
             inst.AnimState:PlayAnimation("slingshot_pre")
-            inst.AnimState:PushAnimation("slingshot_lag", false)
+            inst.AnimState:PushAnimation("slingshot_lag", true)
+
+            if inst.sg.laststate == inst.sg.currentstate then
+                inst.sg.statemem.chained = true
+                inst.AnimState:SetTime(3 * FRAMES)
+            end
 
             local buffaction = inst:GetBufferedAction()
             if buffaction ~= nil then
 				if buffaction.target ~= nil and buffaction.target:IsValid() then
 					inst:ForceFacePoint(buffaction.target:GetPosition())
+	                inst.sg.statemem.attacktarget = buffaction.target -- this is to allow repeat shooting at the same target
 				end
 
                 inst:PerformPreviewBufferedAction()
@@ -2917,12 +2954,20 @@ local states =
         end,
 
         onupdate = function(inst)
-            if inst:HasTag("doing") then
+            if inst.sg.timeinstate >= (inst.sg.statemem.chained and 15 or 18)*FRAMES and inst.sg.statemem.flattened_time == nil and inst:HasTag("attack") then
                 if inst.entity:FlattenMovementPrediction() then
-                    inst.sg:GoToState("idle", "noanim")
+					inst.sg.statemem.flattened_time = inst.sg.timeinstate
+					inst.sg:AddStateTag("idle")
+					inst.sg:AddStateTag("canrotate")
+		            inst.entity:SetIsPredictingMovement(false) -- so the animation will come across
                 end
-            elseif inst.bufferedaction == nil then
-                inst.sg:GoToState("idle")
+			end
+            
+			if inst.bufferedaction == nil and inst.sg.statemem.flattened_time ~= nil and inst.sg.statemem.flattened_time < inst.sg.timeinstate then
+				inst.sg.statemem.flattened_time = nil
+				inst.entity:SetIsPredictingMovement(true)
+				inst.sg:RemoveStateTag("attack")
+				inst.sg:AddStateTag("idle")
             end
         end,
 
@@ -2930,6 +2975,21 @@ local states =
             inst:ClearBufferedAction()
             inst.sg:GoToState("idle")
         end,
+
+        events =
+        {
+            EventHandler("animqueueover", function(inst)
+                if inst.AnimState:AnimDone() then
+                    inst.sg:GoToState("idle")
+                end
+            end),
+        },
+
+		onexit = function(inst)
+			if inst.sg.statemem.flattened_time ~= nil then
+				inst.entity:SetIsPredictingMovement(true)
+			end
+		end,
     },
 
     State

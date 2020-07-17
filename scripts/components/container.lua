@@ -273,7 +273,7 @@ function Container:RemoveItemBySlot(slot)
                 item.components.inventoryitem:OnRemoved()
             end
 
-            self.inst:PushEvent("itemlose", {slot = slot})
+            self.inst:PushEvent("itemlose", {slot = slot, prev_item = item})
         end
         item.prevcontainer = self
         item.prevslot = slot
@@ -342,7 +342,9 @@ function Container:Open(doer)
             if self:IsSideWidget() then
                 TheFocalPoint.SoundEmitter:PlaySound("dontstarve/wilson/backpack_open")
             else
-                TheFocalPoint.SoundEmitter:PlaySound("dontstarve/HUD/Together_HUD/container_open")
+                if not self.skipopensnd then
+                    TheFocalPoint.SoundEmitter:PlaySound("dontstarve/HUD/Together_HUD/container_open")
+                end
             end
         elseif self.widget ~= nil
             and self.widget.buttoninfo ~= nil
@@ -370,7 +372,9 @@ function Container:Close()
             if self:IsSideWidget() then
                 TheFocalPoint.SoundEmitter:PlaySound("dontstarve/wilson/backpack_close")
             else
-                TheFocalPoint.SoundEmitter:PlaySound("dontstarve/HUD/Together_HUD/container_close")
+                if not self.skipclosesnd then
+                    TheFocalPoint.SoundEmitter:PlaySound("dontstarve/HUD/Together_HUD/container_close")
+                end
             end
         elseif doer.components.playeractionpicker ~= nil then
             doer.components.playeractionpicker:UnregisterContainer(self.inst)
@@ -573,7 +577,7 @@ function Container:RemoveItem(item, wholestack)
     for k, v in pairs(self.slots) do
         if v == item then
             self.slots[k] = nil
-            self.inst:PushEvent("itemlose", { slot = k })
+            self.inst:PushEvent("itemlose", { slot = k, prev_item = item })
             item.components.inventoryitem:OnRemoved()
             item.prevslot = prevslot
             item.prevcontainer = self

@@ -8,6 +8,8 @@ local assets =
     Asset("ANIM", "anim/cook_pot_food.zip"),
     Asset("ANIM", "anim/cook_pot_food2.zip"),
 	Asset("ANIM", "anim/cook_pot_food3.zip"),
+    Asset("ANIM", "anim/cook_pot_food4.zip"),
+    Asset("ANIM", "anim/cook_pot_food5.zip"),
     Asset("ANIM", "anim/ui_cookpot_1x4.zip"),
 }
 
@@ -263,6 +265,8 @@ local function fn()
     inst.components.container:WidgetSetup("cookpot")
     inst.components.container.onopenfn = onopen
     inst.components.container.onclosefn = onclose
+    inst.components.container.skipclosesnd = true
+    inst.components.container.skipopensnd = true
 
     inst:AddComponent("inspectable")
     inst.components.inspectable.getstatus = getstatus

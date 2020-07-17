@@ -43,22 +43,37 @@ end
 
 local function OnProjectileLaunched(inst, attacker, target)
 	if inst.components.container ~= nil then
-		local item = inst.components.container:RemoveItem(inst.components.container:GetItemInSlot(1), false)
+		local ammo_stack = inst.components.container:GetItemInSlot(1)
+		local item = inst.components.container:RemoveItem(ammo_stack, false)
 		if item ~= nil then
+			if item == ammo_stack then
+				item:PushEvent("ammounloaded", {slingshot = inst})
+			end
+
 			item:Remove()
 		end
 	end
 end
 
-local function OnAmmoChanged(inst, data)
+local function OnAmmoLoaded(inst, data)
 	if inst.components.weapon ~= nil then
 		if data ~= nil and data.item ~= nil then
 			inst.components.weapon:SetProjectile(data.item.prefab.."_proj")
-		else
-			inst.components.weapon:SetProjectile(nil)
+			data.item:PushEvent("ammoloaded", {slingshot = inst})
 		end
 	end
 end
+
+local function OnAmmoUnloaded(inst, data)
+	if inst.components.weapon ~= nil then
+		inst.components.weapon:SetProjectile(nil)
+		if data ~= nil and data.prev_item ~= nil then
+			data.prev_item:PushEvent("ammounloaded", {slingshot = inst})
+		end
+	end
+end
+
+local floater_swap_data = {sym_build = "swap_slingshot"}
 
 local function fn()
     local inst = CreateEntity()
@@ -82,7 +97,7 @@ local function fn()
 
     --inst.projectiledelay = PROJECTILE_DELAY
 
-    MakeInventoryFloatable(inst, "med", 0.05, {1.1, 0.5, 1.1}, true, -9)
+    MakeInventoryFloatable(inst, "med", 0.075, {0.5, 0.4, 0.5}, true, -7, floater_swap_data)
 
     inst.entity:SetPristine()
 
@@ -109,8 +124,8 @@ local function fn()
     inst:AddComponent("container")
     inst.components.container:WidgetSetup("slingshot")
 	inst.components.container.canbeopened = false
-    inst:ListenForEvent("itemget", OnAmmoChanged)
-    inst:ListenForEvent("itemlose", OnAmmoChanged)
+    inst:ListenForEvent("itemget", OnAmmoLoaded)
+    inst:ListenForEvent("itemlose", OnAmmoUnloaded)
 
     MakeSmallBurnable(inst, TUNING.SMALL_BURNTIME)
     MakeSmallPropagator(inst)

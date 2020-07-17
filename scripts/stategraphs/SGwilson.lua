@@ -759,7 +759,13 @@ local actionhandlers =
         function(inst, action)
             return (action.target == nil or action.target.components.constructionsite == nil) and "startconstruct" or "construct"
         end),
-    ActionHandler(ACTIONS.STARTCHANNELING, "startchanneling"),
+    ActionHandler(ACTIONS.STARTCHANNELING, function(inst,action)
+        if action.target and action.target.components.channelable and action.target.components.channelable.use_channel_longaction then
+                return "channel_longaction" 
+            else
+                return "startchanneling" 
+            end
+        end),
     ActionHandler(ACTIONS.REVIVE_CORPSE, "revivecorpse"),
     ActionHandler(ACTIONS.DISMANTLE, "dolongaction"),
     ActionHandler(ACTIONS.TACKLE, "tackle_pre"),
@@ -5242,32 +5248,18 @@ local states =
         end,
     },
 
-    State
-    {
-        name = "dolongaction",
+    State{
+        name = "makeballoon",
         tags = { "doing", "busy", "nodangle" },
 
         onenter = function(inst, timeout)
-            if timeout == nil then
-                timeout = 1
-            elseif timeout > 1 then
-                inst.sg:AddStateTag("slowaction")
-            end
-            inst.sg:SetTimeout(timeout)
+            inst.sg.statemem.action = inst.bufferedaction
+            inst.sg:SetTimeout(timeout or 1)
             inst.components.locomotor:Stop()
-            inst.SoundEmitter:PlaySound("dontstarve/wilson/make_trap", "make")
+            inst.SoundEmitter:PlaySound("dontstarve/common/balloon_make", "make")
+            inst.SoundEmitter:PlaySound("dontstarve/common/balloon_blowup")
             inst.AnimState:PlayAnimation("build_pre")
             inst.AnimState:PushAnimation("build_loop", true)
-            if inst.bufferedaction ~= nil then
-                inst.sg.statemem.action = inst.bufferedaction
-                if inst.bufferedaction.action.actionmeter then
-                    inst.sg.statemem.actionmeter = true
-                    StartActionMeter(inst, timeout)
-                end
-                if inst.bufferedaction.target ~= nil and inst.bufferedaction.target:IsValid() then
-                    inst.bufferedaction.target:PushEvent("startlongaction")
-                end
-            end
         end,
 
         timeline =
@@ -5280,10 +5272,6 @@ local states =
         ontimeout = function(inst)
             inst.SoundEmitter:KillSound("make")
             inst.AnimState:PlayAnimation("build_pst")
-            if inst.sg.statemem.actionmeter then
-                inst.sg.statemem.actionmeter = nil
-                StopActionMeter(inst, true)
-            end
             inst:PerformBufferedAction()
         end,
 
@@ -5298,9 +5286,6 @@ local states =
 
         onexit = function(inst)
             inst.SoundEmitter:KillSound("make")
-            if inst.sg.statemem.actionmeter then
-                StopActionMeter(inst, false)
-            end
             if inst.bufferedaction == inst.sg.statemem.action then
                 inst:ClearBufferedAction()
             end
@@ -5410,8 +5395,12 @@ local states =
                 inst.bufferedaction.invobject ~= nil and
                 inst.bufferedaction.invobject.components.shaver ~= nil then
                 local shavee = inst.bufferedaction.target or inst.bufferedaction.doer
-                if shavee ~= nil and shavee.components.beard ~= nil then
-                    pass, reason = shavee.components.beard:ShouldTryToShave(inst.bufferedaction.doer, inst.bufferedaction.invobject)
+                if shavee ~= nil then
+                    if shavee.components.beard ~= nil then
+                        pass, reason = shavee.components.beard:ShouldTryToShave(inst.bufferedaction.doer, inst.bufferedaction.invobject)
+                    elseif shavee.components.shaveable ~= nil then
+                        pass, reason = shavee.components.shaveable:CanShave(inst.bufferedaction.doer, inst.bufferedaction.invobject)
+                    end
                 end
             end
 
@@ -5836,7 +5825,7 @@ local states =
                 inst:ClearBufferedAction()
             end
         end,
-    },
+    },    
 
     State
     {
@@ -6015,6 +6004,48 @@ local states =
                 inst.AnimState:Hide("ARM_normal")
             end
         end,
+    },
+
+    State
+    {
+        name = "channel_longaction",
+        tags = { "doing", "canrotate", "channeling"},
+
+        onenter = function(inst)
+
+            inst.components.locomotor:Stop()
+            inst.AnimState:PlayAnimation("give",false)
+            inst.AnimState:PushAnimation("give_pst",false)                    
+            
+            if inst:GetBufferedAction() then
+                local act = inst:GetBufferedAction()
+                inst.channelitem = act.target
+                inst:PerformBufferedAction()
+            end
+        end,
+
+        onexit = function(inst)
+            if not inst.sg.noexit then
+                if inst.channelitem then
+                    inst.channelitem:PushEvent("channel_finished")
+                    inst.channelitem = nil
+                end                
+            else
+                inst.sg.noexit = nil
+            end
+        end,
+
+        events =
+        {
+            EventHandler("animqueueover", function(inst)
+                inst.sg.noexit = true
+                inst.sg:GoToState("channel_longaction")
+            end),
+            EventHandler("cancel_channel_longaction", function(inst)
+                inst.sg:GoToState("idle")
+            end),
+        },
+
     },
 
     State{
@@ -7002,6 +7033,7 @@ local states =
             TimeEvent(1 * FRAMES, function(inst)
                 if inst.sg.statemem.riding then
                     DoRunSounds(inst)
+                    inst.SoundEmitter:PlaySound("dontstarve/beefalo/walk",nil,.5)
                     if inst.sg.statemem.ridingwoby then
                         inst.SoundEmitter:PlaySoundWithParams("dontstarve/characters/walter/woby/big/footstep", {intensity= 1})
                     end
@@ -7009,7 +7041,6 @@ local states =
             end),
             TimeEvent(3 * FRAMES, function(inst)
                 if inst.sg.statemem.riding then
-                    DoRunSounds(inst)
                     if inst.sg.statemem.ridingwoby then
                         inst.SoundEmitter:PlaySoundWithParams("dontstarve/characters/walter/woby/big/footstep", {intensity= 1})
                     end
@@ -7018,6 +7049,7 @@ local states =
             TimeEvent(8 * FRAMES, function(inst)
                 if inst.sg.statemem.riding then
                     DoRunSounds(inst)
+                    inst.SoundEmitter:PlaySound("dontstarve/beefalo/walk",nil,.5)
                     if inst.sg.statemem.ridingwoby then
                         inst.SoundEmitter:PlaySoundWithParams("dontstarve/characters/walter/woby/big/footstep", {intensity= 1})
                     end
@@ -7025,7 +7057,6 @@ local states =
             end),
             TimeEvent(10 * FRAMES, function(inst)
                 if inst.sg.statemem.riding then
-                    DoRunSounds(inst)
                     if inst.sg.statemem.ridingwoby then
                         inst.SoundEmitter:PlaySoundWithParams("dontstarve/characters/walter/woby/big/footstep", {intensity= 1})
                     end
@@ -11097,59 +11128,137 @@ local states =
     State
     {
         name = "slingshot_shoot",
-        tags = { "doing", "busy", "nointerrupt", "nomorph" },
+        tags = { "attack" },
 
         onenter = function(inst)
             local buffaction = inst:GetBufferedAction()
-            inst.components.locomotor:Stop()
-
             local target = buffaction ~= nil and buffaction.target or nil
             if target ~= nil and target:IsValid() then
 	            inst:ForceFacePoint(target.Transform:GetWorldPosition())
+	            inst.sg.statemem.attacktarget = target -- this is to allow repeat shooting at the same target
 			end
+
+			inst.sg.statemem.abouttoattack = true
 
             inst.AnimState:PlayAnimation("slingshot_pre")
             inst.AnimState:PushAnimation("slingshot", false)
-            inst.sg:SetTimeout(27 * FRAMES)
+
+            if inst.sg.laststate == inst.sg.currentstate then
+                inst.sg.statemem.chained = true
+                inst.AnimState:SetTime(3 * FRAMES)
+            end
+
+            inst.components.combat:StartAttack()
+            inst.components.combat:SetTarget(target)
+            inst.components.locomotor:Stop()
+
+            inst.sg:SetTimeout((inst.sg.statemem.chained and 25 or 28) * FRAMES)
         end,
 
         timeline =
         {
-            TimeEvent(20 * FRAMES, function(inst) -- start of slingshot
-                inst.SoundEmitter:PlaySound("dontstarve/characters/walter/slingshot/stretch")
+            TimeEvent(15 * FRAMES, function(inst)
+				if inst.sg.statemem.chained then
+					local buffaction = inst:GetBufferedAction()
+					local target = buffaction ~= nil and buffaction.target or nil
+					if not (target ~= nil and target:IsValid() and inst.components.combat:CanTarget(target)) then
+						inst:ClearBufferedAction()
+						inst.sg:GoToState("idle")
+					end
+				end
             end),
             
-            TimeEvent(25 * FRAMES, function(inst)
+            TimeEvent(16 * FRAMES, function(inst) -- start of slingshot
+				if inst.sg.statemem.chained then
+	                inst.SoundEmitter:PlaySound("dontstarve/characters/walter/slingshot/stretch")
+				end
+            end),
+            
+            TimeEvent(22 * FRAMES, function(inst)
+				if inst.sg.statemem.chained then
+					local buffaction = inst:GetBufferedAction()
+					local equip = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
+					if equip ~= nil and equip.components.weapon ~= nil and equip.components.weapon.projectile ~= nil then
+						local target = buffaction ~= nil and buffaction.target or nil
+						if target ~= nil and target:IsValid() and inst.components.combat:CanTarget(target) then
+							inst.sg.statemem.abouttoattack = false
+							inst:PerformBufferedAction()
+							inst.SoundEmitter:PlaySound("dontstarve/characters/walter/slingshot/shoot")
+						else
+							inst:ClearBufferedAction()
+							inst.sg:GoToState("idle")
+						end
+					else -- out of ammo
+						inst:ClearBufferedAction()
+						inst.components.talker:Say(GetString(inst, "ANNOUNCE_SLINGHSOT_OUT_OF_AMMO"))
+						inst.SoundEmitter:PlaySound("dontstarve/characters/walter/slingshot/no_ammo")
+					end
+				end
+            end),
 
-	           local buffaction = inst:GetBufferedAction()
-                local equip = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
-                if equip ~= nil and equip.components.weapon ~= nil and equip.components.weapon.projectile ~= nil then
--- TODO play shoot sound
-                    inst:PerformBufferedAction()
-                    inst.SoundEmitter:PlaySound("dontstarve/characters/walter/slingshot/shoot")
-                else -- out of ammo
--- TODO play out of ammo sound
-                    inst:ClearBufferedAction()
-                    inst.components.talker:Say(GetString(inst, "ANNOUNCE_SLINGHSOT_OUT_OF_AMMO"))
-                    inst.SoundEmitter:PlaySound("dontstarve/characters/walter/slingshot/no_ammo")
-                end
+            TimeEvent(18 * FRAMES, function(inst)
+				if not inst.sg.statemem.chained then
+					local buffaction = inst:GetBufferedAction()
+					local target = buffaction ~= nil and buffaction.target or nil
+					if not (target ~= nil and target:IsValid() and inst.components.combat:CanTarget(target)) then
+						inst:ClearBufferedAction()
+						inst.sg:GoToState("idle")
+					end
+				end
+            end),
+            
+            TimeEvent(19 * FRAMES, function(inst) -- start of slingshot
+				if not inst.sg.statemem.chained then
+	                inst.SoundEmitter:PlaySound("dontstarve/characters/walter/slingshot/stretch")
+				end
+            end),
+
+            TimeEvent(25 * FRAMES, function(inst)
+				if not inst.sg.statemem.chained then
+					local buffaction = inst:GetBufferedAction()
+					local equip = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
+					if equip ~= nil and equip.components.weapon ~= nil and equip.components.weapon.projectile ~= nil then
+						local target = buffaction ~= nil and buffaction.target or nil
+						if target ~= nil and target:IsValid() and inst.components.combat:CanTarget(target) then
+							inst.sg.statemem.abouttoattack = false
+							inst:PerformBufferedAction()
+							inst.SoundEmitter:PlaySound("dontstarve/characters/walter/slingshot/shoot")
+						else
+							inst:ClearBufferedAction()
+							inst.sg:GoToState("idle")
+						end
+					else -- out of ammo
+						inst:ClearBufferedAction()
+						inst.components.talker:Say(GetString(inst, "ANNOUNCE_SLINGHSOT_OUT_OF_AMMO"))
+						inst.SoundEmitter:PlaySound("dontstarve/characters/walter/slingshot/no_ammo")
+					end
+				end
             end),
         },
 
         ontimeout = function(inst)
-
-            inst.sg:GoToState("idle", true)
+            inst.sg:RemoveStateTag("attack")
+            inst.sg:AddStateTag("idle")
         end,
 
         events =
         {
+            EventHandler("equip", function(inst) inst.sg:GoToState("idle") end),
+            EventHandler("unequip", function(inst) inst.sg:GoToState("idle") end),
             EventHandler("animqueueover", function(inst)
                 if inst.AnimState:AnimDone() then
                     inst.sg:GoToState("idle")
                 end
             end),
         },
-    },
+
+        onexit = function(inst)
+            inst.components.combat:SetTarget(nil)
+            if inst.sg.statemem.abouttoattack and inst.replica.combat ~= nil then
+                inst.replica.combat:CancelAttack()
+            end
+        end,
+	},
 
     State
     {

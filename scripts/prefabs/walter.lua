@@ -44,6 +44,10 @@ local function StoryToTellFn(inst, story_prop)
 
 		local campfire_stories = STRINGS.STORYTELLER.WALTER["CAMPFIRE"]
 		if campfire_stories ~= nil then
+			if inst._story_proxy ~= nil then
+				inst._story_proxy:Remove()
+				inst._story_proxy = nil
+			end
 			inst._story_proxy = SpawnPrefab("walter_campfire_story_proxy")
 			inst._story_proxy:Setup(inst, story_prop)
 
@@ -201,6 +205,7 @@ local function common_postinit(inst)
     inst:AddTag("efficient_sleeper")
     inst:AddTag("dogrider")
     inst:AddTag("nowormholesanityloss")
+	inst:AddTag("storyteller") -- for storyteller component
 
     inst.customidleanim = "idle_walter"
 
@@ -221,8 +226,8 @@ local function master_postinit(inst)
     inst.components.sanity.custom_rate_fn = CustomSanityFn
     inst.components.sanity:SetNegativeAuraImmunity(true)
     inst.components.sanity:SetPlayerGhostImmunity(true)
-    inst.components.sanity:SetDappernessImmunity(true)
     inst.components.sanity:SetLightDrainImmune(true)
+	inst.components.sanity.only_magic_dapperness = true
 
     inst.components.foodaffinity:AddPrefabAffinity("trailmix", TUNING.AFFINITY_15_CALORIES_SMALL)
 

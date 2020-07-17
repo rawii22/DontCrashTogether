@@ -55,6 +55,7 @@ local function fn()
     --inst.AnimState:SetMultColour(1, 1, 1, 0.6)
 
     inst:AddTag("sanity")
+    inst:AddTag("shadow")
 
     inst.foleysound = "dontstarve/movement/foley/nightarmour"
     
@@ -77,6 +78,7 @@ local function fn()
     inst:AddComponent("equippable")
     inst.components.equippable.equipslot = EQUIPSLOTS.BODY
     inst.components.equippable.dapperness = TUNING.CRAZINESS_SMALL
+    inst.components.equippable.is_magic_dapperness = true
 
     inst.components.equippable:SetOnEquip(onequip)
     inst.components.equippable:SetOnUnequip(onunequip)

@@ -27,7 +27,8 @@ local Floater = Class(function(self, inst)
     self.float_index = 1
     self.swap_data = nil
     self.showing_effect = false
-    self.bob_percent = 1    
+    self.bob_percent = 1
+    self.splash = true
 
     self._is_landed = net_bool(inst.GUID, "floater._is_landed", "landeddirty")
 end)
@@ -105,10 +106,10 @@ function Floater:OnLandedServer()
         -- update the inventory component to represent the associated wetness.
         -- Don't apply the wetness to something held by someone, though.
         if self.inst.components.inventoryitem ~= nil and not self.inst.components.inventoryitem:IsHeld() and not self.inst:HasTag("likewateroffducksback") then
-            self.inst.components.inventoryitem:AddMoisture(TUNING.OCEAN.WETNESS)
+            self.inst.components.inventoryitem:AddMoisture(TUNING.OCEAN_WETNESS)
         end
 
-        if not self.inst.components.inventoryitem or not self.inst.components.inventoryitem:IsHeld() then
+        if self.splash and (not self.inst.components.inventoryitem or not self.inst.components.inventoryitem:IsHeld()) then
             local splash = SpawnPrefab("splash")
             splash.Transform:SetPosition(self.inst.Transform:GetWorldPosition())
         end

@@ -907,6 +907,15 @@ local function OnDespawn(inst)
     inst.components.constructionbuilder:StopConstruction()
     if GetGameModeProperty("drop_everything_on_despawn") then
         inst.components.inventory:DropEverything()
+
+		local followers = inst.components.leader.followers
+		for k, v in pairs(followers) do
+			if k.components.inventory ~= nil then
+				k.components.inventory:DropEverything()
+			elseif k.components.container ~= nil then
+				k.components.container:DropEverything()
+			end
+		end
     else
         inst.components.inventory:DropEverythingWithTag("irreplaceable")
     end
@@ -1165,6 +1174,26 @@ local function OnWintersFeastMusic(inst)
         ThePlayer:PushEvent("isfeasting")
     end
 end
+
+local function OnHermitMusic(inst)
+    if ThePlayer ~= nil and  ThePlayer == inst then
+        ThePlayer:PushEvent("playhermitmusic")
+    end
+end
+
+local function OnSharkSound(inst)
+    if ThePlayer ~= nil and  ThePlayer == inst then
+        if inst._sharksoundparam:value() <= 1 then
+            if not TheFocalPoint.SoundEmitter:PlayingSound("shark") then
+                TheFocalPoint.SoundEmitter:PlaySound("dangerous_sea/creatures/shark/swim_LP" ,"shark")               
+            end
+            TheFocalPoint.SoundEmitter:SetParameter("shark", "distance", inst._sharksoundparam:value())
+        else
+            TheFocalPoint.SoundEmitter:KillSound("shark")
+        end
+    end
+end
+
 --------------------------------------------------------------------------
 
 --V2C: starting_inventory passed as a parameter here is now deprecated
@@ -1472,6 +1501,8 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         inst:AddTag("scarytoprey")
         inst:AddTag("character")
         inst:AddTag("lightningtarget")
+        inst:AddTag(UPGRADETYPES.WATERPLANT.."_upgradeuser")
+        inst:AddTag(UPGRADETYPES.MAST.."_upgradeuser")
 
 		SetInstanceFunctions(inst)
 
@@ -1541,15 +1572,21 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         inst:ListenForEvent("got_on_platform", function(player, platform) OnGotOnPlatform(inst, platform) end)
         inst:ListenForEvent("got_off_platform", function(player, platform) OnGotOffPlatform(inst, platform) end)
 
-
+        inst._sharksoundparam = net_float(inst.GUID, "localplayer._sharksoundparam","sharksounddirty")
         inst._winters_feast_music = net_event(inst.GUID, "localplayer._winters_feast_music")
+        inst._hermit_music = net_event(inst.GUID, "localplayer._hermit_music")
+
+
         if not TheNet:IsDedicated() then
             inst:ListenForEvent("localplayer._winters_feast_music", OnWintersFeastMusic)
+            inst:ListenForEvent("localplayer._hermit_music", OnHermitMusic)
         end
 
         inst.entity:SetPristine()
 
-        if not TheWorld.ismastersim then
+        inst:ListenForEvent("sharksounddirty", OnSharkSound)
+        
+        if not TheWorld.ismastersim then    
             return inst
         end
 

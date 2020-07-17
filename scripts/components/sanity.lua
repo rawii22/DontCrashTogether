@@ -70,12 +70,11 @@ local Sanity = Class(function(self, inst)
 
     self.custom_rate_fn = nil
 
-    self.sanity_aura_immune = false -- This makes it so the player is unaffected by ANY auras
-    self.sanity_aura_immunities = {} -- This protects against specific auras, like Wendy with the ghosts
-    self.player_ghost_immune = false
+    --self.sanity_aura_immune = false -- is unaffected by ANY auras
+    --self.sanity_aura_immunities = nil -- protects against specific auras, like Wendy with the ghosts
+    --self.player_ghost_immune = false
 
-    self.dapperness_immune = false
-    self.light_drain_immune = false
+    --self.light_drain_immune = false
 
     self._oldissane = self:IsSane()
     self._oldpercent = self:GetPercent()
@@ -161,26 +160,17 @@ function Sanity:RecalculatePenalty()
 end
 
 function Sanity:AddSanityAuraImmunity(tag)
-    if not table.contains(self.sanity_aura_immunities, tag) then
-        table.insert(self.sanity_aura_immunities, tag)
-    end
+	if self.sanity_aura_immunities == nil then
+		self.sanity_aura_immunities = {}
+	end
+	self.sanity_aura_immunities[tag] = true
 end
 
 function Sanity:RemoveSanityAuraImmunity(tag)
-    if table.contains(self.sanity_aura_immunities, tag) then
-        local remove_index = -1
-
-        for i,v in ipairs(self.sanity_aura_immunities) do
-            if tag == v then
-                remove_index = i
-                break
-            end
-        end
-
-        if remove_index ~= -1 then
-            table.remove(self.sanity_aura_immunities, remove_index)
-        end
-    end
+	self.sanity_aura_immunities[tag] = nil
+	if next(self.sanity_aura_immunities) == nil then
+		self.sanity_aura_immunities = nil
+	end
 end
 
 function Sanity:SetFullAuraImmunity(immunity)
@@ -193,10 +183,6 @@ end
 
 function Sanity:SetPlayerGhostImmunity(immunity)
     self.player_ghost_immune = immunity
-end
-
-function Sanity:SetDappernessImmunity(immunity)
-    self.dapperness_immune = immunity
 end
 
 function Sanity:SetLightDrainImmune(immunity)
@@ -388,19 +374,19 @@ local LIGHT_SANITY_DRAINS =
 local SANITYRECALC_MUST_TAGS = { "sanityaura" }
 local SANITYRECALC_CANT_TAGS = { "FX", "NOCLICK", "DECOR","INLIMBO" }
 function Sanity:Recalc(dt)
-    local total_dapperness = self.dapperness
-    for k, v in pairs(self.inst.components.inventory.equipslots) do
-        if v.components.equippable ~= nil then
-            total_dapperness = total_dapperness + v.components.equippable:GetDapperness(self.inst)
-        end
-    end
+	local dapper_delta = 0
+	if self.dapperness_mult ~= 0 then 
+		local total_dapperness = self.dapperness
+		for k, v in pairs(self.inst.components.inventory.equipslots) do
+			local equippable = v.components.equippable
+			if equippable ~= nil and (not self.only_magic_dapperness or equippable.is_magic_dapperness) then
+				total_dapperness = total_dapperness + equippable:GetDapperness(self.inst)
+			end
+		end
 
-    total_dapperness = total_dapperness * self.dapperness_mult
-    local dapper_delta = total_dapperness * TUNING.SANITY_DAPPERNESS
-
-    if self.dapperness_immune then
-        dapper_delta = 0
-    end
+		total_dapperness = total_dapperness * self.dapperness_mult
+		dapper_delta = total_dapperness * TUNING.SANITY_DAPPERNESS
+	end
 
     local moisture_delta = easing.inSine(self.inst.components.moisture:GetMoisture(), 0, TUNING.MOISTURE_SANITY_PENALTY_MAX, self.inst.components.moisture:GetMaxMoisture())
 
@@ -427,12 +413,14 @@ function Sanity:Recalc(dt)
 	    for i, v in ipairs(ents) do 
 	        if v.components.sanityaura ~= nil and v ~= self.inst then
                 local is_aura_immune = false
-                for _, tag in ipairs(self.sanity_aura_immunities) do
-                    if v:HasTag(tag) then
-                        is_aura_immune = true
-                        break
-                    end
-                end
+				if self.sanity_aura_immunities ~= nil then
+					for tag, _ in pairs(self.sanity_aura_immunities) do
+						if v:HasTag(tag) then
+							is_aura_immune = true
+							break
+						end
+					end
+				end
 
                 if not is_aura_immune then
                     local aura_val = v.components.sanityaura:GetAura(self.inst)

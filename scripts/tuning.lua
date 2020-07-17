@@ -59,6 +59,8 @@ function Tune(overrides)
         STACK_SIZE_SMALLITEM = 40,
 		STACK_SIZE_TINYITEM = 60,
 
+		OCEAN_WETNESS = 75, -- same as MAX_WETNESS in weather.lua
+
 		DEFAULT_TALKER_DURATION = 2.5,
 		MAX_TALKER_DURATION = 8.0,
 
@@ -548,6 +550,8 @@ function Tune(overrides)
         LIGHTNING_GOAT_FOLLOW_TIME = 30,
         LIGHTNING_GOAT_MATING_SEASON_BABYDELAY = total_day_time*1.5,
         LIGHTNING_GOAT_MATING_SEASON_BABYDELAY_VARIANCE = 0.5*total_day_time,
+
+		LIGHTNINGGOATHERD_MAX_SIZE = 6,
 
         DEER_DAMAGE = 25,
         DEER_HEALTH = 350 * 2, -- harder for multiplayer
@@ -3503,7 +3507,7 @@ function Tune(overrides)
 
 		OCEAN =
 		{
-			WETNESS = 75,
+			WETNESS = 75, -- DEPRECATED - use TUNING.OCEAN_WETNESS
 		},
 
         OCEAN_SILHOUETTE =
@@ -3900,10 +3904,11 @@ function Tune(overrides)
 		GHOSTLYELIXIR_DRIP_FX_DELAY = seg_time / 2,
 
         -- WALTER
-		SLINGSHOT_DISTANCE = 8,
-		SLINGSHOT_DISTANCE_MAX = 12,
+		SLINGSHOT_DISTANCE = 10,
+		SLINGSHOT_DISTANCE_MAX = 14,
 
 		SLINGSHOT_AMMO_MOVESPEED_MULT = 2/3,
+		SLINGSHOT_AMMO_MOVESPEED_DURATION = 30,
 		SLINGSHOT_AMMO_FREEZE_COLDNESS = 2,
 		SLINGSHOT_AMMO_SHADOWTENTACLE_CHANCE = 0.5,
 
@@ -3927,19 +3932,19 @@ function Tune(overrides)
 
 		WALTER_STARTING_WOBY = "wobysmall",
 
-        WOBY_BIG_HUNGER = calories_per_day*4,
-        WOBY_BIG_HUNGER_RATE = (calories_per_day*4)/(total_day_time * 1.5), -- same hunger as beefalo, but a full stomach lasts for a day and a half
+        WOBY_BIG_HUNGER = 50,
+        WOBY_BIG_HUNGER_RATE = 50/(total_day_time * 2.5),
         WOBY_BIG_SPEED =
         {
-            FAST = 8,
-            MEDIUM = 7,
-            SLOW = 5.5
+            FAST = 10,
+            MEDIUM = 9,
+            SLOW = 8
         },
 
         WOBY_BIG_WALK_SPEED = 1.5,
 
         WOBY_SMALL_HUNGER = 50,
-        WOBY_SMALL_HUNGER_RATE = 50 / (total_day_time * 1.5),
+        WOBY_SMALL_HUNGER_RATE = 50 / (total_day_time * 2.5),
 
         -- Salty dog
         FLOTSAM_SPAWN_MAX = 4,
@@ -3992,6 +3997,9 @@ function Tune(overrides)
 				struggle_times = {low = 3, high = 8, r_low = 1, r_high = 1}, -- uses self.stamina to lerp between low and high
 				tired_times = {low = 4, high = 2, r_low = 1, r_high = 1}, -- uses self.stamina to lerp between low and high
 			},
+
+            SPRINKLER_DETECT_RANGE = 7,
+            SPRINKLER_DETECT_PERIOD = 4,
 		},
 
         GNARWAIL =
@@ -4274,7 +4282,89 @@ function Tune(overrides)
 
         MESSAGEBOTTLE_NOTE_CHANCE = 0.66,
 
-        SINGINGSHELL_TRIGGER_RANGE = 4,    }
+        SINGINGSHELL_TRIGGER_RANGE = 4,
+
+        WATERPLANT =
+        {
+            DAMAGE = wilson_attack * 2,
+            ITEM_DAMAGE = wilson_attack * 0.7,
+            ATTACK_PERIOD = 5,
+            YELLOW_ATTACK_PERIOD = 2.5,
+            ATTACK_DISTANCE = 18,
+            ATTACK_AOE = 1.5,
+            HEALTH = 500,
+
+            MAX_BARNACLES = 3,
+            GROW_TIME = 2.5 * total_day_time,
+            GROW_VARIANCE = 1.5 * total_day_time,
+            REBIRTH_TIME = 2 * total_day_time,
+
+            ANGERING_HIT_VELOCITY = 2.01,
+
+            POLLEN_DURATION = 25,
+            POLLEN_FADETIME = 2,
+            POLLEN_RESETTIME = seg_time * 6,
+            PINK_POLLEN_RESETTIME = seg_time * 3,
+            POLLEN_RESETVARIANCE = seg_time / 2,
+
+            FISH_SPAWN =
+            {
+                MAX_CHILDREN = 1,
+                SPAWN_RADIUS = 4.5,
+                REGEN_PERIOD = seg_time * 8,
+                WHITE_REGEN_PERIOD = seg_time * 4,
+            },
+        },
+
+        WAVEYJONES = 
+        {
+            HAND = 
+            {
+                WALK_SPEED = 1,--0.5,
+            },
+            RESPAWN_TIMER = 10,
+        },
+
+        SHARK =
+        {
+            DAMAGE = 30,
+            HEALTH = 1000,
+            WALK_SPEED = 1,
+            RUN_SPEED = 7,
+
+            WALK_SPEED_LAND = 7,
+            RUN_SPEED_LAND = 7,  
+
+            ATTACK_RANGE = 4,
+            
+            TARGET_DIST = 8, --20,
+
+            AOE_RANGE = 3,
+            AOE_SCALE = 0.5,
+        },
+
+        OCEANHORROR =
+        {
+            ATTACH_OFFSET_PADDING = 0.5,
+
+            ATTACK_RANGE = 4.1,
+            SPEED = 2,
+            HEALTH = 400,
+            DAMAGE = 50,
+            ATTACK_PERIOD = 3,
+            BLOCK_TELEPORT_ON_HIT_DURATION = 3.5,
+            BLOCK_TELEPORT_ON_HIT_DURATION_VARIANCE = 2,
+        },
+
+        MAST_LAMP_LIGHTTIME = (night_time+dusk_time)*2,
+
+        WATERSTREAK_AOE_DIST = 3,
+
+        WATERPUMP =
+        {
+            MAXRANGE = 7.5,
+        }
+    }
 end
 
 Tune()
