@@ -1080,7 +1080,6 @@ return{
         SPIDERHOLE_ROCK = "All webby...",
         STALAGMITE = "Cave rock.",
         STALAGMITE_TALL = "Big cave rock",
-        TREASURECHEST_TRAP = "Treasure!",
 
         TURF_CARPETFLOOR = "Fuzzy ground.",
         TURF_CHECKERFLOOR = "Ground bit.",
@@ -1391,6 +1390,7 @@ return{
             "Ha ha! Her face!",
         },
         CHESSPIECE_DRAGONFLY = "It all buggy-eyed.",
+		CHESSPIECE_MINOTAUR = "It good for scratching scales against.",
         CHESSPIECE_BUTTERFLY = "It so ugly.",
         CHESSPIECE_ANCHOR = "Why made anchor for land, florpt?",
         CHESSPIECE_MOON = "It look just like real thing!",
@@ -1609,6 +1609,7 @@ return{
 		FEATHER_ROBIN_WINTER = "Snowy bird feather.",
 		FEATHER_CANARY = "Yellow birdy feather.",
 		FEATHERPENCIL = "For fancy writing, florp.",
+        COOKBOOK = "Like this one, has pictures of food!",
 		FEM_PUPPET = "You stuck?",
 		FIREFLIES =
 		{
@@ -1669,7 +1670,7 @@ return{
         STALKER_ATRIUM = "Glurp, i-it real!",
         STALKER_MINION = "Little crawlers!",
         THURIBLE = "Weird smell, flort.",
-        ATRIUM_OVERGROWTH = "Wierd letters make head hurt, florp...",
+        ATRIUM_OVERGROWTH = "Weird letters make head hurt, florp...",
 		FROG =
 		{
 			DEAD = "He gone to big swamp in the sky.",
@@ -2770,9 +2771,6 @@ return{
 		QUAGMIRE_SALMON_COOKED = "Nooooooo!!",
 		QUAGMIRE_CRABMEAT = "(Sniff) poor crab...",
 		QUAGMIRE_CRABMEAT_COOKED = "Glurph... can't look.",
-        QUAGMIRE_POT = "Is just normal pot.",
-        QUAGMIRE_POT_SMALL = "Bitty pot.",
-        QUAGMIRE_POT_HANGER_ITEM = "It help for cooking.",
 		QUAGMIRE_SUGARWOODTREE = 
 		{
 			GENERIC = "There sweet stuff inside!",

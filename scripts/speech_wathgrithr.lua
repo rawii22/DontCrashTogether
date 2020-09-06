@@ -1080,7 +1080,6 @@ return{
         SPIDERHOLE_ROCK = "Webbing. Never a good sign.",
         STALAGMITE = "Cave boulder.",
         STALAGMITE_TALL = "A pointy rock of sorts.",
-        TREASURECHEST_TRAP = "I am always ready.",
 
         TURF_CARPETFLOOR = "It soaks up the blood of battle.",
         TURF_CHECKERFLOOR = "Fancy floor.",
@@ -1391,6 +1390,7 @@ return{
             "Twas an honor to fight thee.",
         },
         CHESSPIECE_DRAGONFLY = "Tis the trophy of glorious battle!",
+		CHESSPIECE_MINOTAUR = "The beast guarded its treasure well, but not well enough.",
         CHESSPIECE_BUTTERFLY = "To celebrate the moon's messenger!",
         CHESSPIECE_ANCHOR = "'Twas made in honor of our stalwart vessel!",
         CHESSPIECE_MOON = "Offered in honor of our beauteous moon!",
@@ -1609,6 +1609,7 @@ return{
 		FEATHER_ROBIN_WINTER = "Winter's feather.",
 		FEATHER_CANARY = "In remembrance of a songbird.",
 		FEATHERPENCIL = "Perhaps I'll pen a saga of my journeys!",
+        COOKBOOK = "'Tis filled with too many non-meat dishes if you ask me.",
 		FEM_PUPPET = "She looks unhappy upon her throne.",
 		FIREFLIES =
 		{
@@ -2770,9 +2771,6 @@ return{
 		QUAGMIRE_SALMON_COOKED = "A feast from the sea.",
 		QUAGMIRE_CRABMEAT = "T'would be an honor to be fed to the sky god, beast.",
 		QUAGMIRE_CRABMEAT_COOKED = "Tis a delicacy!",
-        QUAGMIRE_POT = "Room for more meat!",
-        QUAGMIRE_POT_SMALL = "We shall fill thee with meat!",
-        QUAGMIRE_POT_HANGER_ITEM = "'Tis no use to me in this form.",
 		QUAGMIRE_SUGARWOODTREE = 
 		{
 			GENERIC = "The nectar of the gods dwells within.",

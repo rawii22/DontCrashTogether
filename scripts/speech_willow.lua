@@ -1087,7 +1087,6 @@ return{
         SPIDERHOLE_ROCK = "It's full of spiders.",
         STALAGMITE = "Rocks are boring.",
         STALAGMITE_TALL = "More boring rocks.",
-        TREASURECHEST_TRAP = "Dirty trick!",
 
         TURF_CARPETFLOOR = "The ground is boring.",
         TURF_CHECKERFLOOR = "The ground is boring.",
@@ -1398,6 +1397,7 @@ return{
             "Looks as dumb as the real thing.",
         },
         CHESSPIECE_DRAGONFLY = "I think... I think I understand art.",
+		CHESSPIECE_MINOTAUR = "Pfft, I never needed a guardian. And I turned out fine!",
         CHESSPIECE_BUTTERFLY = "Meh. I can't even burn it.",
         CHESSPIECE_ANCHOR = "It's hard to burn stuff at sea.",
         CHESSPIECE_MOON = "I guess it's nice.",
@@ -1616,6 +1616,7 @@ return{
 		FEATHER_ROBIN_WINTER = "Snowbird feather. It probably smells terrible on fire.",
 		FEATHER_CANARY = "Canary feather. It probably smells terrible on fire.",
 		FEATHERPENCIL = "So what does the feather do again?",
+        COOKBOOK = "Uuugh, it's no fun cooking with instructions!",
 		FEM_PUPPET = "She looks scared half to death.",
 		FIREFLIES =
 		{
@@ -2777,9 +2778,6 @@ return{
 		QUAGMIRE_SALMON_COOKED = "All it needed was some fire.",
 		QUAGMIRE_CRABMEAT = "Needs more fire.",
 		QUAGMIRE_CRABMEAT_COOKED = "I bet it's tasty.",
-        QUAGMIRE_POT = "I should light a fire under its butt.",
-        QUAGMIRE_POT_SMALL = "It goes with the fire.",
-        QUAGMIRE_POT_HANGER_ITEM = "It needs to be set up in a firepit.",
 		QUAGMIRE_SUGARWOODTREE = 
 		{
 			GENERIC = "Aw! It's impervious to fire.",

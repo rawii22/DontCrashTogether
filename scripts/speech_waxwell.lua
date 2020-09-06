@@ -1080,7 +1080,6 @@ return{
         SPIDERHOLE_ROCK = "How did that get down here?",
         STALAGMITE = "Rocks. How dull.",
         STALAGMITE_TALL = "Stalagmite. How dull.",
-        TREASURECHEST_TRAP = "Hmmm. Looks suspicious.",
 
         TURF_CARPETFLOOR = "That's a quality, high-pile carpet sample!",
         TURF_CHECKERFLOOR = "That's my natural habitat.",
@@ -1391,6 +1390,7 @@ return{
             "What an imbecilic expression.",
         },
         CHESSPIECE_DRAGONFLY = "It never stood a chance.",
+		CHESSPIECE_MINOTAUR = "Always keep things close to the chest, right pal?",
         CHESSPIECE_BUTTERFLY = "Rather elegant, I'd say.",
         CHESSPIECE_ANCHOR = "How kitsch.",
         CHESSPIECE_MOON = "I'm fairly partial to this one.",
@@ -1609,6 +1609,7 @@ return{
 		FEATHER_ROBIN_WINTER = "Grey is the color of pain.",
 		FEATHER_CANARY = "Yellow is the color of naivety.",
 		FEATHERPENCIL = "Not as elegant as a quill and inkwell, but it'll do.",
+        COOKBOOK = "Very well. If I can master the dark arts, how hard could cooking be?",
 		FEM_PUPPET = "Better her than me.",
 		FIREFLIES =
 		{
@@ -2770,9 +2771,6 @@ return{
 		QUAGMIRE_SALMON_COOKED = "I do enjoy a good smoked salmon.",
 		QUAGMIRE_CRABMEAT = "Ah, how refined.",
 		QUAGMIRE_CRABMEAT_COOKED = "Perfect with a bit of butter.",
-        QUAGMIRE_POT = "Magic could bring it to a boil faster, you know.",
-        QUAGMIRE_POT_SMALL = "I shalln't let it speak with the kettle.",
-        QUAGMIRE_POT_HANGER_ITEM = "Well I'M not setting it up.",
 		QUAGMIRE_SUGARWOODTREE = 
 		{
 			GENERIC = "A sickly sweet aroma wafts from its branches.",

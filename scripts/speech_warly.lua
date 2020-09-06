@@ -1080,7 +1080,6 @@ return{
         SPIDERHOLE_ROCK = "I'd prefer not to get closer.",
         STALAGMITE = "I always get you upside down with stalactites...",
         STALAGMITE_TALL = "Rocks to be had.",
-        TREASURECHEST_TRAP = "Hmmm, something does not feel right about this...",
 
         TURF_CARPETFLOOR = "Make fists with your toes...",
         TURF_CHECKERFLOOR = "It's like an ingredient for the ground.",
@@ -1391,6 +1390,7 @@ return{
             "I should whip up some roast goose with cranberry sauce.",
         },
         CHESSPIECE_DRAGONFLY = "I was afraid I was going to be broiled alive!",
+		CHESSPIECE_MINOTAUR = "Perhaps now you can keep watch over my crock pot.",
         CHESSPIECE_BUTTERFLY = "How lovely!",
         CHESSPIECE_ANCHOR = "I think Maman would like this.",
         CHESSPIECE_MOON = "Hits my eye like a big pizza pie.",
@@ -1609,6 +1609,7 @@ return{
 		FEATHER_ROBIN_WINTER = "A bird's feather, in tuna blue.",
 		FEATHER_CANARY = "A bird's feather, in lemon yellow.",
 		FEATHERPENCIL = "Lighter than my meringue.",
+        COOKBOOK = "I added a few of my own personal recipes.",
 		FEM_PUPPET = "She's trapped!",
 		FIREFLIES =
 		{
@@ -3488,7 +3489,7 @@ return{
         BARNACLINGUINE = "Delectable!",
         BARNACLESTUFFEDFISHHEAD = "Some culinary experiments go better than others.",
 
-        LEAFLOAF = "A basic recipe, elevated though the use of this strange meat!",
+        LEAFLOAF = "A basic recipe, elevated through the use of this strange meat!",
         LEAFYMEATBURGER = "Perhaps this is how we'll convince Mademoiselle Wigfrid to eat her vegetables?",
         LEAFYMEATSOUFFLE = "It is certainly... food.",
         MEATYSALAD = "I'm not sure whether we can truly call this vegetarian.",

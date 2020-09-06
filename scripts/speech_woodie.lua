@@ -1081,7 +1081,6 @@ return{
         SPIDERHOLE_ROCK = "I should skedaddle before they come out of there.",
         STALAGMITE = "I'm not too interested in rocks.",
         STALAGMITE_TALL = "I'm not too interested in rocks.",
-        TREASURECHEST_TRAP = "Something is not quite right aboot that chest.",
 
         TURF_CARPETFLOOR = "Too classy for my tastes.",
         TURF_CHECKERFLOOR = "Looks like one of those city-people outhouses.",
@@ -1392,6 +1391,7 @@ return{
             "Looks sturdy.",
         },
         CHESSPIECE_DRAGONFLY = "Good stonework.",
+		CHESSPIECE_MINOTAUR = "Gotta say I prefer it to the original.",
         CHESSPIECE_BUTTERFLY = "Reminds me of nature.",
         CHESSPIECE_ANCHOR = "Looks good to me.",
         CHESSPIECE_MOON = "Someone did a good job on this.",
@@ -1400,7 +1400,7 @@ return{
         CHESSPIECE_CRABKING = "That's nicely made.",
         CHESSPIECE_TOADSTOOL = "Structurally sound.",
         CHESSPIECE_STALKER = "Nothin' wrong with it now.",
-        CHESSPIECE_KLAUS = "Can't complain about that worksmanship.",
+        CHESSPIECE_KLAUS = "Can't complain aboot that worksmanship.",
         CHESSPIECE_BEEQUEEN = "Some nice detail on that.",
         CHESSPIECE_ANTLION = "Looks almost real, eh?",
         CHESSJUNK1 = "Dead metal.",
@@ -1610,6 +1610,7 @@ return{
 		FEATHER_ROBIN_WINTER = "A stupid feather.",
 		FEATHER_CANARY = "A grody feather.",
 		FEATHERPENCIL = "The bird murder wasn't even necessary. Heh.",
+        COOKBOOK = "Pretty handy. Luce, how aboot you read off the ingredients while I cook?",
 		FEM_PUPPET = "She's trapped!",
 		FIREFLIES =
 		{
@@ -2310,16 +2311,16 @@ return{
         TRINKET_46 = "I prefer to let mine air dry.", -- Hairdryer ONI trinket
 
         -- The numbers align with the trinket numbers above.
-        LOST_TOY_1  = "There's something unnatural about that thing... wouldn't ya say, Luce?",
-        LOST_TOY_2  = "There's something unnatural about that thing... wouldn't ya say, Luce?",
-        LOST_TOY_7  = "There's something unnatural about that thing... wouldn't ya say, Luce?",
-        LOST_TOY_10 = "There's something unnatural about that thing... wouldn't ya say, Luce?",
-        LOST_TOY_11 = "There's something unnatural about that thing... wouldn't ya say, Luce?",
-        LOST_TOY_14 = "There's something unnatural about that thing... wouldn't ya say, Luce?",
-        LOST_TOY_18 = "There's something unnatural about that thing... wouldn't ya say, Luce?",
-        LOST_TOY_19 = "There's something unnatural about that thing... wouldn't ya say, Luce?",
-        LOST_TOY_42 = "There's something unnatural about that thing... wouldn't ya say, Luce?",
-        LOST_TOY_43 = "There's something unnatural about that thing... wouldn't ya say, Luce?",
+        LOST_TOY_1  = "There's something unnatural aboot that thing... wouldn't ya say, Luce?",
+        LOST_TOY_2  = "There's something unnatural aboot that thing... wouldn't ya say, Luce?",
+        LOST_TOY_7  = "There's something unnatural aboot that thing... wouldn't ya say, Luce?",
+        LOST_TOY_10 = "There's something unnatural aboot that thing... wouldn't ya say, Luce?",
+        LOST_TOY_11 = "There's something unnatural aboot that thing... wouldn't ya say, Luce?",
+        LOST_TOY_14 = "There's something unnatural aboot that thing... wouldn't ya say, Luce?",
+        LOST_TOY_18 = "There's something unnatural aboot that thing... wouldn't ya say, Luce?",
+        LOST_TOY_19 = "There's something unnatural aboot that thing... wouldn't ya say, Luce?",
+        LOST_TOY_42 = "There's something unnatural aboot that thing... wouldn't ya say, Luce?",
+        LOST_TOY_43 = "There's something unnatural aboot that thing... wouldn't ya say, Luce?",
         
         HALLOWEENCANDY_1 = "Even the stick is delicious.",
         HALLOWEENCANDY_2 = "Don't worry, I'll eat enough for the both of us, Lucy.",
@@ -2771,9 +2772,6 @@ return{
 		QUAGMIRE_SALMON_COOKED = "Tastes like home.",
 		QUAGMIRE_CRABMEAT = "That'll cook up real good.",
 		QUAGMIRE_CRABMEAT_COOKED = "I wouldn't mind a taste of that.",
-        QUAGMIRE_POT = "What do ya wanna make, Lucy?",
-        QUAGMIRE_POT_SMALL = "I only know a handful of recipes, but I'm real good at them.",
-        QUAGMIRE_POT_HANGER_ITEM = "Gotta hang the pot on the fire somehow.",
 		QUAGMIRE_SUGARWOODTREE = 
 		{
 			GENERIC = "It's beautiful!",

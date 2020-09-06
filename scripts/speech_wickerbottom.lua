@@ -1080,7 +1080,6 @@ return{
         SPIDERHOLE_ROCK = "This is the source of the spider infestation.",
         STALAGMITE = "A strange rock formation.",
         STALAGMITE_TALL = "Another stalagmite.",
-        TREASURECHEST_TRAP = "Looks suspicious...",
 
         TURF_CARPETFLOOR = "The ground. You step on it.",
         TURF_CHECKERFLOOR = "The ground. You step on it.",
@@ -1391,6 +1390,7 @@ return{
             "Bust of Alces canadensis.",
         },
         CHESSPIECE_DRAGONFLY = "Artist's interpretation of mythical Diptera.",
+		CHESSPIECE_MINOTAUR = "A rather convincing likeness.",
         CHESSPIECE_BUTTERFLY = "Carved in the lunar moth's likeness.",
         CHESSPIECE_ANCHOR = "Artists tend to reference what they're familiar with.",
         CHESSPIECE_MOON = "The missing chunk is a recent development.",
@@ -1609,6 +1609,7 @@ return{
 		FEATHER_ROBIN_WINTER = "It looks like a feather of Cardinalis, but white.",
 		FEATHER_CANARY = "Feather of Canaria.",
 		FEATHERPENCIL = "Oh, how I missed proper writing implements!",
+        COOKBOOK = "A collection of culinary observations.",
 		FEM_PUPPET = "Poor girl.",
 		FIREFLIES =
 		{
@@ -2770,9 +2771,6 @@ return{
 		QUAGMIRE_SALMON_COOKED = "Seared oncorhynchus nerka.",
 		QUAGMIRE_CRABMEAT = "Raw Paralithodes meat.",
 		QUAGMIRE_CRABMEAT_COOKED = "It no longer presents a threat of salmonellosis.",
-        QUAGMIRE_POT = "A larger pot takes longer to boil.",
-        QUAGMIRE_POT_SMALL = "Hmmm, what shall we make next?",
-        QUAGMIRE_POT_HANGER_ITEM = "The old fashioned way to cook over a fire.",
 		QUAGMIRE_SUGARWOODTREE = 
 		{
 			GENERIC = "What unique coloring. I should like to press its leaves in my books!",

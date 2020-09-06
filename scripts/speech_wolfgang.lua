@@ -1081,7 +1081,6 @@ return{
         SPIDERHOLE_ROCK = "Spiders everywhere.",
         STALAGMITE = "Is pointy.",
         STALAGMITE_TALL = "Rock, reaching for the roof.",
-        TREASURECHEST_TRAP = "Raagh!",
 
         TURF_CARPETFLOOR = "Step stones.",
         TURF_CHECKERFLOOR = "Step stones.",
@@ -1392,6 +1391,7 @@ return{
             "Bad monster made of stone.",
         },
         CHESSPIECE_DRAGONFLY = "Is fiery killbeast, but stone.",
+		CHESSPIECE_MINOTAUR = "Strong beast made from strong stone!",
         CHESSPIECE_BUTTERFLY = "Is look like little flutterby, but bigger!",
         CHESSPIECE_ANCHOR = "Is big. And heavy. Wolfgang would like to lift.",
         CHESSPIECE_MOON = "Is look just like sky cheese!",
@@ -1610,6 +1610,7 @@ return{
 		FEATHER_ROBIN_WINTER = "Is feather of bird white.",
 		FEATHER_CANARY = "Is feather of bird yellow.",
 		FEATHERPENCIL = "Wolfgang must stick pinky out when holding it.",
+        COOKBOOK = "Is book of things to fill Wolfgang's mighty belly!",
 		FEM_PUPPET = "Scary chair scares her!",
 		FIREFLIES =
 		{
@@ -2771,9 +2772,6 @@ return{
 		QUAGMIRE_SALMON_COOKED = "Fish is cooked now.",
 		QUAGMIRE_CRABMEAT = "Is meat of tiny pincher.",
 		QUAGMIRE_CRABMEAT_COOKED = "Yummy, yummy pincher.",
-        QUAGMIRE_POT = "Wolfgang put this over fire.",
-        QUAGMIRE_POT_SMALL = "Friends, do not look! Pot needs to boil.",
-        QUAGMIRE_POT_HANGER_ITEM = "Is make pot hang over fire.",
 		QUAGMIRE_SUGARWOODTREE = 
 		{
 			GENERIC = "Is little tree of yummy goop.",

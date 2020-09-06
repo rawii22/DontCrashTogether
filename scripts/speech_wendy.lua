@@ -1084,7 +1084,6 @@ return{
         SPIDERHOLE_ROCK = "It is infested.",
         STALAGMITE = "The earth gives up its bounty.",
         STALAGMITE_TALL = "The earth reaches up.",
-        TREASURECHEST_TRAP = "Every once in awhile, things go my way.",
 
         TURF_CARPETFLOOR = "Some ground.",
         TURF_CHECKERFLOOR = "Some ground.",
@@ -1395,6 +1394,7 @@ return{
             "Such expression in her eyes.",
         },
         CHESSPIECE_DRAGONFLY = "She now lies, cold as stone.",
+		CHESSPIECE_MINOTAUR = "A testament to a lifetime spent alone in the dark.",
         CHESSPIECE_BUTTERFLY = "But a simulacrum of life. Sigh.",
         CHESSPIECE_ANCHOR = "Why did we sculpt an anchor.",
         CHESSPIECE_MOON = "I'd prefer to look at this over the real thing.",
@@ -1613,6 +1613,7 @@ return{
 		FEATHER_ROBIN_WINTER = "A snowbird feather, white as the light at the end of the tunnel.",
 		FEATHER_CANARY = "A canary feather, golden as the gilded cage.",
 		FEATHERPENCIL = "M...maybe I'll doodle something... When no one's looking.",
+        COOKBOOK = "What's the point of filling my stomach when my heart remains empty...",
 		FEM_PUPPET = "I wonder what she did.",
 		FIREFLIES =
 		{
@@ -2774,9 +2775,6 @@ return{
 		QUAGMIRE_SALMON_COOKED = "Not so lively now.",
 		QUAGMIRE_CRABMEAT = "Its insides are as horrid as its outsides.",
 		QUAGMIRE_CRABMEAT_COOKED = "It's ready now.",
-        QUAGMIRE_POT = "We cook to stave off death.",
-        QUAGMIRE_POT_SMALL = "We will cook, or we will die.",
-        QUAGMIRE_POT_HANGER_ITEM = "It's for hanging the pot over the fire.",
 		QUAGMIRE_SUGARWOODTREE = 
 		{
 			GENERIC = "It has a sickly beauty.",
