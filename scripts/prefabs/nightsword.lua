@@ -40,6 +40,7 @@ local function fn()
     inst.AnimState:PlayAnimation("idle")
     --inst.AnimState:SetMultColour(1, 1, 1, .6)
 
+    inst:AddTag("shadow_item")
     inst:AddTag("shadow")
     inst:AddTag("sharp")
 

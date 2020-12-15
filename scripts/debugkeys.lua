@@ -227,7 +227,6 @@ AddGameDebugKey(KEY_F4, function()
     ConsoleCommandPlayer().components.inventory:Equip( c_spawn("axe") )
     ConsoleCommandPlayer().components.inventory:Equip( c_spawn("flowerhat") )
     local invitems = {
-        meat = 10,
         carrot = 20,
         berries = 20,
         twigs = 20,
@@ -764,7 +763,13 @@ AddGameDebugKey(KEY_L, function()
 	--local pt = TheInput:GetWorldPosition()
 	local pt = ThePlayer:GetPosition()
 	
---    local tile = TheWorld.Map:GetTileAtPoint(pt:Get())
+	if TheInput:IsKeyDown(KEY_SHIFT) then
+		local node_index = TheWorld.Map:GetNodeIdAtPoint(pt:Get())
+		print("Node (" .. tostring(node_index) .. "): " .. tostring(TheWorld.topology.ids[node_index]))
+		print("Node Tags:", (TheWorld.topology.nodes[node_index] == nil or #TheWorld.topology.nodes[node_index].tags == 0) and "<empty>" or unpack(TheWorld.topology.nodes[node_index].tags))
+
+		return
+	end
 
 	local GROUND_NAMES = table.invert(GROUND)
 

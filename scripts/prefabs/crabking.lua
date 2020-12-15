@@ -71,8 +71,7 @@ local function getfreezerange(inst)
     return TUNING.CRABKING_FREEZE_RANGE * (0.75 + Remap(inst.countgems(inst).blue,0,9,0,2.25)) /2
 end
 
-local function removecrab(inst) 
-    inst:RemoveEventCallback("onremove", function() removecrab( inst ) end, inst.crab)
+local function removecrab(inst)
     inst.crab = nil
     inst:Remove()
 end
@@ -146,6 +145,9 @@ local function socketitem(inst,item,slot)
     if #inst.socketed >= MAX_SOCKETS then
         inst.components.health:SetMaxHealth(TUNING.CRABKING_HEALTH + (math.floor(inst.countgems(inst).red/2) * math.floor(inst.countgems(inst).red/2) *TUNING.CRABKING_HEALTH_BONUS ))
         inst.components.health.currenthealth = inst.components.health.maxhealth
+
+        MakeLargeBurnableCharacter(inst, "body")
+        MakeHugeFreezableCharacter(inst, "body")
 
         inst.components.freezable:SetResistance(3 + inst.countgems(inst).blue)
 
@@ -255,6 +257,8 @@ end
 local function OnEntitySleep(inst)
     inst.components.health:DoDelta(inst.components.health.maxhealth - inst.components.health.currenthealth)
     if not inst.sg:HasStateTag("inert") then
+        inst.components.health:SetMaxHealth(200000)
+        inst.components.health.currenthealth = inst.components.health.maxhealth
         inst.spawnstacks(inst)
         inst.dropgems(inst)
         inst.sg:GoToState("inert")
@@ -270,6 +274,9 @@ local function OnEntitySleep(inst)
         inst:RemoveTag("animal")
         inst:RemoveTag("scarytoprey")
         inst:RemoveTag("hostile")           
+
+        inst:RemoveComponent("freezable")
+        inst:RemoveComponent("burnable")
    end
 end
 
@@ -309,6 +316,8 @@ local function OnSave(inst, data)
         end
     end
 
+    data.healthpercent = inst.components.health:GetPercent()
+
     return ents
 end
 
@@ -336,6 +345,9 @@ local function OnLoadPostPass(inst, newents, data)
                 end
             end
         end
+        if data.healthpercent then
+            inst.components.health:SetPercent(data.healthpercent)
+        end        
     end
 end
 
@@ -393,7 +405,7 @@ local function endcastspell(inst, lastwasfreeze)
     local ents = TheSim:FindEntities(x, y, z, 25, nil, nil, CRABKING_SPELLGENERATOR_TAGS)
     if #ents > 0 then
         for i,ent in pairs(ents)do
-            if not inst.components.freezable:IsFrozen() and not inst.components.health:IsDead() then
+            if (not inst.components.freezable or not inst.components.freezable:IsFrozen()) and not inst.components.health:IsDead() then
                 ent:PushEvent("endspell")
             else
                 ent:Remove()
@@ -792,7 +804,7 @@ local function fn()
     ------------------
 
     inst:AddComponent("health")
-    inst.components.health:SetMaxHealth(TUNING.CRABKING_HEALTH)
+    inst.components.health:SetMaxHealth(200000)--TUNING.CRABKING_HEALTH)
     inst.components.health.destroytime = 5
 
     ------------------
@@ -859,9 +871,6 @@ local function fn()
     inst:ListenForEvent("timerdone", OnTimerDone)
     inst:ListenForEvent("healthdelta", onHealthChange)
     inst:ListenForEvent("freeze", oncrabfreeze)
-
-    MakeLargeBurnableCharacter(inst, "body")
-    MakeHugeFreezableCharacter(inst, "body")
   
     clearsocketart(inst)
     inst.OnSave = OnSave

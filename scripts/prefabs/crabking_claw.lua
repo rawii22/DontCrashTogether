@@ -28,9 +28,10 @@ local function releaseclamp(inst, immediate)
 			inst.boat.components.boatphysics:RemoveBoatDrag(inst)
 		end
 
-        inst:RemoveEventCallback("onremove", function()  
-            inst.releaseclamp(inst)
-        end, inst.boat)  
+        if inst._releaseclamp then
+            inst:RemoveEventCallback("onremove", inst._releaseclamp, inst.boat)  
+            inst._releaseclamp = nil
+        end
     end  
     inst.boat = nil
     inst:PushEvent("releaseclamp", {immediate = immediate} )
@@ -77,10 +78,9 @@ local function clamp(inst)
 		
 		if inst.boat.components.boatphysics ~= nil then
 			inst.boat.components.boatphysics:AddBoatDrag(inst)
-		end
-        inst:ListenForEvent("onremove", function()  
-            inst.releaseclamp(inst)
-        end, inst.boat)    
+        end
+        inst._releaseclamp = function() inst:releaseclamp() end
+        inst:ListenForEvent("onremove", inst._releaseclamp, inst.boat)    
         inst.clamptask = inst:DoTaskInTime(math.random()+3,function() inst.crunchboat(inst,inst.boat) end)
     end   
 end

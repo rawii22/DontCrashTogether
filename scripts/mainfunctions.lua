@@ -725,6 +725,7 @@ function SaveGame(isshutdown, cb)
         save.map.prefab = ground.worldprefab
         save.map.tiles = ground.Map:GetStringEncode()
         save.map.nav = ground.Map:GetNavStringEncode()
+        save.map.nodeidtilemap = ground.Map:GetNodeIdTileMapStringEncode()
         save.map.width, save.map.height = ground.Map:GetSize()
         save.map.topology = ground.topology
         save.map.generated = ground.generated
@@ -794,10 +795,21 @@ function SaveGame(isshutdown, cb)
             TheNet:TruncateSnapshots(save.meta.session_identifier)
         end
         TheNet:IncrementSnapshot()
-        SaveGameIndex:Save(cb)
+        local function onsaved()
+            ShardGameIndex:WriteTimeFile(cb)
+        end
+        ShardGameIndex:Save(onsaved)
     end
 
-    SerializeWorldSession(data, save.meta.session_identifier, callback)
+    --todo, if we add more values to this, turn this into a function thats called both here and gamelogic.lua@DoGenerateWorld
+    local metadata = {}
+    if save and save.world_network and save.world_network.persistdata then
+        metadata.clock = save.world_network.persistdata.clock
+        metadata.seasons = save.world_network.persistdata.seasons
+    end
+    local metadataStr = DataDumper(metadata, nil, not PRETTY_PRINT)
+
+    SerializeWorldSession(data, save.meta.session_identifier, callback, metadataStr)
 end
 
 function ProcessJsonMessage(message)
@@ -1218,7 +1230,7 @@ local function savefn()
             v:OnDespawn()
         end
         TheSystemService:EnableStorage(true)
-        SaveGameIndex:SaveCurrent(postsavefn, true)
+        ShardGameIndex:SaveCurrent(postsavefn, true)
     else
         SerializeUserSession(ThePlayer)
         postsavefn()
@@ -1299,6 +1311,11 @@ function OnNetworkDisconnect( message, should_reset, force_immediate_reset, deta
         TheSystemService:StopDedicatedServers()
     end
 
+    local accounts_link = nil
+    if (IsRail() or TheNet:IsNetOverlayEnabled()) and (message == "E_BANNED") then
+        accounts_link = {text=STRINGS.UI.NETWORKDISCONNECT.ACCOUNTS, cb = function() TheFrontEnd:GetAccountManager():VisitAccountPage() end}
+    end
+
     local title = STRINGS.UI.NETWORKDISCONNECT.TITLE[message] or STRINGS.UI.NETWORKDISCONNECT.TITLE.DEFAULT 
     message = STRINGS.UI.NETWORKDISCONNECT.BODY[message] or STRINGS.UI.NETWORKDISCONNECT.BODY.DEFAULT
 
@@ -1348,7 +1365,7 @@ function OnNetworkDisconnect( message, should_reset, force_immediate_reset, deta
             local cb = TheFrontEnd.fadecb
             TheFrontEnd.fadecb = function()
                 if cb then cb() end
-                TheFrontEnd:PushScreen( PopupDialogScreen(title, message, { {text=STRINGS.UI.NETWORKDISCONNECT.OK, cb = function() doquit( should_reset ) end}  }) )
+                TheFrontEnd:PushScreen( PopupDialogScreen(title, message, { {text=STRINGS.UI.NETWORKDISCONNECT.OK, cb = function() doquit( should_reset ) end}, accounts_link }) )
                 local screen = TheFrontEnd:GetActiveScreen()
                 if screen then
                     screen:Enable()
@@ -1356,7 +1373,7 @@ function OnNetworkDisconnect( message, should_reset, force_immediate_reset, deta
                 TheFrontEnd:Fade(FADE_IN, screen_fade_time)
             end
         else
-            TheFrontEnd:PushScreen( PopupDialogScreen(title, message, { {text=STRINGS.UI.NETWORKDISCONNECT.OK, cb = function() doquit( should_reset ) end}  }) )
+            TheFrontEnd:PushScreen( PopupDialogScreen(title, message, { {text=STRINGS.UI.NETWORKDISCONNECT.OK, cb = function() doquit( should_reset ) end}, accounts_link  }) )
             local screen = TheFrontEnd:GetActiveScreen()
             if screen then
                 screen:Enable()
@@ -1365,7 +1382,7 @@ function OnNetworkDisconnect( message, should_reset, force_immediate_reset, deta
         end
     else
         -- TheFrontEnd:Fade(FADE_OUT, screen_fade_time, function()
-            TheFrontEnd:PushScreen( PopupDialogScreen(title, message, { {text=STRINGS.UI.NETWORKDISCONNECT.OK, cb = function() doquit( should_reset ) end}  }) )
+            TheFrontEnd:PushScreen( PopupDialogScreen(title, message, { {text=STRINGS.UI.NETWORKDISCONNECT.OK, cb = function() doquit( should_reset ) end}, accounts_link  }) )
             local screen = TheFrontEnd:GetActiveScreen()
             if screen then
                 screen:Enable()
@@ -1415,7 +1432,7 @@ function OnFocusLost()
     --check that we are in gameplay, not main menu
     if PLATFORM == "ANDROID" and inGamePlay then
         SetPause(true)
-        SaveGameIndex:SaveCurrent()
+        ShardGameIndex:SaveCurrent()
     end
 end
 
@@ -1617,7 +1634,7 @@ function SaveAndShutdown()
             v:OnDespawn()
         end
         TheSystemService:EnableStorage(true)
-        SaveGameIndex:SaveCurrent(Shutdown, true)
+        ShardGameIndex:SaveCurrent(Shutdown, true)
     end
 end
 

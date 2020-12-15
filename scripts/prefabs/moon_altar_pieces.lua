@@ -22,6 +22,7 @@ local function makepiece(name, socket_product)
         owner.AnimState:OverrideSymbol("swap_body", "swap_altar_"..name.."piece", "swap_body")
     end
 
+
     local function fn()
         local inst = CreateEntity()
 
@@ -81,6 +82,10 @@ local function makepiece(name, socket_product)
 
         inst:AddComponent("hauntable")
         inst.components.hauntable:SetHauntValue(TUNING.HAUNT_TINY)
+
+        inst:ListenForEvent("calling_moon_relics", function(theworld,data)
+            data.caller:RegisterDevice(inst)
+        end, TheWorld)
 
         return inst
     end
@@ -176,17 +181,50 @@ local function makerockpiece(name, socket_product)
 		MakeSnowCovered(inst)
 		MakeHauntableWork(inst)
 
+        inst:ListenForEvent("calling_moon_relics", function(theworld,data)
+            data.caller:RegisterDevice(inst)
+        end, TheWorld)
+
         return inst
     end
 
     return Prefab("moon_altar_rock_"..name, fn, assets, rock_prefabs)
 end
 
---For searching: "moon_altar_idol", "moon_altar_glass", "moon_altar_seed", "moon_altar_crown", "moon_altar_rock_glass", "moon_altar_rock_seed", "moon_altar_rock_idol"
-return makepiece("idol"),
-	makerockpiece("idol"),
-    makepiece("glass", "moon_altar"),
+
+
+local function makemarker(name, socket_product)
+ 
+    local function fn()
+        local inst = CreateEntity()
+
+        inst.entity:AddTransform()
+        inst.entity:AddNetwork()
+
+        inst:AddTag("moon_altar_marker")
+
+        inst.entity:SetPristine()
+
+        if not TheWorld.ismastersim then
+            return inst
+        end
+
+        return inst
+    end
+
+    return Prefab("moon_altar_marker")
+end
+
+--For searching: "moon_altar_idol", "moon_altar_glass", "moon_altar_seed", "moon_altar_crown", "moon_altar_rock_glass", "moon_altar_rock_seed", "moon_altar_rock_idol" ,"moon_altar_ward", "moon_altar_icon"
+return 
+    makerockpiece("idol"),
+    makepiece("idol"),	   
 	makerockpiece("glass"),
+    makepiece("glass", "moon_altar"),
+    makerockpiece("seed"),
     makepiece("seed"),
-	makerockpiece("seed"),
-    makepiece("crown", "moon_altar_cosmic")
+	
+    makepiece("crown", "moon_altar_cosmic"),
+
+    makepiece("ward"),
+    makepiece("icon", "moon_altar_astral")

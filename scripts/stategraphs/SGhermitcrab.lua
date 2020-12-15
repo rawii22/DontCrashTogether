@@ -1597,6 +1597,7 @@ local states =
         end,
 
         onexit = function(inst)
+            inst.SoundEmitter:KillSound("splash")
             if not inst.sg.statemem.continue then
                 inst.stopfishing(inst)
             end
@@ -1609,10 +1610,6 @@ local states =
                 inst.sg:GoToState("fishing_strain") 
             end),
         },
-
-        onexit = function(inst)
-            inst.SoundEmitter:KillSound("splash")
-        end,
     },
 
     State{
@@ -1672,6 +1669,7 @@ local states =
         },
 
         onexit = function(inst)
+            inst.AnimState:ClearOverrideSymbol("fish01")
             if not inst.sg.statemem.continue then
                 inst.stopfishing(inst)
             end            
@@ -1686,10 +1684,6 @@ local states =
                 end
             end),
         },
-
-        onexit = function(inst)
-            inst.AnimState:ClearOverrideSymbol("fish01")
-        end,
     },
 
     State{
@@ -1981,8 +1975,7 @@ local states =
         end,
     },
 
-    State
-    {
+    State{
         name = "unsaddle",
         tags = { "doing", "busy" },
 
@@ -2077,8 +2070,7 @@ local states =
         end,
     },
 
-    State
-    {
+    State{
         name = "heavylifting_drop",
         tags = { "doing", "busy" },
 
@@ -2113,8 +2105,7 @@ local states =
         end,
     },
 
-    State
-    {
+    State{
         name = "dostandingaction",
         tags = { "doing", "busy" },
 
@@ -2149,8 +2140,7 @@ local states =
         end,
     },
 
-    State
-    {
+    State{
         name = "doshortaction",
         tags = { "doing", "busy" },
 
@@ -2193,8 +2183,7 @@ local states =
         end,
     },
 
-    State
-    {
+    State{
         name = "dosilentshortaction",
 
         onenter = function(inst)
@@ -2202,8 +2191,7 @@ local states =
         end,
     },
 
-    State
-    {
+    State{
         name = "domediumaction",
 
         onenter = function(inst)
@@ -2211,8 +2199,7 @@ local states =
         end,
     },
 
-    State
-    {
+    State{
         name = "dolongaction",
         tags = { "doing", "busy", "nodangle" },
 
@@ -2265,8 +2252,7 @@ local states =
         end,
     },
 
-    State
-    {
+    State{
         name = "harvest",
         tags = { "doing", "busy", "nodangle" },
 
@@ -4011,8 +3997,7 @@ local states =
         end,
     },
 
-    State
-    {
+    State{
         name = "bundle",
         tags = { "doing", "busy", "nodangle" },
 
@@ -4055,8 +4040,7 @@ local states =
         end,
     },
 
-    State
-    {
+    State{
         name = "bundling",
         tags = { "doing", "nodangle" },
 
@@ -4085,8 +4069,7 @@ local states =
         end,
     },
 
-    State
-    {
+    State{
         name = "bundle_pst",
         tags = { "doing", "busy", "nodangle" },
 

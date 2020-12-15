@@ -199,6 +199,54 @@ t = {
 			level.version = 4
 			return level
         end,
+        UpgradeShardIndexFromV1toV2 = function(shardindex)
+            if shardindex.version ~= nil and shardindex.version ~= 1 then
+                return
+            end
+
+            local level = shardindex:GetGenOptions()
+            if level == nil or not IsTableEmpty(level.overrides) then
+                return
+            end
+
+            local function onreadworldfile(success, str)
+                if success and str ~= nil and #str > 0 then
+                    local success, savedata = RunInSandbox(str)
+                    if success and savedata ~= nil and GetTableSize(savedata) > 0 then
+                        if savedata.map and savedata.map.topology and savedata.map.topology.overrides then
+                            print(string.format("Upgrading saved level data for '%s' from v1 to v2 (Return of Them: Forgotten Knowledge).", tostring(level.id)))
+                            level.overrides = deepcopy(savedata.map.topology.overrides.original)
+                        end
+                    end
+                end
+            end
+
+
+            local slot = shardindex:GetSlot()
+            local shard = shardindex:GetShard()
+            local session_id = shardindex:GetSession()
+
+            if session_id then
+                if slot and shard and not shardindex:GetServerData().use_legacy_session_path then
+                    local file = TheNet:GetWorldSessionFileInClusterSlot(slot, shard, session_id)
+                    if file ~= nil then
+                        TheSim:GetPersistentStringInClusterSlot(slot, shard, file, function(success, str)
+                            onreadworldfile(success, str)
+                        end)
+                    end
+                else
+                    local file = TheNet:GetWorldSessionFile(session_id)
+                    if file ~= nil then
+                        TheSim:GetPersistentString(file, function(success, str)
+                            onreadworldfile(success, str)
+                        end)
+                    end
+                end
+            end
+
+            shardindex.version = 2
+            shardindex:MarkDirty()
+        end,
         UpgradeWorldgenoverrideFromV1toV2 = function(wgo)
             local validfields = {
                 overrides = true,
@@ -247,6 +295,77 @@ t = {
             print("\n\n"..DataDumper(ret).."\n")
 
             return ret
+        end,
+        ConvertSaveSlotToShardIndex = function(saveindex, slot, shardindex)
+            local slotdata = saveindex.data.slots[slot]
+            if not saveindex:IsSlotEmpty(slot) and slotdata then
+                shardindex.world.options = slotdata.world.options and slotdata.world.options[1]
+                shardindex.server = slotdata.server
+                shardindex.session_id = slotdata.session_id
+                shardindex.enabled_mods = slotdata.enabled_mods
+
+                shardindex.server.use_legacy_session_path = not shardindex.server.use_cluster_path or nil
+                shardindex.server.use_cluster_path = nil
+
+                --always ask the real SaveGameIndex whether a slot is multi level
+                if TheNet:IsDedicated() or SaveGameIndex:IsSlotMultiLevel(slot) then
+                    shardindex.server.use_legacy_session_path = nil
+                end
+            else
+                shardindex.isdirty = false
+            end
+        end,
+        ConvertSaveIndexSlotToShardIndexSlots = function(savegameindex, shardsavegameindex, slot, ismultilevel)
+            local masterShardIndex = shardsavegameindex:GetShardIndex(slot, "Master", true)
+            masterShardIndex:NewShardInSlot(slot, "Master")
+            
+            if not ismultilevel then
+                if TheSim:EnsureShardIndexPathExists(slot) then
+                    t.utilities.ConvertSaveSlotToShardIndex(savegameindex, slot, masterShardIndex)
+                    if masterShardIndex:GetServerData().use_legacy_session_path then
+                        if TheSim:CopyLegacySessionToSlot(slot, masterShardIndex:GetSession()) then
+                            masterShardIndex:GetServerData().use_legacy_session_path = nil
+                        else
+                            print("Failed to migrate legacy session data for slot "..tostring(slot))
+                        end
+                    end
+                else
+                    print("Failed to migrate slot "..tostring(slot).." from saveindex to shardindex")
+                    shardsavegameindex.failed_slot_conversions = shardsavegameindex.failed_slot_conversions or {}
+                    shardsavegameindex.failed_slot_conversions[slot] = true
+                end
+            else
+                local enabled_mods = savegameindex.data.slots[slot] and savegameindex.data.slots[slot].enabled_mods or {}
+                local cavesShardIndex = shardsavegameindex:GetShardIndex(slot, "Caves", true)
+                cavesShardIndex:NewShardInSlot(slot, "Caves")
+
+                local masterSaveIndex = SaveIndex()
+                masterSaveIndex:LoadClusterSlot(slot, "Master", function()
+                    t.utilities.ConvertSaveSlotToShardIndex(masterSaveIndex, 1, masterShardIndex)
+                    masterShardIndex.enabled_mods = enabled_mods
+                end)
+                
+                local cavesSaveIndex = SaveIndex()
+                cavesSaveIndex:LoadClusterSlot(slot, "Caves", function()
+                    t.utilities.ConvertSaveSlotToShardIndex(cavesSaveIndex, 1, cavesShardIndex)
+                    cavesShardIndex.enabled_mods = enabled_mods
+                end)
+            end
+        end,
+        ConvertSaveIndexToShardSaveIndex = function(savegameindex, shardsavegameindex)
+            shardsavegameindex.slots = TheSim:GetSaveFiles()
+            for slot, data in ipairs(savegameindex.data.slots) do
+                if not savegameindex:IsSlotEmpty(slot) then
+                    shardsavegameindex.slots[slot] = savegameindex:IsSlotMultiLevel(slot)
+                else
+                    shardsavegameindex.slots[slot] = nil
+                end
+            end
+
+            for slot, ismultilevel in pairs(shardsavegameindex.slots) do
+                t.utilities.ConvertSaveIndexSlotToShardIndexSlots(savegameindex, shardsavegameindex, slot, ismultilevel)
+            end
+
         end,
     },
 
@@ -759,7 +878,6 @@ t = {
         {
             version = 5.040, -- RoT: She Sells Seashells - new content
             fn = function(savedata)
-				print("savedata", savedata.map.prefab, savedata.map.persistdata)
                 if savedata ~= nil and savedata.map ~= nil and savedata.map.prefab == "forest" then
 					if savedata.map.persistdata == nil then
 						savedata.map.persistdata = {}
@@ -776,8 +894,7 @@ t = {
         {
             version = 5.050, -- Return of Them: Troubled Waters
             fn = function(savedata)
-                if savedata ~= nil and savedata.map ~= nil
-                        and savedata.map.prefab == "forest" and savedata.map.has_ocean then
+                if savedata ~= nil and savedata.map ~= nil and savedata.map.prefab == "forest" and savedata.map.has_ocean then
                     if savedata.map.persistdata == nil then
                         savedata.map.persistdata = {}
                     end
@@ -788,6 +905,141 @@ t = {
                 end
             end,
         },
+
+        {
+            version = 5.06, -- RoT: Forgotten Knowledge - archive and moon mush trees
+            fn = function(savedata)
+                if savedata ~= nil and savedata.map ~= nil then
+					savedata.retrofit_nodeidtilemap = true
+
+					if savedata.map.prefab == "cave" then
+						if savedata.map.persistdata == nil then
+							savedata.map.persistdata = {}
+						end
+						if savedata.map.persistdata.retrofitcavemap_anr == nil then
+							savedata.map.persistdata.retrofitcavemap_anr = {}
+						end
+						savedata.map.persistdata.retrofitcavemap_anr.retrofit_acientarchives = true
+
+						savedata.retrofit_acientarchives = true -- static layouts need to be done before the map is finalized
+						savedata.map.persistdata.retrofitcavemap_anr.requiresreset = true -- for retrofit_nodeidtilemap and retrofit_acientarchives
+					end
+
+					if savedata.map.prefab == "forest" then
+						if savedata.map.persistdata == nil then
+							savedata.map.persistdata = {}
+						end
+						if savedata.map.persistdata.retrofitforestmap_anr == nil then
+							savedata.map.persistdata.retrofitforestmap_anr = {}
+						end
+
+						savedata.map.persistdata.retrofitforestmap_anr.requiresreset = true -- for retrofit_nodeidtilemap
+						savedata.map.persistdata.retrofitforestmap_anr.retrofit_moonfissures = true
+
+						if savedata.map.has_ocean then
+							savedata.map.persistdata.retrofitforestmap_anr.retrofit_inaccessibleunderwaterobjects = true -- Reposition inaccessible underwater objects
+						end
+					end
+				end
+            end,
+        },
+
+        {
+            version = 5.061, -- RoT: Forgotten Knowledge - tile node id and astral marker fixes
+            fn = function(savedata)
+                if savedata ~= nil and savedata.map ~= nil then
+					if savedata.map.prefab == "cave" then
+						if savedata.map.persistdata == nil then
+							savedata.map.persistdata = {}
+						end
+						if savedata.map.persistdata.retrofitcavemap_anr == nil then
+							savedata.map.persistdata.retrofitcavemap_anr = {}
+						end
+						savedata.map.persistdata.retrofitcavemap_anr.retrofit_acientarchives_fixes = true
+					end
+
+                    if savedata.map.prefab == "forest" then
+                        if savedata.map.persistdata == nil then
+                            savedata.map.persistdata = {}
+                        end
+                        if savedata.map.persistdata.retrofitforestmap_anr == nil then
+                            savedata.map.persistdata.retrofitforestmap_anr = {}
+                        end
+                        savedata.map.persistdata.retrofitforestmap_anr.retrofit_astralmarkers = true
+                    end
+				end
+            end,
+		},
+
+        {
+            version = 5.062, -- RoT: Forgotten Knowledge - retrofitted dispencer fixes
+            fn = function(savedata)
+                if savedata ~= nil and savedata.map ~= nil then
+                    if savedata.map.prefab == "cave" then
+                        if savedata.map.persistdata == nil then
+                            savedata.map.persistdata = {}
+                        end
+                        if savedata.map.persistdata.retrofitcavemap_anr == nil then
+                            savedata.map.persistdata.retrofitcavemap_anr = {}
+                        end
+                        savedata.map.persistdata.retrofitcavemap_anr.retrofit_dispencer_fixes = true
+                    end
+                end
+            end,
+        },
+
+        {
+            version = 5.063, -- RoT: Forgotten Knowledge - fix nav mesh for retrofitted land
+            fn = function(savedata)
+                if savedata ~= nil and savedata.map ~= nil then
+                    if savedata.map.prefab == "forest" then
+                        if savedata.map.persistdata == nil then
+                            savedata.map.persistdata = {}
+                        end
+                        if savedata.map.persistdata.retrofitforestmap_anr == nil then
+                            savedata.map.persistdata.retrofitforestmap_anr = {}
+                        end
+                        savedata.map.persistdata.retrofitforestmap_anr.retrofit_nodeidtilemap_secondpass = true
+                    end
+
+                    if savedata.map.prefab == "cave" then
+                        if savedata.map.persistdata == nil then
+                            savedata.map.persistdata = {}
+                        end
+                        if savedata.map.persistdata.retrofitcavemap_anr == nil then
+                            savedata.map.persistdata.retrofitcavemap_anr = {}
+                        end
+                        savedata.map.persistdata.retrofitcavemap_anr.retrofit_archives_navmesh = true
+                    end
+                end
+            end,
+        },
+		
+        {
+            version = 5.064, -- RoT: Forgotten Knowledge - fix converting the hermit crab's island to lunacy from retrofit_nodeidtilemap_secondpass 
+            fn = function(savedata)
+                if savedata ~= nil and savedata.map ~= nil then
+                    if savedata.map.persistdata == nil then
+                        savedata.map.persistdata = {}
+                    end
+
+                    if savedata.map.prefab == "forest" then
+                        if savedata.map.persistdata.retrofitforestmap_anr == nil then
+                            savedata.map.persistdata.retrofitforestmap_anr = {}
+                        end
+                        savedata.map.persistdata.retrofitforestmap_anr.retrofit_nodeidtilemap_thirdpass = true
+                    end
+
+                    if savedata.map.prefab == "cave" then
+                        if savedata.map.persistdata.retrofitcavemap_anr == nil then
+                            savedata.map.persistdata.retrofitcavemap_anr = {}
+                        end
+                        savedata.map.persistdata.retrofitcavemap_anr.retrofit_nodeidtilemap_atriummaze = true
+                    end
+                end
+            end,
+        },
+		
     },
 }
 

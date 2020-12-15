@@ -217,8 +217,12 @@ function Sanity:GetPenaltyPercent()
     return self.penalty
 end
 
+function Sanity:GetRealPercent()
+    return self.current / self.max
+end
+
 function Sanity:GetPercent()
-    return self.inducedinsanity and 0 or self.current / self.max
+    return self.inducedinsanity and 0 or self:GetRealPercent()
 end
 
 function Sanity:GetPercentWithPenalty()
@@ -330,7 +334,7 @@ function Sanity:DoDelta(delta, overtime)
 end
 
 function Sanity:OnUpdate(dt)
-    if not (self.inst.components.health.invincible or
+    if not (self.inst.components.health:IsInvincible() or
             self.inst.sg:HasStateTag("sleeping") or --need this now because you are no longer invincible during sleep
             self.inst.is_teleporting or
             (self.ignore and self.redirect == nil)) then

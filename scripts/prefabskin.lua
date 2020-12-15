@@ -77,6 +77,9 @@ spear_wathgrithr_clear_fn = function(inst) basic_clear_fn(inst, "swap_spear_wath
 axe_init_fn = function(inst, build_name) basic_init_fn(inst, build_name, "axe" ) end
 axe_clear_fn = function(inst) basic_clear_fn(inst, "axe" ) end
 
+razor_init_fn = function(inst, build_name) basic_init_fn(inst, build_name, "swap_razor" ) end
+razor_clear_fn = function(inst) basic_clear_fn(inst, "swap_razor" ) end
+
 goldenaxe_init_fn = function(inst, build_name) basic_init_fn(inst, build_name, "goldenaxe" ) end
 goldenaxe_clear_fn = function(inst) basic_clear_fn(inst, "goldenaxe" ) end
 
@@ -227,9 +230,6 @@ beebox_clear_fn = function(inst) basic_clear_fn(inst, "bee_box" ) end
 rabbithouse_init_fn = function(inst, build_name) basic_init_fn(inst, build_name, "rabbit_house" ) end
 rabbithouse_clear_fn = function(inst) basic_clear_fn(inst, "rabbit_house" ) end
 
-researchlab3_init_fn = function(inst, build_name) basic_init_fn(inst, build_name, "researchlab3" ) end
-researchlab3_clear_fn = function(inst) basic_clear_fn(inst, "researchlab3" ) end
-
 beemine_init_fn = function(inst, build_name) basic_init_fn(inst, build_name, "bee_mine" ) end
 beemine_clear_fn = function(inst) basic_clear_fn(inst, "bee_mine" ) end
 
@@ -295,6 +295,35 @@ pighouse_clear_fn = function(inst)
     end
 end
 
+--------------------------------------------------------------------------
+--[[ Science machine skin functions ]]
+--------------------------------------------------------------------------
+researchlab_init_fn = function(inst, build_name)
+    basic_init_fn(inst, build_name, "researchlab" ) 
+    
+    inst.AnimState:OverrideSymbol("bolt_b", "researchlab", "bolt_b")
+    inst.AnimState:OverrideSymbol("bolt_c", "researchlab", "bolt_c")
+
+    inst.AnimState:OverrideSymbol("rayFX", "researchlab", "rayFX")
+    inst.AnimState:OverrideSymbol("glowFX", "researchlab", "glowFX")
+    inst.AnimState:OverrideSymbol("sparkleFX", "researchlab", "sparkleFX")
+
+    inst.AnimState:OverrideSymbol("shadow_plume", "researchlab", "shadow_plume")
+    inst.AnimState:OverrideSymbol("shadow_wisp", "researchlab", "shadow_wisp")
+end
+researchlab_clear_fn = function(inst)
+    basic_clear_fn(inst, "researchlab" )
+    
+    inst.AnimState:ClearOverrideSymbol("bolt_b")
+    inst.AnimState:ClearOverrideSymbol("bolt_c")
+
+    inst.AnimState:ClearOverrideSymbol("rayFX")
+    inst.AnimState:ClearOverrideSymbol("glowFX")
+    inst.AnimState:ClearOverrideSymbol("sparkleFX")
+
+    inst.AnimState:ClearOverrideSymbol("shadow_plume")
+    inst.AnimState:ClearOverrideSymbol("shadow_wisp")
+end
 
 
 --------------------------------------------------------------------------
@@ -1225,7 +1254,7 @@ end
 --[[ ResearchLab2 skin functions ]]
 --------------------------------------------------------------------------
 local function researchlab2_cancelflash(inst)
-    if inst.flashtasks ~= nil then
+    if inst.flashtasks then
         for i = 1, #inst.flashtasks do
             table.remove(inst.flashtasks):Cancel()
         end
@@ -1296,7 +1325,9 @@ end
 local function researchlab2_pushanimation(inst, anim, loop)
     local wasplaying = inst.AnimState:IsCurrentAnimation(anim)
     inst.AnimState:PushAnimation(anim, loop)
-    inst.highlightchildren[1].AnimState:PushAnimation(anim, loop)
+    if inst.highlightchildren then
+        inst.highlightchildren[1].AnimState:PushAnimation(anim, loop)
+    end
     if not wasplaying and inst.AnimState:IsCurrentAnimation(anim) then
         researchlab2_checkflashing(inst, anim, 0)
     elseif (anim == "proximity_gift_loop" or anim == "proximity_loop") and inst.checkanimtask == nil then
@@ -1329,13 +1360,13 @@ function researchlab2_init_fn(inst, build_name)
         inst.flashtasks = {}
         inst._PlayAnimation = researchlab2_playanimation
         inst._PushAnimation = researchlab2_pushanimation
-    end
 
-    if inst.AnimState:IsCurrentAnimation("proximity_loop") then
-        researchlab2_playanimation(inst, "proximity_loop", true)
-    end
-    if inst.AnimState:IsCurrentAnimation("proximity_gift_loop") then
-        researchlab2_playanimation(inst, "proximity_gift_loop", true)
+        if inst.AnimState:IsCurrentAnimation("proximity_loop") then
+            researchlab2_playanimation(inst, "proximity_loop", true)
+        end
+        if inst.AnimState:IsCurrentAnimation("proximity_gift_loop") then
+            researchlab2_playanimation(inst, "proximity_gift_loop", true)
+        end
     end
 end
 function researchlab2_clear_fn(inst)
@@ -1343,8 +1374,10 @@ function researchlab2_clear_fn(inst)
     inst.AnimState:ClearOverrideSymbol("shadow_plume")
     inst.AnimState:ClearOverrideSymbol("shadow_wisp")
 
-    for _,v in pairs( inst.highlightchildren ) do
-        v:Remove()
+    if inst.highlightchildren then
+        for _,v in pairs( inst.highlightchildren ) do
+            v:Remove()
+        end
     end
     researchlab2_cancelflash(inst)
     inst.flashtasks = nil

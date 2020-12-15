@@ -815,7 +815,8 @@ end
 
 ACTIONS.DEPLOY.strfn = function(act)
     return act.invobject ~= nil
-        and (   (act.invobject:HasTag("groundtile") and "GROUNDTILE") or
+        and (   (act.invobject:HasTag("usedeploystring") and "DEPLOY") or
+                (act.invobject:HasTag("groundtile") and "GROUNDTILE") or
                 (act.invobject:HasTag("wallbuilder") and "WALL") or
                 (act.invobject:HasTag("fencebuilder") and "FENCE") or
                 (act.invobject:HasTag("gatebuilder") and "GATE") or
@@ -1946,13 +1947,20 @@ ACTIONS.STEALMOLEBAIT.fn = function(act)
 end
 
 ACTIONS.MAKEMOLEHILL.fn = function(act)
-    if act.doer and act.doer.prefab == "mole" then
+    if act.doer then
+        if act.doer.prefab == "mole" then
         local molehill = SpawnPrefab("molehill")
         molehill.Transform:SetPosition(act.doer.Transform:GetWorldPosition())
         molehill:AdoptChild(act.doer)
         act.doer.needs_home_time = nil
         return true
+        elseif act.doer.prefab == "molebat" then
+            local molebathill = SpawnPrefab("molebathill")
+            molebathill.Transform:SetPosition(act.doer.Transform:GetWorldPosition())
+            molebathill:AdoptChild(act.doer)
+            return true
     end
+end
 end
 
 ACTIONS.MOLEPEEK.fn = function(act)
