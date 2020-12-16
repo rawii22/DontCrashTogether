@@ -4,6 +4,8 @@ local INSPIRATION_BATTLESONG_DEFS = require("prefabs/battlesongdefs")
 
 local fns = {} -- a table to store local functions in so that we don't hit the 60 upvalues limit
 
+local fns = {} -- a table to store local functions in so that we don't hit the 60 upvalues limit
+
 --------------------------------------------------------------------------
 --Server interface
 --------------------------------------------------------------------------

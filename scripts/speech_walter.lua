@@ -2270,7 +2270,6 @@ return{
 			GENERIC = "It isn't a toy chest, it's a very grownup SUPPLY chest.",
 			BURNT = "My stuff!!",
 		},
-		TREASURECHEST_TRAP = "There might be cursed pirate gold inside!",
 		SACRED_CHEST = 
 		{
 			GENERIC = "There HAS to be something good in there, just look at it!",
