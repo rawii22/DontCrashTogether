@@ -112,7 +112,7 @@ local function fn()
 
     inst:AddComponent("herd")
     if inst:HasTag("migratory") then
-        inst.components.herd:SetMemberTag("beefalo_migratory") 
+        inst.components.herd:SetMemberTag("beefalo_migratory")
     else
         inst.components.herd:SetMemberTag("beefalo")
     end
@@ -123,7 +123,7 @@ local function fn()
     inst.components.herd:SetAddMemberFn(AddMember)
 
     inst:AddComponent("mood")
-    inst.components.mood:SetMoodTimeInDays(TUNING.BEEFALO_MATING_SEASON_LENGTH, TUNING.BEEFALO_MATING_SEASON_WAIT)
+    inst.components.mood:SetMoodTimeInDays(TUNING.BEEFALO_MATING_SEASON_LENGTH, TUNING.BEEFALO_MATING_SEASON_WAIT, TUNING.BEEFALO_MATING_ALWAYS, TUNING.BEEFALO_MATING_SEASON_LENGTH, TUNING.BEEFALO_MATING_SEASON_WAIT, TUNING.BEEFALO_MATING_ENABLED)
     inst.components.mood:SetMoodSeason(SEASONS.SPRING)
     inst.components.mood:SetInMoodFn(InMood)
     inst.components.mood:SetLeaveMoodFn(LeaveMood)

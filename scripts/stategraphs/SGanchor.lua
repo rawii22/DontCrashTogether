@@ -28,15 +28,15 @@ local states =
         events =
         {
             EventHandler("lowering_anchor",
-                function(inst) 
+                function(inst)
                     local anchor_x, anchor_y, anchor_z = inst.Transform:GetWorldPosition()
-                    if TheWorld.Map:GetPlatformAtPoint(anchor_x, anchor_z) ~= nil then
+                    if inst.components.anchor ~= nil and inst.components.anchor.boat ~= nil then
                         inst.sg:GoToState("lowering")
                     else
                         inst.sg:GoToState("lowering_land")
                     end
                 end),
-            EventHandler("workinghit", 
+            EventHandler("workinghit",
                 function(inst, data)
                     inst.AnimState:PlayAnimation("idle_hit")
                     inst.AnimState:PushAnimation("untethered_idle_loop", true)
@@ -66,7 +66,7 @@ local states =
         {
             EventHandler("lowering_anchor", function(inst) inst.sg:GoToState("lowering") end),
             EventHandler("raising_anchor", function(inst) inst.sg:GoToState("raising") end),
-            EventHandler("workinghit", 
+            EventHandler("workinghit",
                 function(inst, data)
 
                     local depth = inst.components.anchor.raiseunits
@@ -91,7 +91,7 @@ local states =
     State{
         name = "lowered_land",
         onenter = function(inst)
-        
+
             inst.AnimState:PlayAnimation("tether_land_idle")
             anchor_lowered(inst)
         end,
@@ -99,7 +99,7 @@ local states =
         events =
         {
             EventHandler("raising_anchor", function(inst) inst.sg:GoToState("raising_land") end),
-            EventHandler("workinghit", 
+            EventHandler("workinghit",
                 function(inst, data)
                     inst.AnimState:PlayAnimation("tether_land_hit")
                     inst.AnimState:PushAnimation("tether_land_idle", false)
@@ -140,8 +140,8 @@ local states =
                 if inst.sg.statemem.depth ~= TUNING.ANCHOR_DEPTH_TIMES.SHALLOW then
                     inst.sg.statemem.depth = TUNING.ANCHOR_DEPTH_TIMES.SHALLOW
                     inst.AnimState:PlayAnimation("untethering_loop_full", true)
-                end  
-            end 
+                end
+            end
             if not inst.components.anchor.is_anchor_transitioning then
                 if inst.components.anchor.raiseunits == 0 then
                     inst.sg:GoToState("raising_pst")
@@ -163,7 +163,7 @@ local states =
         {
             EventHandler("lowering_anchor", function(inst)
                 local anchor_x, anchor_y, anchor_z = inst.Transform:GetWorldPosition()
-                if TheWorld.Map:GetPlatformAtPoint(anchor_x, anchor_z) ~= nil then
+                if inst.components.anchor ~= nil and inst.components.anchor.boat ~= nil then
                     inst.sg:GoToState("lowering")
                 else
                     inst.sg:GoToState("lowering_land")
@@ -190,9 +190,9 @@ local states =
 
         events =
         {
-            EventHandler("lowering_anchor", function(inst) 
+            EventHandler("lowering_anchor", function(inst)
                 local anchor_x, anchor_y, anchor_z = inst.Transform:GetWorldPosition()
-                if TheWorld.Map:GetPlatformAtPoint(anchor_x, anchor_z) ~= nil then
+                if inst.components.anchor ~= nil and inst.components.anchor.boat ~= nil then
                     inst.sg:GoToState("lowering")
                 else
                     inst.sg:GoToState("lowering_land")
@@ -215,7 +215,7 @@ local states =
                 inst.SoundEmitter:PlaySound("turnoftides/common/together/boat/anchor/tether_land_up")
             end),
         },
-        
+
         events =
         {
             EventHandler("lowering_anchor", function(inst) inst.sg:GoToState("lowering_land") end),
@@ -274,8 +274,8 @@ local states =
                 if inst.sg.statemem.depth ~= TUNING.ANCHOR_DEPTH_TIMES.DEEP then
                     inst.sg.statemem.depth = TUNING.ANCHOR_DEPTH_TIMES.DEEP
                     inst.AnimState:PlayAnimation("tethering_loop_empty", true)
-                end  
-            end 
+                end
+            end
 
             if not inst.components.anchor.is_anchor_transitioning then
                 if inst.components.anchor.raiseunits == 0 then

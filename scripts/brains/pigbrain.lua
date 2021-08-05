@@ -248,6 +248,16 @@ local function WatchingMinigame(inst)
 	return inst.components.minigame_spectator ~= nil and inst.components.minigame_spectator:GetMinigame()
 end
 
+local function WatchingMinigame_MinDist(inst)
+	return inst.components.minigame_spectator:GetMinigame().components.minigame.watchdist_min
+end
+local function WatchingMinigame_TargetDist(inst)
+	return inst.components.minigame_spectator:GetMinigame().components.minigame.watchdist_target
+end
+local function WatchingMinigame_MaxDist(inst)
+	return inst.components.minigame_spectator:GetMinigame().components.minigame.watchdist_max
+end
+
 local function WatchingCheaters(inst)
     local minigame = WatchingMinigame(inst) or nil
     if minigame ~= nil and minigame._minigame_elites ~= nil then
@@ -255,6 +265,42 @@ local function WatchingCheaters(inst)
             if k:WasCheated() then
                 return minigame
             end
+        end
+    end
+end
+
+
+local function WatchingCheaters(inst)
+    local minigame = WatchingMinigame(inst) or nil
+    if minigame ~= nil and minigame._minigame_elites ~= nil then
+        for k, v in pairs(minigame._minigame_elites) do
+            if k:WasCheated() then
+                return minigame
+            end
+        end
+    end
+end
+
+local function CurrentContestTarget(inst)
+    local stage = inst.npc_stage
+    if stage.current_contest_target then
+        return stage.current_contest_target
+    else
+        return stage
+    end
+end
+
+local function MarkPost(inst)
+    if inst.yotb_post_to_mark ~= nil then
+        return BufferedAction(inst, inst.yotb_post_to_mark, ACTIONS.MARK)
+    end
+end
+
+local function CollctPrize(inst)
+    if inst.yotb_prize_to_collect ~= nil then
+        local x,y,z = inst.yotb_prize_to_collect.Transform:GetWorldPosition()
+        if y < 0.1 and y > -0.1 and not inst.yotb_prize_to_collect:HasTag("INLIMBO") then
+            return BufferedAction(inst, inst.yotb_prize_to_collect, ACTIONS.PICKUP)
         end
     end
 end
@@ -274,36 +320,63 @@ end)
 
 function PigBrain:OnStart()
     --print(self.inst, "PigBrain:OnStart")
+
+    local in_contest = WhileNode( function() return self.inst:HasTag("NPC_contestant") end, "In contest",
+        PriorityNode({
+--            IfNode(function() return self.inst.yotb_post_to_mark end, "mark post",
+                DoAction(self.inst, CollctPrize, "collect prize", true ),
+                DoAction(self.inst, MarkPost, "mark post", true ),   --)
+            WhileNode( function() return self.inst.components.timer and self.inst.components.timer:TimerExists("contest_panic") end, "Panic Contest",
+                ChattyNode(self.inst, "PIG_TALK_CONTEST_PANIC",
+                    Panic(self.inst))),
+            ChattyNode(self.inst, "PIG_TALK_CONTEST_OOOH",
+                FaceEntity(self.inst, CurrentContestTarget, CurrentContestTarget ), 5, 15),
+        }, 0.1))
+
 	local watch_game = WhileNode( function() return WatchingMinigame(self.inst) end, "Watching Game",
         PriorityNode({
-			IfNode(function() return IsWatchingMinigameIntro(self.inst) end, "Is Intro",
-		        PriorityNode({
-	                Follow(self.inst, WatchingMinigame, TUNING.MINIGAME_CROWD_DIST_MIN, TUNING.MINIGAME_CROWD_DIST_TARGET, TUNING.MINIGAME_CROWD_DIST_MAX),
-					RunAway(self.inst, "minigame_participator", 5, 7),
-					DoAction(self.inst, FindFoodAction),
-					FaceEntity(self.inst, WatchingMinigame, WatchingMinigame),
-				}, 0.1)),
-            ChattyNode(self.inst, "PIG_TALK_GAME_GOTO",
-                Follow(self.inst, WatchingMinigame, TUNING.MINIGAME_CROWD_DIST_MIN, TUNING.MINIGAME_CROWD_DIST_TARGET, TUNING.MINIGAME_CROWD_DIST_MAX)),
-            ChattyNode(self.inst, "PIG_TALK_GAME_CHEER",
-                RunAway(self.inst, "minigame_participator", 5, 7)),
-            ChattyNode(self.inst, "PIG_TALK_FIND_MEAT",
-                DoAction(self.inst, FindFoodAction )),
-            ChattyNode(self.inst, "PIG_ELITE_SALTY",
-                FaceEntity(self.inst, WatchingCheaters, WatchingCheaters ), 5, 15),
-            ChattyNode(self.inst, "PIG_TALK_GAME_CHEER",
-                FaceEntity(self.inst, WatchingMinigame, WatchingMinigame ), 5, 15),
-        }, 0.1))
+			IfNode(function() return WatchingMinigame(self.inst).components.minigame.gametype == "pigking_wrestling" end, "Is Pig King Wrestling",
+				PriorityNode({
+					ChattyNode(self.inst, "PIG_TALK_GAME_GOTO",
+						Follow(self.inst, WatchingMinigame, WatchingMinigame_MinDist, WatchingMinigame_TargetDist, WatchingMinigame_MaxDist)),
+					WhileNode(function() return IsWatchingMinigameIntro(self.inst) end, "Is Intro",
+						PriorityNode({
+							RunAway(self.inst, "minigame_participator", 5, 7),
+							ChattyNode(self.inst, "PIG_TALK_FIND_MEAT",
+								DoAction(self.inst, FindFoodAction )),
+							FaceEntity(self.inst, WatchingMinigame, WatchingMinigame),
+						}, 0.1)),
+					ChattyNode(self.inst, "PIG_TALK_GAME_CHEER",
+						RunAway(self.inst, "minigame_participator", 5, 7)),
+					ChattyNode(self.inst, "PIG_TALK_FIND_MEAT",
+						DoAction(self.inst, FindFoodAction )),
+					ChattyNode(self.inst, "PIG_ELITE_SALTY",
+						FaceEntity(self.inst, WatchingCheaters, WatchingCheaters ), 5, 15),
+					ChattyNode(self.inst, "PIG_TALK_GAME_CHEER",
+						FaceEntity(self.inst, WatchingMinigame, WatchingMinigame ), 5, 15),
+				}, 0.1)
+			),
+			PriorityNode({
+				ChattyNode(self.inst, "PIG_TALK_MISC_GAME_GOTO",
+					Follow(self.inst, WatchingMinigame, WatchingMinigame_MinDist, WatchingMinigame_TargetDist, WatchingMinigame_MaxDist)),
+				ChattyNode(self.inst, "PIG_TALK_MISC_GAME_CHEER",
+					RunAway(self.inst, "minigame_participator", 5, 7)),
+				ChattyNode(self.inst, "PIG_TALK_FIND_MEAT",
+					DoAction(self.inst, FindFoodAction )),
+				ChattyNode(self.inst, "PIG_TALK_MISC_GAME_CHEER",
+					FaceEntity(self.inst, WatchingMinigame, WatchingMinigame ), 5, 15),
+			}, 0.1),
+        }, 0.1)
+	)
 
     local day = WhileNode( function() return TheWorld.state.isday end, "IsDay",
         PriorityNode{
             ChattyNode(self.inst, "PIG_TALK_FIND_MEAT",
                 DoAction(self.inst, FindFoodAction )),
-            IfNode(function() return StartChoppingCondition(self.inst) end, "chop", 
-                WhileNode(function() return KeepChoppingAction(self.inst) end, "keep chopping",
-                    LoopNode{ 
-                        ChattyNode(self.inst, "PIG_TALK_HELP_CHOP_WOOD",
-                            DoAction(self.inst, FindTreeToChopAction ))})),
+            IfThenDoWhileNode(function() return StartChoppingCondition(self.inst) end, function() return KeepChoppingAction(self.inst) end, "chop",
+                LoopNode{
+                    ChattyNode(self.inst, "PIG_TALK_HELP_CHOP_WOOD",
+                        DoAction(self.inst, FindTreeToChopAction ))}),
             ChattyNode(self.inst, "PIG_TALK_FOLLOWWILSON",
                 Follow(self.inst, GetLeader, MIN_FOLLOW_DIST, TARGET_FOLLOW_DIST, MAX_FOLLOW_DIST)),
             IfNode(function() return GetLeader(self.inst) end, "has leader",
@@ -327,9 +400,9 @@ function PigBrain:OnStart()
                 DoAction(self.inst, FindFoodAction )),
             RunAway(self.inst, "player", START_RUN_DIST, STOP_RUN_DIST, function(target) return ShouldRunAway(self.inst, target) end ),
             ChattyNode(self.inst, "PIG_TALK_GO_HOME",
-                WhileNode( function() return not TheWorld.state.iscaveday or not self.inst.LightWatcher:IsInLight() end, "Cave nightness",
+                WhileNode( function() return not TheWorld.state.iscaveday or not self.inst:IsInLight() end, "Cave nightness",
                     DoAction(self.inst, GoHomeAction, "go home", true ))),
-            WhileNode(function() return TheWorld.state.isnight and self.inst.LightWatcher:GetLightValue() > COMFORT_LIGHT_LEVEL end, "IsInLight", -- wants slightly brighter light for this
+            WhileNode(function() return TheWorld.state.isnight and self.inst:IsLightGreaterThan(COMFORT_LIGHT_LEVEL) end, "IsInLight", -- wants slightly brighter light for this
                 Wander(self.inst, GetNearestLightPos, GetNearestLightRadius, {
                     minwalktime = 0.6,
                     randwalktime = 0.2,
@@ -371,6 +444,7 @@ function PigBrain:OnStart()
             ChattyNode(self.inst, "PIG_TALK_GIVE_GIFT",
                 WhileNode( function() return WantsToGivePlayerPigTokenAction(self.inst) end, "Wants To Give Token", -- todo: check for death and valid
                     DoAction(self.inst, GivePlayerPigTokenAction, "Giving Token", true) )),
+            in_contest,
 			watch_game,
             day,
             night,

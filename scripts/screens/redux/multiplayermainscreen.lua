@@ -33,7 +33,8 @@ local PurchasePackScreen = require "screens/redux/purchasepackscreen"
 local SHOW_DST_DEBUG_HOST_JOIN = BRANCH == "dev"
 local SHOW_QUICKJOIN = false
 
-local IS_BETA = BRANCH == "staging"
+local IS_BETA = BRANCH == "staging" -- BRANCH == "dev"
+local IS_DEV_BUILD = BRANCH == "dev"
 
 local function PlayBannerSound(inst, self, sound)
     if self.bannersoundsenabled then
@@ -46,58 +47,117 @@ function MakeBanner(self)
 	local title_str = nil
 
 	local baner_root = Widget("banner_root")
-	baner_root:SetPosition(0, RESOLUTION_Y / 2 - banner_height / 2 + 1 )
+	--baner_root:SetPosition(0, RESOLUTION_Y / 2 - banner_height / 2 + 1 ) -- positioning for when we had the top banner art
+	baner_root:SetPosition(0, 0)
 
 	local anim = baner_root:AddChild(UIAnim())
 
+
+
 	if IS_BETA then
-        --local anim = baner_root:AddChild(UIAnim())
-        anim:GetAnimState():SetBuild("dst_menu_grotto")
-        anim:GetAnimState():SetBank ("dst_menu_grotto")
-        anim:GetAnimState():PlayAnimation("loop", true)
-        anim:SetScale(.667)
-        anim:SetPosition(0, 0)
-  --       anim:GetAnimState():SetBuild("dst_menu_wathgrithr")
-  --       anim:GetAnimState():SetBank("dst_menu_wathgrithr")
-  --       anim:SetScale(.667)
-  --       anim:GetAnimState():PlayAnimation("loop", true)
-  --       anim:MoveToBack()
-		-- title_str = STRINGS.UI.MAINSCREEN.MAINBANNER_ROT_BETA_TITLE
-	elseif IsFestivalEventActive(FESTIVAL_EVENTS.LAVAARENA) then
-		anim:GetAnimState():SetBuild("dst_menu_lavaarena_s2")
-		anim:GetAnimState():SetBank("dst_menu_lavaarena_s2")
-		anim:GetAnimState():PlayAnimation("idle", true)
-		anim:SetScale(0.48)
-		anim:SetPosition(0, -160)
-	elseif IsSpecialEventActive(SPECIAL_EVENTS.HALLOWED_NIGHTS) then
-		--[[anim:GetAnimState():SetBuild("dst_menu_halloween")
-		anim:GetAnimState():SetBank("dst_menu_halloween")
-		anim:GetAnimState():PlayAnimation("anim", true)
-		anim:SetScale(0.67)
-		anim:SetPosition(183, 40)]]
-		anim:GetAnimState():SetBuild("dst_menu_grotto")
-		anim:GetAnimState():SetBank("dst_menu_grotto")
-        anim:GetAnimState():PlayAnimation("loop", true)
-        anim:SetScale(.667)
-	elseif IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) then
---        anim:GetAnimState():SetBuild("dst_menu_inker_winter")
---        anim:GetAnimState():SetBank("dst_menu_inker_winter")
---        anim:GetAnimState():PlayAnimation("loop", true)
---        anim:SetScale(.667)
+		title_str = STRINGS.UI.MAINSCREEN.MAINBANNER_ROT_BETA_TITLE
 
-	    local anim_bg = baner_root:AddChild(UIAnim())
-		anim_bg:GetAnimState():SetBuild("dst_menu_feast_bg")
-		anim_bg:GetAnimState():SetBank("dst_menu_bg")
-		anim_bg:SetScale(0.7)
-		anim_bg:GetAnimState():SetDeltaTimeMultiplier(1.6)
-		anim_bg:GetAnimState():PlayAnimation("loop", true)
-		anim_bg:MoveToBack()
-        
-		anim:GetAnimState():SetBuild("dst_menu_feast")
-		anim:GetAnimState():SetBank("dst_menu")
-		anim:SetScale(0.7)
-		anim:GetAnimState():PlayAnimation("loop", true)
 
+        anim:GetAnimState():SetBuild("dst_menu_moonstorm_background")
+        anim:GetAnimState():SetBank ("dst_menu_moonstorm_background")
+        anim:GetAnimState():PlayAnimation("loop_w1", true)
+        anim:SetScale(.667)
+        anim.inst:ListenForEvent("animover", function()
+            anim:GetAnimState():PlayAnimation("loop_w"..math.random(3))
+        end)
+
+
+        local anim_wrench = baner_root:AddChild(UIAnim())
+        anim_wrench:GetAnimState():SetBuild("dst_menu_moonstorm_wrench")
+        anim_wrench:GetAnimState():SetBank ("dst_menu_moonstorm_wrench")
+        anim_wrench:GetAnimState():PlayAnimation("loop_w1", false)
+        anim_wrench:SetScale(.667)
+        anim_wrench:GetAnimState():SetErosionParams(0.06, 0, -1.0)
+        anim_wrench.inst.holo_time = 0
+        anim_wrench.inst:DoPeriodicTask(FRAMES, function()
+            anim_wrench.inst.holo_time = anim_wrench.inst.holo_time + FRAMES
+            anim_wrench:GetAnimState():SetErosionParams(0.06, anim_wrench.inst.holo_time, -1.0)
+        end)
+        anim_wrench.inst:ListenForEvent("animover", function()
+            -- This is a hack to get it to loop in sync with Wilson in the background,
+            -- since the Wilson anim isn't set to loop either (it switches randomly
+            -- between different animations)
+            anim_wrench:GetAnimState():PlayAnimation("loop_w1")
+        end)
+
+
+        local anim_wagstaff = baner_root:AddChild(UIAnim())
+        anim_wagstaff:GetAnimState():SetBuild("dst_menu_moonstorm_wagstaff")
+        anim_wagstaff:GetAnimState():SetBank ("dst_menu_moonstorm_wagstaff")
+        anim_wagstaff:GetAnimState():PlayAnimation("loop_w2", true)
+        anim_wagstaff:SetScale(.667)
+        anim_wagstaff:GetAnimState():SetErosionParams(1, 0, -1.0)
+        anim_wagstaff:GetAnimState():SetMultColour(0.9, 0.9, 0.9, 0.9)
+
+        local wagstaff_erosion_min = 0.02 -- Not 0 so there's always a little bit of influence on the alpha from the lines
+        local wagstaff_erosion_max = 1.2 -- Overshoots 1.2 to get more stable alpha lines when close to fully faded out
+        local wagstaff_erosion_speed = 1.65
+        local wagstaff_visible_time_min = 5.2
+        local wagstaff_visible_time_variance = 3.4
+        local wagstaff_invisible_time_min = 8
+        local wagstaff_invisible_time_variance = 5.7
+        --
+        anim_wagstaff.inst.holo_time = 0
+        anim_wagstaff.inst.holo_erosion = 1
+        anim_wagstaff.inst.holo_fade_in = false
+        anim_wagstaff.inst.holo_position = math.random(3)
+        anim_wagstaff.inst:DoPeriodicTask(FRAMES, function()
+            if anim_wagstaff.inst.holo_fade_in then
+                anim_wagstaff.inst.holo_erosion = math.max(wagstaff_erosion_min, anim_wagstaff.inst.holo_erosion - FRAMES * wagstaff_erosion_speed)
+            else
+                anim_wagstaff.inst.holo_erosion = math.min(wagstaff_erosion_max, anim_wagstaff.inst.holo_erosion + FRAMES * wagstaff_erosion_speed)
+            end
+            anim_wagstaff.inst.holo_time = anim_wagstaff.inst.holo_time + FRAMES
+            anim_wagstaff:GetAnimState():SetErosionParams(anim_wagstaff.inst.holo_erosion, anim_wagstaff.inst.holo_time, -1)
+        end)
+        local holo_fade_in
+        local holo_fade_out
+        holo_fade_out = function(inst)
+            anim_wagstaff.inst.holo_fade_in = false
+
+            inst:DoTaskInTime(wagstaff_invisible_time_min + wagstaff_invisible_time_variance * math.random(), holo_fade_in)
+        end
+        holo_fade_in = function(inst)
+            anim_wagstaff.inst.holo_fade_in = true
+            anim_wagstaff.inst.holo_time = 0
+
+            local anim_variations = {[1] = 1, [2] = 1, [3] = 1}
+            anim_variations[anim_wagstaff.inst.holo_position] = 0
+            anim_wagstaff.inst.holo_position = weighted_random_choice(anim_variations)
+            anim_wagstaff:GetAnimState():PlayAnimation("loop_w"..anim_wagstaff.inst.holo_position, true)
+
+            if anim_wagstaff.inst.holo_position == 1 and IsConsole() then
+                anim_wagstaff:GetAnimState():PlayAnimation("loop_w1_console", true)
+            end
+
+            anim_wagstaff.inst:DoTaskInTime(wagstaff_visible_time_min + wagstaff_visible_time_variance * math.random(), holo_fade_out)
+        end
+        anim_wagstaff.inst:DoTaskInTime(1.5 + wagstaff_invisible_time_min * math.random() + wagstaff_invisible_time_variance * math.random(), holo_fade_in)
+
+
+        local anim_foreground = baner_root:AddChild(UIAnim())
+        anim_foreground:GetAnimState():SetBuild("dst_menu_moonstorm_foreground")
+        anim_foreground:GetAnimState():SetBank ("dst_menu_moonstorm_foreground")
+        anim_foreground:GetAnimState():PlayAnimation("loop_w"..math.random(3), true)
+        anim_foreground:SetScale(.667)
+        anim_foreground.inst:ListenForEvent("animover", function()
+            anim_foreground:GetAnimState():PlayAnimation("loop_w"..math.random(3))
+        end)
+
+
+    --[[
+        local anim_bg = baner_root:AddChild(UIAnim())
+        anim_bg:GetAnimState():SetBuild("dst_menu_beefalo_bg")
+        anim_bg:GetAnimState():SetBank("dst_menu_beefalo_bg")
+        anim:SetScale(.667)
+        anim_bg:GetAnimState():PlayAnimation("loop", true)
+        anim_bg:MoveToBack()
+]]
 	elseif IsSpecialEventActive(SPECIAL_EVENTS.YOTC) then
 		local anim_bg = baner_root:AddChild(UIAnim())
 		anim_bg:GetAnimState():SetBuild("dst_menu_carrat_bg")
@@ -105,7 +165,7 @@ function MakeBanner(self)
 		anim_bg:SetScale(0.7)
 		anim_bg:GetAnimState():PlayAnimation("loop", true)
 		anim_bg:MoveToBack()
-        
+
 		anim:GetAnimState():SetBuild("dst_menu_carrat")
 		anim:GetAnimState():SetBank("dst_carrat")
         anim:GetAnimState():PlayAnimation("loop", true)
@@ -127,89 +187,153 @@ function MakeBanner(self)
         if color then
             anim:GetAnimState():OverrideSymbol("ear1", "dst_menu_carrat_swaps", color.."_ear1")
             anim:GetAnimState():OverrideSymbol("ear2", "dst_menu_carrat_swaps", color.."_ear2")
-            anim:GetAnimState():OverrideSymbol("tail", "dst_menu_carrat_swaps", color.."_tail")        
+            anim:GetAnimState():OverrideSymbol("tail", "dst_menu_carrat_swaps", color.."_tail")
         end
+	elseif IsSpecialEventActive(SPECIAL_EVENTS.CARNIVAL) then
 
---[[
-        local function onanimover(inst)
-            inst.AnimState:PlayAnimation("loop")
+        anim:GetAnimState():SetBuild("dst_menu_webber_carnival")
+        anim:GetAnimState():SetBank ("dst_menu_webber")
+        anim:SetScale(.667)
+        anim:GetAnimState():PlayAnimation("loop", true)
 
-            inst:DoTaskInTime(94 * FRAMES, PlayBannerSound, self, "dontstarve/pig/pig_king_laugh")
-            inst:DoTaskInTime(102 * FRAMES, PlayBannerSound, self, "dontstarve/pig/pig_king_laugh")
-            inst:DoTaskInTime(109 * FRAMES, PlayBannerSound, self, "dontstarve/pig/pig_king_laugh")
-            inst:DoTaskInTime(118 * FRAMES, PlayBannerSound, self, "dontstarve/pig/pig_king_laugh")
+	elseif true then
+        
+        anim:GetAnimState():SetBuild("dst_menu_webber")
+        anim:GetAnimState():SetBank ("dst_menu_webber")
+        anim:SetScale(.667)
+        anim:GetAnimState():PlayAnimation("loop", true)
+        
 
-            inst:DoTaskInTime(32 * FRAMES, PlayBannerSound, self, "dontstarve/pig/come_at_me")
-            inst:DoTaskInTime(40 * FRAMES, PlayBannerSound, self, "dontstarve/pig/come_at_me")
-            inst:DoTaskInTime(151 * FRAMES, PlayBannerSound, self, "dontstarve/pig/come_at_me")
-            inst:DoTaskInTime(161 * FRAMES, PlayBannerSound, self, "dontstarve/pig/come_at_me")
+
+        --[[anim:GetAnimState():SetBuild("dst_menu_moonstorm_background")
+        anim:GetAnimState():SetBank ("dst_menu_moonstorm_background")
+        anim:GetAnimState():PlayAnimation("loop_w1", true)
+        anim:SetScale(.667)
+        anim.inst:ListenForEvent("animover", function()
+            anim:GetAnimState():PlayAnimation("loop_w"..math.random(3))
+        end)
+
+
+        local anim_wrench = baner_root:AddChild(UIAnim())
+        anim_wrench:GetAnimState():SetBuild("dst_menu_moonstorm_wrench")
+        anim_wrench:GetAnimState():SetBank ("dst_menu_moonstorm_wrench")
+        anim_wrench:GetAnimState():PlayAnimation("loop_w1", false)
+        anim_wrench:SetScale(.667)
+        anim_wrench:GetAnimState():SetErosionParams(0.06, 0, -1.0)
+        anim_wrench.inst.holo_time = 0
+        anim_wrench.inst:DoPeriodicTask(FRAMES, function()
+            anim_wrench.inst.holo_time = anim_wrench.inst.holo_time + FRAMES
+            anim_wrench:GetAnimState():SetErosionParams(0.06, anim_wrench.inst.holo_time, -1.0)
+        end)
+        anim_wrench.inst:ListenForEvent("animover", function()
+            -- This is a hack to get it to loop in sync with Wilson in the background,
+            -- since the Wilson anim isn't set to loop either (it switches randomly
+            -- between different animations)
+            anim_wrench:GetAnimState():PlayAnimation("loop_w1")
+        end)
+
+
+        local anim_wagstaff = baner_root:AddChild(UIAnim())
+        anim_wagstaff:GetAnimState():SetBuild("dst_menu_moonstorm_wagstaff")
+        anim_wagstaff:GetAnimState():SetBank ("dst_menu_moonstorm_wagstaff")
+        anim_wagstaff:GetAnimState():PlayAnimation("loop_w2", true)
+        anim_wagstaff:SetScale(.667)
+        anim_wagstaff:GetAnimState():SetErosionParams(1, 0, -1.0)
+        anim_wagstaff:GetAnimState():SetMultColour(0.9, 0.9, 0.9, 0.9)
+
+        local wagstaff_erosion_min = 0.02 -- Not 0 so there's always a little bit of influence on the alpha from the lines
+        local wagstaff_erosion_max = 1.2 -- Overshoots 1.2 to get more stable alpha lines when close to fully faded out
+        local wagstaff_erosion_speed = 1.65
+        local wagstaff_visible_time_min = 5.2
+        local wagstaff_visible_time_variance = 3.4
+        local wagstaff_invisible_time_min = 8
+        local wagstaff_invisible_time_variance = 5.7
+        --
+        anim_wagstaff.inst.holo_time = 0
+        anim_wagstaff.inst.holo_erosion = 1
+        anim_wagstaff.inst.holo_fade_in = false
+        anim_wagstaff.inst.holo_position = math.random(3)
+        anim_wagstaff.inst:DoPeriodicTask(FRAMES, function()
+            if anim_wagstaff.inst.holo_fade_in then
+                anim_wagstaff.inst.holo_erosion = math.max(wagstaff_erosion_min, anim_wagstaff.inst.holo_erosion - FRAMES * wagstaff_erosion_speed)
+            else
+                anim_wagstaff.inst.holo_erosion = math.min(wagstaff_erosion_max, anim_wagstaff.inst.holo_erosion + FRAMES * wagstaff_erosion_speed)
+            end
+            anim_wagstaff.inst.holo_time = anim_wagstaff.inst.holo_time + FRAMES
+            anim_wagstaff:GetAnimState():SetErosionParams(anim_wagstaff.inst.holo_erosion, anim_wagstaff.inst.holo_time, -1)
+        end)
+        local holo_fade_in
+        local holo_fade_out
+        holo_fade_out = function(inst)
+            anim_wagstaff.inst.holo_fade_in = false
+
+            inst:DoTaskInTime(wagstaff_invisible_time_min + wagstaff_invisible_time_variance * math.random(), holo_fade_in)
         end
+        holo_fade_in = function(inst)
+            anim_wagstaff.inst.holo_fade_in = true
+            anim_wagstaff.inst.holo_time = 0
 
-        anim.inst:ListenForEvent("animover", onanimover)
-        onanimover(anim.inst)
-    ]]
+            local anim_variations = {[1] = 1, [2] = 1, [3] = 1}
+            anim_variations[anim_wagstaff.inst.holo_position] = 0
+            anim_wagstaff.inst.holo_position = weighted_random_choice(anim_variations)
+            anim_wagstaff:GetAnimState():PlayAnimation("loop_w"..anim_wagstaff.inst.holo_position, true)
+
+            if anim_wagstaff.inst.holo_position == 1 and IsConsole() then
+                anim_wagstaff:GetAnimState():PlayAnimation("loop_w1_console", true)
+            end
+
+            anim_wagstaff.inst:DoTaskInTime(wagstaff_visible_time_min + wagstaff_visible_time_variance * math.random(), holo_fade_out)
+        end
+        anim_wagstaff.inst:DoTaskInTime(1.5 + wagstaff_invisible_time_min * math.random() + wagstaff_invisible_time_variance * math.random(), holo_fade_in)
+
+
+        local anim_foreground = baner_root:AddChild(UIAnim())
+        anim_foreground:GetAnimState():SetBuild("dst_menu_moonstorm_foreground")
+        anim_foreground:GetAnimState():SetBank ("dst_menu_moonstorm_foreground")
+        anim_foreground:GetAnimState():PlayAnimation("loop_w"..math.random(3), true)
+        anim_foreground:SetScale(.667)
+        anim_foreground.inst:ListenForEvent("animover", function()
+            anim_foreground:GetAnimState():PlayAnimation("loop_w"..math.random(3))
+        end)]]
+
 	else
 		-- default banner
-        
-  --       local anim_bg = baner_root:AddChild(UIAnim())
-		-- anim_bg:GetAnimState():SetBuild("dst_menu_v2_bg")
-		-- anim_bg:GetAnimState():SetBank("dst_menu_v2_bg")
-  --       anim:SetScale(.667)
-		-- anim_bg:GetAnimState():PlayAnimation("loop", true)
-  --       anim_bg:MoveToBack()
-        
-  --       anim:GetAnimState():SetBuild("dst_menu_v2")
-  --       anim:GetAnimState():SetBank("dst_menu_v2")
-  --       anim:GetAnimState():PlayAnimation("loop", true)
-  --       anim:SetScale(.667)
-  --       anim:SetPosition(0, 0)
-	    
-  --       local creatures = 
-  --       {
-  --           "creature_cookie",
-  --           "creature_squid",
-  --           "creature_gnarwail",
-  --           "creature_puffin",
-  --           "creature_hound",
-  --           "creature_malbatross",
-  --       }
-  --       for _,v in pairs(creatures) do
-  --           anim:GetAnimState():Hide(v)
-  --       end
-      
-  --       local c1 = creatures[math.random(1,#creatures)]
-  --       local c2 = creatures[math.random(1,#creatures)]
-  --       local c3 = creatures[math.random(1,#creatures)]
-      
-  --       --could end up with dupes picked, that's okay, then we'll have only 1 or 2 chosen
-  --       anim:GetAnimState():Show(c1)
-  --       anim:GetAnimState():Show(c2)
-  --       anim:GetAnimState():Show(c3)
---[[ 
-        local anim = baner_root:AddChild(UIAnim())
-        anim:GetAnimState():SetBuild("dst_menu_wathgrithr")
-        anim:GetAnimState():SetBank ("dst_menu_wathgrithr")
+        local anim_bg = baner_root:AddChild(UIAnim())
+    	anim_bg:GetAnimState():SetBuild("dst_menu_v2_bg")
+    	anim_bg:GetAnimState():SetBank("dst_menu_v2_bg")
+        anim:SetScale(.667)
+    	anim_bg:GetAnimState():PlayAnimation("loop", true)
+        anim_bg:MoveToBack()
+
+        anim:GetAnimState():SetBuild("dst_menu_v2")
+        anim:GetAnimState():SetBank("dst_menu_v2")
         anim:GetAnimState():PlayAnimation("loop", true)
         anim:SetScale(.667)
-        anim:SetPosition(0, 0)
-]]
-        local anim = baner_root:AddChild(UIAnim())
-        anim:GetAnimState():SetBuild("dst_menu_grotto")
-        anim:GetAnimState():SetBank ("dst_menu_grotto")
-        anim:GetAnimState():PlayAnimation("loop", true)
-        anim:SetScale(.667)
-        anim:SetPosition(0, 0)
---[[	
-        local anim = baner_root:AddChild(UIAnim())
-		anim:GetAnimState():SetBuild("dst_menu_walter")
-        anim:GetAnimState():SetBank("dst_menu_walter")
-        anim:GetAnimState():PlayAnimation("loop", true)
-        anim:SetScale(.667)
-        anim:SetPosition(0, 0)
-]]
-        
+
+        local creatures =
+        {
+            "creature_cookie",
+            "creature_squid",
+            "creature_gnarwail",
+            "creature_puffin",
+            "creature_hound",
+            "creature_malbatross",
+        }
+        for _,v in pairs(creatures) do
+            anim:GetAnimState():Hide(v)
+        end
+
+        local c1 = creatures[math.random(1,#creatures)]
+        local c2 = creatures[math.random(1,#creatures)]
+        local c3 = creatures[math.random(1,#creatures)]
+
+        --could end up with dupes picked, that's okay, then we'll have only 1 or 2 chosen
+        anim:GetAnimState():Show(c1)
+        anim:GetAnimState():Show(c2)
+        anim:GetAnimState():Show(c3)
+
         --[[
-		local cur_time = os.time() 
+		local cur_time = os.time()
 		if cur_time <= 1585810740 and (not IsConsole() or cur_time >= 1585759200) then -- 9:40am to 11:59pm PDT
 			anim:GetAnimState():SetBuild("dst_menu_wes")
 			anim:GetAnimState():SetBank("dst_menu_wes")
@@ -225,21 +349,10 @@ function MakeBanner(self)
         end]]
 	end
 
-	if IsFestivalEventActive(FESTIVAL_EVENTS.LAVAARENA) then
-		self.logo = baner_root:AddChild(Image("images/lavaarena_frontend.xml", "title.tex"))
-		self.logo:SetScale(.6)
-		self.logo:SetPosition( -RESOLUTION_X/2 + 180, 5)
-	else
-		self.logo = baner_root:AddChild(Image("images/frontscreen.xml", "title.tex"))
-		self.logo:SetScale(.36)
-		self.logo:SetPosition( -RESOLUTION_X/2 + 180, 5)
-		self.logo:SetTint(unpack(FRONTEND_TITLE_COLOUR))
-	end
-	
 	if title_str then
 		if title_str ~= nil then
-			local x = 165
-			local y = -140
+			local x = 170
+			local y = 75
 			local text_width = 880
 
 			local font_size = 22
@@ -276,7 +389,7 @@ end)
 
 function MultiplayerMainScreen:GotoShop( filter_info )
 	if TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode() then
-		TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.MAINSCREEN.OFFLINE, STRINGS.UI.MAINSCREEN.ITEMCOLLECTION_DISABLE, 
+		TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.MAINSCREEN.OFFLINE, STRINGS.UI.MAINSCREEN.ITEMCOLLECTION_DISABLE,
 			{
 				{text=STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_LOGIN, cb = function()
 						SimReset()
@@ -293,7 +406,7 @@ end
 function MultiplayerMainScreen:getStatsPanel()
     return MainMenuStatsPanel({store_cb = function()
         if TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode() then
-            TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.MAINSCREEN.OFFLINE, STRINGS.UI.MAINSCREEN.ITEMCOLLECTION_DISABLE, 
+            TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.MAINSCREEN.OFFLINE, STRINGS.UI.MAINSCREEN.ITEMCOLLECTION_DISABLE,
                 {
                     {text=STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_LOGIN, cb = function()
                             SimReset()
@@ -317,39 +430,22 @@ function MultiplayerMainScreen:DoInit()
 
 	self.banner_root = self.fixed_root:AddChild(MakeBanner(self))
 
-	local bg = self.fixed_root:AddChild(Image("images/bg_redux_dark_bottom_solid.xml", "dark_bottom_solid.tex"))
-	bg:SetScale(.669)
-	bg:SetPosition(0, -160)
-	bg:SetClickable(false)
+	self.sidebar = self.fixed_root:AddChild(Image("images/bg_redux_black_sidebar.xml", "black_sidebar.tex"))
+	self.sidebar:SetPosition(-RESOLUTION_X/2 + 180, 0)
+	self.sidebar:SetScale(0.95, 1.01)
+	self.sidebar:SetTint(0, 0, 0, .85)
 
-	-- new MOTD
-	if TheFrontEnd.MotdManager:IsEnabled() then
-		local info_panel = MainMenuMotdPanel({font = self.info_font, bg = bg, 
-			error_cb = function() 
-				if self.info_panel ~= nil then
-					self.info_panel:Kill() 
-				end
-				self.info_panel = self.fixed_root:AddChild(self:getStatsPanel())
-			end,
-			on_to_skins_cb = function( filter_info ) self:GotoShop( filter_info ) end,
-			})
-		if self.info_panel == nil then
-			self.info_panel = self.fixed_root:AddChild(info_panel)
-		end
+	if IsFestivalEventActive(FESTIVAL_EVENTS.LAVAARENA) then
+		self.logo = self.fixed_root:AddChild(Image("images/lavaarena_frontend.xml", "title.tex"))
+		self.logo:SetScale(.6)
+		self.logo:SetPosition( -RESOLUTION_X/2 + 180, 5)
 	else
-		self.info_panel = self.fixed_root:AddChild(self:getStatsPanel())
+		self.logo = self.fixed_root:AddChild(Image("images/frontscreen.xml", "title.tex"))
+		self.logo:SetScale(.36)
+		self.logo:SetPosition( -RESOLUTION_X/2 + 180, RESOLUTION_Y / 2 - 170)
+		self.logo:SetTint(unpack(FRONTEND_TITLE_COLOUR))
 	end
 
-    if IsAnyFestivalEventActive() then        
-        if not TheFrontEnd:GetIsOfflineMode() then
-			self.userprogress = self.fixed_root:AddChild(TEMPLATES.UserProgress(function()
-				self:OnPlayerSummaryButton()
-			end))
-		end
-    end
-	
-	self.fixed_root:AddChild(Widget("left"))
-    
     self:MakeMainMenu()
 	self:MakeSubMenu()
 
@@ -366,6 +462,29 @@ function MultiplayerMainScreen:DoInit()
 		self.snowfall:SetHAnchor(ANCHOR_MIDDLE)
 		self.snowfall:SetScaleMode(SCALEMODE_PROPORTIONAL)
 	end
+
+    ----------------------------------------------------------
+	-- new MOTD
+	if TheFrontEnd.MotdManager:IsEnabled() then
+		local motd_panel = MainMenuMotdPanel({font = self.info_font, x = 100, y = -150,
+			on_no_focusforward = self.menu,
+			on_to_skins_cb = function( filter_info ) self:GotoShop( filter_info ) end,
+			})
+		if self.motd_panel == nil then
+			self.motd_panel = self.fixed_root:AddChild(motd_panel)
+		end
+	else
+		self.motd_panel = self.fixed_root:AddChild(self:getStatsPanel())
+	end
+
+    if IsAnyFestivalEventActive() then
+        if not TheFrontEnd:GetIsOfflineMode() then
+			self.userprogress = self.fixed_root:AddChild(TEMPLATES.UserProgress(function()
+				self:OnPlayerSummaryButton()
+			end))
+		end
+    end
+
 
     ----------------------------------------------------------
 
@@ -387,8 +506,14 @@ function MultiplayerMainScreen:DoFocusHookups()
         self.debug_menu:SetFocusChangeDir(MOVE_LEFT, self.menu)
     end
 
-	self.menu:SetFocusChangeDir(MOVE_RIGHT, self.info_panel)
-	self.info_panel:SetFocusChangeDir(MOVE_LEFT, self.menu)
+	self.menu:SetFocusChangeDir(MOVE_RIGHT, self.motd_panel)
+	self.motd_panel:SetFocusChangeDir(MOVE_LEFT, self.menu)
+end
+
+function MultiplayerMainScreen:OnControl(control, down)
+    if MultiplayerMainScreen._base.OnControl(self, control, down) then return true end
+
+    if self.motd_panel ~= nil and self.motd_panel:OnControl(control, down) then return true end
 end
 
 function MultiplayerMainScreen:EnableBannerSounds(enable)
@@ -470,7 +595,7 @@ function MultiplayerMainScreen:_GoToFestfivalEventScreen(fadeout_cb)
     if GetFestivalEventInfo().FEMUSIC ~= nil then
         self:StopMusic() --only stop the main menu music if we have something for the next screeen
     end
-	
+
 	self.last_focus_widget = TheFrontEnd:GetFocusWidget()
     self.menu:Disable()
     self.leaving = true --Note(Peter): what is this even used for?!?
@@ -487,7 +612,7 @@ end
 
 function MultiplayerMainScreen:OnFestivalEventButton()
     if TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode() then
-        TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_TITLE, STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_BODY[WORLD_FESTIVAL_EVENT], 
+        TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_TITLE, STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_BODY[WORLD_FESTIVAL_EVENT],
             {
                 {text=STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_LOGIN, cb = function()
                         SimReset()
@@ -497,7 +622,7 @@ function MultiplayerMainScreen:OnFestivalEventButton()
     else
 		if AreAnyModsEnabled() and not KnownModIndex:GetIsSpecialEventModWarningDisabled() then
 			local popup_body = subfmt(STRINGS.UI.FESTIVALEVENTSCREEN.MODS_POPUP_BODY, {event=STRINGS.UI.GAMEMODES[string.upper(GetFestivalEventInfo().GAME_MODE)]})
-			TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.FESTIVALEVENTSCREEN.MODS_POPUP_TITLE, popup_body, 
+			TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.FESTIVALEVENTSCREEN.MODS_POPUP_TITLE, popup_body,
 				{
 					{text=STRINGS.UI.FESTIVALEVENTSCREEN.MODS_POPUP_DISABLE_MODS, cb = function()
 							self:Disable()
@@ -508,20 +633,20 @@ function MultiplayerMainScreen:OnFestivalEventButton()
                                 SimReset()
                             end)
 						end},
-					{text=STRINGS.UI.FESTIVALEVENTSCREEN.MODS_POPUP_CONTINUE, cb=function() 
+					{text=STRINGS.UI.FESTIVALEVENTSCREEN.MODS_POPUP_CONTINUE, cb=function()
 						    KnownModIndex:SetDisableSpecialEventModWarning()
                             KnownModIndex:Save(function()
 								self:_GoToFestfivalEventScreen(function() TheFrontEnd:PopScreen() end)
 							end)
 						end},
-					{text=STRINGS.UI.FESTIVALEVENTSCREEN.MODS_POPUP_CANCEL, cb=function() 
+					{text=STRINGS.UI.FESTIVALEVENTSCREEN.MODS_POPUP_CANCEL, cb=function()
 								TheFrontEnd:PopScreen()
 						end},
 				}))
 		else
 			self:_GoToFestfivalEventScreen()
 		end
-    
+
 	end
 end
 
@@ -564,7 +689,7 @@ function MultiplayerMainScreen:OnBrowseServersButton()
 		end
     else
         self.filter_settings = {}
-        table.insert(self.filter_settings, {name = "SHOWLAN", data=self.offline} )   
+        table.insert(self.filter_settings, {name = "SHOWLAN", data=self.offline} )
     end
 
     self:_GoToOnlineScreen(ServerListingScreen, { self.filter_settings, cb, self.offline, self.session_data })
@@ -573,7 +698,7 @@ end
 function MultiplayerMainScreen:OnPlayerSummaryButton()
 
     if TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode() then
-        TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.MAINSCREEN.OFFLINE, STRINGS.UI.MAINSCREEN.ITEMCOLLECTION_DISABLE, 
+        TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.MAINSCREEN.OFFLINE, STRINGS.UI.MAINSCREEN.ITEMCOLLECTION_DISABLE,
             {
                 {text=STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_LOGIN, cb = function()
                         SimReset()
@@ -600,7 +725,7 @@ function MultiplayerMainScreen:OnQuickJoinServersButton()
     self.leaving = true
 
     -- QuickJoin is a popup, so don't fade to it.
-    TheFrontEnd:PushScreen(QuickJoinScreen(self, self.offline, self.session_data, 
+    TheFrontEnd:PushScreen(QuickJoinScreen(self, self.offline, self.session_data,
 		"",
 		CalcQuickJoinServerScore,
 		function() self:OnCreateServerButton() end,
@@ -615,7 +740,7 @@ end
 function MultiplayerMainScreen:OnModsButton()
     self:_FadeToScreen(ModsScreen, {})
 end
- 
+
 function MultiplayerMainScreen:Quit()
     self.last_focus_widget = TheFrontEnd:GetFocusWidget()
     TheFrontEnd:PushScreen(PopupDialogScreen(
@@ -669,7 +794,7 @@ function MultiplayerMainScreen:MakeMainMenu()
         local btn = TEMPLATES.MenuButton(text, onclick, tooltip_text, tooltip_widget)
         return btn
     end
-	
+
     local browse_button		= MakeMainMenuButton(STRINGS.UI.MAINSCREEN.BROWSE,    function() self:OnBrowseServersButton() end, STRINGS.UI.MAINSCREEN.TOOLTIP_BROWSE, self.tooltip)
     local host_button		= MakeMainMenuButton(STRINGS.UI.MAINSCREEN.CREATE,    function() self:OnCreateServerButton() end,  STRINGS.UI.MAINSCREEN.TOOLTIP_HOST, self.tooltip)
     local summary_button	= MakeMainMenuButton(STRINGS.UI.PLAYERSUMMARYSCREEN.TITLE, function() self:OnPlayerSummaryButton() end, STRINGS.UI.MAINSCREEN.TOOLTIP_PLAYERSUMMARY, self.tooltip)
@@ -708,7 +833,7 @@ function MultiplayerMainScreen:MakeMainMenu()
 
     self.menu = self.menu_root:AddChild(TEMPLATES.StandardMenu(menu_items, 38, nil, nil, true))
 
-    -- For Debugging/Testing    
+    -- For Debugging/Testing
     if SHOW_DST_DEBUG_HOST_JOIN then
 		local debug_menu_items = {}
         table.insert( debug_menu_items, {text=STRINGS.UI.MAINSCREEN.JOIN, cb= function() self:OnJoinButton() end})
@@ -777,20 +902,22 @@ function MultiplayerMainScreen:OnBecomeActive()
 		TheSim:StartWorkshopQuery()
 	end
 
-	if self.info_panel ~= nil and self.info_panel.OnBecomeActive ~= nil then
-		self.info_panel:OnBecomeActive()
+	if self.motd_panel ~= nil and self.motd_panel.OnBecomeActive ~= nil then
+		self.motd_panel:OnBecomeActive()
 	end
 
     --delay for a frame to allow the screen to finish building, then check the entity count for leaks
-    self.inst:DoTaskInTime(0, function()
-        if self.cached_entity_count ~= nil and self.cached_entity_count ~= TheSim:GetNumberOfEntities() then
-            print("### Error: Leaked entities in the frontend.", self.cached_entity_count)
-            for k, v in pairs(Ents) do if v.widget and (not v:IsValid() or v.widget.parent == nil) then
-                print(k, v.widget.name, v:IsValid(), v.widget.parent ~= nil, v) end
-            end
-        end
-        self.cached_entity_count = TheSim:GetNumberOfEntities()
-    end)
+	if IS_DEV_BUILD then
+		self.inst:DoTaskInTime(0, function()
+			if self.cached_entity_count ~= nil and self.cached_entity_count ~= TheSim:GetNumberOfEntities() then
+				print("### Error: Leaked entities in the frontend.", self.cached_entity_count, TheSim:GetNumberOfEntities())
+				for k, v in pairs(Ents) do if v.widget and (not v:IsValid() or v.widget.parent == nil) then
+					print(k, v.widget.name, v:IsValid(), v.widget.parent ~= nil, v) end
+				end
+			end
+			self.cached_entity_count = TheSim:GetNumberOfEntities()
+		end)
+	end
 end
 
 function MultiplayerMainScreen:FinishedFadeIn()
@@ -817,12 +944,12 @@ function MultiplayerMainScreen:FinishedFadeIn()
 		for _,item in pairs(entitlement_items) do
 			table.insert(items, { item = item.item_type, item_id = item.item_id, gifttype = SkinGifts.types[item.item_type] or "DEFAULT" })
         end
-        
+
         local daily_gift = GetDailyGiftItem()
         if daily_gift then
             table.insert(items, { item = daily_gift, item_id = 0, gifttype = "DAILY_GIFT" })
         end
-	
+
 		if #items > 0 then
 			local thankyou_popup = ThankYouPopup(items)
 			TheFrontEnd:PushScreen(thankyou_popup)
@@ -897,5 +1024,10 @@ function MultiplayerMainScreen:CheckNewUser(onnofn, no_button_text)
     TheFrontEnd:PushScreen(popup)
     return true
 end
+
+function MultiplayerMainScreen:GetHelpText()
+    return (self.motd_panel ~= nil and self.motd_panel.GetHelpText ~= nil and not self.motd_panel.focus) and self.motd_panel:GetHelpText() or ""
+end
+
 
 return MultiplayerMainScreen

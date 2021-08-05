@@ -48,7 +48,7 @@ local prefabs =
     "SURVIVAL_blueprint",
     "FARM_blueprint",
     "SCIENCE_blueprint",
-    "WAR_blueprint",
+    "WARTAB_blueprint",
     "TOWN_blueprint",
     "REFINE_blueprint",
     "MAGIC_blueprint",
@@ -229,7 +229,7 @@ local function MakeLoot(inst)
         end
         if next_loot ~= nil then
             table.insert(inst.loot, next_loot)
-            if next_aggro then 
+            if next_aggro then
                 table.insert(inst.lootaggro, true)
             else
                 table.insert(inst.lootaggro, false)

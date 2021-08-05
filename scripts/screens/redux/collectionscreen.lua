@@ -26,13 +26,19 @@ end)
 
 function CollectionScreen:DoInit()
     self.root = self:AddChild(TEMPLATES.ScreenRoot())
-    self.bg = self.root:AddChild(TEMPLATES.BrightMenuBackground())	
+    self.bg = self.root:AddChild(TEMPLATES.BrightMenuBackground())
 
     self.title = self.root:AddChild(TEMPLATES.ScreenTitle(STRINGS.UI.COLLECTIONSCREEN.TITLE, ""))
 
     self.doodad_count = self.root:AddChild(TEMPLATES.DoodadCounter(TheInventory:GetCurrencyAmount()))
 	self.doodad_count:SetPosition(-550, 215)
 	self.doodad_count:SetScale(0.4)
+
+    if IsSteam() or IsRail() then
+        self.points_count = self.root:AddChild(TEMPLATES.KleiPointsCounter(TheInventory:GetKleiPointsAmount()))
+        self.points_count:SetPosition(-480, 215)
+        self.points_count:SetScale(0.4)
+    end
 
     self.subscreener = Subscreener(self,
         self.MakeMenu,
@@ -47,9 +53,9 @@ function CollectionScreen:DoInit()
             profileflair        = self.root:AddChild(ProfileFlairExplorerPanel(self, self.user_profile)),
             loaders             = self.root:AddChild(LoadersExplorerPanel(self, self.user_profile)),
         })
-    
 
-    if not TheInput:ControllerAttached() then 
+
+    if not TheInput:ControllerAttached() then
         self.back_button = self.root:AddChild(TEMPLATES.BackButton(
                 function()
                     self:_CloseScreen()
@@ -91,7 +97,7 @@ end
 
 function CollectionScreen:MakeMenu(subscreener)
     self.tooltip = self.root:AddChild(TEMPLATES.ScreenTooltip())
-	
+
     local button_skins   = subscreener:MenuButton(STRINGS.UI.COLLECTIONSCREEN.SKINS,   "skins",    STRINGS.UI.COLLECTIONSCREEN.TOOLTIP_SKINS,   self.tooltip)
     local button_gameitem= subscreener:MenuButton(STRINGS.UI.COLLECTIONSCREEN.GAMEITEM,"gameitem", STRINGS.UI.COLLECTIONSCREEN.TOOLTIP_GAMEITEM,   self.tooltip)
     local button_beard   = subscreener:MenuButton(STRINGS.UI.COLLECTIONSCREEN.BEARD,   "beards",   STRINGS.UI.COLLECTIONSCREEN.TOOLTIP_BEARD,   self.tooltip)
@@ -122,7 +128,7 @@ function CollectionScreen:_FadeToScreen(screen_type, data)
     self.last_focus_widget = TheFrontEnd:GetFocusWidget()
     self.subscreener.menu:Disable()
     self.leaving = true
-    
+
     TheFrontEnd:FadeToScreen( self, function() return screen_type(self.user_profile, unpack(data)) end, nil )
 end
 
@@ -131,7 +137,7 @@ function CollectionScreen:OnBecomeActive()
         local function ShowApology(message)
             local sorry_popup = PopupDialogScreen(
                 STRINGS.UI.SKINSSCREEN.SORRY,
-                message, 
+                message,
                 {
                     {
                         text=STRINGS.UI.POPUPDIALOG.OK,
@@ -140,7 +146,7 @@ function CollectionScreen:OnBecomeActive()
                             TheFrontEnd:FadeBack() -- collection screen
                         end
                     }
-                }) 
+                })
             TheFrontEnd:PushScreen(sorry_popup)
             return sorry_popup
         end
@@ -173,6 +179,9 @@ end
 
 function CollectionScreen:RefreshInventory(animateDoodads)
     self.doodad_count:SetCount(TheInventory:GetCurrencyAmount(), animateDoodads)
+    if IsSteam() or IsRail() then
+        self.points_count:SetCount(TheInventory:GetKleiPointsAmount())
+    end
     self.subscreener.sub_screens["skins"]:RefreshInventory()
 end
 

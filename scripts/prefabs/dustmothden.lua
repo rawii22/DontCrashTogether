@@ -1,3 +1,5 @@
+require("worldsettingsutil")
+
 local assets =
 {
     Asset("ANIM", "anim/dustmothden.zip"),
@@ -28,9 +30,9 @@ local function StartRepairing(inst, repairer)
             inst.components.timer:ResumeTimer("repair")
         end
     else
-        inst.components.timer:StartTimer("repair", TUNING.DUSTMOTHDEN.REPAIR_TIME)
+        inst.components.timer:StartTimer("repair", TUNING.DUSTMOTHDEN_REPAIR_TIME)
     end
-    
+
     inst.components.entitytracker:TrackEntity("repairer", repairer)
 
     inst.AnimState:PlayAnimation("repair", true)
@@ -53,10 +55,10 @@ local function MakeWhole(inst, play_growth_anim)
     else
         inst.AnimState:PlayAnimation("idle_thulecite")
     end
-    
+
     inst.components.workable.workleft = inst.components.workable.workleft <= 0 and inst.components.workable.maxwork or inst.components.workable.workleft
     inst.components.workable.workable = true
-    
+
     local repairer = inst.components.entitytracker:GetEntity("repairer")
     if repairer ~= nil and repairer:IsValid() then
         repairer:PushEvent("dustmothden_repaired", inst)
@@ -86,10 +88,14 @@ local function OnLoadPostPass(inst, ents, data)
     else
         MakeWhole(inst, false)
     end
-    
+
     if inst.components.timer:TimerExists("repair") then
         PauseRepairing(inst)
     end
+end
+
+local function OnPreLoad(inst, data)
+    WorldSettings_ChildSpawner_PreLoad(inst, data, TUNING.DUSTMOTHDEN_RELEASE_TIME, TUNING.DUSTMOTHDEN_REGEN_TIME)
 end
 
 local function fn()
@@ -121,31 +127,36 @@ local function fn()
 
     inst._start_repairing_fn = StartRepairing
     inst._pause_repairing_fn = PauseRepairing
-    
+
     inst:AddComponent("childspawner")
     inst.components.childspawner.childname = "dustmoth"
-    inst.components.childspawner:SetRegenPeriod(TUNING.DUSTMOTHDEN.REGEN_TIME)
-    inst.components.childspawner:SetSpawnPeriod(TUNING.DUSTMOTHDEN.RELEASE_TIME)
-    inst.components.childspawner:SetMaxChildren(1)
+    inst.components.childspawner:SetRegenPeriod(TUNING.DUSTMOTHDEN_REGEN_TIME)
+    inst.components.childspawner:SetSpawnPeriod(TUNING.DUSTMOTHDEN_RELEASE_TIME)
+    inst.components.childspawner:SetMaxChildren(TUNING.DUSTMOTHDEN_MAX_CHILDREN)
+    WorldSettings_ChildSpawner_SpawnPeriod(inst, TUNING.DUSTMOTHDEN_RELEASE_TIME, TUNING.DUSTMOTHDEN_ENABLED)
+    WorldSettings_ChildSpawner_RegenPeriod(inst, TUNING.DUSTMOTHDEN_REGEN_TIME, TUNING.DUSTMOTHDEN_ENABLED)
+    if not TUNING.DUSTMOTHDEN_ENABLED then
+        inst.components.childspawner.childreninside = 0
+    end
     inst.components.childspawner:StartRegen()
     inst.components.childspawner:StartSpawning()
 
     inst:AddComponent("workable")
     inst.components.workable:SetWorkAction(ACTIONS.MINE)
-    inst.components.workable:SetMaxWork(TUNING.DUSTMOTHDEN.MAXWORK)
-    inst.components.workable:SetWorkLeft(TUNING.DUSTMOTHDEN.MAXWORK)
+    inst.components.workable:SetMaxWork(TUNING.DUSTMOTHDEN_MAXWORK)
+    inst.components.workable:SetWorkLeft(TUNING.DUSTMOTHDEN_MAXWORK)
     inst.components.workable:SetOnFinishCallback(OnFinishWork)
     inst.components.workable.savestate = true
 
     inst.components.workable.workleft = 0
     inst.components.workable.workable = false
-    
+
     inst:AddComponent("timer")
     inst:AddComponent("entitytracker")
-    
+
     inst:AddComponent("lootdropper")
     inst.components.lootdropper:SetChanceLootTable('dustmothden')
-    
+
     inst:AddComponent("inspectable")
 
     inst:ListenForEvent("timerdone", OnTimerDone)
@@ -155,6 +166,7 @@ local function fn()
     MakeHauntableWork(inst)
 
     inst.OnLoadPostPass = OnLoadPostPass
+    inst.OnPreLoad = OnPreLoad
 
     return inst
 end

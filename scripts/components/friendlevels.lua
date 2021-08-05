@@ -1,7 +1,7 @@
 local Friendlevels = Class(function(self, inst)
     self.inst = inst
 
-    self.friendlytasks = {}    
+    self.friendlytasks = {}
     self.annoytasks = {}
 
     self.enabled = true
@@ -24,7 +24,7 @@ function Friendlevels:SetDefaultRewards(fn)
     self.defaultrewards = fn
 end
 
-function Friendlevels:SetLeveltRewards(data)
+function Friendlevels:SetLevelRewards(data)
     self.levelrewards = data
 end
 
@@ -33,18 +33,17 @@ function Friendlevels:SetFriendlyTasks(data)
 end
 
 function Friendlevels:DoRewards(target)
-
     local gifts = {}
-    for i,reward in ipairs(self.queuedrewards)do
-        if reward.task == "default" then            
-            gifts = JoinArrays(gifts,self.defaultrewards(self.inst,target))
-        else           
-            gifts = JoinArrays(gifts,self.levelrewards[reward.level](self.inst,target))
+    for i, reward in ipairs(self.queuedrewards) do
+        if reward.level == nil then
+            gifts = ConcatArrays(gifts, self.defaultrewards(self.inst, target, reward.task))
+        else
+            gifts = ConcatArrays(gifts, self.levelrewards[reward.level](self.inst, target, reward.task))
         end
     end
+
     self.queuedrewards = {}
     return gifts
-
 end
 
 function Friendlevels:CompleteTask(task,doer)
@@ -52,18 +51,18 @@ function Friendlevels:CompleteTask(task,doer)
 
     if not self.friendlytasks[task].complete and self.level < #self.levelrewards then
         self.level = self.level + 1
-        table.insert(self.queuedrewards,{level = self.level,task = task})        
+        table.insert(self.queuedrewards, {level = self.level, task = task})
     elseif not self.friendlytasks[task] or not self.friendlytasks[task].complete or not self.friendlytasks[task].onetime then
         defaulttask = true
         if self.defaultrewards then
-            table.insert(self.queuedrewards,{level = nil, task = "default"})
+            table.insert(self.queuedrewards,{level = nil, task = task })
         end
     end
 
     if self.friendlytasks[task] and not self.friendlytasks[task].complete then
         self.friendlytasks[task].complete = true
     end
-    
+
     self.inst:PushEvent("friend_task_complete", defaulttask)
 end
 
@@ -78,14 +77,14 @@ end
 function Friendlevels:OnSave()
     local taskscomplete = {}
     for i,task in ipairs(self.friendlytasks)do
-        table.insert(taskscomplete,{complete = task.complete})        
+        table.insert(taskscomplete,{complete = task.complete})
     end
     return {enabled = self.enabled, level = self.level, taskscomplete = taskscomplete, queuedrewards = self.queuedrewards}
 end
 
 function Friendlevels:OnLoad(data)
     self.enabled = data.enabled
-    self.level = data.level   
+    self.level = data.level
     self.queuedrewards = data.queuedrewards or {}
     if #self.queuedrewards > 0 then
         self.inst:PushEvent("friend_task_complete")

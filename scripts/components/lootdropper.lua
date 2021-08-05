@@ -103,7 +103,7 @@ function LootDropper:GetRecipeLoot(recipe)
 
     for k,v in ipairs(recipe.ingredients) do
         local amt = math.ceil( (v.amount * TUNING.HAMMER_LOOT_PERCENT) * percent)
-        if self.inst:HasTag("burnt") then 
+        if self.inst:HasTag("burnt") then
             amt = math.ceil( (v.amount * TUNING.BURNT_HAMMER_LOOT_PERCENT) * percent)
         end
         for n = 1, amt do
@@ -264,6 +264,7 @@ function LootDropper:SpawnLootPrefab( lootprefab, pt, linked_skinname, skin_id, 
             self:FlingItem(loot, pt)
 
             loot:PushEvent("on_loot_dropped", {dropper = self.inst})
+            self.inst:PushEvent("loot_prefab_spawned", {loot = loot})
 
             return loot
         end
@@ -300,7 +301,7 @@ function LootDropper:DropLoot(pt)
 
     if IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) then
         local prefabname = string.upper(self.inst.prefab)
-        local num_decor_loot = TUNING.WINTERS_FEAST_TREE_DECOR_LOOT[prefabname] or nil
+        local num_decor_loot = self.GetWintersFeastOrnaments ~= nil and self.GetWintersFeastOrnaments(self.inst) or TUNING.WINTERS_FEAST_TREE_DECOR_LOOT[prefabname] or nil
         if num_decor_loot ~= nil then
             for i = 1, num_decor_loot.basic do
                 self:SpawnLootPrefab(GetRandomBasicWinterOrnament(), pt)

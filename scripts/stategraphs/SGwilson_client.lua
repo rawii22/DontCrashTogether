@@ -60,7 +60,7 @@ local function ConfigureRunState(inst)
     if inst.replica.rider ~= nil and inst.replica.rider:IsRiding() then
         inst.sg.statemem.riding = true
         inst.sg.statemem.groggy = inst:HasTag("groggy")
-        
+
         local mount = inst.replica.rider:GetMount()
         inst.sg.statemem.ridingwoby = mount and mount:HasTag("woby")
 
@@ -85,7 +85,7 @@ local function ConfigureRunState(inst)
         else
             inst.sg.statemem.normal = true
         end
-    elseif inst:GetSandstormLevel() >= TUNING.SANDSTORM_FULL_LEVEL and not inst.components.playervision:HasGoggleVision() then
+    elseif inst:GetStormLevel() >= TUNING.SANDSTORM_FULL_LEVEL and not inst.components.playervision:HasGoggleVision() then
         inst.sg.statemem.sandstorm = true
     elseif inst:HasTag("groggy") then
         inst.sg.statemem.groggy = true
@@ -155,7 +155,7 @@ local actionhandlers =
             end
         end),
     ActionHandler(ACTIONS.OCEAN_FISHING_CAST, "oceanfishing_cast"),
-    ActionHandler(ACTIONS.OCEAN_FISHING_REEL, 
+    ActionHandler(ACTIONS.OCEAN_FISHING_REEL,
         function(inst, action)
             local fishable = action.invobject ~= nil and action.invobject.replica.oceanfishingrod:GetTarget() or nil
             if fishable ~= nil and fishable:HasTag("partiallyhooked") then
@@ -188,17 +188,20 @@ local actionhandlers =
         end),
     ActionHandler(ACTIONS.TURNOFF, "give"),
     ActionHandler(ACTIONS.TURNON, "give"),
+    ActionHandler(ACTIONS.YOTB_UNLOCKSKIN, "dolongaction"),
+    ActionHandler(ACTIONS.YOTB_SEW, "dolongaction"),
     ActionHandler(ACTIONS.ADDFUEL, "doshortaction"),
     ActionHandler(ACTIONS.ADDWETFUEL, "doshortaction"),
     ActionHandler(ACTIONS.REPAIR, "dolongaction"),
-    ActionHandler(ACTIONS.READ, 
-        function(inst, action) 
+    ActionHandler(ACTIONS.READ,
+        function(inst, action)
             return	(action.invobject ~= nil and action.invobject:HasTag("simplebook")) and "book_peruse"
-					or inst:HasTag("aspiring_bookworm") and "book_peruse" 
+					or inst:HasTag("aspiring_bookworm") and "book_peruse"
 					or "book"
         end),
     ActionHandler(ACTIONS.MAKEBALLOON, "makeballoon"),
     ActionHandler(ACTIONS.DEPLOY, "doshortaction"),
+    ActionHandler(ACTIONS.DEPLOY_TILEARRIVE, "doshortaction"),
     ActionHandler(ACTIONS.STORE, "doshortaction"),
     ActionHandler(ACTIONS.DROP,
         function(inst)
@@ -220,11 +223,17 @@ local actionhandlers =
         end),
     ActionHandler(ACTIONS.PICK,
         function(inst, action)
-            return (action.target:HasTag("jostlepick") and "dojostleaction")
+            return (inst.replica.rider ~= nil and inst.replica.rider:IsRiding() and "dolongaction")
+                or (action.target:HasTag("jostlepick") and "dojostleaction")
                 or (action.target:HasTag("quickpick") and "doshortaction")
                 or (inst:HasTag("fastpicker") and "doshortaction")
                 or (inst:HasTag("quagmire_fasthands") and "domediumaction")
                 or "dolongaction"
+        end),
+    ActionHandler(ACTIONS.CARNIVALGAME_FEED,
+        function(inst, action)
+            return (inst.replica.rider ~= nil and inst.replica.rider:IsRiding() and "dolongaction")
+				or "doequippedaction"
         end),
     ActionHandler(ACTIONS.SLEEPIN,
         function(inst, action)
@@ -240,7 +249,8 @@ local actionhandlers =
     ActionHandler(ACTIONS.BUILD,
         function(inst, action)
             local rec = GetValidRecipe(action.recipe)
-            return (rec ~= nil and rec.tab.shop and "give")
+            return (rec ~= nil and rec.buildingstate)
+                or (rec ~= nil and rec.tab.shop and "give")
                 or (action.recipe == "livinglog" and inst:HasTag("plantkin") and "form_log")
                 or (inst:HasTag("hungrybuilder") and "dohungrybuild")
                 or (inst:HasTag("fastbuilder") and "domediumaction")
@@ -252,8 +262,20 @@ local actionhandlers =
             return inst:HasTag("expertchef") and "domediumaction" or "dolongaction"
         end),
     ActionHandler(ACTIONS.FILL, "dolongaction"),
-    ActionHandler(ACTIONS.PICKUP, "doshortaction"),
-    ActionHandler(ACTIONS.CHECKTRAP, "doshortaction"),
+    ActionHandler(ACTIONS.FILL_OCEAN, "dolongaction"),
+
+    ActionHandler(ACTIONS.PICKUP, function(inst, action)
+            return (inst.replica.rider ~= nil and inst.replica.rider:IsRiding()
+                    and (action.target ~= nil and action.target:HasTag("heavy") and "dodismountaction"
+                        or "domediumaction")
+                    )
+                or "doshortaction"
+        end),
+    ActionHandler(ACTIONS.CHECKTRAP,
+        function(inst, action)
+            return (inst.replica.rider ~= nil and inst.replica.rider:IsRiding() and "domediumaction")
+                or "doshortaction"
+        end),
     ActionHandler(ACTIONS.RUMMAGE, "doshortaction"),
     ActionHandler(ACTIONS.BAIT, "doshortaction"),
     ActionHandler(ACTIONS.HEAL, "dolongaction"),
@@ -287,6 +309,7 @@ local actionhandlers =
                     )
                 or "give"
         end),
+    ActionHandler(ACTIONS.APPRAISE, "give"),
     ActionHandler(ACTIONS.GIVETOPLAYER, "give"),
     ActionHandler(ACTIONS.GIVEALLTOPLAYER, "give"),
     ActionHandler(ACTIONS.FEEDPLAYER, "give"),
@@ -367,6 +390,9 @@ local actionhandlers =
     ActionHandler(ACTIONS.UNPIN, "doshortaction"),
     ActionHandler(ACTIONS.CATCH, "catch_pre"),
     ActionHandler(ACTIONS.CHANGEIN, "usewardrobe"),
+    ActionHandler(ACTIONS.HITCHUP, "usewardrobe"),
+    ActionHandler(ACTIONS.UNHITCH, "usewardrobe"),
+    ActionHandler(ACTIONS.MARK, "doshortaction"),
     ActionHandler(ACTIONS.WRITE, "doshortaction"),
     ActionHandler(ACTIONS.ATTUNE, "dolongaction"),
     ActionHandler(ACTIONS.MIGRATE, "migrate"),
@@ -384,20 +410,20 @@ local actionhandlers =
             inst.sg.statemem.not_interrupted = true
             return "furl_boost"
         end),
-    ActionHandler(ACTIONS.LOWER_SAIL_FAIL, 
+    ActionHandler(ACTIONS.LOWER_SAIL_FAIL,
         function(inst, action)
             inst.sg.statemem.not_interrupted = true
             return "furl_fail"
-        end),  
+        end),
     ActionHandler(ACTIONS.RAISE_ANCHOR, "dolongaction"),
     ActionHandler(ACTIONS.LOWER_ANCHOR, "dolongaction"),
     ActionHandler(ACTIONS.STEER_BOAT, "steer_boat_idle_pre"),
     ActionHandler(ACTIONS.REPAIR_LEAK, "dolongaction"),
     ActionHandler(ACTIONS.SET_HEADING, function(inst, action) inst:PerformPreviewBufferedAction() end),
-    ActionHandler(ACTIONS.CAST_NET, "doshortaction"),    
+    ActionHandler(ACTIONS.CAST_NET, "doshortaction"),
     ActionHandler(ACTIONS.ROW_FAIL, "row_fail"),
     ActionHandler(ACTIONS.ROW, "row"),
-    ActionHandler(ACTIONS.ROW_CONTROLLER, "row"),    
+    ActionHandler(ACTIONS.ROW_CONTROLLER, "row"),
     ActionHandler(ACTIONS.EXTEND_PLANK, "doshortaction"),
     ActionHandler(ACTIONS.RETRACT_PLANK, "doshortaction"),
     ActionHandler(ACTIONS.ABANDON_SHIP, "abandon_ship"),
@@ -414,9 +440,9 @@ local actionhandlers =
         end),
     ActionHandler(ACTIONS.STARTCHANNELING, function(inst,action)
         if action.target and action.target:HasTag("use_channel_longaction") then
-                return "channel_longaction" 
+                return "channel_longaction"
             else
-                return "startchanneling" 
+                return "startchanneling"
             end
         end),
     ActionHandler(ACTIONS.REVIVE_CORPSE, "dolongaction"),
@@ -467,6 +493,41 @@ local actionhandlers =
     ActionHandler(ACTIONS.BEGIN_QUEST, "doshortaction"),
     ActionHandler(ACTIONS.ABANDON_QUEST, "dolongaction"),
     ActionHandler(ACTIONS.TELLSTORY, "dostorytelling"),
+
+    ActionHandler(ACTIONS.POUR_WATER, "pour"),
+    ActionHandler(ACTIONS.POUR_WATER_GROUNDTILE, "pour"),
+
+    ActionHandler(ACTIONS.INTERACT_WITH,
+        function(inst, action)
+            return inst:HasTag("plantkin") and "domediumaction" or
+                   action.target:HasTag("yotb_stage") and "doshortaction" or
+                   "dolongaction"
+        end),
+    ActionHandler(ACTIONS.PLANTREGISTRY_RESEARCH_FAIL, "dolongaction"),
+    ActionHandler(ACTIONS.PLANTREGISTRY_RESEARCH, "dolongaction"),
+    ActionHandler(ACTIONS.ASSESSPLANTHAPPINESS, "dolongaction"),
+    ActionHandler(ACTIONS.ADDCOMPOSTABLE, "give"),
+    ActionHandler(ACTIONS.WAX, "dolongaction"),
+
+    ActionHandler(ACTIONS.USEITEMON, function(inst, action)
+        if action.invobject == nil then
+            return "dolongaction"
+        elseif action.invobject:HasTag("bell") then
+            return "play"
+        else
+            return "dolongaction"
+        end
+    end),
+    
+    ActionHandler(ACTIONS.STOPUSINGITEM, "dolongaction"),
+
+    ActionHandler(ACTIONS.YOTB_STARTCONTEST, "doshortaction"),
+    ActionHandler(ACTIONS.CARNIVAL_HOST_SUMMON, "give"),
+
+    ActionHandler(ACTIONS.MUTATE_SPIDER, "give"),
+    ActionHandler(ACTIONS.HERD_FOLLOWERS, "use_inventory_item"),
+    ActionHandler(ACTIONS.REPEL, "use_inventory_item"),
+    ActionHandler(ACTIONS.BEDAZZLE, "dolongaction"),
 }
 
 local events =
@@ -543,7 +604,7 @@ local states =
             else
                 anim =
                     (inst.replica.inventory ~= nil and inst.replica.inventory:IsHeavyLifting() and "heavy_idle") or
-                    (   inst:GetSandstormLevel() >= TUNING.SANDSTORM_FULL_LEVEL and
+                    (   inst:GetStormLevel() >= TUNING.SANDSTORM_FULL_LEVEL and
                         not inst.components.playervision:HasGoggleVision() and
                         (   inst.AnimState:IsCurrentAnimation("sand_walk_pst") or
                             inst.AnimState:IsCurrentAnimation("sand_walk") or
@@ -839,7 +900,7 @@ local states =
                             inst.sg.statemem.heavy or
                             inst.sg.statemem.iswere or
                             inst.sg.statemem.sandstorm or
-                            inst:GetSandstormLevel() < TUNING.SANDSTORM_FULL_LEVEL) then
+                            inst:GetStormLevel() < TUNING.SANDSTORM_FULL_LEVEL) then
                     inst.sg:GoToState("run")
                 end
             end),
@@ -1524,7 +1585,7 @@ local states =
             inst.components.locomotor:Stop()
             inst.AnimState:PlayAnimation("eat_pre")
             inst.AnimState:PushAnimation("eat_lag", false)
-            
+
             inst:PerformPreviewBufferedAction()
             inst.sg:SetTimeout(TIMEOUT)
         end,
@@ -1553,7 +1614,7 @@ local states =
             inst.components.locomotor:Stop()
             inst.AnimState:PlayAnimation("quick_eat_pre")
             inst.AnimState:PushAnimation("quick_eat_lag", false)
- 
+
             inst:PerformPreviewBufferedAction()
             inst.sg:SetTimeout(TIMEOUT)
         end,
@@ -1718,6 +1779,44 @@ local states =
             inst.sg:GoToState("idle", true)
         end,
     },
+
+    State{
+        name = "doequippedaction",
+        tags = { "doing", "busy" },
+
+        onenter = function(inst)
+            inst.components.locomotor:Stop()
+            inst.AnimState:PlayAnimation("give_equipped")
+
+            inst:PerformPreviewBufferedAction()
+            inst.sg:SetTimeout(TIMEOUT)
+        end,
+
+        timeline =
+        {
+            TimeEvent(6 * FRAMES, function(inst)
+                inst.sg:RemoveStateTag("busy")
+            end),
+        },
+
+        onupdate = function(inst)
+            if inst:HasTag("doing") then
+                if inst.entity:FlattenMovementPrediction() then
+                    inst.sg:GoToState("idle", "noanim")
+                end
+            elseif inst.bufferedaction == nil then
+                inst.AnimState:PlayAnimation("give_equipped_pst")
+                inst.sg:GoToState("idle", true)
+            end
+        end,
+
+        ontimeout = function(inst)
+            inst:ClearBufferedAction()
+            inst.AnimState:PlayAnimation("give_equipped_pst")
+            inst.sg:GoToState("idle", true)
+        end,
+    },
+
 
     State{
         name = "doshortaction",
@@ -1941,6 +2040,47 @@ local states =
     },
 
     State{
+        name = "dodismountaction",
+        tags = { "doing", "busy" },
+
+        onenter = function(inst)
+            inst.components.locomotor:Stop()
+            inst.AnimState:PlayAnimation("dismount")
+            inst.AnimState:PushAnimation("dismount_lag", false)
+
+            inst:PerformPreviewBufferedAction()
+            inst.sg:SetTimeout(TIMEOUT)
+        end,
+
+        timeline =
+        {
+            TimeEvent(4 * FRAMES, function(inst)
+                inst.sg:RemoveStateTag("busy")
+            end),
+            TimeEvent(15*FRAMES, function(inst)
+                inst.SoundEmitter:PlaySound("dontstarve/beefalo/saddle/dismount")
+            end),
+        },
+
+        onupdate = function(inst)
+            if inst:HasTag("doing") then
+                if inst.entity:FlattenMovementPrediction() then
+                    inst.sg:GoToState("idle", "noanim")
+                end
+            elseif inst.bufferedaction == nil then
+                inst.AnimState:PlayAnimation("heavy_mount")
+                inst.sg:GoToState("idle", true)
+            end
+        end,
+
+        ontimeout = function(inst)
+            inst:ClearBufferedAction()
+            inst.AnimState:PlayAnimation("heavy_mount")
+            inst.sg:GoToState("idle", true)
+        end,
+    },
+
+    State{
         name = "dostorytelling",
         tags = { "doing", "busy" },
 
@@ -2069,12 +2209,12 @@ local states =
         onenter = function(inst, snap)
             inst.components.locomotor:Stop()
             inst.Transform:SetNoFaced()
-            inst.AnimState:PlayAnimation("steer_idle_pre")  
-            inst.AnimState:PushAnimation("steer_lag", false)          
+            inst.AnimState:PlayAnimation("steer_idle_pre")
+            inst.AnimState:PushAnimation("steer_lag", false)
             inst:PerformPreviewBufferedAction()
 
             inst.sg:SetTimeout(TIMEOUT)
-        end,      
+        end,
 
         onupdate = function(inst)
             if inst:HasTag("doing") then
@@ -2091,8 +2231,8 @@ local states =
             inst:ClearBufferedAction()
             inst.Transform:SetFourFaced()
             inst.sg:GoToState("idle")
-        end,  
-    },   
+        end,
+    },
 
     State{
         name = "mount_plank",
@@ -2119,8 +2259,8 @@ local states =
         ontimeout = function(inst)
             inst:ClearBufferedAction()
             inst.sg:GoToState("idle")
-        end,  
-    },    
+        end,
+    },
 
 
     State{
@@ -2149,8 +2289,8 @@ local states =
         ontimeout = function(inst)
             inst:ClearBufferedAction()
             inst.sg:GoToState("idle")
-        end,  
-    },       
+        end,
+    },
 
     State{
         name = "play",
@@ -2190,7 +2330,7 @@ local states =
             inst.components.locomotor:Stop()
 
             inst.AnimState:PlayAnimation("give",false)
-            inst.AnimState:PushAnimation("give_pst",false)  
+            inst.AnimState:PushAnimation("give_pst",false)
 
             if inst:GetBufferedAction() then
                 inst:PerformPreviewBufferedAction()
@@ -2326,7 +2466,7 @@ local states =
             inst:ClearBufferedAction()
             inst.sg:GoToState("idle")
         end,
-    },    
+    },
 
     State{
         name = "jumpin",
@@ -2896,7 +3036,7 @@ local states =
 		            inst.entity:SetIsPredictingMovement(false) -- so the animation will come across
                 end
 			end
-            
+
 			if inst.bufferedaction == nil and inst.sg.statemem.flattened_time ~= nil and inst.sg.statemem.flattened_time < inst.sg.timeinstate then
 				inst.sg.statemem.flattened_time = nil
 				inst.entity:SetIsPredictingMovement(true)
@@ -3633,6 +3773,43 @@ local states =
     },
 
     State{
+        name = "pour",
+        tags = { "doing", "busy" },
+
+        onenter = function(inst)
+            inst.components.locomotor:Stop()
+            inst.AnimState:PlayAnimation("water_pre")
+            inst.AnimState:PushAnimation("water_lag", false)
+            inst:PerformPreviewBufferedAction()
+            inst.sg:SetTimeout(TIMEOUT)
+        end,
+
+        timeline =
+        {
+            TimeEvent(4 * FRAMES, function(inst)
+                inst.sg:RemoveStateTag("busy")
+            end),
+        },
+
+        onupdate = function(inst)
+            if inst:HasTag("doing") then
+                if inst.entity:FlattenMovementPrediction() then
+                    inst.sg:GoToState("idle", "noanim")
+                end
+            elseif inst.bufferedaction == nil then
+                inst.AnimState:PlayAnimation("pickup_pst")
+                inst.sg:GoToState("idle", true)
+            end
+        end,
+
+        ontimeout = function(inst)
+            inst:ClearBufferedAction()
+            inst.AnimState:PlayAnimation("pickup_pst")
+            inst.sg:GoToState("idle", true)
+        end,
+    },
+
+    State{
         name = "portal_jumpin_pre",
         tags = { "busy" },
 
@@ -3771,14 +3948,14 @@ local states =
 
         onenter = function(inst)
             inst.components.locomotor:Stop()
-            
+
             inst.AnimState:PlayAnimation("sing_pre", false)
             inst.AnimState:PushAnimation("sing_lag", false)
 
             inst:PerformPreviewBufferedAction()
             inst.sg:SetTimeout(TIMEOUT)
         end,
-        
+
         onupdate = function(inst)
             if inst:HasTag("busy") then
                 if inst.entity:FlattenMovementPrediction() then
@@ -3794,7 +3971,7 @@ local states =
             inst.sg:GoToState("idle")
         end,
     },
-    
+
 
     State{
 
@@ -3811,7 +3988,7 @@ local states =
         ontimeout = function(inst)
             inst:ClearBufferedAction()
             inst.sg:GoToState("idle")
-        end,     
+        end,
     },
 
     --------------------------------------------------------------------------
@@ -3825,7 +4002,7 @@ local states =
             inst.components.locomotor:Stop()
 
             inst.AnimState:PlayAnimation("pull_big_pre")
-            inst.AnimState:PushAnimation("pull_big_lag", false)            
+            inst.AnimState:PushAnimation("pull_big_lag", false)
 
             if inst:HasTag("is_heaving") then
                 inst:RemoveTag("is_heaving")
@@ -3833,12 +4010,12 @@ local states =
                 inst:AddTag("is_heaving")
             end
 
-            inst:AddTag("is_furling") 
+            inst:AddTag("is_furling")
 
             inst:PerformPreviewBufferedAction()
 
             inst.sg:SetTimeout(TIMEOUT)
-        end, 
+        end,
 
         onupdate = function(inst)
             if inst:HasTag("doing") then
@@ -3848,7 +4025,7 @@ local states =
             end
         end,
 
-        onexit = function(inst) 
+        onexit = function(inst)
             if not inst.sg.statemem.not_interrupted then
                 inst:RemoveTag("switchtoho")
                 inst:RemoveTag("is_heaving")
@@ -3857,32 +4034,32 @@ local states =
 
         timeline =
         {
-            TimeEvent(17 * FRAMES, function(inst)      
+            TimeEvent(17 * FRAMES, function(inst)
                 inst.SoundEmitter:PlaySound("turnoftides/common/together/boat/mast/sail_down", nil, nil, true)
             end),
         },
 
 
-        events = 
+        events =
         {
             EventHandler("animqueueover", function(inst)
                 if inst.sg.statemem.stopfurling then
                     inst.sg:GoToState("idle")
-                else 
+                else
                     inst.sg.statemem.not_interrupted = true
-                    inst.sg:GoToState("furl", inst.sg.mem.furl_target)               --_repeat_delay  
+                    inst.sg:GoToState("furl", inst.sg.mem.furl_target)               --_repeat_delay
                 end
-            end),    
+            end),
 
             EventHandler("stopfurling", function(inst)
                 inst.sg.statement.stopfurling = true
-            end),                     
-        },      
+            end),
+        },
         ontimeout = function(inst)
             inst:ClearBufferedAction()
             inst.sg:GoToState("idle")
-        end,        
-    },  
+        end,
+    },
 
     State{
 
@@ -3894,9 +4071,9 @@ local states =
             inst.AnimState:PlayAnimation("pull_small_pre")
             inst.AnimState:PushAnimation("pull_small_loop", true)
             inst:PerformPreviewBufferedAction()
-        end, 
+        end,
 
-        onupdate = function(inst) 
+        onupdate = function(inst)
             if inst:HasTag("doing") then
                 if inst.entity:FlattenMovementPrediction() then
                     inst.sg:GoToState("idle", "noanim")
@@ -3904,8 +4081,8 @@ local states =
             end
         end,
 
-        onexit = function(inst) 
-            if not inst.sg.statemem.not_interrupted then                
+        onexit = function(inst)
+            if not inst.sg.statemem.not_interrupted then
                 inst:RemoveTag("switchtoho")
                 inst:RemoveTag("is_heaving")
             end
@@ -3913,33 +4090,33 @@ local states =
 
         timeline =
         {
-            TimeEvent(15 * FRAMES, function(inst)      
+            TimeEvent(15 * FRAMES, function(inst)
                  inst.SoundEmitter:PlaySound("turnoftides/common/together/boat/mast/sail_up", nil, nil, true)
             end),
-            TimeEvent((15+17) * FRAMES, function(inst)      
+            TimeEvent((15+17) * FRAMES, function(inst)
                  inst.SoundEmitter:PlaySound("turnoftides/common/together/boat/mast/sail_up", nil, nil, true)
-            end),            
-            TimeEvent((15+(2*17)) * FRAMES, function(inst)      
+            end),
+            TimeEvent((15+(2*17)) * FRAMES, function(inst)
                  inst.SoundEmitter:PlaySound("turnoftides/common/together/boat/mast/sail_up", nil, nil, true)
-            end),              
-            TimeEvent((15+(3*17)) * FRAMES, function(inst)      
+            end),
+            TimeEvent((15+(3*17)) * FRAMES, function(inst)
                  inst.SoundEmitter:PlaySound("turnoftides/common/together/boat/mast/sail_up", nil, nil, true)
-            end),          
-            TimeEvent((15+(4*17)) * FRAMES, function(inst)      
+            end),
+            TimeEvent((15+(4*17)) * FRAMES, function(inst)
                  inst.SoundEmitter:PlaySound("turnoftides/common/together/boat/mast/sail_up", nil, nil, true)
-            end),          
-            TimeEvent((15+(5*17)) * FRAMES, function(inst)      
+            end),
+            TimeEvent((15+(5*17)) * FRAMES, function(inst)
                  inst.SoundEmitter:PlaySound("turnoftides/common/together/boat/mast/sail_up", nil, nil, true)
-            end),                
+            end),
         },
 
-        events = 
+        events =
         {
             EventHandler("stopfurling", function(inst)
-                inst.AnimState:PlayAnimation("pull_small_pst")                
+                inst.AnimState:PlayAnimation("pull_small_pst")
                 inst.sg:GoToState("idle",true)
-            end),                     
-        },      
+            end),
+        },
     },
 
     State{
@@ -3949,36 +4126,36 @@ local states =
 
         onenter = function(inst)
 
-            inst:PerformPreviewBufferedAction()  
-           
-            inst:RemoveTag("is_heaving") 
+            inst:PerformPreviewBufferedAction()
 
-            inst.AnimState:PlayAnimation("pull_fail") 
-        end,    
+            inst:RemoveTag("is_heaving")
 
-        onupdate = function(inst) 
+            inst.AnimState:PlayAnimation("pull_fail")
+        end,
+
+        onupdate = function(inst)
             if not inst:HasTag("is_furling") then
                 inst.sg:GoToState("idle")
             end
         end,
 
-        onexit = function(inst) 
+        onexit = function(inst)
             if not inst.sg.statemem.not_interrupted then
                 inst:RemoveTag("is_heaving")
             end
         end,
 
-        events = 
+        events =
         {
             EventHandler("animqueueover", function(inst)
                 inst.sg.statemem.not_interrupted = true
-                inst.sg:GoToState("furl", inst.sg.mem.furl_target)                
-            end),     
+                inst.sg:GoToState("furl", inst.sg.mem.furl_target)
+            end),
 
             EventHandler("stopfurling", function(inst)
                 inst.sg:GoToState("idle")
-            end),                    
-        },            
+            end),
+        },
     },
 
 
@@ -4041,16 +4218,45 @@ local states =
         end,
     },
 
+
+    State{
+        name = "use_inventory_item",
+        tags = { "doing", "playing" },
+
+        onenter = function(inst)
+            inst.components.locomotor:Stop()
+            inst.AnimState:PlayAnimation("useitem_pre")
+            inst.AnimState:PushAnimation("useitem_lag", false)
+
+            inst:PerformPreviewBufferedAction()
+            inst.sg:SetTimeout(TIMEOUT)
+        end,
+
+        onupdate = function(inst)
+            if inst:HasTag("doing") then
+                if inst.entity:FlattenMovementPrediction() then
+                    inst.sg:GoToState("idle", "noanim")
+                end
+            elseif inst.bufferedaction == nil then
+                inst.sg:GoToState("idle")
+            end
+        end,
+
+        ontimeout = function(inst)
+            inst:ClearBufferedAction()
+            inst.sg:GoToState("idle")
+        end,
+    },
 }
 
-local hop_timelines = 
+local hop_timelines =
 {
-    hop_pre = 
+    hop_pre =
     {
-        TimeEvent(0, function(inst) 
+        TimeEvent(0, function(inst)
             inst.components.embarker.embark_speed = math.clamp(inst.components.locomotor:RunSpeed() * inst.components.locomotor:GetSpeedMultiplier() + TUNING.WILSON_EMBARK_SPEED_BOOST, TUNING.WILSON_EMBARK_SPEED_MIN, TUNING.WILSON_EMBARK_SPEED_MAX)
         end),
-        TimeEvent(4, function(inst) 
+        TimeEvent(4, function(inst)
             inst.components.embarker:StartMoving()
         end),
     },

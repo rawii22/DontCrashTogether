@@ -21,7 +21,7 @@ local BIRD_TYPES =
     [GROUND.GRASS] = { "robin" },
     [GROUND.FOREST] = { "robin", "crow" },
     [GROUND.MARSH] = { "crow" },
-    
+
     [GROUND.OCEAN_COASTAL] = {"puffin"},
     [GROUND.OCEAN_COASTAL_SHORE] = {"puffin"},
     [GROUND.OCEAN_SWELL] = {"puffin"},
@@ -117,6 +117,7 @@ local function ToggleUpdate(force)
 end
 
 local SCARECROW_TAGS = { "scarecrow" }
+local CARNIVAL_EVENT_ONEOF_TAGS = { "carnivaldecor", "carnivaldecor_ranker" }
 local function PickBird(spawnpoint)
     local bird = "crow"
 	if TheNet:GetServerGameMode() == "quagmire" then
@@ -126,15 +127,19 @@ local function PickBird(spawnpoint)
 		if BIRD_TYPES[tile] ~= nil then
 			bird = GetRandomItem(BIRD_TYPES[tile])
 		end
-	end
 
-    if bird == "crow" then
-        local x, y, z = spawnpoint:Get()
-        local canarylure = TheSim:FindEntities(x, y, z, TUNING.BIRD_CANARY_LURE_DISTANCE, SCARECROW_TAGS)
-        if #canarylure ~= 0 then
-            bird = "canary"
-        end
-    end
+		if IsSpecialEventActive(SPECIAL_EVENTS.CARNIVAL) and bird ~= "crow" and IsLandTile(tile) then
+			local x, y, z = spawnpoint:Get()
+			if TheSim:CountEntities(x, y, z, TUNING.BIRD_CANARY_LURE_DISTANCE, nil, nil, CARNIVAL_EVENT_ONEOF_TAGS) > 0 then
+				bird = "crow"
+			end
+		elseif bird == "crow" then
+			local x, y, z = spawnpoint:Get()
+			if TheSim:CountEntities(x, y, z, TUNING.BIRD_CANARY_LURE_DISTANCE, SCARECROW_TAGS) > 0 then
+				bird = "canary"
+			end
+		end
+	end
 
     return _worldstate.iswinter and bird == "robin" and "robin_winter" or bird
 end
@@ -196,7 +201,7 @@ end
 
 --Register events
 inst:WatchWorldState("israining", OnIsRaining)
-inst:WatchWorldState("isnight", ToggleUpdate)
+inst:WatchWorldState("isnight", function() ToggleUpdate() end)
 inst:ListenForEvent("ms_playerjoined", OnPlayerJoined, TheWorld)
 inst:ListenForEvent("ms_playerleft", OnPlayerLeft, TheWorld)
 
@@ -213,36 +218,32 @@ end
 --[[ Public member functions ]]
 --------------------------------------------------------------------------
 
-function self:SetSpawnTimes(delay)
-	print "DEPRECATED: SetSpawnTimes() in birdspawner.lua, use birdattractor.spawnmodifier instead"
-    _minspawndelay = delay.min
-    _maxspawndelay = delay.max
+function self:SetSpawnTimes()
+    --depreciated
 end
 
-function self:SetMaxBirds(max)
-	print "DEPRECATED: SetMaxBirds() in birdspawner.lua, use birdattractor.spawnmodifier instead"
-    _maxbirds = max
-    ToggleUpdate(true)
+function self:SetMaxBirds()
+    --depreciated
 end
 
 function self:ToggleUpdate()
-	ToggleUpdate(true)
+    ToggleUpdate(true)
 end
 
 function self:SpawnModeNever()
-    self:SetMaxBirds(0)
-end
-
-function self:SpawnModeHeavy()
-    self:SetMaxBirds(10)
-end
-
-function self:SpawnModeMed()
-    self:SetMaxBirds(7)
+    --depreciated
 end
 
 function self:SpawnModeLight()
-    self:SetMaxBirds(2)
+    --depreciated
+end
+
+function self:SpawnModeMed()
+    --depreciated
+end
+
+function self:SpawnModeHeavy()
+    --depreciated
 end
 
 local BIRDBLOCKER_TAGS = {"birdblocker"}
@@ -251,10 +252,23 @@ function self:GetSpawnPoint(pt)
     local function TestSpawnPoint(offset)
         local spawnpoint_x, spawnpoint_y, spawnpoint_z = (pt + offset):Get()
         local allow_water = true
+        local moonstorm = false
+        if TheWorld.net.components.moonstorms and next(TheWorld.net.components.moonstorms:GetMoonstormNodes()) then
+            local node_index = TheWorld.Map:GetNodeIdAtPoint(spawnpoint_x, 0, spawnpoint_z)
+            local nodes = TheWorld.net.components.moonstorms._moonstorm_nodes:value()
+            for i, node in pairs(nodes) do
+                if node == node_index then
+                    moonstorm = true
+                    break
+                end
+            end
+        end
+
         return _map:IsPassableAtPoint(spawnpoint_x, spawnpoint_y, spawnpoint_z, allow_water) and
                _map:GetTileAtPoint(spawnpoint_x, spawnpoint_y, spawnpoint_z) ~= GROUND.OCEAN_COASTAL_SHORE and
                not _groundcreep:OnCreep(spawnpoint_x, spawnpoint_y, spawnpoint_z) and
-               #(TheSim:FindEntities(spawnpoint_x, 0, spawnpoint_z, 4, BIRDBLOCKER_TAGS)) == 0
+               #(TheSim:FindEntities(spawnpoint_x, 0, spawnpoint_z, 4, BIRDBLOCKER_TAGS)) == 0 and
+               not moonstorm
     end
 
     local theta = math.random() * 2 * PI
@@ -333,27 +347,6 @@ end
 
 function self:StopTracking(target)
     self.StopTrackingFn(target)
-end
-
---------------------------------------------------------------------------
---[[ Save/Load ]]
---------------------------------------------------------------------------
-
-function self:OnSave()
-    return
-    {
-        maxbirds = _maxbirds,
-        minspawndelay = _minspawndelay,
-        maxspawndelay = _maxspawndelay,
-    }
-end
-
-function self:OnLoad(data)
-    _maxbirds = data.maxbirds or TUNING.BIRD_SPAWN_MAX
-    _minspawndelay = data.minspawndelay or TUNING.BIRD_SPAWN_DELAY.min
-    _maxspawndelay = data.maxspawndelay or TUNING.BIRD_SPAWN_DELAY.max
-
-    ToggleUpdate(true)
 end
 
 --------------------------------------------------------------------------

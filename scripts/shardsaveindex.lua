@@ -53,7 +53,7 @@ end
 local function UpgradeShardSaveIndexData(savedata)
     local savefileupgrades = require "savefileupgrades"
     local upgraded = false
-    
+
     --[[
     if savedata.version == nil or savedata.version == 1 then
         savefileupgrades.utilities.UpgradeShardSaveIndexFromV1toV2(savedata)
@@ -129,7 +129,7 @@ local function OnLoad(self, callback, str)
     -- If we are on steam cloud this will stop a corrupt shardsaveindex file from
     -- ruining everyone's day..
     if success and string.len(str) > 0 and type(savedata) == "table" then
-        
+
         local was_upgraded = false
         if savedata.version ~= SHARDSAVEINDEX_VERSION then
             was_upgraded = UpgradeShardSaveIndexData(savedata)
@@ -147,8 +147,8 @@ local function OnLoad(self, callback, str)
 				self:Save()
 			end
         end
-        
-    
+
+
         self.slots = TheSim:GetSaveFiles()
 
         RetryFailedSaveConversions(self)
@@ -242,7 +242,7 @@ function ShardSaveIndex:GetSlotLastTimePlayed(slot)
     local time
     local function ontimefileloaded(load_success, str)
         local success, timedata = RunInSandbox(str)
-    
+
         if success and string.len(str) > 0 then
             if type(timedata) == "number" then
                 time = timedata
@@ -265,7 +265,7 @@ function ShardSaveIndex:GetSlotDateCreated(slot)
     local function ontimefileloaded(load_success, str)
         if load_success then
             local success, timedata = RunInSandbox(str)
-        
+
             if success and string.len(str) > 0 then
                 if type(timedata) == "table" then
                     created = timedata.created
@@ -323,7 +323,7 @@ function ShardSaveIndex:GetSlotCharacter(slot)
     local shardIndex = self:GetShardIndex(slot, "Master")
     if shardIndex then
         local session_id = shardIndex:GetSession()
-        local online_mode = shardIndex.online_mode ~= false
+        local online_mode = shardIndex.server.online_mode ~= false
         local encode_user_path = shardIndex:GetServerData().encode_user_path == true
 
         local character = nil
@@ -408,7 +408,7 @@ function ShardSaveIndex:GetSlotDayAndSeasonText(slot)
         if session_id then
             local day = 1
             local season = nil
-            
+
             local function onreadmetafile(success, str, slot, shard, file)
                 if success then
                     if str ~= nil and #str > 0 then
@@ -500,7 +500,7 @@ function ShardSaveIndex:GetSlotDay(slot)
     if shardIndex then
         local session_id = shardIndex:GetSession()
 
-        if session_id then            
+        if session_id then
             local function onreadmetafile(success, str, slot, shard, file)
                 if success then
                     if str ~= nil and #str > 0 then
@@ -558,35 +558,10 @@ function ShardSaveIndex:GetSlotPresetText(slot)
 	local preset_str = ""
     if self:IsSlotEmpty(slot) then return preset_str end
 
-    local shardIndex = self:GetShardIndex(slot, "Master")
-    if shardIndex then
-        if self:IsSlotMultiLevel(slot) then
-            local forest_preset = nil
-            local caves_preset = nil
-
-            local server_gen = shardIndex:GetGenOptions()
-            if server_gen then
-                forest_preset = server_gen.name
-            end
-
-            local secondaryShardIndex = self:GetShardIndex(slot, "Caves")
-            server_gen = secondaryShardIndex and secondaryShardIndex:GetGenOptions() or nil
-            if secondaryShardIndex then
-                if server_gen then
-                    caves_preset = server_gen.name
-                end
-            end
-
-            if forest_preset ~= nil and caves_preset ~= nil then
-                preset_str = forest_preset.." / "..caves_preset
-            else
-                preset_str = forest_preset or caves_preset
-            end
-        else
-            local server_gen = shardIndex:GetGenOptions()
-            if server_gen then
-                preset_str = server_gen.name
-            end
+    if self:GetShardIndex(slot, "Master") then
+        preset_str = STRINGS.UI.SERVERCREATIONSCREEN.FORESTONLY
+        if self:IsSlotMultiLevel(slot) and self:GetShardIndex(slot, "Caves") then
+            preset_str = STRINGS.UI.SERVERCREATIONSCREEN.FORESTANDCAVES
         end
     end
     return preset_str
@@ -612,8 +587,8 @@ function ShardSaveIndex:SetSlotEnabledServerMods(slot)
         if config and type(config) == "table" then
             for i,v in pairs(config) do
                 if v.saved ~= nil then
-                    mod_data.configuration_options[v.name] = v.saved 
-                else 
+                    mod_data.configuration_options[v.name] = v.saved
+                else
                     mod_data.configuration_options[v.name] = v.default
                 end
             end
@@ -621,7 +596,7 @@ function ShardSaveIndex:SetSlotEnabledServerMods(slot)
         enabled_mods[modname] = mod_data
     end
 
-    if self:IsSlotEmpty(slot) then 
+    if self:IsSlotEmpty(slot) then
         self.enabled_mods_cache = enabled_mods
         return
     end

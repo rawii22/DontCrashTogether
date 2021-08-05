@@ -61,8 +61,7 @@ function Widget:OnFocusMove(dir, down)
     end
 
     if down and self.focus_flow[dir] then
-        local dest = self.focus_flow[dir]
-        if dest and type(dest) == "function" then dest = dest() end
+        local dest = FunctionOrValue(self.focus_flow[dir])
 
         -- Can we pass the focus down the chain if we are disabled/hidden?
         if dest and dest:IsVisible() and dest.enabled then
@@ -249,7 +248,7 @@ function Widget:KillAllChildren()
         self:RemoveChild(k)
         k:Kill()
     end
-    
+
     self:ClearHoverText()
 end
 
@@ -414,7 +413,7 @@ function Widget:GetTooltipPos()
             end
         end
         return self.tooltip_pos
-    end 
+    end
 end
 
 function Widget:StartUpdating()
@@ -628,16 +627,9 @@ end
 
 function Widget:SetFocus()
   --  print ("SET FOCUS ", self)
-    if self.focus_forward and type(self.focus_forward) == "function" then
-        local widg = self.focus_forward()
-		if widg ~= nil then
-	        widg:SetFocus()
-		    return
-		else
-			print ("Warning: Widget:SetFocus called on '"..tostring(self).. "' failled to find widget to focus_forward to.")
-		end
-    elseif self.focus_forward then
-        self.focus_forward:SetFocus()
+    local focus_forward = FunctionOrValue(self.focus_forward)
+    if focus_forward then
+        focus_forward:SetFocus()
         return
     end
 
@@ -694,7 +686,7 @@ function Widget:SetHoverText(text, params)
 
             self.hovertext_root = Widget("hovertext_root")
             self.hovertext_root:SetScaleMode(SCALEMODE_PROPORTIONAL)
-            
+
             if params.bg == nil or params.bg == true then
                 self.hovertext_bg = self.hovertext_root:AddChild(Image(params.bg_atlas or "images/frontend.xml", params.bg_texture or "scribble_black.tex"))
                 self.hovertext_bg:SetTint(1,1,1,.8)
@@ -702,17 +694,17 @@ function Widget:SetHoverText(text, params)
                 self.hovertext_bg:SetClickable(false)
             end
 
-            
+
             if not self.hovertext then
                 self.hovertext = self.hovertext_root:AddChild(Text(params.font or NEWFONT_OUTLINE, params.font_size or 22, text))
                 self.hovertext:SetClickable(false)
                 self.hovertext:SetScale(1.1,1.1)
 
-                if params.region_h ~= nil or params.region_w ~= nil then 
+                if params.region_h ~= nil or params.region_w ~= nil then
                     self.hovertext:SetRegionSize(params.region_w or 1000, params.region_h or 40)
                 end
 
-                if params.wordwrap ~= nil then 
+                if params.wordwrap ~= nil then
                     --print("Enabling word wrap", params.wordwrap)
                     self.hovertext:EnableWordWrap(params.wordwrap)
                 end
@@ -724,7 +716,7 @@ function Widget:SetHoverText(text, params)
             end
             self.hovertext:Hide()
 
-            
+
             if params.bg == nil or params.bg == true then
                 local w, h = self.hovertext:GetRegionSize()
                 self.hovertext_bg:SetSize(w*1.5, h*2.0)
@@ -804,7 +796,7 @@ function Widget:ClearHoverText()
     if self.hovertext ~= nil then
         self.hovertext:Kill()
         self.hovertext = nil
-        
+
         --unhook the hover text focus functions
         if self._OnGainFocus then
             self.OnGainFocus = self._OnGainFocus

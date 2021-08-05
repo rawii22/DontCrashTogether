@@ -34,6 +34,7 @@ local PIECES =
     {name="anchor",     moonevent=false},
     {name="moon",       moonevent=false},
     {name="carrat",     moonevent=false},
+    {name="beefalo",    moonevent=false},
     {name="crabking",   moonevent=false},
     {name="malbatross", moonevent=false},
     {name="toadstool",	moonevent=false},
@@ -42,7 +43,8 @@ local PIECES =
     {name="beequeen",	moonevent=false},
     {name="antlion",	moonevent=false},
     {name="minotaur",	moonevent=false},
-} 
+    {name="guardianphase3", moonevent=false},
+}
 
 local MOON_EVENT_RADIUS = 12
 local MOON_EVENT_MINPIECES = 3
@@ -73,7 +75,7 @@ local function SetMaterial(inst, materialid)
     inst.AnimState:SetBuild(build)
 
 	inst.components.lootdropper:SetLoot({MATERIALS[materialid].prefab})
-	
+
 	inst.components.symbolswapdata:SetData(build, "swap_body")
 
     local inv_image_suffix = (materialid ~= nil and MATERIALS[materialid].inv_suffix) or ""
@@ -184,12 +186,10 @@ end
 
 local function onsave(inst, data)
     data.materialid = inst.materialid
-    data.pieceid = inst.pieceid
 end
 
 local function onload(inst, data)
     if data ~= nil then
-        inst.pieceid = data.pieceid
         SetMaterial(inst, data.materialid or 1)
 
         -- The moonglass sculptures don't need any of the shadow creature stuff.
@@ -213,10 +213,10 @@ local function makepiece(pieceid, materialid)
         Asset("ANIM", "anim/chesspiece.zip"),
     }
 
-    local prefabs = 
+    local prefabs =
     {
 		"collapse_small",
-		
+
 		"underwater_salvageable",
 		"splash_green",
     }
@@ -291,7 +291,7 @@ local function makepiece(pieceid, materialid)
         inst.components.workable:SetWorkAction(ACTIONS.HAMMER)
         inst.components.workable:SetWorkLeft(1)
 		inst.components.workable:SetOnFinishCallback(onworkfinished)
-		
+
 		inst:AddComponent("submersible")
 		inst:AddComponent("symbolswapdata")
 		inst.components.symbolswapdata:SetData(build, "swap_body")

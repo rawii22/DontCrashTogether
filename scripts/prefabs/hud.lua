@@ -17,11 +17,16 @@ local assets =
     Asset("IMAGE", "images/fx5.tex"),
 
     Asset("ANIM", "anim/sand_over.zip"),
+    Asset("ANIM", "anim/moonstorm_over.zip"),
+    Asset("ANIM", "anim/moonstorm_over_static.zip"),
     Asset("ANIM", "anim/mind_control_overlay.zip"),
+    Asset("ANIM", "anim/screenlightning.zip"),
 
     Asset("ANIM", "anim/clock_transitions.zip"),
     Asset("ANIM", "anim/moon_phases_clock.zip"),
+    Asset("ANIM", "anim/moon_phases_clock_alter.zip"),
     Asset("ANIM", "anim/moon_phases.zip"),
+    Asset("ANIM", "anim/moonalter_phases.zip"),
     Asset("ANIM", "anim/cave_clock.zip"),
 
     Asset("PKGREF", "anim/health.zip"),
@@ -67,13 +72,14 @@ local assets =
     Asset("IMAGE", "images/serverbrowser.tex"),
     --
 
-    Asset("PKGREF", "anim/wet_meter_player.zip"),     
+    Asset("PKGREF", "anim/wet_meter_player.zip"),
     Asset("ANIM", "anim/wet_meter.zip"),
 
     Asset("PKGREF", "anim/boat_meter.zip"),
     Asset("PKGREF", "anim/boat_meter_leak.zip"),
 
     Asset("ANIM", "anim/tab_gift.zip"),
+    Asset("ANIM", "anim/tab_yotb.zip"),
 
     Asset("INV_IMAGE", "unknown_head"),
     Asset("INV_IMAGE", "unknown_hand"),

@@ -60,7 +60,7 @@ function BeeBrain:OnStart()
 
         --ChaseAndAttack(self.inst, beecommon.MAX_CHASE_TIME),
         WhileNode( function() return IsHomeOnFire(self.inst) end, "HomeOnFire", Panic(self.inst)),
-        IfNode(function() return not TheWorld.state.iscaveday or not self.inst.LightWatcher:IsInLight() end, "IsNight",
+        IfNode(function() return not TheWorld.state.iscaveday or not self.inst:IsInLight() end, "IsNight",
             DoAction(self.inst, function() return beecommon.GoHomeAction(self.inst) end, "go home", true )),
         IfNode(function() return self.inst.components.pollinator:HasCollectedEnough() end, "IsFullOfPollen",
             DoAction(self.inst, function() return beecommon.GoHomeAction(self.inst) end, "go home", true )),
@@ -71,7 +71,7 @@ function BeeBrain:OnStart()
             Wander(self.inst, function() return GetBeeBeaconPos(self) end, MAX_WANDER_DIST_BEE_BEACON)),
 
         FindFlower(self.inst),
-        Wander(self.inst, function() return self.inst.components.knownlocations:GetLocation("home") end, beecommon.MAX_WANDER_DIST)            
+        Wander(self.inst, function() return self.inst.components.knownlocations:GetLocation("home") end, beecommon.MAX_WANDER_DIST)
     }, 1)
 
     self.bt = BT(self.inst, root)

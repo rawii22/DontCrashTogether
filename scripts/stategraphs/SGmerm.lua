@@ -1,12 +1,14 @@
 require("stategraphs/commonstates")
 
-local actionhandlers = 
+local actionhandlers =
 {
     ActionHandler(ACTIONS.GOHOME, "gohome"),
     ActionHandler(ACTIONS.EAT, "eat"),
     ActionHandler(ACTIONS.CHOP, "chop"),
     ActionHandler(ACTIONS.MINE, "mine"),
     ActionHandler(ACTIONS.HAMMER, "hammer"),
+    ActionHandler(ACTIONS.MARK, "chop"),
+    ActionHandler(ACTIONS.PICKUP, "pickup"),
 }
 
 
@@ -34,7 +36,7 @@ local events=
         end
 
         if not inst.sg:HasStateTag("transforming") then
-            if TheWorld.components.mermkingmanager and TheWorld.components.mermkingmanager:ShouldTransform(inst) then 
+            if TheWorld.components.mermkingmanager and TheWorld.components.mermkingmanager:ShouldTransform(inst) then
                 if inst.sg:HasStateTag("sitting") then
                     inst.sg:GoToState("getup")
                 elseif not inst.sg:HasStateTag("gettingup") then
@@ -48,16 +50,26 @@ local events=
         end
     end),
 
-    EventHandler("getup", function(inst) 
+    EventHandler("getup", function(inst)
         inst.sg:GoToState("getup")
     end),
 
-    EventHandler("onmermkingcreated", function(inst) 
+    EventHandler("onmermkingcreated", function(inst)
         inst.sg:GoToState("buff")
     end),
-    EventHandler("onmermkingdestroyed", function(inst) 
+    EventHandler("onmermkingdestroyed", function(inst)
         inst.sg:GoToState("debuff")
-    end),   
+    end),
+    EventHandler("cheer", function(inst, data)
+        if not (inst.sg:HasStateTag("busy") or inst.components.health:IsDead()) then
+            inst.sg:GoToState("cheer")
+        end
+    end),
+    EventHandler("win_yotb", function(inst, data)
+        if not (inst.sg:HasStateTag("busy") or inst.components.health:IsDead()) then
+            inst.sg:GoToState("win_yotb")
+        end
+    end),
 }
 
 local states=
@@ -138,7 +150,7 @@ local states=
             TimeEvent(30 * FRAMES, function(inst)
                 inst.SoundEmitter:PlaySound("dontstarve/characters/wurt/merm/transform_pre")
             end),
-        },        
+        },
 
         events =
         {
@@ -146,7 +158,7 @@ local states=
                 TheWorld:PushEvent("oncandidatekingarrived", {candidate = inst})
             end),
         },
-        
+
     },
 
     State{
@@ -188,7 +200,7 @@ local states=
 
                 if inst.bufferedaction ~= nil then
                     local target = inst.bufferedaction.target
-                    
+
                     if target ~= nil and target:IsValid() then
                         local frozen = target:HasTag("frozen")
                         local moonglass = target:HasTag("moonglass")
@@ -244,10 +256,10 @@ local states=
 
         onenter = function(inst)
             inst.Physics:Stop()
-            
+
             if inst:HasTag("guard") then
                 inst.AnimState:PlayAnimation("transform_pre")
-            else                
+            else
                 inst.AnimState:PlayAnimation("buff")
             end
             local fx = SpawnPrefab("merm_splash")
@@ -260,7 +272,7 @@ local states=
             TimeEvent(9 * FRAMES, function(inst)
                 inst.SoundEmitter:PlaySound(inst.sounds.buff)
             end),
-        },        
+        },
 
         events =
         {
@@ -314,6 +326,40 @@ local states=
             end),
         },
     },
+
+    State{
+        name = "cheer",
+        tags = { "busy" },
+
+        onenter = function(inst)
+            inst.Physics:Stop()
+            inst.AnimState:PlayAnimation("buff")
+        end,
+
+        events =
+        {
+            EventHandler("animover", function(inst)
+                inst.sg:GoToState("idle")
+            end),
+        },
+    },
+
+    State{
+        name = "win_yotb",
+        tags = { "busy" },
+
+        onenter = function(inst)
+            inst.Physics:Stop()
+            inst.AnimState:PlayAnimation("win")
+        end,
+
+        events =
+        {
+            EventHandler("animover", function(inst)
+                inst.sg:GoToState("idle")
+            end),
+        },
+    },
 }
 
 CommonStates.AddWalkStates(states,
@@ -333,7 +379,7 @@ CommonStates.AddRunStates(states,
 
 CommonStates.AddSleepStates(states,
 {
-	sleeptimeline = 
+	sleeptimeline =
 	{
 		TimeEvent(35*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve/creatures/merm/sleep") end ),
 	},
@@ -341,17 +387,17 @@ CommonStates.AddSleepStates(states,
 
 CommonStates.AddCombatStates(states,
 {
-    attacktimeline = 
+    attacktimeline =
     {
         TimeEvent(0*FRAMES, function(inst) inst.SoundEmitter:PlaySound(inst.sounds.attack) end),
         TimeEvent(0*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve/wilson/attack_whoosh") end),
         TimeEvent(13*FRAMES, function(inst) inst.components.combat:DoAttack() end),
     },
-    hittimeline = 
+    hittimeline =
     {
         TimeEvent(0*FRAMES, function(inst) inst.SoundEmitter:PlaySound(inst.sounds.hit) end),
     },
-    deathtimeline = 
+    deathtimeline =
     {
         TimeEvent(0*FRAMES, function(inst) inst.SoundEmitter:PlaySound(inst.sounds.death) end),
     },
@@ -363,6 +409,6 @@ CommonStates.AddSimpleState(states, "refuse", "pig_reject", { "busy" })
 CommonStates.AddFrozenStates(states)
 CommonStates.AddHopStates(states, true, { pre = "boat_jump_pre", loop = "boat_jump_loop", pst = "boat_jump_pst"})
 CommonStates.AddSinkAndWashAsoreStates(states)
+CommonStates.AddSimpleActionState(states, "pickup", "pig_pickup", 10 * FRAMES, { "busy" })
 
-    
 return StateGraph("merm", states, events, "idle", actionhandlers)

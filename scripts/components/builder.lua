@@ -155,7 +155,7 @@ function Builder:EvaluateTechTrees()
                 --activate the first machine in the list. This will be the one you're closest to.
                 v.components.prototyper:TurnOn(self.inst)
                 self.accessible_tech_trees = v.components.prototyper:GetTechTrees()
-                
+
                 if v.components.craftingstation ~= nil then
                     local recs = v.components.craftingstation:GetRecipes(self.inst)
                     for _, recname in ipairs(recs) do
@@ -165,7 +165,7 @@ function Builder:EvaluateTechTrees()
                             self.station_recipes[recname] = true
 						end
                     end
-				end                    
+				end
 
                 prototyper_active = true
                 self.current_prototyper = v
@@ -226,14 +226,14 @@ function Builder:EvaluateTechTrees()
 
     if not trees_changed then
         for k, v in pairs(old_accessible_tech_trees) do
-            if v ~= self.accessible_tech_trees[k] then 
+            if v ~= self.accessible_tech_trees[k] then
                 trees_changed = true
                 break
             end
         end
         if not trees_changed then
             for k, v in pairs(self.accessible_tech_trees) do
-                if v ~= old_accessible_tech_trees[k] then 
+                if v ~= old_accessible_tech_trees[k] then
                     trees_changed = true
                     break
                 end
@@ -293,9 +293,11 @@ function Builder:GetIngredients(recname)
     if recipe then
         local ingredients = {}
         for k,v in pairs(recipe.ingredients) do
-            local amt = math.max(1, RoundBiasedUp(v.amount * self.ingredientmod))
-            local items = self.inst.components.inventory:GetItemByName(v.type, amt)
-            ingredients[v.type] = items
+			if v.amount > 0 then
+				local amt = math.max(1, RoundBiasedUp(v.amount * self.ingredientmod))
+				local items = self.inst.components.inventory:GetItemByName(v.type, amt)
+				ingredients[v.type] = items
+			end
         end
         return ingredients
     end
@@ -305,7 +307,15 @@ function Builder:RemoveIngredients(ingredients, recname)
     for item, ents in pairs(ingredients) do
         for k,v in pairs(ents) do
             for i = 1, v do
-                self.inst.components.inventory:RemoveItem(k, false):Remove()
+                local item = self.inst.components.inventory:RemoveItem(k, false)
+
+                -- If the item we're crafting with is a container,
+                -- drop the contained items onto the ground.
+                if item.components.container ~= nil then
+                    item.components.container:DropEverything(self.inst:GetPosition())
+                end
+
+                item:Remove()
             end
         end
     end
@@ -388,6 +398,17 @@ function Builder:MakeRecipe(recipe, pt, rot, skin, onsuccess)
     return false
 end
 
+local function GiveOrDropItem(self, recipe, item, pt)
+	if recipe.dropitem then
+		local angle = (self.inst.Transform:GetRotation() + GetRandomMinMax(-65, 65)) * DEGREES
+		local r = item:GetPhysicsRadius(0.5) + self.inst:GetPhysicsRadius(0.5) + 0.1
+		item.Transform:SetPosition(pt.x + r * math.cos(angle), pt.y, pt.z - r * math.sin(angle))
+		item.components.inventoryitem:OnDropped()
+	else
+	    self.inst.components.inventory:GiveItem(item, nil, pt)
+	end
+end
+
 function Builder:DoBuild(recname, pt, rotation, skin)
     local recipe = GetValidRecipe(recname)
     if recipe ~= nil and (self:IsBuildBuffered(recname) or self:CanBuild(recname)) then
@@ -450,13 +471,14 @@ function Builder:DoBuild(recname, pt, rotation, skin)
                     --self.inst.components.inventory:GiveItem(prod)
                     self.inst:PushEvent("builditem", { item = prod, recipe = recipe, skin = skin, prototyper = self.current_prototyper })
                     if self.current_prototyper ~= nil and self.current_prototyper:IsValid() then
-                        self.current_prototyper:PushEvent("builditem", { item = prod, recipe = recipe, skin = skin }) -- added this back for the gorge. 
+                        self.current_prototyper:PushEvent("builditem", { item = prod, recipe = recipe, skin = skin }) -- added this back for the gorge.
                     end
                     ProfileStatsAdd("build_"..prod.prefab)
 
-                    if prod.components.equippable ~= nil and
-                        self.inst.components.inventory:GetEquippedItem(prod.components.equippable.equipslot) == nil and
-                        not prod.components.equippable:IsRestricted(self.inst) then
+                    if prod.components.equippable ~= nil
+						and not recipe.dropitem
+                        and self.inst.components.inventory:GetEquippedItem(prod.components.equippable.equipslot) == nil
+                        and not prod.components.equippable:IsRestricted(self.inst) then
                         if recipe.numtogive <= 1 then
                             --The item is equippable. Equip it.
                             self.inst.components.inventory:Equip(prod)
@@ -475,18 +497,18 @@ function Builder:DoBuild(recname, pt, rotation, skin)
                         end
                     elseif recipe.numtogive <= 1 then
                         --Only the original item is being received.
-                        self.inst.components.inventory:GiveItem(prod, nil, pt)
+						GiveOrDropItem(self, recipe, prod, pt)
                     elseif prod.components.stackable ~= nil then
                         --The item is stackable. Just increase the stack size of the original item.
                         prod.components.stackable:SetStackSize(recipe.numtogive)
-                        self.inst.components.inventory:GiveItem(prod, nil, pt)
+						GiveOrDropItem(self, recipe, prod, pt)
                     else
                         --We still need to give the player the original product that was spawned, so do that.
-                        self.inst.components.inventory:GiveItem(prod, nil, pt)
+						GiveOrDropItem(self, recipe, prod, pt)
                         --Now spawn in the rest of the items and give them to the player.
                         for i = 2, recipe.numtogive do
                             local addt_prod = SpawnPrefab(recipe.product)
-                            self.inst.components.inventory:GiveItem(addt_prod, nil, pt)
+							GiveOrDropItem(self, recipe, addt_prod, pt)
                         end
                     end
 
@@ -500,7 +522,21 @@ function Builder:DoBuild(recname, pt, rotation, skin)
                     return true
                 end
             else
-                prod.Transform:SetPosition(pt:Get())
+                local spawn_pos = pt
+
+                -- If a non-inventoryitem recipe specifies dropitem, position the created object
+                -- away from the builder so that they don't overlap.
+                if recipe.dropitem then
+                    local angle = (self.inst.Transform:GetRotation() + GetRandomMinMax(-65, 65)) * DEGREES
+                    local r = prod:GetPhysicsRadius(0.5) + self.inst:GetPhysicsRadius(0.5) + 0.1
+                    spawn_pos = Vector3(
+                        spawn_pos.x + r * math.cos(angle),
+                        spawn_pos.y,
+                        spawn_pos.z - r * math.sin(angle)
+                    )
+                end
+
+                prod.Transform:SetPosition(spawn_pos:Get())
                 --V2C: or 0 check added for backward compatibility with mods that
                 --     have not been updated to support placement rotation yet
                 prod.Transform:SetRotation(rotation or 0)

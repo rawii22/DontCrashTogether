@@ -1,3 +1,5 @@
+require("worldsettingsutil")
+
 local assets =
 {
     Asset("ANIM", "anim/grass.zip"),
@@ -23,14 +25,8 @@ local prefabs =
     "grasspartfx",
 }
 
-local function SpawnDiseasePuff(inst)
-    SpawnPrefab("disease_puff").Transform:SetPosition(inst.Transform:GetWorldPosition())
-end
-
 local function canmorph(inst)
     return inst.AnimState:IsCurrentAnimation("idle")
-        and not (inst.components.diseaseable ~= nil and
-                inst.components.diseaseable:IsDiseased())
 end
 
 local TRIGGERMORPH_MUST_TAGS = { "renewable" }
@@ -45,21 +41,21 @@ local function triggernearbymorph(inst, quick, range)
     for i, v in ipairs(ents) do
         if v ~= inst and
             v.prefab == "grass" and
-            v.components.timer ~= nil and
-            not (v.components.timer:TimerExists("morphdelay") or
-                v.components.timer:TimerExists("morphing") or
-                v.components.timer:TimerExists("morphrelay")) then
+            v.components.worldsettingstimer ~= nil and
+            not (v.components.worldsettingstimer:ActiveTimerExists("morphdelay") or
+                v.components.worldsettingstimer:ActiveTimerExists("morphing") or
+                v.components.worldsettingstimer:ActiveTimerExists("morphrelay")) then
 
             count = count + 1
 
             if canmorph(v) and math.random() < .75 then
-                v.components.timer:StartTimer(
+                v.components.worldsettingstimer:StartTimer(
                     "morphing",
                     ((not quick or count > 3) and .75 + math.random() * 1.5) or
                     (.2 + math.random() * .2) * count
                 )
             else
-                v.components.timer:StartTimer("morphrelay", count * FRAMES)
+                v.components.worldsettingstimer:StartTimer("morphrelay", count * FRAMES)
             end
         end
     end
@@ -72,16 +68,8 @@ end
 local function dig_up(inst, worker)
     if inst.components.pickable ~= nil and inst.components.lootdropper ~= nil then
         local withered = inst.components.witherable ~= nil and inst.components.witherable:IsWithered()
-        local diseased = inst.components.diseaseable ~= nil and inst.components.diseaseable:IsDiseased()
 
-        if diseased then
-            SpawnDiseasePuff(inst)
-        elseif inst.components.diseaseable ~= nil and inst.components.diseaseable:IsBecomingDiseased() then
-            SpawnDiseasePuff(inst)
-            if worker ~= nil then
-                worker:PushEvent("digdiseasing")
-            end
-        elseif not TheWorld.state.iswinter
+        if not TheWorld.state.iswinter
             and worker ~= nil
             and worker:HasTag("player")
             and math.random() < TUNING.GRASSGEKKO_MORPH_CHANCE then
@@ -92,11 +80,7 @@ local function dig_up(inst, worker)
             inst.components.lootdropper:SpawnLootPrefab(inst.components.pickable.product)
         end
 
-        inst.components.lootdropper:SpawnLootPrefab(
-            (withered or diseased) and
-            "cutgrass" or
-            "dug_grass"
-        )
+        inst.components.lootdropper:SpawnLootPrefab(withered and "cutgrass" or "dug_grass")
     end
     inst:Remove()
 end
@@ -135,14 +119,7 @@ local function onpickedfn(inst, picker)
     inst.SoundEmitter:PlaySound("dontstarve/wilson/pickup_reeds")
     inst.AnimState:PlayAnimation("picking")
 
-    if inst.components.diseaseable ~= nil and inst.components.diseaseable:IsDiseased() then
-        SpawnDiseasePuff(inst)
-    elseif inst.components.diseaseable ~= nil and inst.components.diseaseable:IsBecomingDiseased() then
-        SpawnDiseasePuff(inst)
-        if picker ~= nil then
-            picker:PushEvent("pickdiseasing")
-        end
-    elseif not TheWorld.state.iswinter
+    if not TheWorld.state.iswinter
         and picker ~= nil
         and picker:HasTag("player")
         and math.random() < TUNING.GRASSGEKKO_MORPH_CHANCE then
@@ -154,41 +131,6 @@ local function onpickedfn(inst, picker)
         inst.AnimState:PushAnimation("idle_dead", false)
     else
         inst.AnimState:PushAnimation("picked", false)
-    end
-end
-
-local function SetDiseaseBuild(inst)
-    inst.AnimState:SetBuild("grass_diseased_build")
-end
-
-local function ondiseasedfn(inst)
-    inst.components.pickable:ChangeProduct("spoiled_food")
-    if POPULATING then
-        SetDiseaseBuild(inst)
-    elseif inst.components.pickable:CanBePicked() then
-        inst.AnimState:PlayAnimation("rustle")
-        inst.AnimState:PushAnimation("idle", true)
-        SpawnDiseasePuff(inst)
-        inst:DoTaskInTime(4 * FRAMES, SetDiseaseBuild)
-    else
-        if inst.components.witherable ~= nil and
-            inst.components.witherable:IsWithered() or
-            inst.components.pickable:IsBarren() then
-            inst.AnimState:PlayAnimation("rustle_dead")
-            inst.AnimState:PushAnimation("idle_dead", false)
-        else
-            inst.AnimState:PlayAnimation("rustle_empty")
-            inst.AnimState:PushAnimation("picked", false)
-        end
-        inst:DoTaskInTime(2 * FRAMES, SpawnDiseasePuff)
-        inst:DoTaskInTime(6 * FRAMES, SetDiseaseBuild)
-    end
-end
-
-local function makediseaseable(inst)
-    if inst.components.diseaseable == nil then
-        inst:AddComponent("diseaseable")
-        inst.components.diseaseable:SetDiseasedFn(ondiseasedfn)
     end
 end
 
@@ -213,36 +155,39 @@ local function onmorphtimer(inst, data)
                 return
             end
         end
-        inst.components.timer:StartTimer("morphdelay", GetRandomWithVariance(TUNING.GRASSGEKKO_MORPH_DELAY, TUNING.GRASSGEKKO_MORPH_DELAY_VARIANCE))
+        inst.components.worldsettingstimer:StartTimer("morphdelay", GetRandomWithVariance(TUNING.GRASSGEKKO_MORPH_DELAY, TUNING.GRASSGEKKO_MORPH_DELAY_VARIANCE))
         triggernearbymorph(inst, false)
     end
 end
 
 local function makemorphable(inst)
-    if inst.components.timer == nil then
-        inst:AddComponent("timer")
+    if inst.components.worldsettingstimer == nil then
+        inst:AddComponent("worldsettingstimer")
+        inst.components.worldsettingstimer:AddTimer("morphdelay", TUNING.GRASSGEKKO_MORPH_DELAY, TUNING.GRASSGEKKO_MORPH_ENABLED)
+        inst.components.worldsettingstimer:AddTimer("morphing", 1, TUNING.GRASSGEKKO_MORPH_ENABLED)
+        inst.components.worldsettingstimer:AddTimer("morphrelay", FRAMES, TUNING.GRASSGEKKO_MORPH_ENABLED)
         inst:ListenForEvent("timerdone", onmorphtimer)
     end
 end
 
 local function ontransplantfn(inst)
     inst.components.pickable:MakeBarren()
-    makediseaseable(inst)
     makemorphable(inst)
-    inst.components.diseaseable:RestartNearbySpread()
-    inst.components.timer:StartTimer("morphdelay", GetRandomWithVariance(TUNING.GRASSGEKKO_MORPH_DELAY, TUNING.GRASSGEKKO_MORPH_DELAY_VARIANCE))
+    inst.components.worldsettingstimer:StartTimer("morphdelay", GetRandomWithVariance(TUNING.GRASSGEKKO_MORPH_DELAY, TUNING.GRASSGEKKO_MORPH_DELAY_VARIANCE))
 end
 
 local function OnPreLoad(inst, data)
+    WorldSettings_Timer_PreLoad(inst, data, "morphdelay", TUNING.GRASSGEKKO_MORPH_DELAY + TUNING.GRASSGEKKO_MORPH_DELAY_VARIANCE)
+    WorldSettings_Timer_PreLoad_Fix(inst, data, "morphdelay", 1)
+    WorldSettings_Timer_PreLoad(inst, data, "morphing")
+    WorldSettings_Timer_PreLoad_Fix(inst, data, "morphing", 1)
+    WorldSettings_Timer_PreLoad(inst, data, "morphrelay")
+    WorldSettings_Timer_PreLoad_Fix(inst, data, "morphrelay", 1)
     if data ~= nil then
         if data.pickable ~= nil and data.pickable.transplanted then
-            makediseaseable(inst)
             makemorphable(inst)
         else
-            if data.diseaseable ~= nil then
-                makediseaseable(inst)
-            end
-            if data.timer ~= nil then
+            if data.worldsettingstimer ~= nil then
                 makemorphable(inst)
             end
         end
@@ -267,6 +212,7 @@ local function grass(name, stage)
 
         inst:AddTag("plant")
         inst:AddTag("renewable")
+		inst:AddTag("silviculture") -- for silviculture book
 
         --witherable (from witherable component) added to pristine state for optimization
         inst:AddTag("witherable")
@@ -317,7 +263,6 @@ local function grass(name, stage)
         ---------------------
 
         inst.OnPreLoad = OnPreLoad
-        inst.MakeDiseaseable = makediseaseable
 
         return inst
     end

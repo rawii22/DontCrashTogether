@@ -74,7 +74,7 @@ local function Refill(inst, snap)
 
     inst._glassed = false
     inst:RemoveTag("moonglass")
-    inst:AddTag("watersource")
+    inst.components.watersource.available = true
     inst.components.bathbombable:Reset()
 
 	if not snap then
@@ -96,7 +96,7 @@ end
 local function RemoveGlass(inst)
     inst._glassed = false
     inst:RemoveTag("moonglass")
-    inst:RemoveTag("watersource")
+    inst.components.watersource.available = false
     inst.components.bathbombable:DisableBathBombing()
 	inst.AnimState:PlayAnimation("empty")
 	StopFx(inst)
@@ -120,7 +120,7 @@ end
 local function TurnToGlassed(inst, is_loading)
     inst._glassed = true
     inst:AddTag("moonglass")
-    inst:RemoveTag("watersource")
+    inst.components.watersource.available = false
 	inst.components.bathbombable:DisableBathBombing()
 
     inst.Light:Enable(false)
@@ -133,7 +133,7 @@ local function TurnToGlassed(inst, is_loading)
         inst.AnimState:PlayAnimation("glassify")
         inst.AnimState:PushAnimation("glass_full", false)
 	    inst.SoundEmitter:PlaySound("turnoftides/common/together/water/hotspring/glassify")
-		
+
         inst.components.workable:SetWorkLeft(TUNING.HOTSPRING_WORK)
     end
 
@@ -143,7 +143,7 @@ end
 --------------------------------------------------------------------------
 
 local function GetHeat(inst)
-    return (inst.components.bathbombable.is_bathbombed and TUNING.HOTSPRING_HEAT.ACTIVE) 
+    return (inst.components.bathbombable.is_bathbombed and TUNING.HOTSPRING_HEAT.ACTIVE)
 			or (inst.components.bathbombable.can_be_bathbombed and TUNING.HOTSPRING_HEAT.PASSIVE)
 			or 0
 end
@@ -193,7 +193,7 @@ end
 
 local function GetStatus(inst)
 	return inst._glassed and "GLASS"
-			or inst._bathbombed and "BOMBED" 
+			or inst._bathbombed and "BOMBED"
 			or (not inst.components.bathbombable.is_bathbombed and not inst.components.bathbombable.can_be_bathbombed) and "EMPTY"
 			or nil
 end
@@ -249,6 +249,7 @@ local function hotspring()
 
     inst.MiniMapEntity:SetIcon("hotspring.png")
 
+    -- From watersource component
     inst:AddTag("watersource")
     inst:AddTag("antlion_sinkhole_blocker")
     inst:AddTag("birdblocker")
@@ -280,7 +281,7 @@ local function hotspring()
 
     inst:AddComponent("bathbombable")
     inst.components.bathbombable:SetOnBathBombedFn(OnBathBombed)
-    
+
     inst:AddComponent("workable")
     inst.components.workable:SetWorkAction(ACTIONS.MINE)
     inst.components.workable:SetOnFinishCallback(OnGlassedSpringMineFinished)
@@ -291,6 +292,8 @@ local function hotspring()
 
     inst:AddComponent("lootdropper")
     inst.components.lootdropper:SetLoot(MINED_GLASS_LOOT_TABLE)
+
+    inst:AddComponent("watersource")
 
     inst._bathbombed = false
     inst._glassed = false

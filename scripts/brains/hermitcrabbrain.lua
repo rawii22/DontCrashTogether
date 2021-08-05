@@ -39,9 +39,9 @@ local KEEP_FACE_DIST = 6
 local function getstring(inst, stringdata)
     if stringdata["LOW"] then
         local gfl = inst.getgeneralfriendlevel(inst)
-        return stringdata[gfl][math.random(1,#stringdata[gfl])]    
+        return stringdata[gfl][math.random(1,#stringdata[gfl])]
     else
-        return stringdata[math.random(1,#stringdata)]    
+        return stringdata[math.random(1,#stringdata)]
     end
 end
 
@@ -126,7 +126,7 @@ local function GetTraderFn(inst)
                 inst.components.timer:SetTimeLeft("complain_time", time + 10)
             else
                 inst.components.timer:StartTimer("complain_time",10 + (math.random()*30))
-            end        
+            end
 
             return v
         end
@@ -161,7 +161,7 @@ local function GoHomeAction(inst)
     end
 end
 
-local function GetHomePos(inst)  
+local function GetHomePos(inst)
     return HasValidHome(inst) and inst.components.homeseeker:GetHomePos()
 end
 
@@ -190,9 +190,9 @@ end
 local function getfriendlevelspeech(inst, target)
     if not inst.components.timer:TimerExists("speak_time") then
 
-        local level = inst.components.friendlevels.level        
+        local level = inst.components.friendlevels.level
         local str = STRINGS.HERMITCRAB_GREETING[level][math.random(1,#STRINGS.HERMITCRAB_GREETING[level])]
-       
+
         if type(str) == "table" then
             local new = {}
             for i,sstr in ipairs(str)do
@@ -207,10 +207,10 @@ local function getfriendlevelspeech(inst, target)
         local rewardstr = inst.rewardcheck(inst)
         if rewardstr then
             str = rewardstr
-            if inst.giverewardstask then            
+            if inst.giverewardstask then
                 inst.giverewardstask:Cancel()
-                inst.giverewardstask = nil  
-            end          
+                inst.giverewardstask = nil
+            end
         else
             --othewise, do some cutsom stuff for fun.
             if target and level == 10 and not inst.components.timer:TimerExists("hermit_grannied"..target.GUID) then
@@ -233,7 +233,7 @@ local function getfriendlevelspeech(inst, target)
                 end
             end
         end
-        
+
         inst.components.timer:StartTimer("speak_time",TUNING.HERMITCRAB.SPEAKTIME)
 
         if inst.components.timer:TimerExists("complain_time") then
@@ -241,7 +241,7 @@ local function getfriendlevelspeech(inst, target)
             inst.components.timer:SetTimeLeft("complain_time", time + 10)
         else
             inst.components.timer:StartTimer("complain_time",10 + (math.random()*30))
-        end        
+        end
 
         return str
     end
@@ -287,14 +287,14 @@ local function KeepFaceTargetFn(inst, target)
         and inst:IsNear(target, KEEP_FACE_DIST)
 end
 
-function DoCommentAction(inst)
+local function DoCommentAction(inst)
     if inst.comment_data then
         return BufferedAction(inst, nil, ACTIONS.COMMENT, nil, inst.comment_data.pos)
     end
 end
 
 local HARVEST_TAGS = {"dried"}
-function DoHarvestMeat(inst)
+local function DoHarvestMeat(inst)
     local source = inst.CHEVO_marker
     if source then
         local x,y,z = source.Transform:GetWorldPosition()
@@ -312,14 +312,14 @@ function DoHarvestMeat(inst)
 end
 
 local PICKABLE_TAGS = {"pickable","bush"}
-function DoHarvestBerries(inst)
+local function DoHarvestBerries(inst)
     local source = inst.CHEVO_marker
-    if source then 
+    if source then
         local x,y,z = source.Transform:GetWorldPosition()
         local ents = TheSim:FindEntities(x,y,z, inst.island_radius, PICKABLE_TAGS)
         local target = nil
-        if #ents > 0 then        
-            for i,ent in ipairs(ents)do    
+        if #ents > 0 then
+            for i,ent in ipairs(ents)do
                 target = ent
                 break
             end
@@ -332,7 +332,7 @@ end
 
 local FISHING_MARKER_TAGS = {"hermitcrab_marker_fishing"}
 local FISH_TAGS = {"oceanfish"}
-function DoFishingAction(inst)
+local function DoFishingAction(inst)
     if not using_umbrella(inst) then
         local source = inst.CHEVO_marker
         if source then
@@ -359,13 +359,13 @@ function DoFishingAction(inst)
     end
 end
 
-function DoReel(inst)
+local function DoReel(inst)
     if inst.hookfish and inst:HasTag("fishing_idle") then
         return BufferedAction(inst, nil, ACTIONS.OCEAN_FISHING_REEL)
     end
 end
 
-function runawaytest(inst)
+local function runawaytest(inst)
     if inst.components.friendlevels.level <= TUNING.HERMITCRAB.UNFRIENDLY_LEVEL then
         local player = FindClosestPlayerToInst(inst, STOP_RUN_DIST, true)
         if not player then
@@ -380,14 +380,14 @@ function runawaytest(inst)
     end
 end
 
-function DoBottleToss(inst)
+local function DoBottleToss(inst)
     if not inst.components.timer:TimerExists("bottledelay") and not using_umbrella(inst) then
         local source = inst.CHEVO_marker
         if source then
             local x,y,z = source.Transform:GetWorldPosition()
             local ents = TheSim:FindEntities(x,y,z, inst.island_radius, FISHING_MARKER_TAGS)
             if #ents > 0 then
-                local pos = Vector3(ents[math.random(1,#ents)].Transform:GetWorldPosition())        
+                local pos = Vector3(ents[math.random(1,#ents)].Transform:GetWorldPosition())
 
                 if pos then
                     local equipped = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
@@ -427,9 +427,9 @@ end)
 function HermitBrain:OnStart()
 
     local day = WhileNode( function() return TheWorld.state.isday or allnighttest(self.inst) end, "IsDay",
-        PriorityNode{  
+        PriorityNode{
             WhileNode( function() return not self.inst.sg:HasStateTag("mandatory") end, "unfriendly",
-                PriorityNode{  
+                PriorityNode{
                 ChattyNode(self.inst, function(inst) return getstring(inst,STRINGS.HERMITCRAB_ATTEMPT_TRADE) end,
                     FaceEntity(self.inst, GetTraderFn, KeepTraderFn)),
                 FaceEntity(self.inst, GetTraderFn, KeepTraderFn),
@@ -438,7 +438,7 @@ function HermitBrain:OnStart()
                 IfNode( function() return self.inst.components.friendlevels.level > TUNING.HERMITCRAB.UNFRIENDLY_LEVEL end, "friendly",
                       FaceEntity(self.inst, GetFaceTargetFn, KeepFaceTargetFn)),
                 WhileNode( function() return self.inst.comment_data ~= nil end, "comment",
-                            DoAction(self.inst, DoCommentAction, "comment", true )),  
+                            DoAction(self.inst, DoCommentAction, "comment", true )),
                 DoAction(self.inst, DoReel, "reel", true ),
                 IfNode( function() return not self.inst.sg:HasStateTag("alert") and not self.inst.sg:HasStateTag("npc_fishing") and not self.inst.sg:HasStateTag("busy") and not self.inst.components.locomotor.dest end, "not fishing",
                     PriorityNode{
@@ -455,7 +455,7 @@ function HermitBrain:OnStart()
         PriorityNode{
             RunAway(self.inst, "player", START_RUN_DIST, STOP_RUN_DIST, function(target) return ShouldRunAway(self.inst, target) end ),
             ChattyNode(self.inst, function(inst) return getstring(inst,STRINGS.HERMITCRAB_GO_HOME) end ,
-                WhileNode( function() return not TheWorld.state.iscaveday or not self.inst.LightWatcher:IsInLight() end, "Cave nightness",
+                WhileNode( function() return not TheWorld.state.iscaveday or not self.inst:IsInLight() end, "Cave nightness",
                     DoAction(self.inst, GoHomeAction, "go home", true ))),
             ChattyNode(self.inst, function(inst) return getstring(inst,STRINGS.HERMITCRAB_PANIC) end,
                 Panic(self.inst)),
@@ -464,7 +464,7 @@ function HermitBrain:OnStart()
     local root =
         PriorityNode(
         {
-            
+
             WhileNode( function() return self.inst.components.hauntable and self.inst.components.hauntable.panic end, "PanicHaunted",
                 ChattyNode(self.inst, function(inst) return getstring(inst,STRINGS.HERMITCRAB_PANICHAUNT) end,
                     Panic(self.inst))),
@@ -473,7 +473,7 @@ function HermitBrain:OnStart()
             IfNode( function() return not self.inst.sg:HasStateTag("busy") and TheWorld.state.israining and has_umbrella(self.inst) and not using_umbrella(self.inst) end, "umbrella",
                     DoAction(self.inst, EquipUmbrella, "umbrella", true )),
             IfNode( function() return not self.inst.sg:HasStateTag("busy") and not TheWorld.state.israining and using_umbrella(self.inst) end, "stop umbrella",
-                    DoAction(self.inst, UnEquipHands, "stop umbrella", true )),  
+                    DoAction(self.inst, UnEquipHands, "stop umbrella", true )),
             IfNode( function() return not self.inst.sg:HasStateTag("busy") and TheWorld.state.issnowing and has_coat(self.inst) and not using_coat(self.inst) end, "coat",
                     DoAction(self.inst, EquipCoat, "coat", true )),
             IfNode( function() return not self.inst.sg:HasStateTag("busy") and not TheWorld.state.issnowing and using_coat(self.inst) end, "stop coat",

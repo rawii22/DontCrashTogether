@@ -1,25 +1,27 @@
 local function onpercent(self)
-    local percent = self:GetPercent()
-    if percent >= 0.5 then
-        if not self.inst:HasTag("fresh") then
-            self.inst:RemoveTag("stale")
-            self.inst:RemoveTag("spoiled")
-            self.inst:AddTag("fresh")
-            self.inst:PushEvent("forceperishchange")
-        end
-    elseif percent > 0.2 then
-        if not self.inst:HasTag("stale") then
-            self.inst:RemoveTag("fresh")
-            self.inst:RemoveTag("spoiled")
-            self.inst:AddTag("stale")
-            self.inst:PushEvent("forceperishchange")
-        end
-    elseif not self.inst:HasTag("spoiled") then
-        self.inst:RemoveTag("fresh")
-        self.inst:RemoveTag("stale")
-        self.inst:AddTag("spoiled")
-        self.inst:PushEvent("forceperishchange")
-    end
+	if self.perishremainingtime ~= nil then
+		local percent = self:GetPercent()
+		if percent >= TUNING.PERISH_FRESH then
+			if not self.inst:HasTag("fresh") then
+				self.inst:RemoveTag("stale")
+				self.inst:RemoveTag("spoiled")
+				self.inst:AddTag("fresh")
+				self.inst:PushEvent("forceperishchange")
+			end
+		elseif percent > TUNING.PERISH_STALE then
+			if not self.inst:HasTag("stale") then
+				self.inst:RemoveTag("fresh")
+				self.inst:RemoveTag("spoiled")
+				self.inst:AddTag("stale")
+				self.inst:PushEvent("forceperishchange")
+			end
+		elseif not self.inst:HasTag("spoiled") then
+			self.inst:RemoveTag("fresh")
+			self.inst:RemoveTag("stale")
+			self.inst:AddTag("spoiled")
+			self.inst:PushEvent("forceperishchange")
+		end
+	end
     --V2C: force clients to refresh spoilage icons when tags change,
     --     since the percent value may not change enough to be dirty
 end
@@ -27,12 +29,12 @@ end
 local Perishable = Class(function(self, inst)
     self.inst = inst
     self.perishfn = nil
-    self.perishtime = nil
+    --self.perishtime = nil
 
     self.frozenfiremult = false
-    
+
     self.targettime = nil
-    self.perishremainingtime = nil
+    --self.perishremainingtime = nil
     self.updatetask = nil
     self.dt = nil
     self.onperishreplacement = nil
@@ -112,10 +114,10 @@ local function Update(inst, dt)
         modifier = modifier * self.localPerishMultiplyer
 
 		modifier = modifier * TUNING.PERISH_GLOBAL_MULT
-		
+
 		local old_val = self.perishremainingtime
 		local delta = dt or (10 + math.random()*FRAMES*8)
-		if self.perishremainingtime then 
+		if self.perishremainingtime then
 			self.perishremainingtime = math.min(self.perishtime, self.perishremainingtime - delta*modifier)
 	        if math.floor(old_val*100) ~= math.floor(self.perishremainingtime*100) then
 		        inst:PushEvent("perishchange", {percent = self:GetPercent()})
@@ -199,7 +201,7 @@ function Perishable:GetPercent()
 end
 
 function Perishable:SetPercent(percent)
-	if self.perishtime then 
+	if self.perishtime then
 		if percent < 0 then percent = 0 end
 		if percent > 1 then percent = 1 end
 		self.perishremainingtime = percent*self.perishtime
@@ -266,6 +268,12 @@ function Perishable:Perish()
             if goop.components.stackable ~= nil and self.inst.components.stackable ~= nil then
                 goop.components.stackable:SetStackSize(self.inst.components.stackable.stacksize)
             end
+            local x, y, z = self.inst.Transform:GetWorldPosition()
+            goop.Transform:SetPosition(x, y, z)
+
+			if self.onreplacedfn ~= nil then
+				self.onreplacedfn(self.inst, goop)
+			end
             local owner = self.inst.components.inventoryitem ~= nil and self.inst.components.inventoryitem.owner or nil
             local holder = owner ~= nil and (owner.components.inventory or owner.components.container) or nil
             if holder ~= nil then
@@ -273,9 +281,7 @@ function Perishable:Perish()
                 self.inst:Remove()
                 holder:GiveItem(goop, slot)
             else
-                local x, y, z = self.inst.Transform:GetWorldPosition()
                 self.inst:Remove()
-                goop.Transform:SetPosition(x, y, z)
             end
         end
     end

@@ -38,7 +38,7 @@ local assets =
     Asset("DYNAMIC_ATLAS", "images/bg_spiral_anim_overlay.xml"),
     Asset("PKGREF", "images/bg_spiral_anim_overlay.tex"),
 
-    
+
 	Asset("IMAGE", "images/waterfall_mask.tex"),
 	Asset("IMAGE", "levels/textures/waterfall_noise1.tex"),
 	Asset("IMAGE", "levels/textures/waterfall_noise2.tex"),
@@ -201,15 +201,31 @@ local prefabs =
     "inventoryitem_classified",
     "writeable_classified",
     "container_classified",
+    "container_opener",
     "constructionsite_classified",
 
     "dummytarget",
     "float_fx_front",
     "float_fx_back",
-    "groundshadow",
 
     "puffin",
+
+	-- summer carnival
+	"carnival_host",
+
+	-- Farming
+	"slow_farmplot", -- deprecated but still used in old worlds and mods
+    "fast_farmplot", -- deprecated but still used in old worlds and mods
+    "nutrients_overlay",
+    "lordfruitfly",
 }
+
+for k, v in pairs(require("prefabs/farm_plant_defs").PLANT_DEFS) do
+	table.insert(prefabs, v.prefab)
+end
+for k, v in pairs(require("prefabs/weed_defs").WEED_DEFS) do
+	table.insert(prefabs, v.prefab)
+end
 
 --------------------------------------------------------------------------
 
@@ -217,15 +233,15 @@ local function OnPlayerSpawn(world, inst)
     inst:DoTaskInTime(0, function()
         if TheWorld.auto_teleport_players then
             local teleported = false
-            
-            for k,v in pairs(Ents) do                            
-                if v:IsValid() and v:HasTag("player") and v ~= inst and not teleported then                    
+
+            for k,v in pairs(Ents) do
+                if v:IsValid() and v:HasTag("player") and v ~= inst and not teleported then
                     inst.Transform:SetPosition(v.Transform:GetWorldPosition())
                     inst:SnapCamera()
                     teleported = true
-                end         
+                end
             end
-        end    
+        end
     end)
 end
 
@@ -299,7 +315,11 @@ function MakeWorld(name, customprefabs, customassets, common_postinit, master_po
     local function fn()
         local inst = CreateEntity()
 
-        assert(TheWorld == nil)
+		if TheWorld ~= nil then
+			print("You cannot spawn multiple worlds!")
+			return nil
+		end
+
         TheWorld = inst
         inst.net = nil
         inst.shard = nil
@@ -391,7 +411,7 @@ function MakeWorld(name, customprefabs, customassets, common_postinit, master_po
 
         --Initialize lua components
         inst:AddComponent("groundcreep")
-        
+
         --Public member functions
         inst.PostInit = PostInit
         inst.OnRemoveEntity = OnRemoveEntity
@@ -411,10 +431,10 @@ function MakeWorld(name, customprefabs, customassets, common_postinit, master_po
         inst:SetPrefabName("world") -- the actual prefab to load comes from gamelogic.lua, this is for postinitfns.
 
         if not TheNet:IsDedicated() then
-            inst:AddComponent("ocean")
-	        inst:AddComponent("oceancolor")
+            inst:AddComponent("oceancolor")
+            inst:AddComponent("nutrients_visual_manager")
+            inst:AddComponent("hudindicatablemanager")
         end
-
         --
         inst:AddComponent("walkableplatformmanager")
 
@@ -425,6 +445,12 @@ function MakeWorld(name, customprefabs, customassets, common_postinit, master_po
             return inst
         end
 
+        inst:AddComponent("klaussackloot")
+
+        inst:AddComponent("worldsettingstimer")
+        inst:AddComponent("timer")
+
+        inst:AddComponent("farming_manager")
 
         inst:AddComponent("playerspawner")
 

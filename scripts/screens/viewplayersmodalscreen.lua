@@ -16,9 +16,9 @@ local ViewPlayersModalScreen = Class(Screen, function(self, players, maxPlayers)
 
     self.black = self:AddChild(TEMPLATES.BackgroundTint())
     self.root = self:AddChild(TEMPLATES.ScreenRoot())
-	
+
     local buttons = nil
-    if TheInput:ControllerAttached() then 
+    if TheInput:ControllerAttached() then
         -- Button is awkward to navigate to, so rely on CONTROL_CANCEL instead.
         buttons = {}
     else
@@ -43,6 +43,9 @@ local ViewPlayersModalScreen = Class(Screen, function(self, players, maxPlayers)
         local playerListing =  Widget("playerListing")
 
         local displayName = v.name or ""
+        if TheSim:IsSteamChinaClient() then
+            displayName = TheSim:ApplyLocalWordFilter(displayName, TEXT_FILTER_CTX_NAME)
+        end
 
         playerListing.highlight = playerListing:AddChild(Image("images/scoreboard.xml", "row_short_goldoutline.tex"))
         playerListing.highlight:SetPosition(27, 0)
@@ -115,7 +118,7 @@ local ViewPlayersModalScreen = Class(Screen, function(self, players, maxPlayers)
 		if IsXB1() then
 	        playerListing.OnControl = function(self, control, down)
 	            if Widget.OnControl(playerListing, control, down) then return true end
-	
+
 	            if not down then
 	                if control == CONTROL_MAP then
 	                    TheNet:ViewNetProfile(v.netid)

@@ -225,13 +225,13 @@ end
 local function MooseLeftClickPicker(inst, target)
     return target ~= nil
         and target ~= inst
-        and (   (   inst.replica.combat:CanTarget(target) and 
+        and (   (   inst.replica.combat:CanTarget(target) and
 					(not target:HasTag("player") or inst.components.playercontroller:IsControlPressed(CONTROL_FORCE_ATTACK)) and
                     inst.components.playeractionpicker:SortActionList({ ACTIONS.ATTACK }, target, nil)
                 )
 				or
-				(   target:HasTag("walkingplank") and 
-					target:HasTag("interactable") and 
+				(   target:HasTag("walkingplank") and
+					target:HasTag("interactable") and
 					target:HasTag("plank_extended") and
                     inst.components.playeractionpicker:SortActionList({ ACTIONS.MOUNT_PLANK }, target, nil)
                 )
@@ -934,7 +934,7 @@ local function onbecamehuman(inst)
     inst.components.moisture:SetInherentWaterproofness(0)
     inst.components.talker:StopIgnoringAll("becamewere")
     inst.components.catcher:SetEnabled(true)
-    inst.components.stormwatcher:SetSandstormSpeedMultiplier(TUNING.SANDSTORM_SPEED_MOD)
+    inst.components.sandstormwatcher:SetSandstormSpeedMultiplier(TUNING.SANDSTORM_SPEED_MOD)
     inst.components.carefulwalker:SetCarefulWalkingSpeedMultiplier(TUNING.CAREFUL_SPEED_MOD)
     inst.components.wereeater:ResetFoodMemory()
     inst.components.wereness:StopDraining()
@@ -985,7 +985,7 @@ local function onbecamebeaver(inst)
     inst.components.moisture:SetInherentWaterproofness(TUNING.WATERPROOFNESS_LARGE)
     inst.components.talker:IgnoreAll("becamewere")
     inst.components.catcher:SetEnabled(false)
-    inst.components.stormwatcher:SetSandstormSpeedMultiplier(1)
+    inst.components.sandstormwatcher:SetSandstormSpeedMultiplier(1)
     inst.components.carefulwalker:SetCarefulWalkingSpeedMultiplier(1)
     inst.components.wereeater:ResetFoodMemory()
     inst.components.wereness:SetDrainRate(CalculateWerenessDrainRate(inst, WEREMODES.BEAVER, TheWorld.state.isfullmoon))
@@ -1038,7 +1038,7 @@ local function onbecamemoose(inst)
     inst.components.moisture:SetInherentWaterproofness(TUNING.WATERPROOFNESS_LARGE)
     inst.components.talker:IgnoreAll("becamewere")
     inst.components.catcher:SetEnabled(false)
-    inst.components.stormwatcher:SetSandstormSpeedMultiplier(1)
+    inst.components.sandstormwatcher:SetSandstormSpeedMultiplier(1)
     inst.components.carefulwalker:SetCarefulWalkingSpeedMultiplier(1)
     inst.components.wereeater:ResetFoodMemory()
     inst.components.wereness:SetDrainRate(CalculateWerenessDrainRate(inst, WEREMODES.MOOSE, TheWorld.state.isfullmoon))
@@ -1091,7 +1091,7 @@ local function onbecamegoose(inst)
     inst.components.moisture:SetInherentWaterproofness(TUNING.WATERPROOFNESS_LARGE)
     inst.components.talker:IgnoreAll("becamewere")
     inst.components.catcher:SetEnabled(false)
-    inst.components.stormwatcher:SetSandstormSpeedMultiplier(1)
+    inst.components.sandstormwatcher:SetSandstormSpeedMultiplier(1)
     inst.components.carefulwalker:SetCarefulWalkingSpeedMultiplier(1)
     inst.components.wereeater:ResetFoodMemory()
     inst.components.wereness:SetDrainRate(CalculateWerenessDrainRate(inst, WEREMODES.GOOSE, TheWorld.state.isfullmoon))

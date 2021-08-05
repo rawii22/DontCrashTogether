@@ -3,14 +3,18 @@
 -- If you are adding strings that are character specific, or not required by all characters, you will still need to add the strings to speech_wilson.lua,
 -- and then add the context string to speech_from_generic.lua. Once you run the PropagateSpeech.bat, you can go into your character's speech file and simply uncomment the new lines.
 --
--- There are some caveats about maintaining sane formatting in this file. 
+-- There are some caveats about maintaining sane formatting in this file.
 --      -No single line lua tables
 --      -Opening and closing brackets should be on their own line
---      -If wilson's speech has X unnamed strings in a table, then all other speech files must have at least X unnamed strings in that context too (example, CHESSPIECE_MOOSEGOOSE has 1 string in wilson, but 2 in wortox), this requirement could be relaxed if required by motifying po_vault.lua) 
+--      -If wilson's speech has X unnamed strings in a table, then all other speech files must have at least X unnamed strings in that context too (example, CHESSPIECE_MOOSEGOOSE has 1 string in wilson, but 2 in wortox), this requirement could be relaxed if required by motifying po_vault.lua)
 
 return {
 	ACTIONFAIL =
 	{
+        APPRAISE =
+        {
+            NOTNOW = "They must be busy now.",
+        },
         REPAIR =
         {
             WRONGPIECE = "I don't think that was right.",
@@ -26,6 +30,7 @@ return {
 			GENERIC = "I can't shave that!",
 			NOBITS = "There isn't even any stubble left!",
             REFUSE = "only_used_by_woodie",
+            SOMEONEELSESBEEFALO = "I won't shave someone else's beefalo!",
 		},
 		STORE =
 		{
@@ -42,7 +47,7 @@ return {
             MISMATCH = "Whoops! Wrong plans.",
         },
 		RUMMAGE =
-		{	
+		{
 			GENERIC = "I can't do that.",
 			INUSE = "They're elbow deep in junk right now.",
             NOTMASTERCHEF = "I'm not a fancy enough chef for that.",
@@ -57,9 +62,12 @@ return {
         	KLAUS = "I'm a little preoccupied!!",
 			QUAGMIRE_WRONGKEY = "I'll just have to find another key.",
         },
-		ACTIVATE = 
+		ACTIVATE =
 		{
 			LOCKED_GATE = "The gate is locked.",
+            HOSTBUSY = "He seems a bit preoccupied at the moment.",
+            CARNIVAL_HOST_HERE = "He's around here somewhere.",
+            NOCARNIVAL = "It looks like those birds flew the coop."
 		},
         COOK =
         {
@@ -71,7 +79,7 @@ return {
         {
             NO_RACERS = "I think I'm missing something here.",
         },
-        
+
 		DISMANTLE =
 		{
 			COOKING = "I can't do that while something's cooking.",
@@ -119,6 +127,9 @@ return {
 			PIGKINGGAME_MESSY = "I need to clean up first.",
 			PIGKINGGAME_DANGER = "It's too dangerous for that right now.",
 			PIGKINGGAME_TOOLATE = "It's too late for that now.",
+			CARNIVALGAME_INVALID_ITEM = "I need to buy some tokens.",
+			CARNIVALGAME_ALREADY_PLAYING = "A game is already underway.",
+            SPIDERNOHAT = "I can't fit them together in my pocket",
         },
         GIVETOPLAYER =
         {
@@ -148,6 +159,8 @@ return {
             GENERIC = "I don't want to change right now.",
             BURNING = "It's too dangerous right now!",
             INUSE = "It can only handle one style change at a time.",
+            NOTENOUGHHAIR = "There isn't enough fur to style.",
+            NOOCCUPANT = "It needs something hitched up.",
         },
         ATTUNE =
         {
@@ -170,7 +183,7 @@ return {
 
             --MapRecorder/MapExplorer
             WRONGWORLD = "This map was made for some other place.",
-			
+
 			--MapSpotRevealer/messagebottle
 			MESSAGEBOTTLEMANAGER_NOT_FOUND = "I can't make anything out in this lighting!",--Likely trying to read messagebottle treasure map in caves
         },
@@ -182,6 +195,7 @@ return {
         {
 			RESTRICTION = "I'm not skilled enough to use that.",
 			INUSE = "Science says I have to wait my turn.",
+            NOTMINE_SPIDER = "only_used_by_webber",
             NOTMINE_YOTC =
             {
                 "You're not my Carrat.",
@@ -194,8 +208,8 @@ return {
         },
         REPLATE =
         {
-            MISMATCH = "It needs another type of dish.", 
-            SAMEDISH = "I only need to use one dish.", 
+            MISMATCH = "It needs another type of dish.",
+            SAMEDISH = "I only need to use one dish.",
         },
         SAIL =
         {
@@ -224,13 +238,14 @@ return {
 		},
 		COMPARE_WEIGHABLE =
 		{
-			TOO_SMALL = "This one's just a small fry.",
+            FISH_TOO_SMALL = "This one's just a small fry.",
+            OVERSIZEDVEGGIES_TOO_SMALL = "Not quite heavy enough.",
 		},
         BEGIN_QUEST =
         {
             ONEGHOST = "only_used_by_wendy",
         },
-		TELLSTORY = 
+		TELLSTORY =
 		{
 			GENERIC = "only_used_by_walter",
 			NOT_NIGHT = "only_used_by_walter",
@@ -240,7 +255,74 @@ return {
         {
             SAMESONG = "only_used_by_wathgrithr",
         },
-	},
+        PLANTREGISTRY_RESEARCH_FAIL =
+        {
+            GENERIC = "I have nothing left to learn.",
+            FERTILIZER = "I'd rather not know anything further.",
+        },
+        FILL_OCEAN =
+        {
+            UNSUITABLE_FOR_PLANTS = "For some reason, plants don't like salt water.",
+        },
+        POUR_WATER =
+        {
+            OUT_OF_WATER = "Drat, out of water.",
+        },
+        POUR_WATER_GROUNDTILE =
+        {
+            OUT_OF_WATER = "My watering can ran dry.",
+        },
+        USEITEMON =
+        {
+            --GENERIC = "I can't use this on that!",
+
+            --construction is PREFABNAME_REASON
+            BEEF_BELL_INVALID_TARGET = "I couldn't possibly!",
+            BEEF_BELL_ALREADY_USED = "This beefalo already belongs to someone else.",
+            BEEF_BELL_HAS_BEEF_ALREADY = "I don't need a whole herd.",
+        },
+        HITCHUP =
+        {
+            NEEDBEEF = "If I had a bell I could befriend a beefalo.",
+            NEEDBEEF_CLOSER = "My beefalo buddy is too far away.",
+            BEEF_HITCHED = "My beefalo is already hitched up.",
+            INMOOD = "My beefalo seems to be too lively.",
+        },
+        MARK =
+        {
+            ALREADY_MARKED = "I've already made my pick.",
+            NOT_PARTICIPANT = "I've got no steak in this contest.",
+        },
+        YOTB_STARTCONTEST =
+        {
+            DOESNTWORK = "I guess they don't support the arts here.",
+            ALREADYACTIVE = "He must be busy with another contest somewhere.",
+        },
+        YOTB_UNLOCKSKIN =
+        {
+            ALREADYKNOWN = "I'm seeing a familiar pattern... I've learned this already!",
+        },
+        CARNIVALGAME_FEED =
+        {
+            TOO_LATE = "I need to be quicker!",
+        },
+        HERD_FOLLOWERS =
+        {
+            WEBBERONLY = "They won't listen to me, but they might listen to Webber.",
+        },
+        BEDAZZLE =
+        {
+            BURNING = "only_used_by_webber",
+            BURNT = "only_used_by_webber",
+            FROZEN = "only_used_by_webber",
+            ALREADY_BEDAZZLED = "only_used_by_webber",
+        },
+        UPGRADE = 
+        {
+            BEDAZZLED = "only_used_by_webber",
+        },
+    },
+
 	ACTIONFAIL_GENERIC = "I can't do that.",
 	ANNOUNCE_BOAT_LEAK = "We're taking on a lot of water.",
 	ANNOUNCE_BOAT_SINK = "I don't want to drown!",
@@ -263,13 +345,13 @@ return {
 	ANNOUNCE_BOOMERANG = "Ow! I should try to catch that!",
 	ANNOUNCE_CHARLIE = "That presence... it's familiar! Hello?",
 	ANNOUNCE_CHARLIE_ATTACK = "OW! Something bit me!",
-	ANNOUNCE_CHARLIE_MISSED = "only_used_by_winona", --winona specific 
+	ANNOUNCE_CHARLIE_MISSED = "only_used_by_winona", --winona specific
 	ANNOUNCE_COLD = "So cold!",
 	ANNOUNCE_HOT = "Need... ice... or... shade!",
 	ANNOUNCE_CRAFTING_FAIL = "I'm missing a couple key ingredients.",
 	ANNOUNCE_DEERCLOPS = "That sounded big!",
 	ANNOUNCE_CAVEIN = "The ceiling is destabilizing!",
-	ANNOUNCE_ANTLION_SINKHOLE = 
+	ANNOUNCE_ANTLION_SINKHOLE =
 	{
 		"The ground is destabilizing!",
 		"A tremor!",
@@ -284,7 +366,7 @@ return {
 	ANNOUNCE_SACREDCHEST_YES = "I guess I'm worthy.",
 	ANNOUNCE_SACREDCHEST_NO = "It didn't like that.",
     ANNOUNCE_DUSK = "It's getting late. It will be dark soon.",
-    
+
     --wx-78 specific
     ANNOUNCE_CHARGE = "only_used_by_wx78",
 	ANNOUNCE_DISCHARGE = "only_used_by_wx78",
@@ -297,7 +379,7 @@ return {
 		STALE = "I think that was starting to turn.",
 		INVALID = "I can't eat that!",
         YUCKY = "Putting that in my mouth would be disgusting!",
-        
+
         --Warly specific ANNOUNCE_EAT strings
 		COOKED = "only_used_by_warly",
 		DRIED = "only_used_by_warly",
@@ -310,7 +392,7 @@ return {
         SAME_OLD_5 = "only_used_by_warly",
 		TASTY = "only_used_by_warly",
     },
-    
+
     ANNOUNCE_ENCUMBERED =
     {
         "Huff... Pant...",
@@ -323,7 +405,7 @@ return {
         "Pant... Pant...",
         "This is the worst... experiment...",
     },
-    ANNOUNCE_ATRIUM_DESTABILIZING = 
+    ANNOUNCE_ATRIUM_DESTABILIZING =
     {
 		"I think it's time to leave!",
 		"What's that?!",
@@ -331,6 +413,7 @@ return {
 	},
     ANNOUNCE_RUINS_RESET = "All the monsters came back!",
     ANNOUNCE_SNARED = "Sharp! Sharp bones!!",
+    ANNOUNCE_SNARED_IVY = "Help! The garden is fighting back!",
     ANNOUNCE_REPELLED = "It's shielded!",
 	ANNOUNCE_ENTER_DARK = "It's so dark!",
 	ANNOUNCE_ENTER_LIGHT = "I can see again!",
@@ -376,7 +459,7 @@ return {
 	ANNOUNCE_TOWNPORTALTELEPORT = "I'm not sure that was science.",
 	ANNOUNCE_CANFIX = "\nI think I can fix this!",
 	ANNOUNCE_ACCOMPLISHMENT = "I feel so accomplished!",
-	ANNOUNCE_ACCOMPLISHMENT_DONE = "If only my friends could see me now...",	
+	ANNOUNCE_ACCOMPLISHMENT_DONE = "If only my friends could see me now...",
 	ANNOUNCE_INSUFFICIENTFERTILIZER = "Are you still hungry, plant?",
 	ANNOUNCE_TOOL_SLIP = "Wow, that tool is slippery!",
 	ANNOUNCE_LIGHTNING_DAMAGE_AVOIDED = "Safe from that frightening lightning!",
@@ -438,25 +521,25 @@ return {
     },
 
     --winona specific
-    ANNOUNCE_HUNGRY_SLOWBUILD = 
+    ANNOUNCE_HUNGRY_SLOWBUILD =
     {
 	    "only_used_by_winona",
     },
-    ANNOUNCE_HUNGRY_FASTBUILD = 
+    ANNOUNCE_HUNGRY_FASTBUILD =
     {
 	    "only_used_by_winona",
     },
 
     --wormwood specific
-    ANNOUNCE_KILLEDPLANT = 
+    ANNOUNCE_KILLEDPLANT =
     {
         "only_used_by_wormwood",
     },
-    ANNOUNCE_GROWPLANT = 
+    ANNOUNCE_GROWPLANT =
     {
         "only_used_by_wormwood",
     },
-    ANNOUNCE_BLOOMING = 
+    ANNOUNCE_BLOOMING =
     {
         "only_used_by_wormwood",
     },
@@ -513,19 +596,19 @@ return {
     ANNOUNCE_ATTACH_BUFF_WORKEFFECTIVENESS = "Productivity intensifying!",
     ANNOUNCE_ATTACH_BUFF_MOISTUREIMMUNITY  = "I feel as dry as one of Wickerbottom's lectures!",
     ANNOUNCE_ATTACH_BUFF_SLEEPRESISTANCE   = "I feel so refreshed, I'll never get tired again!",
-    
+
     ANNOUNCE_DETACH_BUFF_ELECTRICATTACK    = "The electricity's gone, but the static clings.",
     ANNOUNCE_DETACH_BUFF_ATTACK            = "It seems my brawniness was short-lived.",
     ANNOUNCE_DETACH_BUFF_PLAYERABSORPTION  = "Well, that was nice while it lasted.",
     ANNOUNCE_DETACH_BUFF_WORKEFFECTIVENESS = "Desire to procrastinate... creeping back...",
     ANNOUNCE_DETACH_BUFF_MOISTUREIMMUNITY  = "Looks like my dry spell is over.",
     ANNOUNCE_DETACH_BUFF_SLEEPRESISTANCE   = "I'll... (yawn) never get... tired...",
-    
+
 	ANNOUNCE_OCEANFISHING_LINESNAP = "All my hard work, gone in a snap!",
 	ANNOUNCE_OCEANFISHING_LINETOOLOOSE = "Maybe reeling would help.",
 	ANNOUNCE_OCEANFISHING_GOTAWAY = "It got away.",
 	ANNOUNCE_OCEANFISHING_BADCAST = "My casting needs work...",
-	ANNOUNCE_OCEANFISHING_IDLE_QUOTE = 
+	ANNOUNCE_OCEANFISHING_IDLE_QUOTE =
 	{
 		"Where are the fish?",
 		"Maybe I should find a better fishing spot.",
@@ -546,13 +629,15 @@ return {
     ANNOUNCE_CANTBUILDHERE_THRONE = "only_used_by_wurt",
     ANNOUNCE_CANTBUILDHERE_HOUSE = "only_used_by_wurt",
     ANNOUNCE_CANTBUILDHERE_WATCHTOWER = "only_used_by_wurt",
-    ANNOUNCE_READ_BOOK = 
+    ANNOUNCE_READ_BOOK =
     {
         BOOK_SLEEP = "only_used_by_wurt",
         BOOK_BIRDS = "only_used_by_wurt",
         BOOK_TENTACLES =  "only_used_by_wurt",
         BOOK_BRIMSTONE = "only_used_by_wurt",
         BOOK_GARDENING = "only_used_by_wurt",
+		BOOK_SILVICULTURE = "only_used_by_wurt",
+		BOOK_HORTICULTURE = "only_used_by_wurt",
     },
     ANNOUNCE_WEAK_RAT = "This Carrat is in no shape to be training.",
 
@@ -562,8 +647,8 @@ return {
         "No, no! You're going the wrong way!",
         "Turn around, white eyes!",
     },
-    ANNOUNCE_CARRAT_ERROR_FELL_ASLEEP = "Don't you dare! Wake up, we have a race to win!",    
-    ANNOUNCE_CARRAT_ERROR_WALKING = "Don't walk, RUN!",    
+    ANNOUNCE_CARRAT_ERROR_FELL_ASLEEP = "Don't you dare! Wake up, we have a race to win!",
+    ANNOUNCE_CARRAT_ERROR_WALKING = "Don't walk, RUN!",
     ANNOUNCE_CARRAT_ERROR_STUNNED = "Get up! GO GO!",
 
     ANNOUNCE_GHOST_QUEST = "only_used_by_wendy",
@@ -575,14 +660,14 @@ return {
     ANNOUNCE_ABIGAIL_DEATH = "only_used_by_wendy",
     ANNOUNCE_ABIGAIL_RETRIEVE = "only_used_by_wendy",
 	ANNOUNCE_ABIGAIL_LOW_HEALTH = "only_used_by_wendy",
-    ANNOUNCE_ABIGAIL_SUMMON = 
+    ANNOUNCE_ABIGAIL_SUMMON =
 	{
 		LEVEL1 = "only_used_by_wendy",
 		LEVEL2 = "only_used_by_wendy",
 		LEVEL3 = "only_used_by_wendy",
 	},
 
-    ANNOUNCE_GHOSTLYBOND_LEVELUP = 
+    ANNOUNCE_GHOSTLYBOND_LEVELUP =
 	{
 		LEVEL2 = "only_used_by_wendy",
 		LEVEL3 = "only_used_by_wendy",
@@ -595,6 +680,36 @@ return {
     ANNOUNCE_ARCHIVE_NEW_KNOWLEDGE = "My mind is expanding with new ancient knowledge!",
     ANNOUNCE_ARCHIVE_OLD_KNOWLEDGE = "I already knew that.",
     ANNOUNCE_ARCHIVE_NO_POWER = "Maybe it needs more juice.",
+
+    ANNOUNCE_PLANT_RESEARCHED =
+    {
+        "My knowledge about this plant is growing!",
+    },
+
+    ANNOUNCE_PLANT_RANDOMSEED = "I wonder what it will grow into.",
+
+    ANNOUNCE_FERTILIZER_RESEARCHED = "I never thought I'd be applying my scientific mind to... this.",
+
+	ANNOUNCE_FIRENETTLE_TOXIN =
+	{
+		"My insides are burning!",
+		"Ouch, that's hot!",
+	},
+	ANNOUNCE_FIRENETTLE_TOXIN_DONE = "Note to self: no more experiments with Fire Nettle toxin.",
+
+	ANNOUNCE_TALK_TO_PLANTS =
+	{
+        "Grow plant, grow!",
+        "I always wanted a plant like you.",
+		"Hello plant, I'm here for your daily dose of socializing!",
+        "What a nice plant you are.",
+        "Plant, you are such a good listener.",
+	},
+
+    -- YOTB
+    ANNOUNCE_CALL_BEEF = "Come on over!",
+    ANNOUNCE_CANTBUILDHERE_YOTB_POST = "The judge won't be able to see my beefalo from here.",
+    ANNOUNCE_YOTB_LEARN_NEW_PATTERN =  "My mind has been filled with beefalo styling inspiration!",
 
 	BATTLECRY =
 	{
@@ -649,6 +764,14 @@ return {
 
         BALLOONS_EMPTY = "It looks like clown currency.",
         BALLOON = "How are they floating?",
+		BALLOONPARTY = "How did he get the smaller balloons inside?",
+		BALLOONSPEED =
+        {
+            DEFLATED = "Now it's just another balloon.",
+            GENERIC = "The hole in the center makes it more aerodynamic, that's just physics!",
+        },
+		BALLOONVEST = "If the bright colors don't attract some horrible creature, the squeaking will.",
+		BALLOONHAT = "The static does terrible things to my hair.",
 
         BERNIE_INACTIVE =
         {
@@ -662,6 +785,8 @@ return {
         BOOK_BIRDS = "No point studying when I can just wing it.",
         BOOK_TENTACLES = "Someone'll get suckered into reading this.",
         BOOK_GARDENING = "I see no farm in reading that.",
+		BOOK_SILVICULTURE = "I'll stick to my own experiments.",
+		BOOK_HORTICULTURE = "I see no farm in reading that.",
         BOOK_SLEEP = "Strange, it's just 500 pages of telegraph codes.",
         BOOK_BRIMSTONE = "The beginning was dull, but got better near the end.",
 
@@ -842,7 +967,7 @@ return {
             OPEN = "If I step through, will I still be me?",
             FULL = "It seems to be popular over there.",
         },
-        GLOMMER = 
+        GLOMMER =
         {
             GENERIC = "It's cute, in a gross kind of way.",
             SLEEPING = "Snug as a bug.",
@@ -904,7 +1029,7 @@ return {
 			GENERIC = "This pyramid controls the sands.",
 			ACTIVE = "Ready for departiculation.",
 		},
-        TOWNPORTALTALISMAN = 
+        TOWNPORTALTALISMAN =
         {
 			GENERIC = "A mini departiculator.",
 			ACTIVE = "A more sane person would walk.",
@@ -920,7 +1045,7 @@ return {
             WRONGSTAFF = "I have a distinct feeling this isn't right.",
             MOONSTAFF = "The stone lit it up somehow.",
         },
-        MOONDIAL = 
+        MOONDIAL =
         {
 			GENERIC = "Water amplifies the science, allowing us to measure the moon.",
 			NIGHT_NEW = "It's a new moon.",
@@ -929,6 +1054,7 @@ return {
 			NIGHT_WANE = "The moon is waning.",
 			CAVE = "There's no moon down here to measure.",
 			WEREBEAVER = "only_used_by_woodie", --woodie specific
+			GLASSED = "I have the strangest feeling I'm being watched.",
         },
 		THULECITE = "I wonder where this is from?",
 		ARMORRUINS = "It's oddly light.",
@@ -958,7 +1084,7 @@ return {
 		ORANGESTAFF = "This beats walking.",
 		YELLOWAMULET = "Warm to the touch.",
 		GREENAMULET = "No base should be without one!",
-		SLURPERPELT = "Doesn't look all that much different dead.",	
+		SLURPERPELT = "Doesn't look all that much different dead.",
 
 		SLURPER = "It's so hairy!",
 		SLURPER_PELT = "Doesn't look all that much different dead.",
@@ -969,12 +1095,12 @@ return {
 		ORANGEGEM = "It's an orange gem.",
         OPALSTAFF = "It's scientifically proven that gems look better on top of sticks.",
         OPALPRECIOUSGEM = "This gem seems special.",
-        TELEBASE = 
+        TELEBASE =
 		{
 			VALID = "It's ready to go.",
 			GEMS = "It needs more purple gems.",
 		},
-		GEMSOCKET = 
+		GEMSOCKET =
 		{
 			VALID = "Looks ready.",
 			GEMS = "It needs a gem.",
@@ -995,7 +1121,7 @@ return {
 		CAVE_BANANA_COOKED = "Yum!",
 		CAVE_BANANA_TREE = "It's dubiously photosynthetical.",
 		ROCKY = "It has terrifying claws.",
-		
+
 		COMPASS =
 		{
 			GENERIC="Which way am I facing?",
@@ -1133,17 +1259,19 @@ return {
 		TURF_FUNGUS_RED = "A chunk of ground.",
 		TURF_DRAGONFLY = "Do you want proof that it's fireproof?",
 
+        TURF_SHELLBEACH = "A chunk of beach.",
+
 		POWCAKE = "Science help us.",
         CAVE_ENTRANCE = "I wonder if that rock could be moved.",
         CAVE_ENTRANCE_RUINS = "It's probably hiding something.",
-       
-       	CAVE_ENTRANCE_OPEN = 
+
+       	CAVE_ENTRANCE_OPEN =
         {
             GENERIC = "The earth itself rejects me!",
             OPEN = "I bet there's all sorts of things to discover down there.",
             FULL = "I'll have to wait until someone leaves to enter.",
         },
-        CAVE_EXIT = 
+        CAVE_EXIT =
         {
             GENERIC = "I'll just stay down here, I suppose.",
             OPEN = "I've had enough discovery for now.",
@@ -1160,12 +1288,12 @@ return {
                 "Awww, she has a cute little bow.",
                 "Awww, she has a cute little bow.",
             },
-            LEVEL2 = 
+            LEVEL2 =
             {
                 "Awww, she has a cute little bow.",
                 "Awww, she has a cute little bow.",
             },
-            LEVEL3 = 
+            LEVEL3 =
             {
                 "Awww, she has a cute little bow.",
                 "Awww, she has a cute little bow.",
@@ -1186,7 +1314,7 @@ return {
 			REMAINS_THINGIE = "There's a perfectly scientific explanation for that.",
 		},
 		AXE = "A trusty axe.",
-		BABYBEEFALO = 
+		BABYBEEFALO =
 		{
 			GENERIC = "Awwww. So cute!",
 		    SLEEPING = "Sweet dreams, smelly.",
@@ -1204,7 +1332,7 @@ return {
 		BEARGER_FUR = "A mat of thick fur.",
 		BEDROLL_STRAW = "Looks comfy, but it smells like mildew.",
 		BEEQUEEN = "Keep that stinger away from me!",
-		BEEQUEENHIVE = 
+		BEEQUEENHIVE =
 		{
 			GENERIC = "It's too sticky to walk on.",
 			GROWING = "Was that there before?",
@@ -1253,6 +1381,7 @@ return {
             ORNERY = "It looks deeply angry.",
             RIDER = "This fellow appears quite ridable.",
             PUDGY = "Hmmm, there may be too much food inside it.",
+            MYPARTNER = "We're beef friends forever.",
 		},
 
 		BEEFALOHAT = "That's a case of hat-hair waiting to happen.",
@@ -1308,8 +1437,8 @@ return {
 		BLOWDART_YELLOW = "It has shocking accuracy.",
 		BLUEAMULET = "Cool as ice!",
 		BLUEGEM = "It sparkles with cold energy.",
-		BLUEPRINT = 
-		{ 
+		BLUEPRINT =
+		{
             COMMON = "It's scientific!",
             RARE = "It's REALLY scientific!",
         },
@@ -1339,7 +1468,7 @@ return {
 
 		SHADOWDIGGER = "Oh good. Now there's more of him.",
 
-		CACTUS = 
+		CACTUS =
 		{
 			GENERIC = "Sharp but delicious.",
 			PICKED = "Deflated, but still spiny.",
@@ -1368,7 +1497,7 @@ return {
 		},
 		CANE = "Technically walking is just controlled falling.",
 		CATCOON = "A playful little thing.",
-		CATCOONDEN = 
+		CATCOONDEN =
 		{
 			GENERIC = "It's a den in a stump.",
 			EMPTY = "Its owner ran out of lives.",
@@ -1378,14 +1507,14 @@ return {
 		CARROT = "Yuck. This vegetable came out of the dirt.",
 		CARROT_COOKED = "Mushy.",
 		CARROT_PLANTED = "The earth is making plantbabies.",
-		CARROT_SEEDS = "It's a carrot seed.",
+		CARROT_SEEDS = "It's a seed.",
 		CARTOGRAPHYDESK =
 		{
 			GENERIC = "Now I can show everyone what I found!",
 			BURNING = "So much for that.",
 			BURNT = "Nothing but ash now.",
 		},
-		WATERMELON_SEEDS = "It's a melon seed.",
+		WATERMELON_SEEDS = "It's a seed.",
 		CAVE_FERN = "It's a fern.",
 		CHARCOAL = "It's small, dark, and smells like burnt wood.",
         CHESSPIECE_PAWN = "I can relate.",
@@ -1427,6 +1556,9 @@ return {
         CHESSPIECE_KLAUS = "Can I invoke the \"no holiday decorations\" Klaus?",
         CHESSPIECE_BEEQUEEN = "Very statuesque.",
         CHESSPIECE_ANTLION = "A stagn-antlion.",
+        CHESSPIECE_BEEFALO = "This sculpture is pretty beefy.",
+        CHESSPIECE_GUARDIANPHASE3 = "I much prefer it this way.",
+
         CHESSJUNK1 = "A pile of broken chess pieces.",
         CHESSJUNK2 = "Another pile of broken chess pieces.",
         CHESSJUNK3 = "Even more broken chess pieces.",
@@ -1439,7 +1571,7 @@ return {
 		COOKEDMANDRAKE = "Poor little guy.",
 		COOKEDMEAT = "Charbroiled to perfection.",
 		COOKEDMONSTERMEAT = "That's only somewhat more appetizing than when it was raw.",
-		COOKEDSMALLMEAT = "Now there's no reason to worry about getting worms!",        
+		COOKEDSMALLMEAT = "Now there's no reason to worry about getting worms!",
 		COOKPOT =
 		{
 			COOKING_LONG = "This is going to take a while.",
@@ -1450,7 +1582,7 @@ return {
 		},
 		CORN = "High in fructose!",
 		CORN_COOKED = "Cooked and high in fructose!",
-		CORN_SEEDS = "It's a corn seed.",
+		CORN_SEEDS = "It's a seed.",
         CANARY =
 		{
 			GENERIC = "Some sort of yellow creature made of science.",
@@ -1514,21 +1646,21 @@ return {
 		ARMORDRAGONFLY = "Hot mail!",
 		DRAGON_SCALES = "They're still warm.",
 		DRAGONFLYCHEST = "Next best thing to a lockbox!",
-		DRAGONFLYFURNACE = 
+		DRAGONFLYFURNACE =
 		{
 			HAMMERED = "I don't think it's supposed to look like that.",
 			GENERIC = "Produces a lot of heat, but not much light.", --no gems
 			NORMAL = "Is it winking at me?", --one gem
 			HIGH = "It's scalding!", --two gems
 		},
-        
+
         HUTCH = "Hutch Danglefish, P.I.",
         HUTCH_FISHBOWL =
         {
             GENERIC = "I always wanted one of these.",
             WAITING = "Maybe he needs some science?",
         },
-		LAVASPIT = 
+		LAVASPIT =
 		{
 			HOT = "Hot spit!",
 			COOL = "I like to call it \"Basaliva\".",
@@ -1536,14 +1668,14 @@ return {
 		LAVA_POND = "Magmificent!",
 		LAVAE = "Too hot to handle.",
 		LAVAE_COCOON = "Cooled off and chilled out.",
-		LAVAE_PET = 
+		LAVAE_PET =
 		{
 			STARVING = "Poor thing must be starving.",
 			HUNGRY = "I hear a tiny stomach grumbling.",
 			CONTENT = "It seems happy.",
 			GENERIC = "Aww. Who's a good monster?",
 		},
-		LAVAE_EGG = 
+		LAVAE_EGG =
 		{
 			GENERIC = "There's a faint warmth coming from inside.",
 		},
@@ -1556,7 +1688,7 @@ return {
 
 		DRAGONFRUIT = "What a weird fruit.",
 		DRAGONFRUIT_COOKED = "The fruit's still weird.",
-		DRAGONFRUIT_SEEDS = "It's a weird fruit seed.",
+		DRAGONFRUIT_SEEDS = "It's a seed.",
 		DRAGONPIE = "The dragonfruit is very filling.",
 		DRUMSTICK = "Ready for gobbling.",
 		DRUMSTICK_COOKED = "Even better for gobbling!",
@@ -1567,13 +1699,13 @@ return {
 		DUG_SAPLING = "This needs to be planted.",
 		DURIAN = "Oh, it smells!",
 		DURIAN_COOKED = "Now it smells even worse!",
-		DURIAN_SEEDS = "It's a durian seed.",
+		DURIAN_SEEDS = "It's a seed.",
 		EARMUFFSHAT = "Makes you warm and fuzzy inside. Outside, too.",
 		EGGPLANT = "It doesn't look like an egg.",
 		EGGPLANT_COOKED = "It's even less eggy.",
-		EGGPLANT_SEEDS = "It's an eggplant seed.",
-		
-		ENDTABLE = 
+		EGGPLANT_SEEDS = "It's a seed.",
+
+		ENDTABLE =
 		{
 			BURNT = "A burnt vase on a burnt table.",
 			GENERIC = "A flower in a vase on a table.",
@@ -1582,7 +1714,7 @@ return {
 			FRESHLIGHT = "It's nice to have a little light.",
 			OLDLIGHT = "Did we remember to pick up new bulbs?", -- will be wilted soon, light radius will be very small at this point
 		},
-		DECIDUOUSTREE = 
+		DECIDUOUSTREE =
 		{
 			BURNING = "What a waste of wood.",
 			BURNT = "I feel like I could have prevented that.",
@@ -1608,12 +1740,12 @@ return {
 			CHOPPED = "Take that, nature!",
 			GENERIC = "This sad tree has no cones.",
 		},
-		TWIGGYTREE = 
+		TWIGGYTREE =
 		{
 			BURNING = "What a waste of wood.",
 			BURNT = "I feel like I could have prevented that.",
 			CHOPPED = "Take that, nature!",
-			GENERIC = "It's all stick-y.",			
+			GENERIC = "It's all stick-y.",
 			DISEASED = "It looks sick. More so than usual.",
 		},
 		TWIGGY_NUT_SAPLING = "It doesn't need any help to grow.",
@@ -1661,8 +1793,8 @@ return {
 			OUT = "At least I can start it up again.",
 		},
 		FIRESTAFF = "I don't want to set the world on fire.",
-		FIRESUPPRESSOR = 
-		{	
+		FIRESUPPRESSOR =
+		{
 			ON = "Fling on!",
 			OFF = "All quiet on the flinging front.",
 			LOWFUEL = "The fuel tank is getting a bit low.",
@@ -1674,7 +1806,7 @@ return {
 		FISHTACOS = "Crunchy and delicious!",
 		FISH_COOKED = "Grilled to perfection.",
 		FLINT = "It's a very sharp rock.",
-		FLOWER = 
+		FLOWER =
 		{
             GENERIC = "It's pretty, but it smells like a common laborer.",
             ROSE = "To match my rosy cheeks.",
@@ -1706,7 +1838,7 @@ return {
 		FROGLEGS = "I've heard it's a delicacy.",
 		FROGLEGS_COOKED = "Tastes like chicken.",
 		FRUITMEDLEY = "Fruity.",
-		FURTUFT = "Black and white fur.", 
+		FURTUFT = "Black and white fur.",
 		GEARS = "A pile of mechanical parts.",
 		GHOST = "This offends me as a scientist.",
 		GOLDENAXE = "That's one fancy axe.",
@@ -1724,9 +1856,9 @@ return {
 			DISEASED = "It looks pretty sick.",
 			DISEASING = "Err, something's not right.",
 		},
-		GRASSGEKKO = 
+		GRASSGEKKO =
 		{
-			GENERIC = "It's an extra leafy lizard.",	
+			GENERIC = "It's an extra leafy lizard.",
 			DISEASED = "It looks really sick.",
 		},
 		GREEN_CAP = "It seems pretty normal.",
@@ -1811,7 +1943,7 @@ return {
 			CHARGED = "The power is mine!",
 			GENERIC = "To harness the heavens!",
 		},
-		LIGHTNINGGOAT = 
+		LIGHTNINGGOAT =
 		{
 			GENERIC = "\"Baaaah\" yourself!",
 			CHARGED = "I don't think it liked being struck by lightning.",
@@ -1981,7 +2113,7 @@ return {
         },
         POMEGRANATE = "It looks like the inside of an alien's brain.",
         POMEGRANATE_COOKED = "Haute Cuisine!",
-        POMEGRANATE_SEEDS = "It's a pome-whatsit seed.",
+        POMEGRANATE_SEEDS = "It's a seed.",
         POND = "I can't see the bottom!",
         POOP = "I should fill my pockets!",
         FERTILIZER = "That is definitely a bucket full of poop.",
@@ -1989,7 +2121,7 @@ return {
         PUMPKINCOOKIE = "That's a pretty gourd cookie!",
         PUMPKIN_COOKED = "How did it not turn into a pie?",
         PUMPKIN_LANTERN = "Spooky!",
-        PUMPKIN_SEEDS = "It's a pumpkin seed.",
+        PUMPKIN_SEEDS = "It's a seed.",
         PURPLEAMULET = "It's whispering to me.",
         PURPLEGEM = "It contains the mysteries of the universe.",
         RABBIT =
@@ -2115,7 +2247,7 @@ return {
 			DISEASED = "It looks pretty sick.",
 			DISEASING = "Err, something's not right.",
 		},
-   		SCARECROW = 
+   		SCARECROW =
    		{
 			GENERIC = "All dressed up and no where to crow.",
 			BURNING = "Someone made that strawman eat crow.",
@@ -2129,7 +2261,7 @@ return {
 			BURNT = "Burnt right down.",
    		},
         SCULPTURE_KNIGHTHEAD = "Where's the rest of it?",
-		SCULPTURE_KNIGHTBODY = 
+		SCULPTURE_KNIGHTBODY =
 		{
 			COVERED = "It's an odd marble statue.",
 			UNCOVERED = "I guess he cracked under the pressure.",
@@ -2137,7 +2269,7 @@ return {
 			READY = "Something's moving inside.",
 		},
         SCULPTURE_BISHOPHEAD = "Is that a head?",
-		SCULPTURE_BISHOPBODY = 
+		SCULPTURE_BISHOPBODY =
 		{
 			COVERED = "It looks old, but it feels new.",
 			UNCOVERED = "There's a big piece missing.",
@@ -2145,7 +2277,7 @@ return {
 			READY = "Something's moving inside.",
 		},
         SCULPTURE_ROOKNOSE = "Where did this come from?",
-		SCULPTURE_ROOKBODY = 
+		SCULPTURE_ROOKBODY =
 		{
 			COVERED = "It's some sort of marble statue.",
 			UNCOVERED = "It's not in the best shape.",
@@ -2199,7 +2331,7 @@ return {
 			AWAKE = "Just keep your hand to yourself, alright?",
 			HIDING = "Something's odd here, but I can't put my finger on it.",
         },
-        STATUE_MARBLE = 
+        STATUE_MARBLE =
         {
             GENERIC = "It's a fancy marble statue.",
             TYPE1 = "Don't lose your head now!",
@@ -2251,12 +2383,12 @@ return {
 		TELEPORTATO_POTATO = "This metal potato contains great and fearful power...",
 		TELEPORTATO_RING = "A ring that could focus dimensional energies.",
 		TELESTAFF = "That could reveal the world.",
-		TENT = 
+		TENT =
 		{
 			GENERIC = "I get sort of crazy when I don't sleep.",
 			BURNT = "Nothing left to sleep in.",
 		},
-		SIESTAHUT = 
+		SIESTAHUT =
 		{
 			GENERIC = "A nice place for an afternoon rest, safely out of the heat.",
 			BURNT = "It won't provide much shade now.",
@@ -2274,19 +2406,19 @@ return {
 		TRAP = "I wove it real tight.",
 		TRAP_TEETH = "This is a nasty surprise.",
 		TRAP_TEETH_MAXWELL = "I'll want to avoid stepping on that!",
-		TREASURECHEST = 
+		TREASURECHEST =
 		{
 			GENERIC = "It's a tickle trunk!",
 			BURNT = "That trunk was truncated.",
 		},
 		TREASURECHEST_TRAP = "How convenient!",
-		SACRED_CHEST = 
+		SACRED_CHEST =
 		{
 			GENERIC = "I hear whispers. It wants something.",
 			LOCKED = "It's passing its judgment.",
 		},
 		TREECLUMP = "It's almost like someone is trying to prevent me from going somewhere.",
-		
+
 		TRINKET_1 = "Melted. Maybe Willow had some fun with them?", --Melted Marbles
 		TRINKET_2 = "What's kazoo with you?", --Fake Kazoo
 		TRINKET_3 = "The knot is stuck. Forever.", --Gord's Knot
@@ -2345,7 +2477,7 @@ return {
         LOST_TOY_19 = "I'm sure there's a perfectly scientific explanation for that.",
         LOST_TOY_42 = "I'm sure there's a perfectly scientific explanation for that.",
         LOST_TOY_43 = "I'm sure there's a perfectly scientific explanation for that.",
-        
+
         HALLOWEENCANDY_1 = "The cavities are probably worth it, right?",
         HALLOWEENCANDY_2 = "What corruption of science grew these?",
         HALLOWEENCANDY_3 = "It's... corn.",
@@ -2364,18 +2496,18 @@ return {
 
 		HALLOWEEN_ORNAMENT_1 = "A spectornament I could hang in a tree.",
 		HALLOWEEN_ORNAMENT_2 = "Completely batty decoration.",
-		HALLOWEEN_ORNAMENT_3 = "This wood look good hanging somewhere.", 
+		HALLOWEEN_ORNAMENT_3 = "This wood look good hanging somewhere.",
 		HALLOWEEN_ORNAMENT_4 = "Almost i-tentacle to the real ones.",
 		HALLOWEEN_ORNAMENT_5 = "Eight-armed adornment.",
-		HALLOWEEN_ORNAMENT_6 = "Everyone's raven about tree decorations these days.", 
+		HALLOWEEN_ORNAMENT_6 = "Everyone's raven about tree decorations these days.",
 
 		HALLOWEENPOTION_DRINKS_WEAK = "I was hoping for something bigger.",
 		HALLOWEENPOTION_DRINKS_POTENT = "A potent potion.",
         HALLOWEENPOTION_BRAVERY = "Full of grit.",
 		HALLOWEENPOTION_MOON = "Infused with transforming such-and-such.",
-		HALLOWEENPOTION_FIRE_FX = "Crystallized inferno.", 
+		HALLOWEENPOTION_FIRE_FX = "Crystallized inferno.",
 		MADSCIENCE_LAB = "Sanity is a small price to pay for science!",
-		LIVINGTREE_ROOT = "Something's in there! I'll have to root it out.", 
+		LIVINGTREE_ROOT = "Something's in there! I'll have to root it out.",
 		LIVINGTREE_SAPLING = "It'll grow up big and horrifying.",
 
         DRAGONHEADHAT = "So who gets to be the head?",
@@ -2392,19 +2524,19 @@ return {
         FIRECRACKERS = "Filled with explosion science!",
         PERDFAN = "It's inordinately large.",
         REDPOUCH = "Is there something inside?",
-        WARGSHRINE = 
+        WARGSHRINE =
         {
             GENERIC = "I should make something fun.",
             EMPTY = "I need to put a torch in it.",
             BURNING = "I should make something fun.", --for willow to override
             BURNT = "It burned down.",
         },
-        CLAYWARG = 
+        CLAYWARG =
         {
         	GENERIC = "A terror cotta monster!",
         	STATUE = "Did it just move?",
         },
-        CLAYHOUND = 
+        CLAYHOUND =
         {
         	GENERIC = "It's been unleashed!",
         	STATUE = "It looks so real.",
@@ -2463,44 +2595,59 @@ return {
             BURNT = "Smells like roasted carrots.",
         },
 
-        YOTC_CARRAT_GYM_DIRECTION = 
+        YOTC_CARRAT_GYM_DIRECTION =
         {
             GENERIC = "This'll get things moving in the right direction.",
             RAT = "You would make an excellent lab rat.",
             BURNT = "My training regimen crashed and burned.",
         },
-        YOTC_CARRAT_GYM_SPEED = 
+        YOTC_CARRAT_GYM_SPEED =
         {
             GENERIC = "I need to get my Carrat up to speed.",
             RAT = "Faster... faster!",
             BURNT = "I may have overdone it.",
         },
-        YOTC_CARRAT_GYM_REACTION = 
+        YOTC_CARRAT_GYM_REACTION =
         {
             GENERIC = "Let's train those Carrat-like reflexes!",
             RAT = "The subject's response time is steadily improving!",
             BURNT = "A small loss to take in the pursuit of science.",
         },
-        YOTC_CARRAT_GYM_STAMINA = 
+        YOTC_CARRAT_GYM_STAMINA =
         {
             GENERIC = "Getting strong now!",
             RAT = "This Carrat... will be unstoppable!!",
             BURNT = "You can't stop progress! But this will delay it...",
-        }, 
+        },
 
         YOTC_CARRAT_GYM_DIRECTION_ITEM = "I'd better get training!",
         YOTC_CARRAT_GYM_SPEED_ITEM = "I'd better get this assembled.",
         YOTC_CARRAT_GYM_STAMINA_ITEM = "This should help improve my Carrat's stamina",
         YOTC_CARRAT_GYM_REACTION_ITEM = "This should improve my Carrat's reaction time considerably.",
 
-        YOTC_CARRAT_SCALE_ITEM = "This will help car-rate my Car-rat.",           
-        YOTC_CARRAT_SCALE = 
+        YOTC_CARRAT_SCALE_ITEM = "This will help car-rate my Car-rat.",
+        YOTC_CARRAT_SCALE =
         {
             GENERIC = "Hopefully the scales tip in my favor.",
             CARRAT = "I suppose no matter what, it's still just a sentient vegetable.",
             CARRAT_GOOD = "This Carrat looks ripe for racing!",
             BURNT = "What a mess.",
-        },                
+        },
+
+        YOTB_BEEFALOSHRINE =
+        {
+            GENERIC = "What to make...",
+            EMPTY = "Hm... what makes a beefalo?",
+            BURNT = "Smells like barbeque.",
+        },
+
+        BEEFALO_GROOMER =
+        {
+            GENERIC = "There's no beefalo here to groom.",
+            OCCUPIED = "Let's beautify this beefalo!",
+            BURNT = "I styled my beefalo in the hottest fashions... and paid the price.",
+        },
+        BEEFALO_GROOMER_ITEM = "I'd better set this up somewhere.",
 
 		BISHOP_CHARGE_HIT = "Ow!",
 		TRUNKVEST_SUMMER = "Wilderness casual.",
@@ -2515,8 +2662,8 @@ return {
 		GRASS_UMBRELLA = "My hair looks good wet... it's when it dries that's the problem.",
 		UNIMPLEMENTED = "It doesn't look finished! It could be dangerous.",
 		WAFFLES = "I'm waffling on whether it needs more syrup.",
-		WALL_HAY = 
-		{	
+		WALL_HAY =
+		{
 			GENERIC = "Hmmmm. I guess that'll have to do.",
 			BURNT = "That won't do at all.",
 		},
@@ -2525,7 +2672,7 @@ return {
 		WALL_STONE_ITEM = "They make me feel so safe.",
 		WALL_RUINS = "An ancient piece of wall.",
 		WALL_RUINS_ITEM = "A solid piece of history.",
-		WALL_WOOD = 
+		WALL_WOOD =
 		{
 			GENERIC = "Pointy!",
 			BURNT = "Burnt!",
@@ -2545,7 +2692,7 @@ return {
 			GENERIC = "It looks warm and cozy inside.",
 		},
 		WALRUS_TUSK = "I'm sure I'll find a use for it eventually.",
-		WARDROBE = 
+		WARDROBE =
 		{
 			GENERIC = "It holds dark, forbidden secrets...",
             BURNING = "That's burning fast!",
@@ -2561,7 +2708,7 @@ return {
 		WETGOOP = "It tastes like nothing.",
         WHIP = "Nothing like loud noises to help keep the peace.",
 		WINTERHAT = "It'll be good for when winter comes.",
-		WINTEROMETER = 
+		WINTEROMETER =
 		{
 			GENERIC = "Mercurial.",
 			BURNT = "Its measuring days are over.",
@@ -2574,7 +2721,7 @@ return {
             CANDECORATE = "Happy Winter's Feast!",
             YOUNG = "It's almost Winter's Feast!",
         },
-		WINTER_TREESTAND = 
+		WINTER_TREESTAND =
 		{
 			GENERIC = "I need a pine cone for that.",
             BURNT = "That puts a damper on the festivities.",
@@ -2621,7 +2768,7 @@ return {
 		TAMALES = "If I eat much more I'm going to start feeling a bit husky.",
 		TOURTIERE = "Pleased to eat you.",
 
-		TABLE_WINTERS_FEAST = 
+		TABLE_WINTERS_FEAST =
 		{
 			GENERIC = "A feastival table.",
 			HAS_FOOD = "Time to eat!",
@@ -2629,8 +2776,8 @@ return {
 			BURNT = "Who would do such a thing?",
 		},
 
-		GINGERBREADWARG = "Time to desert this dessert.", 
-		GINGERBREADHOUSE = "Room and board all rolled into one.", 
+		GINGERBREADWARG = "Time to desert this dessert.",
+		GINGERBREADHOUSE = "Room and board all rolled into one.",
 		GINGERBREADPIG = "I'd better follow him.",
 		CRUMBS = "A crummy way to hide yourself.",
 		WINTERSFEASTFUEL = "The spirit of the season!",
@@ -2644,12 +2791,12 @@ return {
 			OPEN = "Science compels me to jump in.",
 		},
 		WORMHOLE_LIMITED = "Guh, that thing looks worse off than usual.",
-		ACCOMPLISHMENT_SHRINE = "I want to use it, and I want the world to know that I did.",        
+		ACCOMPLISHMENT_SHRINE = "I want to use it, and I want the world to know that I did.",
 		LIVINGTREE = "Is it watching me?",
 		ICESTAFF = "It's cold to the touch.",
 		REVIVER = "The beating of this hideous heart will bring a ghost back to life!",
 		SHADOWHEART = "The power of science must have reanimated it...",
-        ATRIUM_RUBBLE = 
+        ATRIUM_RUBBLE =
         {
 			LINE_1 = "It depicts an old civilization. The people look hungry and scared.",
 			LINE_2 = "This tablet is too worn to make out.",
@@ -2658,7 +2805,7 @@ return {
 			LINE_5 = "It shows a massive, technologically advanced city.",
 		},
         ATRIUM_STATUE = "It doesn't seem fully real.",
-        ATRIUM_LIGHT = 
+        ATRIUM_LIGHT =
         {
 			ON = "A truly unsettling light.",
 			OFF = "Something must power it.",
@@ -2706,7 +2853,7 @@ return {
 		RHINODRILL = "He's got a nose for this kind of work.",
 		BEETLETAUR = "I can smell him from here!",
 
-        LAVAARENA_PORTAL = 
+        LAVAARENA_PORTAL =
         {
             ON = "I'll just be going now.",
             GENERIC = "That's how we got here. Hopefully how we get back, too.",
@@ -2754,49 +2901,49 @@ return {
 		LAVAARENA_HEAVYBLADE = "A sharp looking instrument.",
 
         --Quagmire
-        QUAGMIRE_ALTAR = 
+        QUAGMIRE_ALTAR =
         {
         	GENERIC = "We'd better start cooking some offerings.",
         	FULL = "It's in the process of digestinating.",
     	},
 		QUAGMIRE_ALTAR_STATUE1 = "It's an old statue.",
 		QUAGMIRE_PARK_FOUNTAIN = "Been a long time since it was hooked up to water.",
-		
+
         QUAGMIRE_HOE = "It's a farming instrument.",
-        
+
         QUAGMIRE_TURNIP = "It's a raw turnip.",
         QUAGMIRE_TURNIP_COOKED = "Cooking is science in practice.",
         QUAGMIRE_TURNIP_SEEDS = "A handful of odd seeds.",
-        
+
         QUAGMIRE_GARLIC = "The number one breath enhancer.",
         QUAGMIRE_GARLIC_COOKED = "Perfectly browned.",
         QUAGMIRE_GARLIC_SEEDS = "A handful of odd seeds.",
-        
+
         QUAGMIRE_ONION = "Looks crunchy.",
         QUAGMIRE_ONION_COOKED = "A successful chemical reaction.",
         QUAGMIRE_ONION_SEEDS = "A handful of odd seeds.",
-        
+
         QUAGMIRE_POTATO = "The apples of the earth.",
         QUAGMIRE_POTATO_COOKED = "A successful temperature experiment.",
         QUAGMIRE_POTATO_SEEDS = "A handful of odd seeds.",
-        
+
         QUAGMIRE_TOMATO = "It's red because it's full of science.",
         QUAGMIRE_TOMATO_COOKED = "Cooking's easy if you understand chemistry.",
         QUAGMIRE_TOMATO_SEEDS = "A handful of odd seeds.",
-        
+
         QUAGMIRE_FLOUR = "Ready for baking.",
         QUAGMIRE_WHEAT = "It looks a bit grainy.",
         QUAGMIRE_WHEAT_SEEDS = "A handful of odd seeds.",
         --NOTE: raw/cooked carrot uses regular carrot strings
         QUAGMIRE_CARROT_SEEDS = "A handful of odd seeds.",
-        
+
         QUAGMIRE_ROTTEN_CROP = "I don't think the altar will want that.",
-        
+
 		QUAGMIRE_SALMON = "Mm, fresh fish.",
 		QUAGMIRE_SALMON_COOKED = "Ready for the dinner table.",
 		QUAGMIRE_CRABMEAT = "No imitations here.",
 		QUAGMIRE_CRABMEAT_COOKED = "I can put a meal together in a pinch.",
-		QUAGMIRE_SUGARWOODTREE = 
+		QUAGMIRE_SUGARWOODTREE =
 		{
 			GENERIC = "It's full of delicious, delicious sap.",
 			STUMP = "Where'd the tree go? I'm stumped.",
@@ -2805,7 +2952,7 @@ return {
 			TAPPED_BUGS = "That's how you get ants.",
 			WOUNDED = "It looks ill.",
 		},
-		QUAGMIRE_SPOTSPICE_SHRUB = 
+		QUAGMIRE_SPOTSPICE_SHRUB =
 		{
 			GENERIC = "It reminds me of those tentacle monsters.",
 			PICKED = "I can't get anymore out of that shrub.",
@@ -2819,11 +2966,11 @@ return {
 			READY = "Salt has gathered on the rope.",
 			GENERIC = "Science takes time.",
 		},
-		
+
 		QUAGMIRE_POND_SALT = "A little salty spring.",
 		QUAGMIRE_SALT_RACK_ITEM = "For harvesting salt from the pond.",
 
-		QUAGMIRE_SAFE = 
+		QUAGMIRE_SAFE =
 		{
 			GENERIC = "It's a safe. For keeping things safe.",
 			LOCKED = "It won't open without the key.",
@@ -2833,7 +2980,7 @@ return {
 		QUAGMIRE_KEY_PARK = "I'll park it in my pocket until I get to the park.",
         QUAGMIRE_PORTAL_KEY = "This looks science-y.",
 
-		
+
 		QUAGMIRE_MUSHROOMSTUMP =
 		{
 			GENERIC = "Are those mushrooms? I'm stumped.",
@@ -2843,7 +2990,7 @@ return {
         QUAGMIRE_MEALINGSTONE = "The daily grind.",
 		QUAGMIRE_PEBBLECRAB = "That rock's alive!",
 
-		
+
 		QUAGMIRE_RUBBLE_CARRIAGE = "On the road to nowhere.",
         QUAGMIRE_RUBBLE_CLOCK = "Someone beat the clock. Literally.",
         QUAGMIRE_RUBBLE_CATHEDRAL = "Preyed upon.",
@@ -2868,7 +3015,7 @@ return {
             SLEEPING = "It's sleeping, for now.",
         },
         QUAGMIRE_SWAMPIG = "It's a super hairy pig.",
-        
+
         QUAGMIRE_PORTAL = "Another dead end.",
         QUAGMIRE_SALTROCK = "Salt. The tastiest mineral.",
         QUAGMIRE_SALT = "It's full of salt.",
@@ -2881,7 +3028,7 @@ return {
             MATCH = "Science says this will appease the sky God.",
             MATCH_BUT_SNACK = "It's more of a light snack, really.",
         },
-        
+
         QUAGMIRE_FERN = "Probably chock full of vitamins.",
         QUAGMIRE_FOLIAGE_COOKED = "We cooked the foliage.",
         QUAGMIRE_COIN1 = "I'd like more than a penny for my thoughts.",
@@ -2892,7 +3039,7 @@ return {
         QUAGMIRE_SYRUP = "Adds sweetness to the mixture.",
         QUAGMIRE_SAP_SPOILED = "Might as well toss it on the fire.",
         QUAGMIRE_SEEDPACKET = "Sow what?",
-        
+
         QUAGMIRE_POT = "This pot holds more ingredients.",
         QUAGMIRE_POT_SMALL = "Let's get cooking!",
         QUAGMIRE_POT_SYRUP = "I need to sweeten this pot.",
@@ -2909,7 +3056,7 @@ return {
         QUAGMIRE_PLATE_SILVER = "A silver plated plate.",
         QUAGMIRE_BOWL_SILVER = "A bright bowl.",
         QUAGMIRE_CRATE = "Kitchen stuff.",
-        
+
         QUAGMIRE_MERM_CART1 = "Any science in there?", --sammy's wagon
         QUAGMIRE_MERM_CART2 = "I could use some stuff.", --pipton's cart
         QUAGMIRE_PARK_ANGEL = "Take that, creature!",
@@ -2925,7 +3072,7 @@ return {
         QUAGMIRE_CRABTRAP = "A crabby trap.",
         QUAGMIRE_TRADER_MERM = "Maybe they'd be willing to trade.",
         QUAGMIRE_TRADER_MERM2 = "Maybe they'd be willing to trade.",
-        
+
         QUAGMIRE_GOATMUM = "Reminds me of my old nanny.",
         QUAGMIRE_GOATKID = "This goat's much smaller.",
         QUAGMIRE_PIGEON =
@@ -2950,21 +3097,21 @@ return {
         QUAGMIRE_LAMP_SHORT = "Enlightening.",
 
         --v2 Winona
-        WINONA_CATAPULT = 
+        WINONA_CATAPULT =
         {
         	GENERIC = "She's made a sort of automatic defense system.",
         	OFF = "It needs some electricity.",
         	BURNING = "It's on fire!",
         	BURNT = "Science couldn't save it.",
         },
-        WINONA_SPOTLIGHT = 
+        WINONA_SPOTLIGHT =
         {
         	GENERIC = "What an ingenious idea!",
         	OFF = "It needs some electricity.",
         	BURNING = "It's on fire!",
         	BURNT = "Science couldn't save it.",
         },
-        WINONA_BATTERY_LOW = 
+        WINONA_BATTERY_LOW =
         {
         	GENERIC = "Looks science-y. How does it work?",
         	LOWPOWER = "It's getting low on power.",
@@ -2972,7 +3119,7 @@ return {
         	BURNING = "It's on fire!",
         	BURNT = "Science couldn't save it.",
         },
-        WINONA_BATTERY_HIGH = 
+        WINONA_BATTERY_HIGH =
         {
         	GENERIC = "Hey! That's not science!",
         	LOWPOWER = "It'll turn off soon.",
@@ -2997,7 +3144,7 @@ return {
         STEERINGWHEEL = "I could have been a sailor in another life.",
         ANCHOR = "I wouldn't want my boat to float away.",
         BOATPATCH = "Just in case of disaster.",
-        DRIFTWOOD_TREE = 
+        DRIFTWOOD_TREE =
         {
             BURNING = "That driftwood's burning!",
             BURNT = "Doesn't look very useful anymore.",
@@ -3007,7 +3154,7 @@ return {
 
         DRIFTWOOD_LOG = "It floats on water.",
 
-        MOON_TREE = 
+        MOON_TREE =
         {
             BURNING = "The tree is burning!",
             BURNT = "The tree burned down.",
@@ -3016,7 +3163,7 @@ return {
         },
 		MOON_TREE_BLOSSOM = "It fell from the moon tree.",
 
-        MOONBUTTERFLY = 
+        MOONBUTTERFLY =
         {
         	GENERIC = "My vast scientific knowledge tells me it's... a moon butterfly.",
         	HELD = "I've got you now.",
@@ -3027,7 +3174,7 @@ return {
         ROCK_AVOCADO_FRUIT_RIPE = "Uncooked stone fruit is the pits.",
         ROCK_AVOCADO_FRUIT_RIPE_COOKED = "It's actually soft enough to eat now.",
         ROCK_AVOCADO_FRUIT_SPROUT = "It's growing.",
-        ROCK_AVOCADO_BUSH = 
+        ROCK_AVOCADO_BUSH =
         {
         	BARREN = "Its fruit growing days are over.",
 			WITHERED = "It's pretty hot out.",
@@ -3038,7 +3185,7 @@ return {
 			BURNING = "It's burning!",
 		},
         DEAD_SEA_BONES = "That's what they get for coming up on land.",
-        HOTSPRING = 
+        HOTSPRING =
         {
         	GENERIC = "If only I could soak my weary bones.",
         	BOMBED = "Just a simple chemical reaction.",
@@ -3046,6 +3193,7 @@ return {
 			EMPTY = "I'll just have to wait for it to fill up again.",
         },
         MOONGLASS = "It's very sharp.",
+        MOONGLASS_CHARGED = "I should put this to scientific use before the energy fades!",
         MOONGLASS_ROCK = "I can practically see my reflection in it.",
         BATHBOMB = "It's just textbook chemistry.",
         TRAP_STARFISH =
@@ -3054,7 +3202,7 @@ return {
             CLOSED = "It tried to chomp me!",
         },
         DUG_TRAP_STARFISH = "It's not fooling anyone now.",
-        SPIDER_MOON = 
+        SPIDER_MOON =
         {
         	GENERIC = "Oh good. The moon mutated it.",
         	SLEEPING = "Thank science, it stopped moving.",
@@ -3086,9 +3234,9 @@ return {
 
         MINIFLARE = "I can light it to let everyone know I'm here.",
 
-		MOON_FISSURE = 
+		MOON_FISSURE =
 		{
-			GENERIC = "My brain pulses with peace and terror.", 
+			GENERIC = "My brain pulses with peace and terror.",
 			NOLIGHT = "The cracks in this place are starting to show.",
 		},
         MOON_ALTAR =
@@ -3110,7 +3258,7 @@ return {
 
         MOON_ALTAR_ASTRAL = "It seems to be part of a larger mechanism.",
         MOON_ALTAR_ICON = "I think I know just where you belong.",
-        MOON_ALTAR_WARD = "It wants to be with the others.",        
+        MOON_ALTAR_WARD = "It wants to be with the others.",
 
         SEAFARING_PROTOTYPER =
         {
@@ -3121,20 +3269,20 @@ return {
         STEERINGWHEEL_ITEM = "That's going to be the steering wheel.",
         ANCHOR_ITEM = "Now I can build an anchor.",
         MAST_ITEM = "Now I can build a mast.",
-        MUTATEDHOUND = 
+        MUTATEDHOUND =
         {
         	DEAD = "Now I can breathe easy.",
         	GENERIC = "Science save us!",
         	SLEEPING = "I have a very strong desire to run.",
         },
 
-        MUTATED_PENGUIN = 
+        MUTATED_PENGUIN =
         {
 			DEAD = "That's the end of that.",
 			GENERIC = "That thing's terrifying!",
 			SLEEPING = "Thank goodness. It's sleeping.",
 		},
-        CARRAT = 
+        CARRAT =
         {
         	DEAD = "That's the end of that.",
         	GENERIC = "Are carrots supposed to have legs?",
@@ -3142,7 +3290,7 @@ return {
         	SLEEPING = "It's almost cute.",
         },
 
-		BULLKELP_PLANT = 
+		BULLKELP_PLANT =
         {
             GENERIC = "Welp. It's kelp.",
             PICKED = "I just couldn't kelp myself.",
@@ -3264,7 +3412,7 @@ return {
 		SEAFOODGUMBO = "It's a jumbo seafood gumbo.",
 		SURFNTURF = "It's perf!",
 
-        WOBSTER_SHELLER = "What a wascally Wobster.", 
+        WOBSTER_SHELLER = "What a wascally Wobster.",
         WOBSTER_DEN = "It's a rock with Wobsters in it.",
         WOBSTER_SHELLER_DEAD = "You should cook up nicely.",
         WOBSTER_SHELLER_DEAD_COOKED = "I can't wait to eat you.",
@@ -3276,7 +3424,7 @@ return {
         MOONGLASS_WOBSTER_DEN = "It's a chunk of moonglass with Lunar Wobsters in it.",
 
 		TRIDENT = "This is going to be a blast!",
-		
+
 		WINCH =
 		{
 			GENERIC = "It'll do in a pinch.",
@@ -3287,8 +3435,8 @@ return {
         HERMITHOUSE = {
             GENERIC = "It's just an empty shell of a house.",
             BUILTUP = "It just needed a little love.",
-        }, 
-        
+        },
+
         SHELL_CLUSTER = "I bet there's some nice shells in there.",
         --
 		SINGINGSHELL_OCTAVE3 =
@@ -3311,7 +3459,7 @@ return {
             GENERIC = "The real treasure is the treasure we found along the way.",
             LOCKED = "It's clammed right up!",
         },
-        
+
         HERMIT_BUNDLE = "She shore shells out a lot of these.",
         HERMIT_BUNDLE_SHELLS = "She DOES sell sea shells!",
 
@@ -3322,21 +3470,21 @@ return {
 		----------------------- ROT STRINGS GO ABOVE HERE ------------------
 
 		-- Walter
-        WOBYBIG = 
+        WOBYBIG =
         {
             "What in the name of science have you been feeding her?",
             "What in the name of science have you been feeding her?",
         },
-        WOBYSMALL = 
+        WOBYSMALL =
         {
             "It's a scientific fact that petting a good dog will improve your day.",
             "It's a scientific fact that petting a good dog will improve your day.",
         },
 		WALTERHAT = "I was never exactly \"outdoorsy\" in my youth.",
 		SLINGSHOT = "The bane of windows everywhere.",
-		SLINGSHOTAMMO_ROCK = "Shots to be slinged.",		
-		SLINGSHOTAMMO_MARBLE = "Shots to be slinged.",		
-		SLINGSHOTAMMO_THULECITE = "Shots to be slinged.",	
+		SLINGSHOTAMMO_ROCK = "Shots to be slinged.",
+		SLINGSHOTAMMO_MARBLE = "Shots to be slinged.",
+		SLINGSHOTAMMO_THULECITE = "Shots to be slinged.",
         SLINGSHOTAMMO_GOLD = "Shots to be slinged.",
         SLINGSHOTAMMO_SLOW = "Shots to be slinged.",
         SLINGSHOTAMMO_FREEZE = "Shots to be slinged.",
@@ -3352,7 +3500,20 @@ return {
         BATTLESONG_FIRERESISTANCE = "I once burned my vest before seeing a play. I call that dramatic ironing.",
         BATTLESONG_INSTANT_TAUNT = "I'm afraid I'm not a licensed poetic.",
         BATTLESONG_INSTANT_PANIC = "I'm afraid I'm not a licensed poetic.",
-        
+
+        -- Webber
+        MUTATOR_WARRIOR = "Oh wow, that looks um... delicious, Webber!",
+        MUTATOR_DROPPER = "Ah, I... just ate! Why don't you give it to one of your spider friends?",
+        MUTATOR_HIDER = "Oh wow, that looks um... delicious, Webber!",
+        MUTATOR_SPITTER = "Ah, I... just ate! Why don't you give it to one of your spider friends?",
+        MUTATOR_MOON = "Oh wow, that looks um... delicious, Webber!",
+        MUTATOR_HEALER = "Ah, I... just ate! Why don't you give it to one of your spider friends?",
+        SPIDER_WHISTLE = "I don't want to call any spiders over to me!",
+        SPIDERDEN_BEDAZZLER = "It looks like someone's been getting crafty.",
+        SPIDER_HEALER = "Oh wonderful. Now the spiders can heal themselves.",
+        SPIDER_REPELLENT = "If only science could make it work for me.",
+        SPIDER_HEALER_ITEM = "If I see any spiders around I'll be sure to give it to them. Maybe.",
+
 		-- Wendy
 		GHOSTLYELIXIR_SLOWREGEN = "Ah yes. Very science-y.",
 		GHOSTLYELIXIR_FASTREGEN = "Ah yes. Very science-y.",
@@ -3379,7 +3540,7 @@ return {
 			COOKING_SHORT = "It'll be ready in no-time!",
 			EMPTY = "I bet there's nothing in there.",
         },
-        
+
         PORTABLEBLENDER_ITEM = "It mixes all the food.",
         PORTABLESPICER_ITEM =
         {
@@ -3414,26 +3575,26 @@ return {
         TURNIP = "It's a raw turnip.",
         TURNIP_COOKED = "Cooking is science in practice.",
         TURNIP_SEEDS = "A handful of odd seeds.",
-        
+
         GARLIC = "The number one breath enhancer.",
         GARLIC_COOKED = "Perfectly browned.",
         GARLIC_SEEDS = "A handful of odd seeds.",
-        
+
         ONION = "Looks crunchy.",
         ONION_COOKED = "A successful chemical reaction.",
         ONION_SEEDS = "A handful of odd seeds.",
-        
+
         POTATO = "The apples of the earth.",
         POTATO_COOKED = "A successful temperature experiment.",
         POTATO_SEEDS = "A handful of odd seeds.",
-        
+
         TOMATO = "It's red because it's full of science.",
         TOMATO_COOKED = "Cooking's easy if you understand chemistry.",
         TOMATO_SEEDS = "A handful of odd seeds.",
 
-        ASPARAGUS = "A vegetable.", 
+        ASPARAGUS = "A vegetable.",
         ASPARAGUS_COOKED = "Science says it's good for me.",
-        ASPARAGUS_SEEDS = "It's asparagus seeds.",
+        ASPARAGUS_SEEDS = "It's some seeds.",
 
         PEPPER = "Nice and spicy.",
         PEPPER_COOKED = "It was already hot to begin with.",
@@ -3448,13 +3609,13 @@ return {
         {
             GENERIC = "Looks fit for a swamp king!",
             BURNT = "There was something fishy about that throne anyway.",
-        },        
+        },
         MERMTHRONE_CONSTRUCTION =
         {
             GENERIC = "Just what is she planning?",
             BURNT = "I suppose we'll never know what it was for now.",
-        },        
-        MERMHOUSE_CRAFTED = 
+        },
+        MERMHOUSE_CRAFTED =
         {
             GENERIC = "It's actually kind of cute.",
             BURNT = "Ugh, the smell!",
@@ -3471,13 +3632,13 @@ return {
 		GHOSTFLOWER = "My scientific brain refuses to perceive it.",
         SMALLGHOST = "Aww, does someone have a little boo-boo?",
 
-        CRABKING = 
+        CRABKING =
         {
             GENERIC = "Yikes! A little too crabby for me.",
             INERT = "That castle needs a little decoration.",
         },
 		CRABKING_CLAW = "That's claws for alarm!",
-		
+
 		MESSAGEBOTTLE = "I wonder if it's for me!",
 		MESSAGEBOTTLEEMPTY = "It's full of nothing.",
 
@@ -3574,20 +3735,20 @@ return {
         },
 
         ARCHIVE_MOON_STATUE = "These magnificent moon statues have me waxing poetic.",
-        ARCHIVE_RUNE_STATUE = 
+        ARCHIVE_RUNE_STATUE =
         {
             LINE_1 = "So much knowledge, if only I could read it!",
             LINE_2 = "These markings look different from the ones in the the rest of the ruins.",
             LINE_3 = "So much knowledge, if only I could read it!",
             LINE_4 = "These markings look different from the ones in the the rest of the ruins.",
             LINE_5 = "So much knowledge, if only I could read it!",
-        },        
+        },
 
         ARCHIVE_RESONATOR = {
             GENERIC = "Why use a map when you could use a mind-bogglingly complex piece of machinery?",
             IDLE = "It seems to have found everything worth finding.",
         },
-        
+
         ARCHIVE_RESONATOR_ITEM = "Aha! I used the secret knowledge to build a device! Why does this feel familiar...",
 
         ARCHIVE_LOCKBOX_DISPENCER = {
@@ -3625,11 +3786,310 @@ return {
         TURFCRAFTINGSTATION = "A true scientist is always breaking new ground!",
 
         MOON_ALTAR_LINK = "It must be building up to something.",
+
+        -- FARMING
+        COMPOSTINGBIN =
+        {
+            GENERIC = "I can barrel-y stand the smell.",
+            WET = "That looks too soggy.",
+            DRY = "Hm... too dry.",
+            BALANCED = "Just right!",
+            BURNT = "I didn't think it could smell any worse...",
+        },
+        COMPOST = "Food for plants, and not much else.",
+        SOIL_AMENDER =
+		{
+			GENERIC = "Now we wait for science to do its work.",
+			STALE = "It's creating what we scientists call a chemical reaction!",
+			SPOILED = "That stomach-churning smell means it's working!",
+		},
+
+		SOIL_AMENDER_FERMENTED = "That's some strong science!",
+
+        WATERINGCAN =
+        {
+            GENERIC = "I can water the plants with this.",
+            EMPTY = "Maybe there's a pond around here somewhere...",
+        },
+        PREMIUMWATERINGCAN =
+        {
+            GENERIC = "It's been improved with science... and bird parts!",
+            EMPTY = "It won't do me much good without water.",
+        },
+
+		FARM_PLOW = "A convenient plot device.",
+		FARM_PLOW_ITEM = "I'd better find a good spot for my garden before I use it.",
+		FARM_HOE = "I have to make the ground more comfortable for the seeds.",
+		GOLDEN_FARM_HOE = "Do I really need something this fancy to move dirt around?",
+		NUTRIENTSGOGGLESHAT = "This will help me see all the science hiding in the dirt.",
+		PLANTREGISTRYHAT = "To understand the plant, you must wear the plant.",
+
+        FARM_SOIL_DEBRIS = "It's making a mess of my garden.",
+
+		FIRENETTLES = "If you can't stand the heat, stay out of the garden.",
+		FORGETMELOTS = "Hm. I can't remember what I was going to say about those.",
+		SWEETTEA = "A nice cup of tea to forget all my problems.",
+		TILLWEED = "Out of my garden, you!",
+		TILLWEEDSALVE = "My salve-ation.",
+
+		TROPHYSCALE_OVERSIZEDVEGGIES =
+		{
+			GENERIC = "I can scientifically measure my harvest's heftiness.",
+			HAS_ITEM = "Weight: {weight}\nHarvested on day: {day}\nNot bad.",
+			HAS_ITEM_HEAVY = "Weight: {weight}\nHarvested on day: {day}\nWho knew they grew that big?",
+            HAS_ITEM_LIGHT = "It's so average the scale isn't even bothering to tell me its weight.",
+			BURNING = "Mmm, what's cooking?",
+			BURNT = "I suppose that wasn't the best way to cook it.",
+        },
+
+        CARROT_OVERSIZED = "That's one big bunch of carrots!",
+        CORN_OVERSIZED = "What a big ear you have!",
+        PUMPKIN_OVERSIZED = "A rather pumped up pumpkin.",
+        EGGPLANT_OVERSIZED = "I still don't see any resemblance to an egg.",
+        DURIAN_OVERSIZED = "I'm sure it'll make an even bigger stink.",
+        POMEGRANATE_OVERSIZED = "That might be the biggest pomegranate I've ever seen.",
+        DRAGONFRUIT_OVERSIZED = "I half expect it to sprout wings.",
+        WATERMELON_OVERSIZED = "A big, juicy watermelon.",
+        TOMATO_OVERSIZED = "A tomato of incredible proportions.",
+        POTATO_OVERSIZED = "That's a tater lot.",
+        ASPARAGUS_OVERSIZED = "I guess we'll be eating asparagus for a while...",
+        ONION_OVERSIZED = "They grow up so fast! It's... it's bringing a tear to my eye.",
+        GARLIC_OVERSIZED = "A gargantuan garlic!",
+        PEPPER_OVERSIZED = "A pepper of rather unusual size.",
+
+        VEGGIE_OVERSIZED_ROTTEN = "What rotten luck.",
+
+		FARM_PLANT =
+		{
+			GENERIC = "That's a plant!",
+			SEED = "And now, we wait.",
+			GROWING = "Grow my beautiful creation, grow!",
+			FULL = "Time to reap science's rewards.",
+			ROTTEN = "Drat! If only I'd picked it while I had the chance!",
+			FULL_OVERSIZED = "With the power of science, I've produced monstrous produce!",
+			ROTTEN_OVERSIZED = "What rotten luck.",
+			FULL_WEED = "I knew I'd weed out the imposter eventually!",
+
+			BURNING = "That can't be good for the plants...",
+		},
+
+        FRUITFLY = "Buzz off!",
+        LORDFRUITFLY = "Hey, stop upsetting the plants!",
+        FRIENDLYFRUITFLY = "The garden seems happier with it around.",
+        FRUITFLYFRUIT = "Now I'm in charge!",
+
+        SEEDPOUCH = "I was getting tired of carrying loose seeds in my pockets.",
+
+		-- Crow Carnival
+		CARNIVAL_HOST = "What an odd fellow.",
+		CARNIVAL_CROWKID = "Good day to you, small bird person.",
+		CARNIVAL_GAMETOKEN = "One shiny token.",
+		CARNIVAL_PRIZETICKET =
+		{
+			GENERIC = "That's the ticket!",
+			GENERIC_SMALLSTACK = "That's the tickets!",
+			GENERIC_LARGESTACK = "That's a lot of tickets!",
+		},
+
+		CARNIVALGAME_FEEDCHICKS_NEST = "It's a little trapdoor.",
+		CARNIVALGAME_FEEDCHICKS_STATION =
+		{
+			GENERIC = "It won't let me play until I give it something shiny.",
+			PLAYING = "This looks like fun!",
+		},
+		CARNIVALGAME_FEEDCHICKS_KIT = "This really is a pop-up carnival.",
+		CARNIVALGAME_FEEDCHICKS_FOOD = "I don't need to chew them up first, do I?",
+
+		CARNIVALGAME_MEMORY_KIT = "This really is a pop-up carnival.",
+		CARNIVALGAME_MEMORY_STATION =
+		{
+			GENERIC = "It won't let me play until I give it something shiny.",
+			PLAYING = "Not to brag, but I've been called a bit of an egghead in the past.",
+		},
+		CARNIVALGAME_MEMORY_CARD =
+		{
+			GENERIC = "It's a little trapdoor.",
+			PLAYING = "Is this the right one?",
+		},
+
+		CARNIVALGAME_HERDING_KIT = "This really is a pop-up carnival.",
+		CARNIVALGAME_HERDING_STATION =
+		{
+			GENERIC = "It won't let me play until I give it something shiny.",
+			PLAYING = "Those eggs are looking a little runny.",
+		},
+		CARNIVALGAME_HERDING_CHICK = "Come back here!",
+
+		CARNIVAL_PRIZEBOOTH_KIT = "The real prize is the booth we made along the way.",
+		CARNIVAL_PRIZEBOOTH =
+		{
+			GENERIC = "I've got my eyes on the prize. That one, over there!",
+		},
+
+		CARNIVALCANNON_KIT = "I've got a lot of experience in making things explode.",
+		CARNIVALCANNON =
+		{
+			GENERIC = "This experiment blows up on purpose!",
+			COOLDOWN = "What a blast!",
+		},
+
+		CARNIVAL_PLAZA_KIT = "It's a scientifically proven fact that birds love trees.",
+		CARNIVAL_PLAZA =
+		{
+			GENERIC = "It doesn't really scream \"Cawnival\" yet, does it?",
+			LEVEL_2 = "A little birdy told me it could use some more decorations around here.",
+			LEVEL_3 = "This tree is caws for celebration!",
+		},
+
+		CARNIVALDECOR_EGGRIDE_KIT = "I hope this prize is all it's cracked up to be.",
+		CARNIVALDECOR_EGGRIDE = "I could watch it for hours.",
+
+		CARNIVALDECOR_LAMP_KIT = "Only some light work left to do.",
+		CARNIVALDECOR_LAMP = "It's powered by whimsy.",
+		CARNIVALDECOR_PLANT_KIT = "Maybe it's a boxwood?",
+		CARNIVALDECOR_PLANT = "Either it's small, or I'm gigantic.",
+
+		CARNIVALDECOR_FIGURE =
+		{
+			RARE = "See? Proof that trying the exact same thing over and over will eventually lead to success!",
+			UNCOMMON = "You don't see this kind of design too often.",
+			GENERIC = "I seem to be getting a lot of these...",
+		},
+		CARNIVALDECOR_FIGURE_KIT = "The thrill of discovery!",
+
+        CARNIVAL_BALL = "It's genius in its simplicity.",
+		CARNIVAL_SEEDPACKET = "I was feeling a bit peckish.",
+		CARNIVALFOOD_CORNTEA = "Is this drink supposed to be crunchy?",
+
+        CARNIVAL_VEST_A = "I think it makes me look adventurous.",
+        CARNIVAL_VEST_B = "It's like wearing my own shade tree.",
+        CARNIVAL_VEST_C = "I hope there's no bugs in it...",
+
+        -- YOTB
+        YOTB_SEWINGMACHINE = "Sewing can't be that hard... can it?",
+        YOTB_SEWINGMACHINE_ITEM = "There looks to be a bit of assembly required.",
+        YOTB_STAGE = "Strange, I never see him enter or leave...",
+        YOTB_POST =  "This contest is going to go off without a hitch! Well, figuratively speaking.",
+        YOTB_STAGE_ITEM = "It looks like a bit of building is in order.",
+        YOTB_POST_ITEM =  "I'd better get that set up.",
+
+
+        YOTB_PATTERN_FRAGMENT_1 = "If I put some of these together, I bet I could make a beefalo costume.",
+        YOTB_PATTERN_FRAGMENT_2 = "If I put some of these together, I bet I could make a beefalo costume.",
+        YOTB_PATTERN_FRAGMENT_3 = "If I put some of these together, I bet I could make a beefalo costume.",
+
+        YOTB_BEEFALO_DOLL_WAR = {
+            GENERIC = "Scientifically formulated for maximum huggableness.",
+            YOTB = "I wonder what the Judge would say about this?",
+        },
+        YOTB_BEEFALO_DOLL_DOLL = {
+            GENERIC = "Scientifically formulated for maximum huggableness.",
+            YOTB = "I wonder what the Judge would say about this?",
+        },
+        YOTB_BEEFALO_DOLL_FESTIVE = {
+            GENERIC = "Scientifically formulated for maximum huggableness.",
+            YOTB = "I wonder what the Judge would say about this?",
+        },
+        YOTB_BEEFALO_DOLL_NATURE = {
+            GENERIC = "Scientifically formulated for maximum huggableness.",
+            YOTB = "I wonder what the Judge would say about this?",
+        },
+        YOTB_BEEFALO_DOLL_ROBOT = {
+            GENERIC = "Scientifically formulated for maximum huggableness.",
+            YOTB = "I wonder what the Judge would say about this?",
+        },
+        YOTB_BEEFALO_DOLL_ICE = {
+            GENERIC = "Scientifically formulated for maximum huggableness.",
+            YOTB = "I wonder what the Judge would say about this?",
+        },
+        YOTB_BEEFALO_DOLL_FORMAL = {
+            GENERIC = "Scientifically formulated for maximum huggableness.",
+            YOTB = "I wonder what the Judge would say about this?",
+        },
+        YOTB_BEEFALO_DOLL_VICTORIAN = {
+            GENERIC = "Scientifically formulated for maximum huggableness.",
+            YOTB = "I wonder what the Judge would say about this?",
+        },
+        YOTB_BEEFALO_DOLL_BEAST = {
+            GENERIC = "Scientifically formulated for maximum huggableness.",
+            YOTB = "I wonder what the Judge would say about this?",
+        },
+
+        WAR_BLUEPRINT = "How ferocious!",
+        DOLL_BLUEPRINT = "My beefalo will look as cute as a button!",
+        FESTIVE_BLUEPRINT = "This is just the occasion for some festivity!",
+        ROBOT_BLUEPRINT = "This requires a suspicious amount of welding for a sewing project.",
+        NATURE_BLUEPRINT = "You really can't go wrong with flowers.",
+        FORMAL_BLUEPRINT = "This is a costume for some Grade A beefalo.",
+        VICTORIAN_BLUEPRINT = "I think my grandmother wore something similar.",
+        ICE_BLUEPRINT = "I usually like my beefalo fresh, not frozen.",
+        BEAST_BLUEPRINT = "I'm feeling lucky about this one!",
+
+        BEEF_BELL = "It makes beefalo friendly. I'm sure there's a very scientific explanation.",
+
+        -- Moon Storm
+        ALTERGUARDIAN_PHASE1 = {
+            GENERIC = "You'll pay for breaking all that science!",
+            DEAD = "Gotcha!",
+        },
+        ALTERGUARDIAN_PHASE2 = {
+            GENERIC = "I think I just made it angry...",
+            DEAD = "This time I'm sure I got it.",
+        },
+        ALTERGUARDIAN_PHASE2SPIKE = "You've made your point!",
+        ALTERGUARDIAN_PHASE3 = "It's definitely angry now!",
+        ALTERGUARDIAN_PHASE3TRAP = "After rigorous testing, I can confirm that they make me want to take a nap.",
+        ALTERGUARDIAN_PHASE3DEADORB = "Is it dead? That strange energy still seems to be lingering around it.",
+        ALTERGUARDIAN_PHASE3DEAD = "Maybe someone should go poke it... just to be sure.",
+
+        ALTERGUARDIANHAT = "It shows me infinite possibilities...",
+        ALTERGUARDIANHATSHARD = "Even a single piece is pretty illuminating!",
+
+        MOONSTORM_GLASS = {
+            GENERIC = "It's glassy.",
+            INFUSED = "It's glowing with unearthly energy."
+        },
+
+        MOONSTORM_STATIC = "A new discovery, how electrifying!",
+        MOONSTORM_STATIC_ITEM = "It makes my hair do crazy things.",
+        MOONSTORM_SPARK = "I think I'll call it the \"Higgsbury Particle.\"",
+
+        BIRD_MUTANT = "I think that used to be a crow.",
+        BIRD_MUTANT_SPITTER = "I don't like the way it's looking at me...",
+
+        WAGSTAFF_NPC = "As a fellow man of science, I'm compelled to help him!",
+        ALTERGUARDIAN_CONTAINED = "It's draining the energy right out of that monster!",
+
+        WAGSTAFF_TOOL_1 = "That has to be the tool I'm looking for!",
+        WAGSTAFF_TOOL_2 = "Of course I know what it is! It's just, er... too complicated to explain.",
+        WAGSTAFF_TOOL_3 = "Clearly a very scientific tool!",
+        WAGSTAFF_TOOL_4 = "My scientific instincts tell me that this is the tool I'm looking for!",
+        WAGSTAFF_TOOL_5 = "I know exactly what it does! Science!",
+
+        MOONSTORM_GOGGLESHAT = "Of course! Combining moon energy with potato energy, why didn't I think of that?",
+
+        MOON_DEVICE = {
+            GENERIC = "It's containing the energy! I knew what it was for all along, of course.",
+            CONSTRUCTION1 = "The science has only just started.",
+            CONSTRUCTION2 = "That's looking much more science-y already!",
+        }
     },
 
     DESCRIBE_GENERIC = "It's a... thing.",
     DESCRIBE_TOODARK = "It's too dark to see!",
     DESCRIBE_SMOLDERING = "That thing is about to catch fire.",
+
+    DESCRIBE_PLANTHAPPY = "What a happy plant!",
+    DESCRIBE_PLANTVERYSTRESSED = "This plant seems to be under a lot of stress.",
+    DESCRIBE_PLANTSTRESSED = "It's a little cranky.",
+    DESCRIBE_PLANTSTRESSORKILLJOYS = "I might have to do a bit of weeding...",
+    DESCRIBE_PLANTSTRESSORFAMILY = "It's my scientific conclusion that this plant seems lonely.",
+    DESCRIBE_PLANTSTRESSOROVERCROWDING = "There are too many plants competing for this small space.",
+    DESCRIBE_PLANTSTRESSORSEASON = "This season is not being kind to this plant.",
+    DESCRIBE_PLANTSTRESSORMOISTURE = "This looks really dehydrated.",
+    DESCRIBE_PLANTSTRESSORNUTRIENTS = "This poor plant needs nutrients!",
+    DESCRIBE_PLANTSTRESSORHAPPINESS = "It's hungry for some good conversation.",
+
     EAT_FOOD =
     {
         TALLBIRDEGG_CRACKED = "Mmm. Beaky.",

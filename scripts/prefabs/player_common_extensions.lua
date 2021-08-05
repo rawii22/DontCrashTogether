@@ -25,6 +25,7 @@ local function ConfigurePlayerLocomotor(inst)
     inst.components.locomotor.walkspeed = TUNING.WILSON_WALK_SPEED -- 4
     inst.components.locomotor.runspeed = TUNING.WILSON_RUN_SPEED -- 6
     inst.components.locomotor.fasteronroad = true
+    inst.components.locomotor:SetFasterOnCreep(inst:HasTag("spiderwhisperer"))
     inst.components.locomotor:SetTriggersCreep(not inst:HasTag("spiderwhisperer"))
     inst.components.locomotor:SetAllowPlatformHopping(true)
 	inst.components.locomotor.hop_distance_fn = GetHopDistance
@@ -270,7 +271,7 @@ local function DoActualRez(inst, source, item)
     else -- Telltale Heart
         inst.sg:GoToState("reviver_rebirth", item)
     end
- 
+
     --Default to electrocute light values
     inst.Light:SetIntensity(.8)
     inst.Light:SetRadius(.5)
@@ -613,6 +614,36 @@ local function OnMakePlayerCorpse(inst, data)
     end
 end
 
+
+local function GivePlayerStartingItems(inst, items)
+    if items ~= nil and #items > 0 and inst.components.inventory ~= nil then
+        inst.components.inventory.ignoresound = true
+        if inst.components.inventory:GetNumSlots() > 0 then
+            for i, v in ipairs(items) do
+                inst.components.inventory:GiveItem(SpawnPrefab(v))
+            end
+        else
+            local spawned_items = {}
+            for i, v in ipairs(items) do
+                local item = SpawnPrefab(v)
+                if item.components.equippable ~= nil then
+                    inst.components.inventory:Equip(item)
+                    table.insert(spawned_items, item)
+                else
+                    item:Remove()
+                end
+            end
+            for i, v in ipairs(spawned_items) do
+                if v.components.inventoryitem == nil or not v.components.inventoryitem:IsHeld() then
+                    v:Remove()
+                end
+            end
+        end
+        inst.components.inventory.ignoresound = false
+    end
+end
+
+
 --------------------------------------------------------------------------
 
 local function DoSpookedSanity(inst)
@@ -649,6 +680,27 @@ local function OnEat(inst, data)
 	end
 end
 
+local function OnLearnPlantStage(inst, data)
+    local plantregistryupdater = data ~= nil and inst.components.plantregistryupdater
+    if plantregistryupdater then
+        plantregistryupdater:LearnPlantStage(data.plant, data.stage)
+    end
+end
+
+local function OnLearnFertilizer(inst, data)
+    local plantregistryupdater = data ~= nil and inst.components.plantregistryupdater
+    if plantregistryupdater then
+        plantregistryupdater:LearnFertilizer(data.fertilizer)
+    end
+end
+
+local function OnTakeOversizedPicture(inst, data)
+    local plantregistryupdater = data ~= nil and inst.components.plantregistryupdater
+    if plantregistryupdater then
+        plantregistryupdater:TakeOversizedPicture(data.plant, data.weight, data.beardskin, data.beardlength)
+    end
+end
+
 return
 {
     ShouldKnockout              = ShouldKnockout,
@@ -666,4 +718,8 @@ return
 	OnLearnCookbookRecipe		= OnLearnCookbookRecipe,
 	OnLearnCookbookStats		= OnLearnCookbookStats,
 	OnEat						= OnEat,
+    OnLearnPlantStage           = OnLearnPlantStage,
+    OnLearnFertilizer           = OnLearnFertilizer,
+    OnTakeOversizedPicture      = OnTakeOversizedPicture,
+	GivePlayerStartingItems		= GivePlayerStartingItems,
 }

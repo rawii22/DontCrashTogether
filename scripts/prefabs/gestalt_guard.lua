@@ -15,7 +15,7 @@ local brain = require "brains/brightmare_gestaltguardbrain"
 
 local function SetHeadAlpha(inst, a)
 	if inst.blobhead then
-		inst.blobhead.AnimState:SetMultColour(a, a, a, a) 
+		inst.blobhead.AnimState:SetMultColour(a, a, a, a)
 	end
 end
 
@@ -76,25 +76,31 @@ end
 
 local function Client_CalcTransparencyRating(inst, observer)
 	if inst.components.inspectable ~= nil then
-		return TUNING.GESTALT.COMBAT_TRANSPERENCY -- 0.85
+		return TUNING.GESTALT_COMBAT_TRANSPERENCY -- 0.85
 	end
 
 	local level, sanity = GetLevelForTarget(observer)
 	if level >= 3 then
-		return TUNING.GESTALT.COMBAT_TRANSPERENCY -- 0.85
-	end		
-	
+		return TUNING.GESTALT_COMBAT_TRANSPERENCY -- 0.85
+	end
+
 	local x = (.7*sanity - .7)
-	return math.min(x*x + .2, TUNING.GESTALT.COMBAT_TRANSPERENCY)
+	return math.min(x*x + .2, TUNING.GESTALT_COMBAT_TRANSPERENCY)
 end
 
 local function Retarget(inst)
 	local targets_level = 1
 	local function attacktargetcheck(target)
+        if target.components.inventory ~= nil and target.components.inventory:EquipHasTag("gestaltprotection") then
+            return false
+        end
 		targets_level = GetLevelForTarget(target)
 		return targets_level == 3
 	end
 	local function watchtargetcheck(target)
+        if target.components.inventory ~= nil and target.components.inventory:EquipHasTag("gestaltprotection") then
+            return false
+        end
 		targets_level = GetLevelForTarget(target)
 		return targets_level == 2
 	end
@@ -112,7 +118,7 @@ local function Retarget(inst)
 end
 
 local function OnNewCombatTarget(inst, data)
-	inst.behaviour_level = GetLevelForTarget(data.target) 
+	inst.behaviour_level = GetLevelForTarget(data.target)
 
 	if inst.components.inspectable == nil then
 		inst:AddComponent("inspectable")
@@ -188,9 +194,8 @@ local function fn()
 		inst.blobhead = SpawnPrefab("gestalt_guard_head")
 		inst.blobhead.entity:SetParent(inst.entity) --prevent 1st frame sleep on clients
 		inst.blobhead.Follower:FollowSymbol(inst.GUID, "brightmare_gestalt_head_evolved", 0, 0, 0)
-	
+
 		inst.blobhead.AnimState:SetBloomEffectHandle("shaders/anim.ksh")
-		inst.blobhead:DoPeriodicTask(0, function(head) head.Transform:SetRotation(inst.Transform:GetRotation()) end)
 		inst.blobhead.persists = false
 
 	    inst.highlightchildren = { inst.blobhead }
@@ -233,7 +238,7 @@ local function fn()
 
 	inst:AddComponent("combat")
 	inst.components.combat:SetDefaultDamage(TUNING.GESTALTGUARD_DAMAGE)
-	--inst.components.combat:SetAttackPeriod(TUNING.GESTALT.ATTACK_COOLDOWN)
+	--inst.components.combat:SetAttackPeriod(TUNING.GESTALT_ATTACK_COOLDOWN)
 	inst.components.combat:SetRange(TUNING.GESTALTGUARD_ATTACK_RANGE)
 	inst.components.combat:SetAttackPeriod(0)
     inst.components.combat:SetRetargetFunction(1, Retarget)
@@ -242,7 +247,7 @@ local function fn()
 	inst:ListenForEvent("losttarget", OnNoCombatTarget)
 	inst:ListenForEvent("onattackother", onattackother)
 	inst:ListenForEvent("killed", onkilledtarget)
-	
+
 	inst:AddComponent("knownlocations")
 
     inst:SetStateGraph("SGbrightmare_gestalt")

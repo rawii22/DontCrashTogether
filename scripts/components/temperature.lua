@@ -168,7 +168,8 @@ function Temperature:SetTemperature(value)
 end
 
 function Temperature:GetDebugString()
-    return string.format("%2.2fC at %2.2f (delta: %2.2f) (modifiers: %2.2f)", self.current, self.rate, self.delta, self.totalmodifiers)
+	local winter, summer = self:GetInsulation()
+    return string.format("%2.2fC at %2.2f (delta: %2.2f) (modifiers: %2.2f) (insulation: %d, %d)", self.current, self.rate, self.delta, self.totalmodifiers, winter, summer)
 end
 
 function Temperature:IsFreezing()
@@ -220,7 +221,7 @@ function Temperature:GetInsulation()
         for k, v in pairs(self.inst.components.inventory.equipslots) do
             if v.components.insulator ~= nil then
                 local insulationValue, insulationType = v.components.insulator:GetInsulation()
-                
+
                 if insulationType == SEASONS.WINTER then
                     winterInsulation = winterInsulation + insulationValue
                 elseif insulationType == SEASONS.SUMMER then
@@ -354,7 +355,7 @@ function Temperature:OnUpdate(dt, applyhealthdelta)
 
         --print(self.delta + self.current, "after shelter")
 
-        for i, v in ipairs(ents) do 
+        for i, v in ipairs(ents) do
             if v ~= self.inst and
                 not v:IsInLimbo() and
                 v.components.heater ~= nil and

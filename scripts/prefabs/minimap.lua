@@ -36,7 +36,7 @@ local MINIMAP_GROUND_PROPERTIES =
     { GROUND.BRICK,      { name = "map_edge",      noise_texture = "levels/textures/mini_ruinsbrick_noise.tex" } },
     { GROUND.TILES,      { name = "map_edge",      noise_texture = "levels/textures/mini_ruinstile_noise.tex" } },
     { GROUND.TRIM,       { name = "map_edge",      noise_texture = "levels/textures/mini_ruinstrim_noise.tex" } },
-    
+
     { GROUND.ARCHIVE,    { name = "map_edge",      noise_texture = "levels/textures/Ground_noise_archive_mini.tex" } },
     { GROUND.FUNGUSMOON, { name = "map_edge",      noise_texture = "levels/textures/Ground_noise_moon_fungus_mini.tex" } },
 
@@ -50,6 +50,7 @@ local MINIMAP_GROUND_PROPERTIES =
     { GROUND.QUAGMIRE_CITYSTONE,   { name = "map_edge",      noise_texture = "levels/textures/quagmire_citystone_mini.tex" } },
     { GROUND.QUAGMIRE_GATEWAY,     { name = "map_edge",      noise_texture = "levels/textures/quagmire_gateway_mini.tex" } },
     { GROUND.QUAGMIRE_SOIL,        { name = "map_edge",      noise_texture = "levels/textures/quagmire_soil_mini.tex" } },
+    { GROUND.FARMING_SOIL,        { name = "map_edge",      noise_texture = "levels/textures/quagmire_soil_mini.tex" } },
 
     { GROUND.OCEAN_COASTAL,    { name = "map_edge",      noise_texture = "levels/textures/ocean_noise.tex" } },
     { GROUND.OCEAN_BRINEPOOL,  { name = "map_edge",      noise_texture = "levels/textures/ocean_noise.tex" } },

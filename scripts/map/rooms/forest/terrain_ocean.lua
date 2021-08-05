@@ -34,7 +34,7 @@ AddRoom("OceanCoastal", {
 AddRoom("OceanSwell", {
 					colour={r=.5,g=0.6,b=.080,a=.10},
 					value = GROUND.OCEAN_SWELL,
-				    required_prefabs = {"crabking"},
+				    required_prefabs = {"crabking_spawner"},
 					contents =  {
 						distributepercent = 0.005,
 						distributeprefabs =
@@ -88,10 +88,10 @@ AddRoom("OceanHazardous", {
 
 
 AddRoom("OceanReef", { -- OceanReef is deprecated
-					colour={r=.5,g=0.6,b=.080,a=.10}, 
+					colour={r=.5,g=0.6,b=.080,a=.10},
 					value = GROUND.OCEAN_REEF,
 					contents =  {
-						distributepercent = 0, 
+						distributepercent = 0,
 						distributeprefabs =
 						{
 						},

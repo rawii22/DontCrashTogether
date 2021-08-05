@@ -19,6 +19,7 @@ local MovieDialog = require "screens/moviedialog"
 local HistoryOfTravelsPanel = require "screens/redux/panels/historyoftravelspanel"
 local CharacterDetailsPanel = require "screens/redux/panels/characterdetailspanel"
 local CookbookPanel = require "screens/redux/panels/cookbookpanel"
+local PlantRegistryPanel = require "screens/redux/panels/plantregistrypanel"
 local ObituariesPanel = require "screens/redux/panels/obituariespanel"
 local EncountersPanel = require "screens/redux/panels/encounterspanel"
 local CinematicsPanel = require "screens/redux/panels/cinematicspanel"
@@ -31,9 +32,9 @@ local CompendiumScreen = Class(Screen, function(self, prev_screen)
     self:AddChild(TEMPLATES.old.ForegroundLetterbox())
 
 	self.root = self:AddChild(TEMPLATES.ScreenRoot("CompendiumScreenRoot"))
-    self.bg = self.root:AddChild(TEMPLATES.PlainBackground())	
+    self.bg = self.root:AddChild(TEMPLATES.PlainBackground())
     self.title = self.root:AddChild(TEMPLATES.ScreenTitle(STRINGS.UI.MAINSCREEN.COMPENDIUM, ""))
-    
+
 	self.onlinestatus = self.root:AddChild(OnlineStatus())
 
 	self.cancel_button = self.root:AddChild(TEMPLATES.BackButton(function() self:Close() end))
@@ -49,7 +50,8 @@ local CompendiumScreen = Class(Screen, function(self, prev_screen)
     local menu_items = {
 			historyoftravels = self.panel_root:AddChild(HistoryOfTravelsPanel(self)),
 			characterdetails = self.panel_root:AddChild(CharacterDetailsPanel(self)),
-			cookbookpanel = self.panel_root:AddChild(CookbookPanel(self)),
+            cookbookpanel = self.panel_root:AddChild(CookbookPanel(self)),
+            plantregistrypanel = self.panel_root:AddChild(PlantRegistryPanel(self)),
             obituaries = self.panel_root:AddChild(ObituariesPanel(self)),
             encounters = self.panel_root:AddChild(EncountersPanel()),
 			cinematics = self.panel_root:AddChild(CinematicsPanel(self)),
@@ -72,12 +74,13 @@ end)
 
 function CompendiumScreen:_BuildMenu(subscreener)
     self.tooltip = self.root:AddChild(TEMPLATES.ScreenTooltip())
-	
+
     local menu_items = {
         {widget = subscreener:MenuButton(STRINGS.UI.COMPENDIUM.CINEMATICS, "cinematics", STRINGS.UI.COMPENDIUM.TOOLTIP_CINEMATICS, self.tooltip)},
         {widget = subscreener:MenuButton(STRINGS.UI.COMPENDIUM.OBITUARIES, "obituaries", STRINGS.UI.COMPENDIUM.TOOLTIP_OBITUARIES, self.tooltip)},
         {widget = subscreener:MenuButton(STRINGS.UI.COMPENDIUM.ENCOUNTERS, "encounters", STRINGS.UI.COMPENDIUM.TOOLTIP_ENCOUNTERS, self.tooltip)},
         {widget = subscreener:MenuButton(STRINGS.UI.COMPENDIUM.COOKBOOKPANEL, "cookbookpanel", STRINGS.UI.COMPENDIUM.TOOLTIP_COOKBOOKPANEL, self.tooltip)},
+        {widget = subscreener:MenuButton(STRINGS.UI.COMPENDIUM.PLANTREGISTRYPANEL, "plantregistrypanel", STRINGS.UI.COMPENDIUM.TOOLTIP_PLANTREGISTRY, self.tooltip)},
         {widget = subscreener:MenuButton(STRINGS.UI.COMPENDIUM.CHARACTERDETAILS, "characterdetails", STRINGS.UI.COMPENDIUM.TOOLTIP_CHARACTERDETAILS, self.tooltip)},
         {widget = subscreener:MenuButton(STRINGS.UI.COMPENDIUM.HISTORYOFTRAVELS, "historyoftravels", STRINGS.UI.COMPENDIUM.TOOLTIP_HISTORYOFTRAVELS, self.tooltip)},
     }
@@ -87,7 +90,7 @@ end
 
 function CompendiumScreen:OnControl(control, down)
     if CompendiumScreen._base.OnControl(self, control, down) then return true end
-    
+
     if not down then
 	    if control == CONTROL_CANCEL then
 			self:Close() --go back
@@ -99,7 +102,7 @@ end
 
 function CompendiumScreen:Close(fn)
     TheFrontEnd:FadeBack(nil, nil, fn)
-end	
+end
 
 function CompendiumScreen:OnBecomeActive()
     CompendiumScreen._base.OnBecomeActive(self)

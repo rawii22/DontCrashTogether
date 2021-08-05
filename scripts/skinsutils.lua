@@ -19,10 +19,11 @@ SKIN_RARITY_COLORS =
 	Lustrous		= { 1.000, 1.000, 0.298, 1 }, -- FFFF4C - rarity modifier
 	-- #40E0D0 reserved skin colour
 }
---Share Heirloom colour
-SKIN_RARITY_COLORS.HeirloomClassy  = SKIN_RARITY_COLORS.HeirloomElegant
-SKIN_RARITY_COLORS.HeirloomSpiffy  = SKIN_RARITY_COLORS.HeirloomElegant
-SKIN_RARITY_COLORS.HeirloomDistinguished  = SKIN_RARITY_COLORS.HeirloomElegant
+--Share colours
+SKIN_RARITY_COLORS.Complimentary = SKIN_RARITY_COLORS.Common
+SKIN_RARITY_COLORS.HeirloomClassy = SKIN_RARITY_COLORS.HeirloomElegant
+SKIN_RARITY_COLORS.HeirloomSpiffy = SKIN_RARITY_COLORS.HeirloomElegant
+SKIN_RARITY_COLORS.HeirloomDistinguished = SKIN_RARITY_COLORS.HeirloomElegant
 
 DEFAULT_SKIN_COLOR = SKIN_RARITY_COLORS["Common"]
 
@@ -49,6 +50,7 @@ local function GetSpecialItemCategories()
 		CLOTHING,
 		EMOTE_ITEMS,
 		EMOJI_ITEMS,
+		BEEFALO_CLOTHING,
 	}
 end
 local function GetAllItemCategories()
@@ -73,7 +75,8 @@ RARITY_ORDER =
 	Distinguished = 12,
 	Spiffy = 13,
 	Classy = 14,
-	Common = 15
+	Common = 15,
+	Complimentary = 16
 }
 
 function CompareReleaseGroup(item_key_a, item_key_b)
@@ -111,6 +114,9 @@ end
 function GetFrameSymbolForRarity( rarity )
 	if IsHeirloomRarity(rarity) then
 		return "heirloom"
+	end
+	if rarity == "Complimentary" then
+		return "common"
 	end
 	return string.lower( rarity )
 end
@@ -170,7 +176,7 @@ end
 function _IsPackInsideOther( pack_a, pack_b )
 	local a_items = GetPurchasePackOutputItems(pack_a)
 	local b_items = GetPurchasePackOutputItems(pack_b)
-	
+
 	for _,item in ipairs( a_items ) do
 		if not table.contains( b_items, item ) then
 			return false
@@ -188,13 +194,13 @@ function GetFeaturedPacks()
 
 	for _,iap in ipairs(iap_defs) do
 		local item_type = iap.item_type
-		
+
 		if IsPackFeatured(item_type) then
 			if highest_group == 0 then
 				highest_group = GetReleaseGroup(item_type)
 				table.insert(iaps, item_type)
 			else
-				
+
 				local group = GetReleaseGroup(item_type)
 				if group >= highest_group then
 					if group > highest_group then
@@ -215,7 +221,7 @@ function _GetSubPacks(item_key)
     local sub_packs = {}
 	local output_items = GetPurchasePackOutputItems(item_key)
 	local pack_count = #output_items
-	
+
 	--Build a table of items to their pack, use the smallest pack size to indicate which pack an item belongs to
 	--If this is too slow, we could cache it in the pipeline, or on download of the iap
 	local item_to_packinfo = {}
@@ -242,7 +248,7 @@ function _GetSubPacks(item_key)
 			sub_packs[item_to_packinfo[item].pack] = true
 		end
 	end
-	
+
 	--Ugh, packs such as pack_character_wormwood, which have a unique item, plus one other, have one sub pack, which makes us think it's a bundle, but it's not really...
 	if GetTableSize(sub_packs) == 1 then
 		sub_packs = {}
@@ -259,7 +265,7 @@ function _GetSubPacks(item_key)
 			end
 		end
 	end
-	
+
 	return sub_packs
 end
 
@@ -277,13 +283,13 @@ function IsItemInAnyPack(item_key)
 end
 
 
-function GetPackTotalSets(item_key)	
+function GetPackTotalSets(item_key)
 	if item_key == "pack_starter_2019" then --don't show invalid skin sets because Wurt conufuses it
 		return 0
 	end
 
     local sub_packs = _GetSubPacks(item_key)
-    
+
     local count = 0
     for pack,_ in pairs(sub_packs) do
         count = count + 1
@@ -309,8 +315,8 @@ function IsPackABundle(item_key)
 				print("Error!!! Figure out iap for this platform.")
 			end
 		end
-	end    
-    return (value > 0), value 
+	end
+    return (value > 0), value
 end
 
 function GetPriceFromIAPDef( iap_def, sale_active )
@@ -360,7 +366,7 @@ function BuildPriceStr( value, iap_def, sale_active )
 
 			return string.format( "%s %0.0f", currency_code, value / 100 )
 		else
-		
+
 			return string.format( "%s %1.2f", currency_code, value / 100 )
 		end
 	elseif IsRail() then
@@ -393,7 +399,7 @@ end
 
 function IsPackClothingOnly(item_key)
 	local output_items = GetPurchasePackOutputItems(item_key)
-	
+
 	for _,item in pairs(output_items) do
 		local item_data = GetSkinData(item)
 
@@ -411,7 +417,7 @@ end
 
 function IsPackBelongingsOnly(item_key)
 	local output_items = GetPurchasePackOutputItems(item_key)
-	
+
 	for _,item in pairs(output_items) do
 		local item_data = GetSkinData(item)
 
@@ -716,7 +722,7 @@ function IsPackRestrictedDueToOwnership(item_type)
 			if pack_data.warning_only_on_restricted then
 				return "warning", data.base_prefab
 			else
-				return "error", data.base_prefab			
+				return "error", data.base_prefab
 			end
 		end
 	end
@@ -828,13 +834,7 @@ function GetSkinName(item)
 	if SKIN_DEBUGGING then
 		return item
 	else
-	    item = _ItemStringRedirect(item)
-		local nameStr = STRINGS.SKIN_NAMES[item] or STRINGS.SKIN_NAMES["missing"]
-		local alt = STRINGS.SKIN_NAMES[item.."_alt"]
-		if alt then
-			nameStr = GetRandomItem({nameStr, alt})
-		end
-		return nameStr
+		return STRINGS.SKIN_NAMES[_ItemStringRedirect(item)] or STRINGS.SKIN_NAMES["missing"]
 	end
 end
 
@@ -1196,7 +1196,7 @@ function GetSkinCollectionCompletionForHero(herocharacter)
 	local bonus = HasHeirloomItem(herocharacter)
 	local owned_items = {}
 	local need_items = {}
-	
+
     for i,item_key in ipairs(SKIN_AFFINITY_INFO[herocharacter] or {}) do
 		if ShouldDisplayItemInCollection(item_key) then
 			local build = GetBuildForItem(item_key)
@@ -1343,11 +1343,11 @@ function IsDefaultSkinOwned( item_key )
         end
         return true
     end
-    return IsDefaultClothing( item_key ) or IsDefaultMisc( item_key ) --all default clothing is owned.
+    return IsDefaultClothing( item_key ) or IsDefaultBeefClothing( item_key ) or IsDefaultMisc( item_key ) --all default clothing is owned.
 end
 
 function IsDefaultSkin( item_key )
-    return IsDefaultClothing( item_key ) or IsDefaultCharacterSkin( item_key )
+    return IsDefaultClothing( item_key ) or IsDefaultBeefClothing( item_key ) or IsDefaultCharacterSkin( item_key )
 end
 
 function IsPrefabSkinned( prefab )
@@ -1360,6 +1360,10 @@ end
 
 function IsDefaultClothing( item_key )
     return item_key ~= nil and item_key ~= "" and CLOTHING[item_key] ~= nil and CLOTHING[item_key].is_default
+end
+
+function IsDefaultBeefClothing( item_key )
+    return item_key ~= nil and item_key ~= "" and BEEFALO_CLOTHING[item_key] ~= nil and BEEFALO_CLOTHING[item_key].is_default
 end
 
 function IsDefaultMisc( item_key )
@@ -1399,10 +1403,13 @@ function IsValidClothing( name )
 	return name ~= nil and name ~= "" and CLOTHING[name] ~= nil and not CLOTHING[name].is_default
 end
 
+function IsValidBeefaloClothing( name )
+	return name ~= nil and name ~= "" and BEEFALO_CLOTHING[name] ~= nil and not BEEFALO_CLOTHING[name].is_default
+end
 
-function ValidatePreviewItems(currentcharacter, preview_skins)
+function ValidatePreviewItems(currentcharacter, preview_skins, filter)
     for key,item_key in pairs(preview_skins) do
-        if key ~= "base" and not IsValidClothing(preview_skins[key]) then
+        if key ~= "base" and not IsValidClothing(preview_skins[key]) and not IsValidBeefaloClothing(preview_skins[key]) then
             preview_skins[key] = nil
         end
     end
@@ -1411,7 +1418,7 @@ end
 function ValidateItemsLocal(currentcharacter, selected_skins)
     for key,item_key in pairs(selected_skins) do
         if not TheInventory:CheckOwnership(selected_skins[key])
-            or (key ~= "base" and not IsValidClothing(selected_skins[key]))
+            or (key ~= "base" and not IsValidClothing(selected_skins[key]))  and not IsValidBeefaloClothing(selected_skins[key])
             then
             selected_skins[key] = nil
         end
@@ -1634,24 +1641,6 @@ function DisplayCharacterUnownedPopup(character, skins_subscreener)
     TheFrontEnd:PushScreen(unowned_popup)
 end
 
-function DisplayCharacterUnownedPopupPurchase(character, purchase_screen)
-	local PopupDialogScreen = require "screens/redux/popupdialog"
-	local body_str = subfmt(STRINGS.UI.PURCHASEPACKSCREEN.UNOWNED_CHARACTER_BODY, {character = STRINGS.CHARACTER_NAMES[character] })
-	local button_txt = subfmt(STRINGS.UI.PURCHASEPACKSCREEN.VIEW_REQUIRED, {character = STRINGS.CHARACTER_NAMES[character] })
-	
-	local unowned_popup = PopupDialogScreen(STRINGS.UI.LOBBYSCREEN.UNOWNED_CHARACTER_TITLE, body_str,
-    {
-        {text=button_txt, cb = function()
-			purchase_screen:UpdateFilterToItem(character.."_none")
-			TheFrontEnd:PopScreen()
-        end},
-        {text=STRINGS.UI.POPUPDIALOG.OK, cb = function()
-            TheFrontEnd:PopScreen()
-        end},
-    })
-    TheFrontEnd:PushScreen(unowned_popup)
-end
-
 function DisplayInventoryFailedPopup( screen )
 	if not screen.leave_from_fail and not TheInventory:HasDownloadedInventory() then
 		local PopupDialogScreen = require "screens/redux/popupdialog"
@@ -1660,17 +1649,17 @@ function DisplayInventoryFailedPopup( screen )
 		local unowned_popup = PopupDialogScreen(STRINGS.UI.PLAYERSUMMARYSCREEN.FAILED_INVENTORY_TITLE, STRINGS.UI.PLAYERSUMMARYSCREEN.FAILED_INVENTORY_BODY,
 		{
 			{text=STRINGS.UI.PLAYERSUMMARYSCREEN.FAILED_INVENTORY_YES, cb = function()
-				
+
                 screen.leave_from_fail = true
                 TheFrontEnd:PopScreen() --pop the failed dialog
-                
+
                 screen.items_get_popup = GenericWaitingPopup("GetAllItemsPopup", STRINGS.UI.PLAYERSUMMARYSCREEN.GET_INVENTORY, nil, true, function()
                     screen.poll_task:Cancel()
                     screen.poll_task = nil
                 end )
                 TheFrontEnd:PushScreen(screen.items_get_popup)
-                
-                screen.poll_task = scheduler:ExecutePeriodic( 1, function() 
+
+                screen.poll_task = scheduler:ExecutePeriodic( 1, function()
                     if not TheInventory:IsDownloadingInventory() then
                         screen.items_get_popup:Close()
                     end
@@ -1682,14 +1671,14 @@ function DisplayInventoryFailedPopup( screen )
 
 			end},
 			{text=STRINGS.UI.PLAYERSUMMARYSCREEN.FAILED_INVENTORY_NO, cb = function()
-				
+
                 screen.leave_from_fail = true
                 TheFrontEnd:PopScreen()
 				screen:Close()
-				
+
 			end},
 		})
-		TheFrontEnd:PushScreen(unowned_popup)		
+		TheFrontEnd:PushScreen(unowned_popup)
     end
 end
 
@@ -1735,6 +1724,52 @@ function GetSkinModes(character)
 		}
 	end
 	return skintypesbycharacter[character] or skintypesbycharacter.default
+end
+
+function GetPlayerBadgeData(character, ghost, state_1, state_2, state_3 )
+	if character == "wormwood" then
+		if ghost then
+			return "ghost", "idle", "ghost_skin", .15, -55
+		else
+			if state_1 then
+				return "wilson", "idle_loop_ui", "stage_2", .23, -50
+			elseif state_2 then
+				return "wilson", "idle_loop_ui", "stage_3", .23, -50
+			elseif state_3 then
+				return "wilson", "idle_loop_ui", "stage_4", .23, -50
+			else
+				return "wilson", "idle_loop_ui", "normal_skin", .23, -50
+			end
+		end
+	elseif character == "woodie" then
+		if ghost then
+			if state_1 then
+				return "ghost", "idle", "ghost_werebeaver_skin", .15, -55
+			elseif state_2 then
+				return "ghost", "idle", "ghost_weremoose_skin", .15, -55
+			elseif state_3 then
+				return "ghost", "idle", "ghost_weregoose_skin", .15, -55
+			else
+				return "ghost", "idle", "ghost_skin", .15, -55
+			end
+		else
+			if state_1 then
+				return "werebeaver", "idle_loop", "werebeaver_skin", .15, -28
+			elseif state_2 then
+				return "weremoose", "idle_loop", "weremoose_skin", .11, -40
+			elseif state_3 then
+				return "weregoose", "idle_loop", "weregoose_skin", .17, -24
+			else
+				return "wilson", "idle_loop_ui", "normal_skin", .23, -50
+			end
+		end
+	else
+		if ghost then
+			return "ghost", "idle", "ghost_skin", .15, -55
+		else
+			return "wilson", "idle_loop_ui", "normal_skin", .23, -50
+		end
+	end
 end
 
 function GetSkinModeFromBuild(player)

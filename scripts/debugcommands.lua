@@ -1,3 +1,51 @@
+local function _spawn_list(list, spacing, fn)
+	spacing = spacing or 2
+	local num_wide = math.ceil(math.sqrt(#list))
+
+	local pt = ConsoleWorldPosition()
+	pt.x = pt.x - num_wide * 0.5 * spacing
+	pt.z = pt.z - num_wide * 0.5 * spacing
+
+	for y = 0, num_wide-1 do
+		for x = 0, num_wide-1 do
+			if list[(y*num_wide + x + 1)] then
+				local inst = SpawnPrefab(list[(y*num_wide + x + 1)])
+				if inst ~= nil then
+					inst.Transform:SetPosition((pt + Vector3(x*spacing, 0, y*spacing)):Get())
+					if fn ~= nil then
+						fn(inst)
+					end
+				end
+			end
+		end
+	end
+end
+
+function d_allmutators()
+    c_give("mutator_warrior")
+    c_give("mutator_dropper")
+    c_give("mutator_hider")
+    c_give("mutator_spitter")
+    c_give("mutator_moon")
+end
+
+function d_spiders()
+    local spiders = {
+        "spider",
+        "spider_warrior",
+        "spider_dropper",
+        "spider_hider",
+        "spider_spitter",
+        "spider_moon",
+        "spider_healer",
+    }
+
+    for i,v in ipairs(spiders) do
+        local spider = c_spawn(v)
+        spider.components.follower:SetLeader(ThePlayer)
+    end
+end
+
 function d_decodedata(path)
     print("DECODING",path)
     TheSim:GetPersistentString(path, function(load_success, str)
@@ -18,7 +66,7 @@ function d_allsongs()
     c_give("battlesong_sanitygain")
     c_give("battlesong_sanityaura")
     c_give("battlesong_fireresistance")
-    
+
     c_give("battlesong_instant_taunt")
     c_give("battlesong_instant_panic")
 end
@@ -189,7 +237,7 @@ function d_test_skins_gift(param)
 end
 
 function d_print_skin_info()
-	
+
 	print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
     local a = {
@@ -202,7 +250,7 @@ function d_print_skin_info()
     for _,v in pairs(a) do
         print( GetSkinName(v), GetSkinUsableOnString(v) )
 	end
-	
+
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 end
 
@@ -227,16 +275,16 @@ function d_cycle_clothing()
     local idx = 1
     local task = nil
 
-    ConsoleCommandPlayer().cycle_clothing_task = ConsoleCommandPlayer():DoPeriodicTask(10, 
-        function() 
+    ConsoleCommandPlayer().cycle_clothing_task = ConsoleCommandPlayer():DoPeriodicTask(10,
+        function()
             local type, name = GetTypeForItem(skinslist[idx].item_type)
-            --print("showing clothing idx ", idx, name, type, #skinslist) 
-            if (type ~= "base" and type ~= "item") then 
-                c_clothing(name) 
+            --print("showing clothing idx ", idx, name, type, #skinslist)
+            if (type ~= "base" and type ~= "item") then
+                c_clothing(name)
             end
 
-            if idx < #skinslist then 
-                idx = idx + 1 
+            if idx < #skinslist then
+                idx = idx + 1
             else
                 print("Ending cycle")
                 ConsoleCommandPlayer().cycle_clothing_task:Cancel()
@@ -256,7 +304,7 @@ function d_stalkersetup()
 		mound.form = 1
 		mound.components.repairable.onrepaired(mound)
 	end
-	
+
 	c_give "shadowheart"
 	c_give "atrium_key"
 end
@@ -373,8 +421,8 @@ end
 function d_madsciencemats()
 	c_mat("halloween_experiment_bravery")
 	c_mat("halloween_experiment_health")
-	c_mat("halloween_experiment_hunger") 
-	c_mat("halloween_experiment_sanity") 
+	c_mat("halloween_experiment_hunger")
+	c_mat("halloween_experiment_sanity")
 	c_mat("halloween_experiment_volatile")
 	c_mat("halloween_experiment_root")
 end
@@ -394,11 +442,11 @@ function d_lavaarena_speech(dialog, banter_line)
 		if is_banter then
 			dialog = { dialog[banter_line or math.random(#dialog)] }
 		end
-		
+
 		local lines = {}
 		for i,v in ipairs(dialog) do
 			table.insert(lines, {message=v, duration=3.5, noanim=true})
-		end	
+		end
 
 		local target = TheWorld.components.lavaarenaevent:GetBoarlord()
 		if target then
@@ -412,7 +460,7 @@ function d_unlockallachievements()
 	for k, _ in pairs(EventAchievements:GetActiveAchievementsIdList()) do
 		table.insert(achievements, k)
 	end
-	
+
 	TheItems:ReportEventProgress(json.encode_compliant(
 		{
 			WorldID = "dev_"..tostring(math.random(9999999))..tostring(math.random(9999999)),
@@ -442,7 +490,7 @@ function d_unlockfoodachievements()
 		"food_060",	"food_061", "food_062", "food_063", "food_064", "food_065", "food_066", "food_067", "food_068", "food_069",
 	    "food_syrup",
     }
-	
+
 	TheItems:ReportEventProgress(json.encode_compliant(
 		{
 			WorldID = "dev_"..tostring(math.random(9999999))..tostring(math.random(9999999)),
@@ -489,12 +537,12 @@ function d_reportevent(other_ku)
 end
 
 function d_ground(ground, pt)
-	ground = ground == nil and GROUND.QUAGMIRE_SOIL or 
-			type(ground) == "string" and GROUND[string.upper(ground)] 
+	ground = ground == nil and GROUND.QUAGMIRE_SOIL or
+			type(ground) == "string" and GROUND[string.upper(ground)]
 			or ground
 
-	pt = pt or TheInput:GetWorldPosition()
-	
+	pt = pt or ConsoleWorldPosition()
+
     local x, y = TheWorld.Map:GetTileCoordsAtPoint(pt:Get())
 
     local original_tile_type = TheWorld.Map:GetTileAtPoint(pt:Get())
@@ -529,7 +577,7 @@ function d_islandstart()
     local MainCharacter = ConsoleCommandPlayer()
     if MainCharacter ~= nil and MainCharacter.components.sanity ~= nil then
 		MainCharacter.components.sanity:SetPercent(math.random() * 0.4 + 0.2)
-	end		
+	end
 
 end
 
@@ -571,7 +619,7 @@ function d_spawnlayout(name, offset)
 end
 
 function d_allfish()
-	
+
 	local fish_defs = require("prefabs/oceanfishdef").fish
 	local allfish = {"spoiled_fish", "fishmeat", "fishmeat_cooked", "fishmeat_small", "fishmeat_small_cooked"}
 
@@ -595,12 +643,12 @@ function d_allfish()
 end
 
 function d_fishing()
-	local items = {"oceanfishingbobber_ball", "oceanfishingbobber_oval",  "twigs", "trinket_8", 
-					 "oceanfishingbobber_crow", "oceanfishingbobber_robin", "oceanfishingbobber_robin_winter",  "oceanfishingbobber_canary", 
-					 "oceanfishingbobber_goose", "oceanfishingbobber_malbatross", 
+	local items = {"oceanfishingbobber_ball", "oceanfishingbobber_oval",  "twigs", "trinket_8",
+					 "oceanfishingbobber_crow", "oceanfishingbobber_robin", "oceanfishingbobber_robin_winter",  "oceanfishingbobber_canary",
+					 "oceanfishingbobber_goose", "oceanfishingbobber_malbatross",
 				 	"oceanfishinglure_spinner_red", "oceanfishinglure_spinner_blue", "oceanfishinglure_spinner_green",
 				 	"oceanfishinglure_spoon_red", "oceanfishinglure_spoon_blue", "oceanfishinglure_spoon_green",
-					"oceanfishinglure_hermit_snow", "oceanfishinglure_hermit_rain", "oceanfishinglure_hermit_drowsy", "oceanfishinglure_hermit_heavy", 
+					"oceanfishinglure_hermit_snow", "oceanfishinglure_hermit_rain", "oceanfishinglure_hermit_drowsy", "oceanfishinglure_hermit_heavy",
 					 "berries", "butterflywings", "oceanfishingrod"}
 
 	local spacing = 2
@@ -648,6 +696,22 @@ function d_gofishing()
 	c_give("oceanfishinglure_spinner_green", 5)
 end
 
+function d_radius(radius, num, lifetime)
+	radius = radius or 4
+	num = num or math.max(5, radius*2)
+	lifetime = lifetime or 10
+	local delta_theta = PI2 / num
+
+	local pt = ConsoleWorldPosition()
+
+	for i = 1, num do
+
+		local p = SpawnPrefab("flint")
+		p.Transform:SetPosition(pt.x + radius * math.cos( i*delta_theta ), 0, pt.z - radius * math.sin( i*delta_theta ))
+		p:DoTaskInTime(lifetime, p.Remove)
+	end
+end
+
 function d_ratracer(speed, stamina, direction, reaction)
 	local rat = DebugSpawn("carrat")
 	rat._spread_stats_task:Cancel() rat._spread_stats_task = nil
@@ -662,7 +726,7 @@ end
 
 function d_ratracers()
     local MainCharacter = ConsoleCommandPlayer()
-	local rat 
+	local rat
 
 	rat = DebugSpawn("carrat")
 	rat._spread_stats_task:Cancel() rat._spread_stats_task = nil
@@ -730,11 +794,11 @@ function d_setup_placeholders( reuse, out_file_name )
 		end
 	end
 	use_table( STRINGS.CHARACTERS.GENERIC, reuse )
-	
+
 	local out_file = io.open( out_file_name, "w")
-	
+
 	out_file:write("return {\n")
-	
+
 	local write_table = nil
 	write_table = function( tbl, tabs )
 		for k,v in orderedPairs(tbl) do
@@ -752,39 +816,39 @@ function d_setup_placeholders( reuse, out_file_name )
 				out_file:write(k .. " =\n")
 				for i=1,tabs do out_file:write("\t") end
 				out_file:write("{\n")
-				
+
 				write_table( tbl[k], tabs + 1 )
-				
+
 				for i=1,tabs do out_file:write("\t") end
 				out_file:write("},\n")
 			end
 		end
 	end
-	
+
 	write_table( reuse, 1 )
-	
+
 	out_file:write("}")
 	out_file:close()
 end
 
 function d_allshells()
-	local x, y, z = TheInput:GetWorldPosition():Get() 
-	for i=1, 12 do 
-		local shell=SpawnPrefab("singingshell_large") 
-		shell.Transform:SetPosition(x + i*2, 0, z) 
-		shell.components.cyclable:SetStep(i) 
-		local shell=SpawnPrefab("singingshell_medium") 
-		shell.Transform:SetPosition(x + i*2, 0, z + 6) 
-		shell.components.cyclable:SetStep(i) 
-		local shell=SpawnPrefab("singingshell_small") 
-		shell.Transform:SetPosition(x + i*2, 0, z + 12) 
-		shell.components.cyclable:SetStep(i) 
-	end 
+	local x, y, z = TheInput:GetWorldPosition():Get()
+	for i=1, 12 do
+		local shell=SpawnPrefab("singingshell_large")
+		shell.Transform:SetPosition(x + i*2, 0, z)
+		shell.components.cyclable:SetStep(i)
+		local shell=SpawnPrefab("singingshell_medium")
+		shell.Transform:SetPosition(x + i*2, 0, z + 6)
+		shell.components.cyclable:SetStep(i)
+		local shell=SpawnPrefab("singingshell_small")
+		shell.Transform:SetPosition(x + i*2, 0, z + 12)
+		shell.components.cyclable:SetStep(i)
+	end
 end
 
 
 function d_fish(swim, r,g,b)
-	local x, y, z = TheInput:GetWorldPosition():Get() 
+	local x, y, z = TheInput:GetWorldPosition():Get()
 
 	local fish
 	fish = c_spawn "oceanfish_medium_4"
@@ -821,4 +885,100 @@ function d_fish(swim, r,g,b)
 	fish:RemoveTag("NOCLICK")
 	fish.AnimState:SetAddColour((r or 0)/255, (g or 5)/255, (b or 5)/255, 0)
 
+end
+
+function d_farmplants(grow_stage, spacing)
+	local items = {}
+	for k, v in pairs(require("prefabs/farm_plant_defs").PLANT_DEFS) do
+		if v.product_oversized ~= nil then
+			table.insert(items, v.prefab)
+		end
+	end
+
+	_spawn_list(items, 2.5,
+		function(inst)
+			if grow_stage ~= nil then
+				for i = 1, grow_stage do
+					inst:DoTaskInTime((i-1) * 1 + math.random() * 0.5, function()
+							inst.components.growable:DoGrowth()
+					end)
+				end
+			end
+		end)
+end
+function d_plant(plant, num_wide, grow_stage, spacing)
+	spacing = spacing or 1.25
+
+	local pt = ConsoleWorldPosition()
+	pt.x = pt.x - num_wide * 0.5 * spacing
+	pt.z = pt.z - num_wide * 0.5 * spacing
+
+	for y = 0, num_wide-1 do
+		for x = 0, num_wide-1 do
+			local inst = SpawnPrefab(plant)
+			if inst ~= nil then
+				inst.Transform:SetPosition((pt + Vector3(x*spacing, 0, y*spacing)):Get())
+				if grow_stage ~= nil then
+					for k = 1, grow_stage do
+						inst:DoTaskInTime(0.1 * k, function()
+							inst.components.growable:DoGrowth()
+						end)
+					end
+				end
+			end
+		end
+	end
+
+end
+
+function d_seeds()
+	local items = {}
+	for k, v in pairs(require("prefabs/farm_plant_defs").PLANT_DEFS) do
+		if v.product_oversized ~= nil then
+			table.insert(items, v.seed)
+		end
+	end
+	_spawn_list(items, 2)
+end
+
+function d_fertilizers()
+	_spawn_list(require("prefabs/fertilizer_nutrient_defs").SORTED_FERTILIZERS, 2)
+end
+
+function d_oversized()
+	local items = {}
+	for k, v in pairs(require("prefabs/farm_plant_defs").PLANT_DEFS) do
+		if v.product_oversized ~= nil then
+			table.insert(items, v.product_oversized)
+			end
+		end
+	_spawn_list(items, 3)
+end
+
+function d_startmoonstorm()
+	local pt = ConsoleWorldPosition()
+	TheWorld.components.moonstormmanager:StartMoonstorm(TheWorld.Map:GetNodeIdAtPoint(pt.x, pt.y, pt.z))
+end
+
+function d_stopmoonstorm()
+	TheWorld.components.moonstormmanager:StopCurrentMoonstorm()
+end
+
+function d_moonaltars()
+	local offset = 7
+	local pos = TheInput:GetWorldPosition()
+	local altar
+
+	altar = SpawnPrefab("moon_altar")
+	altar.Transform:SetPosition(pos.x, 0, pos.z - offset)
+	altar:set_stage_fn(2)
+
+	SpawnPrefab("moon_altar_idol").Transform:SetPosition(pos.x, 0, pos.z - offset - 2)
+
+	altar = SpawnPrefab("moon_altar_astral")
+	altar.Transform:SetPosition(pos.x - offset, 0, pos.z + offset / 3)
+	altar:set_stage_fn(2)
+
+	altar = SpawnPrefab("moon_altar_cosmic")
+	altar.Transform:SetPosition(pos.x + offset, 0, pos.z + offset / 3)
 end

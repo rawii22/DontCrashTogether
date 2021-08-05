@@ -81,11 +81,7 @@ function Wander:DBString()
 end
 
 function Wander:GetHomePos()
-    if type(self.homepos) == "function" then 
-        return self.homepos(self.inst)
-    end
-
-    return self.homepos
+    return FunctionOrValue(self.homepos, self.inst)
 end
 
 function Wander:GetDistFromHomeSq()
@@ -99,12 +95,8 @@ function Wander:IsFarFromHome()
 end
 
 function Wander:GetMaxDistSq()
-    if type(self.maxdist) == "function" then
-        local dist = self.maxdist(self.inst)
-        return dist*dist
-    end
-
-    return self.maxdist*self.maxdist
+    local dist = FunctionOrValue(self.maxdist, self.inst)
+    return dist*dist
 end
 
 function Wander:Wait(t)
@@ -124,13 +116,13 @@ function Wander:PickNewDirection()
         self.inst.components.locomotor:GoToPoint(self:GetHomePos())
     else
         local pt = Point(self.inst.Transform:GetWorldPosition())
-        local angle = (self.getdirectionFn and self.getdirectionFn(self.inst)) 
-       -- print("got angle ", angle) 
-        if not angle then 
+        local angle = (self.getdirectionFn and self.getdirectionFn(self.inst))
+       -- print("got angle ", angle)
+        if not angle then
             angle = math.random()*2*PI
             --print("no angle, picked", angle, self.setdirectionFn)
             if self.setdirectionFn then
-                --print("set angle to ", angle) 
+                --print("set angle to ", angle)
                 self.setdirectionFn(self.inst, angle)
             end
         end
@@ -146,7 +138,7 @@ function Wander:PickNewDirection()
         if check_angle then
             angle = check_angle
             if self.setdirectionFn then
-                --print("(second case) reset angle to ", angle) 
+                --print("(second case) reset angle to ", angle)
                 self.setdirectionFn(self.inst, angle)
             end
         else
@@ -155,10 +147,7 @@ function Wander:PickNewDirection()
         end
         --print(self.inst, pt, string.format("wander to %s @ %2.2f %s", tostring(offset), angle/DEGREES, deflected and "(deflected)" or ""))
 
-		local run = self.should_run
-		if type(run) == "function" then
-			run = run(self.inst)
-		end
+		local run = FunctionOrValue(self.should_run, self.inst)
 
         if offset then
             self.inst.components.locomotor:GoToPoint(self.inst:GetPosition() + offset, nil, run)

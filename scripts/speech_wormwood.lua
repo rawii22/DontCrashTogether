@@ -2,6 +2,10 @@
 return{
 	ACTIONFAIL =
 	{
+        APPRAISE =
+        {
+            NOTNOW = "Busy",
+        },
         REPAIR =
         {
             WRONGPIECE = "Wrong one",
@@ -17,6 +21,7 @@ return{
 			GENERIC = "Hmmm... Can't do",
 			NOBITS = "Nothing there",
 --fallback to speech_wilson.lua             REFUSE = "only_used_by_woodie",
+            SOMEONEELSESBEEFALO = "Nope. Not mine",
 		},
 		STORE =
 		{
@@ -33,7 +38,7 @@ return{
             MISMATCH = "Nope",
         },
 		RUMMAGE =
-		{	
+		{
 			GENERIC = "Nope",
 			INUSE = "Friends doing it",
             NOTMASTERCHEF = "Not mine",
@@ -48,9 +53,12 @@ return{
         	KLAUS = "Too much danger now!",
 			QUAGMIRE_WRONGKEY = "Wrong key. Oops",
         },
-		ACTIVATE = 
+		ACTIVATE =
 		{
 			LOCKED_GATE = "Nope. Locked",
+            HOSTBUSY = "Big Tweeter busy",
+            CARNIVAL_HOST_HERE = "Hello? Big Tweeter here?",
+            NOCARNIVAL = "Tweeters? Aww..."
 		},
         COOK =
         {
@@ -62,7 +70,7 @@ return{
         {
             NO_RACERS = "Find friends for race",
         },
-        
+
 		DISMANTLE =
 		{
 			COOKING = "Cooking. Wait",
@@ -110,6 +118,9 @@ return{
 			PIGKINGGAME_MESSY = "Have to clean first",
 			PIGKINGGAME_DANGER = "Too much danger!",
 			PIGKINGGAME_TOOLATE = "Too late!",
+			CARNIVALGAME_INVALID_ITEM = "Not right",
+			CARNIVALGAME_ALREADY_PLAYING = "Not yet",
+            SPIDERNOHAT = "No room",
         },
         GIVETOPLAYER =
         {
@@ -139,6 +150,8 @@ return{
             GENERIC = "Not now",
             BURNING = "Fire! Don't like fire!",
             INUSE = "Someone else's",
+            NOTENOUGHHAIR = "Not fuzzy enough",
+            NOOCCUPANT = "Need Shaggy Buddy.",
         },
         ATTUNE =
         {
@@ -161,7 +174,7 @@ return{
 
             --MapRecorder/MapExplorer
             WRONGWORLD = "Not for here",
-			
+
 			--MapSpotRevealer/messagebottle
 			MESSAGEBOTTLEMANAGER_NOT_FOUND = "Not here",--Likely trying to read messagebottle treasure map in caves
         },
@@ -185,8 +198,8 @@ return{
         },
         REPLATE =
         {
-            MISMATCH = "Oops. Wrong food holder", 
-            SAMEDISH = "Already has food holder", 
+            MISMATCH = "Oops. Wrong food holder",
+            SAMEDISH = "Already has food holder",
         },
         SAIL =
         {
@@ -215,13 +228,14 @@ return{
 		},
 		COMPARE_WEIGHABLE =
 		{
-			TOO_SMALL = "Too tiny",
+            FISH_TOO_SMALL = "Too small",
+            OVERSIZEDVEGGIES_TOO_SMALL = "Not big enough",
 		},
         BEGIN_QUEST =
         {
             ONEGHOST = "only_used_by_wendy",
         },
-		TELLSTORY = 
+		TELLSTORY =
 		{
 			GENERIC = "only_used_by_walter",
 --fallback to speech_wilson.lua 			NOT_NIGHT = "only_used_by_walter",
@@ -231,7 +245,74 @@ return{
         {
 --fallback to speech_wilson.lua             SAMESONG = "only_used_by_wathgrithr",
         },
-	},
+        PLANTREGISTRY_RESEARCH_FAIL =
+        {
+            GENERIC = "Know already",
+            FERTILIZER = "Know all about it",
+        },
+        FILL_OCEAN =
+        {
+            UNSUITABLE_FOR_PLANTS = "Bad water for friends",
+        },
+        POUR_WATER =
+        {
+            OUT_OF_WATER = "All gone",
+        },
+        POUR_WATER_GROUNDTILE =
+        {
+            OUT_OF_WATER = "No water",
+        },
+        USEITEMON =
+        {
+            --GENERIC = "I can't use this on that!",
+
+            --construction is PREFABNAME_REASON
+            BEEF_BELL_INVALID_TARGET = "Not working",
+            BEEF_BELL_ALREADY_USED = "Not mine",
+            BEEF_BELL_HAS_BEEF_ALREADY = "Have Buddy already",
+        },
+        HITCHUP =
+        {
+            NEEDBEEF = "Need Shaggy Buddy",
+            NEEDBEEF_CLOSER = "Too far",
+            BEEF_HITCHED = "Stay",
+            INMOOD = "Too cranky!",
+        },
+        MARK =
+        {
+            ALREADY_MARKED = "Picked this one",
+            NOT_PARTICIPANT = "Have to wait",
+        },
+        YOTB_STARTCONTEST =
+        {
+            DOESNTWORK = "Hm...",
+            ALREADYACTIVE = "Not here",
+        },
+        YOTB_UNLOCKSKIN =
+        {
+            ALREADYKNOWN = "Know it",
+        },
+        CARNIVALGAME_FEED =
+        {
+            TOO_LATE = "Too slow",
+        },
+        HERD_FOLLOWERS =
+        {
+            WEBBERONLY = "Leggy Bugs don't listen",
+        },
+        BEDAZZLE =
+        {
+--fallback to speech_wilson.lua             BURNING = "only_used_by_webber",
+--fallback to speech_wilson.lua             BURNT = "only_used_by_webber",
+--fallback to speech_wilson.lua             FROZEN = "only_used_by_webber",
+--fallback to speech_wilson.lua             ALREADY_BEDAZZLED = "only_used_by_webber",
+        },
+        UPGRADE = 
+        {
+--fallback to speech_wilson.lua             BEDAZZLED = "only_used_by_webber",
+        },
+    },
+
 	ACTIONFAIL_GENERIC = "Nope",
 	ANNOUNCE_BOAT_LEAK = "Water! Water coming!",
 	ANNOUNCE_BOAT_SINK = "Why sinking, Floater?",
@@ -254,13 +335,13 @@ return{
 	ANNOUNCE_BOOMERANG = "Whoops. Missed it",
 	ANNOUNCE_CHARLIE = "Someone here?",
 	ANNOUNCE_CHARLIE_ATTACK = "Ouch!",
---fallback to speech_wilson.lua 	ANNOUNCE_CHARLIE_MISSED = "only_used_by_winona", --winona specific 
+--fallback to speech_wilson.lua 	ANNOUNCE_CHARLIE_MISSED = "only_used_by_winona", --winona specific
 	ANNOUNCE_COLD = "Brrr... Cold!",
 	ANNOUNCE_HOT = "Woo-wee, it's hot!",
 	ANNOUNCE_CRAFTING_FAIL = "Failed",
 	ANNOUNCE_DEERCLOPS = "Something scary coming!!",
 	ANNOUNCE_CAVEIN = "Sky is falling!",
-	ANNOUNCE_ANTLION_SINKHOLE = 
+	ANNOUNCE_ANTLION_SINKHOLE =
 	{
 		"Sinking!",
 		"Ground going!",
@@ -275,7 +356,7 @@ return{
 	ANNOUNCE_SACREDCHEST_YES = "Said yes!",
 	ANNOUNCE_SACREDCHEST_NO = "...Nope",
     ANNOUNCE_DUSK = "Light ball is sleepy",
-    
+
     --wx-78 specific
 --fallback to speech_wilson.lua     ANNOUNCE_CHARGE = "only_used_by_wx78",
 --fallback to speech_wilson.lua 	ANNOUNCE_DISCHARGE = "only_used_by_wx78",
@@ -288,7 +369,7 @@ return{
 		STALE = "Food!",
 		INVALID = "Can't",
         YUCKY = "Nope",
-        
+
         --Warly specific ANNOUNCE_EAT strings
 --fallback to speech_wilson.lua 		COOKED = "only_used_by_warly",
 --fallback to speech_wilson.lua 		DRIED = "only_used_by_warly",
@@ -301,7 +382,7 @@ return{
 --fallback to speech_wilson.lua         SAME_OLD_5 = "only_used_by_warly",
 --fallback to speech_wilson.lua 		TASTY = "only_used_by_warly",
     },
-    
+
     ANNOUNCE_ENCUMBERED =
     {
         "Getting heavy...",
@@ -314,7 +395,7 @@ return{
         "Need rest... soon",
         "Keep going...",
     },
-    ANNOUNCE_ATRIUM_DESTABILIZING = 
+    ANNOUNCE_ATRIUM_DESTABILIZING =
     {
 		"Ground shaky",
 		"Sky falling!",
@@ -322,6 +403,7 @@ return{
 	},
     ANNOUNCE_RUINS_RESET = "Oh. Everything back",
     ANNOUNCE_SNARED = "Oh! Caught!",
+    ANNOUNCE_SNARED_IVY = "Ha ha! Silly",
     ANNOUNCE_REPELLED = "Didn't hurt?",
 	ANNOUNCE_ENTER_DARK = "Too dark",
 	ANNOUNCE_ENTER_LIGHT = "It's light again",
@@ -367,7 +449,7 @@ return{
 	ANNOUNCE_TOWNPORTALTELEPORT = "Made it!",
 	ANNOUNCE_CANFIX = "\nCan fix it!",
 	ANNOUNCE_ACCOMPLISHMENT = "A game!",
-	ANNOUNCE_ACCOMPLISHMENT_DONE = "Did it! Yay!",	
+	ANNOUNCE_ACCOMPLISHMENT_DONE = "Did it! Yay!",
 	ANNOUNCE_INSUFFICIENTFERTILIZER = "Need more poop",
 	ANNOUNCE_TOOL_SLIP = "Whoops",
 	ANNOUNCE_LIGHTNING_DAMAGE_AVOIDED = "Too close!",
@@ -376,9 +458,9 @@ return{
 
 
 	ANNOUNCE_DAMP = "Rain!",
-	ANNOUNCE_WET = "Little wet",
-	ANNOUNCE_WETTER = "Really wet",
-	ANNOUNCE_SOAKED = "Too wet!",
+	ANNOUNCE_WET = "Drip drop",
+	ANNOUNCE_WETTER = "Water water all around",
+	ANNOUNCE_SOAKED = "Big drink!",
 
 	ANNOUNCE_WASHED_ASHORE = "Very wet!",
 
@@ -429,29 +511,29 @@ return{
 --fallback to speech_wilson.lua     },
 
     --winona specific
---fallback to speech_wilson.lua     ANNOUNCE_HUNGRY_SLOWBUILD = 
+--fallback to speech_wilson.lua     ANNOUNCE_HUNGRY_SLOWBUILD =
 --fallback to speech_wilson.lua     {
 --fallback to speech_wilson.lua 	    "only_used_by_winona",
 --fallback to speech_wilson.lua     },
---fallback to speech_wilson.lua     ANNOUNCE_HUNGRY_FASTBUILD = 
+--fallback to speech_wilson.lua     ANNOUNCE_HUNGRY_FASTBUILD =
 --fallback to speech_wilson.lua     {
 --fallback to speech_wilson.lua 	    "only_used_by_winona",
 --fallback to speech_wilson.lua     },
 
     --wormwood specific
-    ANNOUNCE_KILLEDPLANT = 
+    ANNOUNCE_KILLEDPLANT =
     {
         "Sorry, friend",
         "Don't like hurting friend",
         "Friends don't like that",
     },
-    ANNOUNCE_GROWPLANT = 
+    ANNOUNCE_GROWPLANT =
     {
         "Grow!",
         "New friend!",
         "Happy Birthday!",
     },
-    ANNOUNCE_BLOOMING = 
+    ANNOUNCE_BLOOMING =
     {
         "Feeling bloomy!",
     },
@@ -508,19 +590,19 @@ return{
     ANNOUNCE_ATTACH_BUFF_WORKEFFECTIVENESS = "Faster gooder!",
     ANNOUNCE_ATTACH_BUFF_MOISTUREIMMUNITY  = "No more wet!",
     ANNOUNCE_ATTACH_BUFF_SLEEPRESISTANCE   = "Awake!",
-    
+
     ANNOUNCE_DETACH_BUFF_ELECTRICATTACK    = "Aww. No more zaps",
     ANNOUNCE_DETACH_BUFF_ATTACK            = "Feel less fighty now",
     ANNOUNCE_DETACH_BUFF_PLAYERABSORPTION  = "Back to normal",
     ANNOUNCE_DETACH_BUFF_WORKEFFECTIVENESS = "Tired now",
     ANNOUNCE_DETACH_BUFF_MOISTUREIMMUNITY  = "Water back!",
     ANNOUNCE_DETACH_BUFF_SLEEPRESISTANCE   = "Bit sleepy...",
-    
+
 	ANNOUNCE_OCEANFISHING_LINESNAP = "Oh!",
 	ANNOUNCE_OCEANFISHING_LINETOOLOOSE = "Too loose?",
 	ANNOUNCE_OCEANFISHING_GOTAWAY = "Too bad",
 	ANNOUNCE_OCEANFISHING_BADCAST = "Will try again",
-	ANNOUNCE_OCEANFISHING_IDLE_QUOTE = 
+	ANNOUNCE_OCEANFISHING_IDLE_QUOTE =
 	{
 		"Waiting...",
 		"Hm...",
@@ -541,13 +623,15 @@ return{
 --fallback to speech_wilson.lua     ANNOUNCE_CANTBUILDHERE_THRONE = "only_used_by_wurt",
 --fallback to speech_wilson.lua     ANNOUNCE_CANTBUILDHERE_HOUSE = "only_used_by_wurt",
 --fallback to speech_wilson.lua     ANNOUNCE_CANTBUILDHERE_WATCHTOWER = "only_used_by_wurt",
-    ANNOUNCE_READ_BOOK = 
+    ANNOUNCE_READ_BOOK =
     {
 --fallback to speech_wilson.lua         BOOK_SLEEP = "only_used_by_wurt",
 --fallback to speech_wilson.lua         BOOK_BIRDS = "only_used_by_wurt",
 --fallback to speech_wilson.lua         BOOK_TENTACLES =  "only_used_by_wurt",
 --fallback to speech_wilson.lua         BOOK_BRIMSTONE = "only_used_by_wurt",
 --fallback to speech_wilson.lua         BOOK_GARDENING = "only_used_by_wurt",
+--fallback to speech_wilson.lua 		BOOK_SILVICULTURE = "only_used_by_wurt",
+--fallback to speech_wilson.lua 		BOOK_HORTICULTURE = "only_used_by_wurt",
     },
     ANNOUNCE_WEAK_RAT = "Tired",
 
@@ -557,8 +641,8 @@ return{
         "Not right",
         "Wrong way",
     },
-    ANNOUNCE_CARRAT_ERROR_FELL_ASLEEP = "Tired",    
-    ANNOUNCE_CARRAT_ERROR_WALKING = "Too slow",    
+    ANNOUNCE_CARRAT_ERROR_FELL_ASLEEP = "Tired",
+    ANNOUNCE_CARRAT_ERROR_WALKING = "Too slow",
     ANNOUNCE_CARRAT_ERROR_STUNNED = "Confused?",
 
     ANNOUNCE_GHOST_QUEST = "only_used_by_wendy",
@@ -570,14 +654,14 @@ return{
 --fallback to speech_wilson.lua     ANNOUNCE_ABIGAIL_DEATH = "only_used_by_wendy",
 --fallback to speech_wilson.lua     ANNOUNCE_ABIGAIL_RETRIEVE = "only_used_by_wendy",
 --fallback to speech_wilson.lua 	ANNOUNCE_ABIGAIL_LOW_HEALTH = "only_used_by_wendy",
-    ANNOUNCE_ABIGAIL_SUMMON = 
+    ANNOUNCE_ABIGAIL_SUMMON =
 	{
 --fallback to speech_wilson.lua 		LEVEL1 = "only_used_by_wendy",
 --fallback to speech_wilson.lua 		LEVEL2 = "only_used_by_wendy",
 --fallback to speech_wilson.lua 		LEVEL3 = "only_used_by_wendy",
 	},
 
-    ANNOUNCE_GHOSTLYBOND_LEVELUP = 
+    ANNOUNCE_GHOSTLYBOND_LEVELUP =
 	{
 --fallback to speech_wilson.lua 		LEVEL2 = "only_used_by_wendy",
 --fallback to speech_wilson.lua 		LEVEL3 = "only_used_by_wendy",
@@ -590,6 +674,36 @@ return{
     ANNOUNCE_ARCHIVE_NEW_KNOWLEDGE = "Oooooh, pictures!",
     ANNOUNCE_ARCHIVE_OLD_KNOWLEDGE = "Know it",
     ANNOUNCE_ARCHIVE_NO_POWER = "Nope",
+
+    ANNOUNCE_PLANT_RESEARCHED =
+    {
+        "Learning lots about friend",
+    },
+
+    ANNOUNCE_PLANT_RANDOMSEED = "Who it going to be?",
+
+    ANNOUNCE_FERTILIZER_RESEARCHED = "Learning about bellystuff",
+
+	ANNOUNCE_FIRENETTLE_TOXIN =
+	{
+		"not_used_by_wormwood",
+		"not_used_by_wormwood",
+	},
+	ANNOUNCE_FIRENETTLE_TOXIN_DONE = "Feel better",
+
+	ANNOUNCE_TALK_TO_PLANTS =
+	{
+        "Hello friend!",
+        "Is friend happy? Yay!",
+		"Hehe, friend has best jokes",
+        "Yes? Oh. Hmm... yes",
+        "Nice to talk to other plants",
+	},
+
+    -- YOTB
+    ANNOUNCE_CALL_BEEF = "Here Shaggy Buddy!",
+    ANNOUNCE_CANTBUILDHERE_YOTB_POST = "Too far for contest",
+    ANNOUNCE_YOTB_LEARN_NEW_PATTERN =  "Ooooh! Make new thing",
 
 	BATTLECRY =
 	{
@@ -644,6 +758,14 @@ return{
 
         BALLOONS_EMPTY = "Needs air",
         BALLOON = "Boop",
+		BALLOONPARTY = "Fun!",
+		BALLOONSPEED =
+        {
+            DEFLATED = "Boop",
+            GENERIC = "Run run run!",
+        },
+		BALLOONVEST = "Safe?",
+		BALLOONHAT = "Squee Hopper? Hm. No",
 
         BERNIE_INACTIVE =
         {
@@ -657,6 +779,8 @@ return{
         BOOK_BIRDS = "Pretty pictures",
         BOOK_TENTACLES = "About Scary Arms",
         BOOK_GARDENING = "This one's nice",
+		BOOK_SILVICULTURE = "About friends!",
+		BOOK_HORTICULTURE = "This one's nice",
         BOOK_SLEEP = "(yawn)",
         BOOK_BRIMSTONE = "Fire!",
 
@@ -837,7 +961,7 @@ return{
             OPEN = "Can go through",
             FULL = "Oh. Full",
         },
-        GLOMMER = 
+        GLOMMER =
         {
             GENERIC = "You're nice. Stay close",
             SLEEPING = "Shh...",
@@ -899,7 +1023,7 @@ return{
 			GENERIC = "Friend poofer",
 			ACTIVE = "Can poof to friends now!",
 		},
-        TOWNPORTALTALISMAN = 
+        TOWNPORTALTALISMAN =
         {
 			GENERIC = "Sandy rock",
 			ACTIVE = "Can poof now!",
@@ -915,7 +1039,7 @@ return{
             WRONGSTAFF = "Nope",
             MOONSTAFF = "Stick makes light!",
         },
-        MOONDIAL = 
+        MOONDIAL =
         {
 			GENERIC = "Night Ball looker",
 			NIGHT_NEW = "No Night Ball",
@@ -924,6 +1048,7 @@ return{
 			NIGHT_WANE = "Night Ball getting smaller",
 			CAVE = "Oh. No Night Ball here",
 --fallback to speech_wilson.lua 			WEREBEAVER = "only_used_by_woodie", --woodie specific
+			GLASSED = "Hello!",
         },
 		THULECITE = "Rocks from old times",
 		ARMORRUINS = "Heavy clothes",
@@ -953,7 +1078,7 @@ return{
 		ORANGESTAFF = "Poof stick",
 		YELLOWAMULET = "Can go zoomy now!",
 		GREENAMULET = "Helps for building",
-		SLURPERPELT = "(sigh) Sad",	
+		SLURPERPELT = "(sigh) Sad",
 
 		SLURPER = "Furry Head Eater",
 		SLURPER_PELT = "(sigh) Sad",
@@ -964,12 +1089,12 @@ return{
 		ORANGEGEM = "Helper Shiny",
         OPALSTAFF = "Oh! Stick is cold",
         OPALPRECIOUSGEM = "Pretty, pretty shiny",
-        TELEBASE = 
+        TELEBASE =
 		{
 			VALID = "Ready",
 			GEMS = "Needs Purple Shiny",
 		},
-		GEMSOCKET = 
+		GEMSOCKET =
 		{
 			VALID = "Ready",
 			GEMS = "Where shiny things?",
@@ -990,7 +1115,7 @@ return{
 		CAVE_BANANA_COOKED = "Smokey",
 		CAVE_BANANA_TREE = "Friend with Sweet Hair",
 		ROCKY = "Rock Pinchy",
-		
+
 		COMPASS =
 		{
 			GENERIC="Which way?",
@@ -1128,17 +1253,19 @@ return{
 		TURF_FUNGUS_RED = "Squashy",
 		TURF_DRAGONFLY = "Fire can't come here!",
 
+        TURF_SHELLBEACH = "Sand",
+
 		POWCAKE = "Ka-pow!",
         CAVE_ENTRANCE = "Goes somewhere",
         CAVE_ENTRANCE_RUINS = "Goes somewhere",
-       
-       	CAVE_ENTRANCE_OPEN = 
+
+       	CAVE_ENTRANCE_OPEN =
         {
             GENERIC = "Closed",
             OPEN = "Open now",
             FULL = "Can't go there",
         },
-        CAVE_EXIT = 
+        CAVE_EXIT =
         {
             GENERIC = "Closed",
             OPEN = "Open",
@@ -1155,12 +1282,12 @@ return{
                 "Floaty Friend",
                 "Floaty Friend",
             },
-            LEVEL2 = 
+            LEVEL2 =
             {
                 "Floaty Friend",
                 "Floaty Friend",
             },
-            LEVEL3 = 
+            LEVEL3 =
             {
                 "Floaty Friend",
                 "Floaty Friend",
@@ -1181,7 +1308,7 @@ return{
 			REMAINS_THINGIE = "Gone",
 		},
 		AXE = "Hurts friends (sob)",
-		BABYBEEFALO = 
+		BABYBEEFALO =
 		{
 			GENERIC = "Needs more fur",
 		    SLEEPING = "Shh...",
@@ -1199,7 +1326,7 @@ return{
 		BEARGER_FUR = "Poor guy",
 		BEDROLL_STRAW = "For sleepytime",
 		BEEQUEEN = "Big Mommy Buzz!",
-		BEEQUEENHIVE = 
+		BEEQUEENHIVE =
 		{
 			GENERIC = "Full of Buzz Juice",
 			GROWING = "Getting bigger!",
@@ -1248,6 +1375,7 @@ return{
             ORNERY = "Cranky",
             RIDER = "Can ride now",
             PUDGY = "Full belly",
+            MYPARTNER = "Shaggy Buddy is friend",
 		},
 
 		BEEFALOHAT = "Warm",
@@ -1303,8 +1431,8 @@ return{
 		BLOWDART_YELLOW = "Zzzt Ptooey",
 		BLUEAMULET = "Cold Neck Thing",
 		BLUEGEM = "Makes the cold",
-		BLUEPRINT = 
-		{ 
+		BLUEPRINT =
+		{
             COMMON = "Paper for stuff making",
             RARE = "Ohhhh... Looks important",
         },
@@ -1334,7 +1462,7 @@ return{
 
 		SHADOWDIGGER = "Dark Floaty Digger",
 
-		CACTUS = 
+		CACTUS =
 		{
 			GENERIC = "Ouch Friend",
 			PICKED = "Grow, Ouch Friend! Grow!",
@@ -1363,7 +1491,7 @@ return{
 		},
 		CANE = "Friend for walking",
 		CATCOON = "Hello, Kitty!",
-		CATCOONDEN = 
+		CATCOONDEN =
 		{
 			GENERIC = "Anyone home?",
 			EMPTY = "No more Kitties",
@@ -1415,13 +1543,16 @@ return{
         CHESSPIECE_ANCHOR = "Heavy",
         CHESSPIECE_MOON = "Night Ball broken",
         CHESSPIECE_CARRAT = "Friends!",
-        CHESSPIECE_MALBATROSS = "Bad tweeter",
+        CHESSPIECE_MALBATROSS = "Bad Tweeter",
         CHESSPIECE_CRABKING = "Snip snap!",
         CHESSPIECE_TOADSTOOL = "Alive? Nope",
         CHESSPIECE_STALKER = "Hello? Hello?",
         CHESSPIECE_KLAUS = "Not squishy",
         CHESSPIECE_BEEQUEEN = "No more buzz-buzz",
         CHESSPIECE_ANTLION = "Not moving",
+        CHESSPIECE_BEEFALO = "Not fluffy...",
+        CHESSPIECE_GUARDIANPHASE3 = "Big",
+
         CHESSJUNK1 = "Machine stuff",
         CHESSJUNK2 = "Lots of machine stuff",
         CHESSJUNK3 = "Full of machine stuff",
@@ -1434,7 +1565,7 @@ return{
 		COOKEDMANDRAKE = "Smells sleepy",
 		COOKEDMEAT = "Yummm",
 		COOKEDMONSTERMEAT = "Smells bad",
-		COOKEDSMALLMEAT = "Little belly stuff",        
+		COOKEDSMALLMEAT = "Little belly stuff",
 		COOKPOT =
 		{
 			COOKING_LONG = "Waiting...",
@@ -1509,21 +1640,21 @@ return{
 		ARMORDRAGONFLY = "Fire Keeper Outer",
 		DRAGON_SCALES = "Fiery clothes",
 		DRAGONFLYCHEST = "Fire Safe",
-		DRAGONFLYFURNACE = 
+		DRAGONFLYFURNACE =
 		{
 			HAMMERED = "Just stuff now",
 			GENERIC = "Not working", --no gems
 			NORMAL = "Needs more sparkly", --one gem
 			HIGH = "Hot! So hot!", --two gems
 		},
-        
+
         HUTCH = "Glub Glub Lugger",
         HUTCH_FISHBOWL =
         {
             GENERIC = "Making friends!",
             WAITING = "Can swim on back?",
         },
-		LAVASPIT = 
+		LAVASPIT =
 		{
 			HOT = "Yeouch!",
 			COOL = "Cooled down",
@@ -1531,14 +1662,14 @@ return{
 		LAVA_POND = "Earth Blood. Hot!",
 		LAVAE = "Too hot!",
 		LAVAE_COCOON = "Nice and warm?",
-		LAVAE_PET = 
+		LAVAE_PET =
 		{
 			STARVING = "Needs ashes",
 			HUNGRY = "Hungry?",
 			CONTENT = "Happy",
 			GENERIC = "Hot!",
 		},
-		LAVAE_EGG = 
+		LAVAE_EGG =
 		{
 			GENERIC = "Baby Patuey Fly",
 		},
@@ -1567,8 +1698,8 @@ return{
 		EGGPLANT = "Mmm...",
 		EGGPLANT_COOKED = "Belly likes it",
 		EGGPLANT_SEEDS = "Grows the purple belly stuff",
-		
-		ENDTABLE = 
+
+		ENDTABLE =
 		{
 			BURNT = "No! NOOOOO!",
 			GENERIC = "Ohh! Table friend!",
@@ -1577,7 +1708,7 @@ return{
 			FRESHLIGHT = "Light Friend looks good!",
 			OLDLIGHT = "Sick, Light Friend?", -- will be wilted soon, light radius will be very small at this point
 		},
-		DECIDUOUSTREE = 
+		DECIDUOUSTREE =
 		{
 			BURNING = "No!",
 			BURNT = "Sorry",
@@ -1603,12 +1734,12 @@ return{
 			CHOPPED = "Sad. So sad",
 			GENERIC = "Shh... Sleeping",
 		},
-		TWIGGYTREE = 
+		TWIGGYTREE =
 		{
 			BURNING = "No! NOOOOOOO!",
 			BURNT = "So young...",
 			CHOPPED = "Keep growing, friend!",
-			GENERIC = "Skinny friend!",			
+			GENERIC = "Skinny friend!",
 			DISEASED = "Sick?",
 		},
 		TWIGGY_NUT_SAPLING = "Cute little friend",
@@ -1656,8 +1787,8 @@ return{
 			OUT = "Needs food",
 		},
 		FIRESTAFF = "Hot Pew Stick",
-		FIRESUPPRESSOR = 
-		{	
+		FIRESUPPRESSOR =
+		{
 			ON = "Good machine",
 			OFF = "Keep fire away",
 			LOWFUEL = "Needs food",
@@ -1669,7 +1800,7 @@ return{
 		FISHTACOS = "What's wrong with eyes, Glub Glub?",
 		FISH_COOKED = "Watch for bones",
 		FLINT = "Sharp stone",
-		FLOWER = 
+		FLOWER =
 		{
             GENERIC = "Friend!",
             ROSE = "Pretty! Pretty friend!",
@@ -1701,7 +1832,7 @@ return{
 		FROGLEGS = "Ribbit legs",
 		FROGLEGS_COOKED = "Legs for belly",
 		FRUITMEDLEY = "Fruit party!",
-		FURTUFT = "Molt (sniff sniff) Smells good", 
+		FURTUFT = "Molt (sniff sniff) Smells good",
 		GEARS = "Machine food",
 		GHOST = "Floaty man!",
 		GOLDENAXE = "Pretty. Pretty scary",
@@ -1719,9 +1850,9 @@ return{
 			DISEASED = "Sick! Sick friend!",
 			DISEASING = "Get better soon",
 		},
-		GRASSGEKKO = 
+		GRASSGEKKO =
 		{
-			GENERIC = "Looking good. Like hair",	
+			GENERIC = "Looking good. Like hair",
 			DISEASED = "Sick?",
 		},
 		GREEN_CAP = "Hurts head",
@@ -1806,7 +1937,7 @@ return{
 			CHARGED = "Zzzzt! Zzzzt!",
 			GENERIC = "Zzzzt Stick",
 		},
-		LIGHTNINGGOAT = 
+		LIGHTNINGGOAT =
 		{
 			GENERIC = "Lovely head branches",
 			CHARGED = "Yaaah!",
@@ -2110,7 +2241,7 @@ return{
 			DISEASED = "Sick. Very, very sick",
 			DISEASING = "Looks sick. Poor little guy",
 		},
-   		SCARECROW = 
+   		SCARECROW =
    		{
 			GENERIC = "Tweeter Friend",
 			BURNING = "No! Save him!",
@@ -2124,7 +2255,7 @@ return{
 			BURNT = "Nooooo!",
    		},
         SCULPTURE_KNIGHTHEAD = "Hello Neigher!",
-		SCULPTURE_KNIGHTBODY = 
+		SCULPTURE_KNIGHTBODY =
 		{
 			COVERED = "Like it!",
 			UNCOVERED = "Needs help?",
@@ -2132,7 +2263,7 @@ return{
 			READY = "Something moving?",
 		},
         SCULPTURE_BISHOPHEAD = "Where's rest?",
-		SCULPTURE_BISHOPBODY = 
+		SCULPTURE_BISHOPBODY =
 		{
 			COVERED = "Looks good!",
 			UNCOVERED = "Broken?",
@@ -2140,7 +2271,7 @@ return{
 			READY = "Hello? Anyone there?",
 		},
         SCULPTURE_ROOKNOSE = "Can lift it?",
-		SCULPTURE_ROOKBODY = 
+		SCULPTURE_ROOKBODY =
 		{
 			COVERED = "Nice looking rock",
 			UNCOVERED = "Needs fixing",
@@ -2194,7 +2325,7 @@ return{
 			AWAKE = "Ohh! Table friend!",
 			HIDING = "Too shy?",
         },
-        STATUE_MARBLE = 
+        STATUE_MARBLE =
         {
             GENERIC = "Like it",
             TYPE1 = "Why so sad?",
@@ -2246,12 +2377,12 @@ return{
 		TELEPORTATO_POTATO = "Thing",
 		TELEPORTATO_RING = "Ring",
 		TELESTAFF = "Poof stick",
-		TENT = 
+		TENT =
 		{
 			GENERIC = "Little home",
 			BURNT = "Turned to ash",
 		},
-		SIESTAHUT = 
+		SIESTAHUT =
 		{
 			GENERIC = "Nap time?",
 			BURNT = "No more naptime",
@@ -2269,19 +2400,19 @@ return{
 		TRAP = "Snap!",
 		TRAP_TEETH = "Hurty Spikes",
 		TRAP_TEETH_MAXWELL = "Hurty Spikes",
-		TREASURECHEST = 
+		TREASURECHEST =
 		{
 			GENERIC = "Stuff!",
 			BURNT = "(sigh)",
 		},
 		TREASURECHEST_TRAP = "Hmm...",
-		SACRED_CHEST = 
+		SACRED_CHEST =
 		{
 			GENERIC = "Put stuff in there!",
 			LOCKED = "Stuff is gone",
 		},
 		TREECLUMP = "Party!",
-		
+
 		TRINKET_1 = "Swirly rocks", --Melted Marbles
 		TRINKET_2 = "Hummm...", --Fake Kazoo
 		TRINKET_3 = "Twisty string", --Gord's Knot
@@ -2340,7 +2471,7 @@ return{
         LOST_TOY_19 = "Spooky",
         LOST_TOY_42 = "Spooky",
         LOST_TOY_43 = "Spooky",
-        
+
         HALLOWEENCANDY_1 = "Careful! Don't eat stick",
         HALLOWEENCANDY_2 = "Not for dirt",
         HALLOWEENCANDY_3 = "Yum!",
@@ -2359,18 +2490,18 @@ return{
 
 		HALLOWEEN_ORNAMENT_1 = "Ooooooo!",
 		HALLOWEEN_ORNAMENT_2 = "Not flapping",
-		HALLOWEEN_ORNAMENT_3 = "Not alive", 
+		HALLOWEEN_ORNAMENT_3 = "Not alive",
 		HALLOWEEN_ORNAMENT_4 = "Spiky pretty thing",
 		HALLOWEEN_ORNAMENT_5 = "Haha! Wrong way Leggy Bug",
-		HALLOWEEN_ORNAMENT_6 = "Alive, Tweeter? Nope", 
+		HALLOWEEN_ORNAMENT_6 = "Alive, Tweeter? Nope",
 
 		HALLOWEENPOTION_DRINKS_WEAK = "Little thing for belly",
 		HALLOWEENPOTION_DRINKS_POTENT = "Big thing for belly",
         HALLOWEENPOTION_BRAVERY = "Makes strong!",
 		HALLOWEENPOTION_MOON = "Change to moony-things",
-		HALLOWEENPOTION_FIRE_FX = "Ka-POW! inside", 
+		HALLOWEENPOTION_FIRE_FX = "Ka-POW! inside",
 		MADSCIENCE_LAB = "For making scaries",
-		LIVINGTREE_ROOT = "Needs dirt", 
+		LIVINGTREE_ROOT = "Needs dirt",
 		LIVINGTREE_SAPLING = "Keep growing, friend!",
 
         DRAGONHEADHAT = "Patuey Head looks good!",
@@ -2387,19 +2518,19 @@ return{
         FIRECRACKERS = "POP! POP!",
         PERDFAN = "Makes wind",
         REDPOUCH = "What's inside?",
-        WARGSHRINE = 
+        WARGSHRINE =
         {
             GENERIC = "Yellow Woofer has house",
             EMPTY = "Needs fire",
 --fallback to speech_wilson.lua             BURNING = "I should make something fun.", --for willow to override
             BURNT = "Too much fire",
         },
-        CLAYWARG = 
+        CLAYWARG =
         {
         	GENERIC = "Aggh! Alive now!",
         	STATUE = "Real Woofer?",
         },
-        CLAYHOUND = 
+        CLAYHOUND =
         {
         	GENERIC = "Too much moving now!",
         	STATUE = "Good Woofer. Stay",
@@ -2458,44 +2589,59 @@ return{
             BURNT = "Oh",
         },
 
-        YOTC_CARRAT_GYM_DIRECTION = 
+        YOTC_CARRAT_GYM_DIRECTION =
         {
             GENERIC = "Turn-arounder",
             RAT = "Learning",
             BURNT = "(sigh)",
         },
-        YOTC_CARRAT_GYM_SPEED = 
+        YOTC_CARRAT_GYM_SPEED =
         {
             GENERIC = "Fast spinner",
             RAT = "Going faster",
             BURNT = "(sigh)",
         },
-        YOTC_CARRAT_GYM_REACTION = 
+        YOTC_CARRAT_GYM_REACTION =
         {
             GENERIC = "Springy box",
             RAT = "Can little friend get poppy corn?",
             BURNT = "(sigh)",
         },
-        YOTC_CARRAT_GYM_STAMINA = 
+        YOTC_CARRAT_GYM_STAMINA =
         {
             GENERIC = "Jumper",
             RAT = "Getting strong",
             BURNT = "(sigh)",
-        }, 
+        },
 
         YOTC_CARRAT_GYM_DIRECTION_ITEM = "For little friend",
         YOTC_CARRAT_GYM_SPEED_ITEM = "For little friend",
         YOTC_CARRAT_GYM_STAMINA_ITEM = "For little friend",
         YOTC_CARRAT_GYM_REACTION_ITEM = "For little friend",
 
-        YOTC_CARRAT_SCALE_ITEM = "Measure little friend",           
-        YOTC_CARRAT_SCALE = 
+        YOTC_CARRAT_SCALE_ITEM = "Measure little friend",
+        YOTC_CARRAT_SCALE =
         {
             GENERIC = "Measure little friend",
             CARRAT = "Not so good",
             CARRAT_GOOD = "Good!",
             BURNT = "Oh",
-        },                
+        },
+
+        YOTB_BEEFALOSHRINE =
+        {
+            GENERIC = "Fluffy now",
+            EMPTY = "Shaggy Buddy... has no fluff",
+            BURNT = "(sigh)",
+        },
+
+        BEEFALO_GROOMER =
+        {
+            GENERIC = "Shaggy Buddy brusher",
+            OCCUPIED = "Hmm hmm, make you pretty!",
+            BURNT = "Oh",
+        },
+        BEEFALO_GROOMER_ITEM = "Make Shaggy Buddy brusher",
 
 		BISHOP_CHARGE_HIT = "Aggh!",
 		TRUNKVEST_SUMMER = "Cool",
@@ -2510,8 +2656,8 @@ return{
 		GRASS_UMBRELLA = "Friend hair keeps rain away",
 		UNIMPLEMENTED = "Hmm...",
 		WAFFLES = "Yum",
-		WALL_HAY = 
-		{	
+		WALL_HAY =
+		{
 			GENERIC = "Wall of friends",
 			BURNT = "Bye bye, friends",
 		},
@@ -2520,7 +2666,7 @@ return{
 		WALL_STONE_ITEM = "For the ground",
 		WALL_RUINS = "Strong",
 		WALL_RUINS_ITEM = "For the ground",
-		WALL_WOOD = 
+		WALL_WOOD =
 		{
 			GENERIC = "So many friends",
 			BURNT = "Noo!!",
@@ -2540,7 +2686,7 @@ return{
 			GENERIC = "Ball home",
 		},
 		WALRUS_TUSK = "Tooth branch",
-		WARDROBE = 
+		WARDROBE =
 		{
 			GENERIC = "Friends holding clothes",
             BURNING = "AGHHH!",
@@ -2556,7 +2702,7 @@ return{
 		WETGOOP = "Yum",
         WHIP = "Snappy Kitty Tail",
 		WINTERHAT = "Looks good",
-		WINTEROMETER = 
+		WINTEROMETER =
 		{
 			GENERIC = "Warm? Cold?",
 			BURNT = "Noo!",
@@ -2569,7 +2715,7 @@ return{
             CANDECORATE = "Make pretty!",
             YOUNG = "So cute...",
         },
-		WINTER_TREESTAND = 
+		WINTER_TREESTAND =
 		{
 			GENERIC = "For friends",
             BURNT = "So sad...",
@@ -2616,7 +2762,7 @@ return{
 		TAMALES = "Friends holding it",
 		TOURTIERE = "Mmm... hot belly stuff",
 
-		TABLE_WINTERS_FEAST = 
+		TABLE_WINTERS_FEAST =
 		{
 			GENERIC = "Friends can eat here",
 			HAS_FOOD = "Friends eat?",
@@ -2624,8 +2770,8 @@ return{
 			BURNT = "Oh...",
 		},
 
-		GINGERBREADWARG = "Scary Sweet Woofer", 
-		GINGERBREADHOUSE = "Yummy house. Mmmmm!", 
+		GINGERBREADWARG = "Scary Sweet Woofer",
+		GINGERBREADHOUSE = "Yummy house. Mmmmm!",
 		GINGERBREADPIG = "Come back, friend!",
 		CRUMBS = "Oh. Friend lost thing",
 		WINTERSFEASTFUEL = "Friends...",
@@ -2639,12 +2785,12 @@ return{
 			OPEN = "Deep. Dark",
 		},
 		WORMHOLE_LIMITED = "Get well soon",
-		ACCOMPLISHMENT_SHRINE = "Pretty!",        
+		ACCOMPLISHMENT_SHRINE = "Pretty!",
 		LIVINGTREE = "Friend?",
 		ICESTAFF = "Chilly stick",
 		REVIVER = "Ba-bum. Ba-bum",
 		SHADOWHEART = "Cold. But still beating...",
-        ATRIUM_RUBBLE = 
+        ATRIUM_RUBBLE =
         {
 			LINE_1 = "Story!",
 			LINE_2 = "Can't read it",
@@ -2653,7 +2799,7 @@ return{
 			LINE_5 = "Pretty picture!",
 		},
         ATRIUM_STATUE = "Still alive?",
-        ATRIUM_LIGHT = 
+        ATRIUM_LIGHT =
         {
 			ON = "Light!",
 			OFF = "Not working",
@@ -2701,7 +2847,7 @@ return{
 		RHINODRILL = "Aww... bro love",
 		BEETLETAUR = "Where's other eye?",
 
-        LAVAARENA_PORTAL = 
+        LAVAARENA_PORTAL =
         {
             ON = "Can go now",
             GENERIC = "Not working",
@@ -2749,49 +2895,49 @@ return{
 		LAVAARENA_HEAVYBLADE = "Chop cutter",
 
         --Quagmire
-        QUAGMIRE_ALTAR = 
+        QUAGMIRE_ALTAR =
         {
         	GENERIC = "Needs belly stuff",
         	FULL = "For you, Sky Mouth!",
     	},
 		QUAGMIRE_ALTAR_STATUE1 = "Oh. Not alive",
 		QUAGMIRE_PARK_FOUNTAIN = "Where's water?",
-		
+
         QUAGMIRE_HOE = "Dirt comber",
-        
+
         QUAGMIRE_TURNIP = "Cute little dirt friend",
         QUAGMIRE_TURNIP_COOKED = "Makes good belly stuff",
         QUAGMIRE_TURNIP_SEEDS = "Mystery baby",
-        
+
         QUAGMIRE_GARLIC = "Mmm... Smelly Dirt thing!",
         QUAGMIRE_GARLIC_COOKED = "Mmm... Smells good",
         QUAGMIRE_GARLIC_SEEDS = "Mystery baby",
-        
+
         QUAGMIRE_ONION = "Makes wet eyes",
         QUAGMIRE_ONION_COOKED = "Sky Belly will like this",
         QUAGMIRE_ONION_SEEDS = "Mystery baby",
-        
+
         QUAGMIRE_POTATO = "Thanks, dirt!",
         QUAGMIRE_POTATO_COOKED = "Dirt makes good belly stuff",
         QUAGMIRE_POTATO_SEEDS = "Mystery baby",
-        
+
         QUAGMIRE_TOMATO = "Oh! Squishy ball",
         QUAGMIRE_TOMATO_COOKED = "Made little red circles",
         QUAGMIRE_TOMATO_SEEDS = "Mystery baby",
-        
+
         QUAGMIRE_FLOUR = "Dust for belly stuff",
         QUAGMIRE_WHEAT = "Oh! Pretty seeds!",
         QUAGMIRE_WHEAT_SEEDS = "Mystery baby",
         --NOTE: raw/cooked carrot uses regular carrot strings
         QUAGMIRE_CARROT_SEEDS = "Mystery baby",
-        
+
         QUAGMIRE_ROTTEN_CROP = "Mmm...Smells good",
-        
+
 		QUAGMIRE_SALMON = "Glub Glub from ground",
 		QUAGMIRE_SALMON_COOKED = "Sky Belly will like it",
 		QUAGMIRE_CRABMEAT = "Branch from Ground Pinchy",
 		QUAGMIRE_CRABMEAT_COOKED = "Pinchy makes good belly stuff",
-		QUAGMIRE_SUGARWOODTREE = 
+		QUAGMIRE_SUGARWOODTREE =
 		{
 			GENERIC = "Sweet Friend!",
 			STUMP = "Sorry",
@@ -2800,7 +2946,7 @@ return{
 			TAPPED_BUGS = "Bugs hurt friend!",
 			WOUNDED = "OUCH! Friend hurt",
 		},
-		QUAGMIRE_SPOTSPICE_SHRUB = 
+		QUAGMIRE_SPOTSPICE_SHRUB =
 		{
 			GENERIC = "What's on hair, friend?",
 			PICKED = "Hair cut already",
@@ -2814,11 +2960,11 @@ return{
 			READY = "Done!",
 			GENERIC = "Getting Tasty Rocks",
 		},
-		
+
 		QUAGMIRE_POND_SALT = "Full of Tasty Rocks",
 		QUAGMIRE_SALT_RACK_ITEM = "Gets the Tasty Rocks",
 
-		QUAGMIRE_SAFE = 
+		QUAGMIRE_SAFE =
 		{
 			GENERIC = "What's inside?",
 			LOCKED = "Where's key?",
@@ -2828,7 +2974,7 @@ return{
 		QUAGMIRE_KEY_PARK = "Needs lock",
         QUAGMIRE_PORTAL_KEY = "Where's it go?",
 
-		
+
 		QUAGMIRE_MUSHROOMSTUMP =
 		{
 			GENERIC = "Friends! Party!",
@@ -2838,7 +2984,7 @@ return{
         QUAGMIRE_MEALINGSTONE = "Crushy rock",
 		QUAGMIRE_PEBBLECRAB = "Ground Pinchy!",
 
-		
+
 		QUAGMIRE_RUBBLE_CARRIAGE = "Where going?",
         QUAGMIRE_RUBBLE_CLOCK = "Tic! Tic! Tic!",
         QUAGMIRE_RUBBLE_CATHEDRAL = "Oh. Fell down",
@@ -2863,7 +3009,7 @@ return{
             SLEEPING = "Shhh",
         },
         QUAGMIRE_SWAMPIG = "Fuzzy Wuzzy Twirly Tail",
-        
+
         QUAGMIRE_PORTAL = "Can't go out",
         QUAGMIRE_SALTROCK = "Rock Tongue Stinger",
         QUAGMIRE_SALT = "Tasty Rocks. Mmmmm...",
@@ -2876,7 +3022,7 @@ return{
             MATCH = "Good belly stuff",
             MATCH_BUT_SNACK = "Small belly stuff",
         },
-        
+
         QUAGMIRE_FERN = "Sky Belly will like it?",
         QUAGMIRE_FOLIAGE_COOKED = "Little belly stuff",
         QUAGMIRE_COIN1 = "Disc for spending",
@@ -2887,7 +3033,7 @@ return{
         QUAGMIRE_SYRUP = "Makes the sweet stuff",
         QUAGMIRE_SAP_SPOILED = "No no no!",
         QUAGMIRE_SEEDPACKET = "Aw... Babies!",
-        
+
         QUAGMIRE_POT = "BIG bubbly water place",
         QUAGMIRE_POT_SMALL = "Hoo! Makes water bubbly!",
         QUAGMIRE_POT_SYRUP = "Makes sweet blubbly",
@@ -2904,7 +3050,7 @@ return{
         QUAGMIRE_PLATE_SILVER = "Pretty food holder",
         QUAGMIRE_BOWL_SILVER = "Shiny food place",
 --fallback to speech_wilson.lua         QUAGMIRE_CRATE = "Kitchen stuff.",
-        
+
         QUAGMIRE_MERM_CART1 = "Junk trunk", --sammy's wagon
         QUAGMIRE_MERM_CART2 = "Wheely Push Thing", --pipton's cart
         QUAGMIRE_PARK_ANGEL = "Scary Floppy Ear",
@@ -2920,7 +3066,7 @@ return{
         QUAGMIRE_CRABTRAP = "Ground Pinchy jail",
         QUAGMIRE_TRADER_MERM = "Gives good things",
         QUAGMIRE_TRADER_MERM2 = "Gives stuff for spend disc",
-        
+
         QUAGMIRE_GOATMUM = "Soft Floppy Ear Mommy",
         QUAGMIRE_GOATKID = "Small Floppy Ear Sprout",
         QUAGMIRE_PIGEON =
@@ -2945,21 +3091,21 @@ return{
         QUAGMIRE_LAMP_SHORT = "Light stick",
 
         --v2 Winona
-        WINONA_CATAPULT = 
+        WINONA_CATAPULT =
         {
         	GENERIC = "Big Rock Flinger!",
         	OFF = "Not on",
         	BURNING = "AGGGHH!",
         	BURNT = "Fire bad",
         },
-        WINONA_SPOTLIGHT = 
+        WINONA_SPOTLIGHT =
         {
         	GENERIC = "Friend made Followy Light!",
         	OFF = "Where's light?",
         	BURNING = "Help! Help!",
         	BURNT = "Oh. So sad",
         },
-        WINONA_BATTERY_LOW = 
+        WINONA_BATTERY_LOW =
         {
         	GENERIC = "Friends made machine feeder",
         	LOWPOWER = "Getting tired",
@@ -2967,7 +3113,7 @@ return{
         	BURNING = "No fire! No!",
         	BURNT = "Fire hurt it",
         },
-        WINONA_BATTERY_HIGH = 
+        WINONA_BATTERY_HIGH =
         {
         	GENERIC = "Big Machine Feeder!",
         	LOWPOWER = "Sleepy?",
@@ -2992,7 +3138,7 @@ return{
         STEERINGWHEEL = "Which way?",
         ANCHOR = "Won't let Floaty move",
         BOATPATCH = "Floaty Fixer",
-        DRIFTWOOD_TREE = 
+        DRIFTWOOD_TREE =
         {
             BURNING = "No!!! Stop!",
             BURNT = "So sad. So sad",
@@ -3002,7 +3148,7 @@ return{
 
         DRIFTWOOD_LOG = "Going for swim, friend?",
 
-        MOON_TREE = 
+        MOON_TREE =
         {
             BURNING = "HELP!! HELP!!",
             BURNT = "(sob)",
@@ -3011,7 +3157,7 @@ return{
         },
 		MOON_TREE_BLOSSOM = "Lost?",
 
-        MOONBUTTERFLY = 
+        MOONBUTTERFLY =
         {
         	GENERIC = "Hehe! Glowy!",
         	HELD = "Hello, Flappy friend!",
@@ -3022,7 +3168,7 @@ return{
         ROCK_AVOCADO_FRUIT_RIPE = "Rocks for belly",
         ROCK_AVOCADO_FRUIT_RIPE_COOKED = "Cooked belly stuff",
         ROCK_AVOCADO_FRUIT_SPROUT = "Baby friend needs dirt",
-        ROCK_AVOCADO_BUSH = 
+        ROCK_AVOCADO_BUSH =
         {
         	BARREN = "Rest well, old friend",
 			WITHERED = "Hot enough for you?",
@@ -3033,7 +3179,7 @@ return{
 			BURNING = "NOOO! AGH! HELP!",
 		},
         DEAD_SEA_BONES = "Dead?",
-        HOTSPRING = 
+        HOTSPRING =
         {
         	GENERIC = "Pool party!",
         	BOMBED = "Warm now. Glowy",
@@ -3041,6 +3187,7 @@ return{
 			EMPTY = "Muddy.",
         },
         MOONGLASS = "Ouch! Sharp!",
+        MOONGLASS_CHARGED = "Glowy sharp things",
         MOONGLASS_ROCK = "Clear Rock",
         BATHBOMB = "Friends made a ball!",
         TRAP_STARFISH =
@@ -3049,7 +3196,7 @@ return{
             CLOSED = "Snap!",
         },
         DUG_TRAP_STARFISH = "Got it!",
-        SPIDER_MOON = 
+        SPIDER_MOON =
         {
         	GENERIC = "Night Ball make you mad?",
         	SLEEPING = "Shh... sleepy",
@@ -3081,9 +3228,9 @@ return{
 
         MINIFLARE = "Makes pretty lights",
 
-		MOON_FISSURE = 
+		MOON_FISSURE =
 		{
-			GENERIC = "Makes head say 'Wee-aow, Wee-aow'", 
+			GENERIC = "Makes head say 'Wee-aow, Wee-aow'",
 			NOLIGHT = "Hello? No one there",
 		},
         MOON_ALTAR =
@@ -3105,7 +3252,7 @@ return{
 
         MOON_ALTAR_ASTRAL = "Ready?",
         MOON_ALTAR_ICON = "Silly! Home not under dirt",
-        MOON_ALTAR_WARD = "Lonely. Find friends",        
+        MOON_ALTAR_WARD = "Lonely. Find friends",
 
         SEAFARING_PROTOTYPER =
         {
@@ -3116,20 +3263,20 @@ return{
         STEERINGWHEEL_ITEM = "For pointing Floaty",
         ANCHOR_ITEM = "Heavy...",
         MAST_ITEM = "Tall friend for Floater.",
-        MUTATEDHOUND = 
+        MUTATEDHOUND =
         {
         	DEAD = "Dead now?",
         	GENERIC = "Where clothes, Woofer?",
         	SLEEPING = "Shh... Sleepytime",
         },
 
-        MUTATED_PENGUIN = 
+        MUTATED_PENGUIN =
         {
 			DEAD = "Oh. Dead",
 			GENERIC = "You okay, Woddle Woddle?",
 			SLEEPING = "Naptime",
 		},
-        CARRAT = 
+        CARRAT =
         {
         	DEAD = "Oh. Dead",
         	GENERIC = "Belly stuff running away!",
@@ -3137,7 +3284,7 @@ return{
         	SLEEPING = "Sleepytime",
         },
 
-		BULLKELP_PLANT = 
+		BULLKELP_PLANT =
         {
             GENERIC = "Water friends!",
             PICKED = "Yum!",
@@ -3259,7 +3406,7 @@ return{
 		SEAFOODGUMBO = "Glub Glub stew",
 		SURFNTURF = "Fills belly",
 
-        WOBSTER_SHELLER = "Snappy Glub Glub", 
+        WOBSTER_SHELLER = "Snappy Glub Glub",
         WOBSTER_DEN = "Wet nest",
         WOBSTER_SHELLER_DEAD = "Oh. Belly stuff now.",
         WOBSTER_SHELLER_DEAD_COOKED = "Why changed color?",
@@ -3271,7 +3418,7 @@ return{
         MOONGLASS_WOBSTER_DEN = "Moony wet nest",
 
 		TRIDENT = "Pokey",
-		
+
 		WINCH =
 		{
 			GENERIC = "Thing lifter",
@@ -3282,8 +3429,8 @@ return{
         HERMITHOUSE = {
             GENERIC = "Sad shell...",
             BUILTUP = "Happy now",
-        }, 
-        
+        },
+
         SHELL_CLUSTER = "Shells!",
         --
 		SINGINGSHELL_OCTAVE3 =
@@ -3306,7 +3453,7 @@ return{
             GENERIC = "Shell stuff",
             LOCKED = "Oh. Locked",
         },
-        
+
         HERMIT_BUNDLE = "Thank you!",
         HERMIT_BUNDLE_SHELLS = "Shells shell",
 
@@ -3317,21 +3464,21 @@ return{
 		----------------------- ROT STRINGS GO ABOVE HERE ------------------
 
 		-- Walter
-        WOBYBIG = 
+        WOBYBIG =
         {
             "Biiiiig woofer!",
             "Biiiiig woofer!",
         },
-        WOBYSMALL = 
+        WOBYSMALL =
         {
             "Pat pat!",
             "Pat pat!",
         },
 		WALTERHAT = "Look like friend!",
 		SLINGSHOT = "Pew pew!",
-		SLINGSHOTAMMO_ROCK = "Pew pew things",		
-		SLINGSHOTAMMO_MARBLE = "Pew pew things",		
-		SLINGSHOTAMMO_THULECITE = "Pew pew things",	
+		SLINGSHOTAMMO_ROCK = "Pew pew things",
+		SLINGSHOTAMMO_MARBLE = "Pew pew things",
+		SLINGSHOTAMMO_THULECITE = "Pew pew things",
         SLINGSHOTAMMO_GOLD = "Pew pew things",
         SLINGSHOTAMMO_SLOW = "Pew pew things",
         SLINGSHOTAMMO_FREEZE = "Pew pew things",
@@ -3347,7 +3494,20 @@ return{
         BATTLESONG_FIRERESISTANCE = "Biiiig mouth sounds",
         BATTLESONG_INSTANT_TAUNT = "Funny words",
         BATTLESONG_INSTANT_PANIC = "Funny words",
-        
+
+        -- Webber
+        MUTATOR_WARRIOR = "Belly stuff for Leggy Bugs?",
+        MUTATOR_DROPPER = "Belly stuff for Leggy Bugs?",
+        MUTATOR_HIDER = "Belly stuff for Leggy Bugs?",
+        MUTATOR_SPITTER = "Belly stuff for Leggy Bugs?",
+        MUTATOR_MOON = "Belly stuff for Leggy Bugs?",
+        MUTATOR_HEALER = "Belly stuff for Leggy Bugs?",
+        SPIDER_WHISTLE = "Fweee!",
+        SPIDERDEN_BEDAZZLER = "Making pretty things",
+        SPIDER_HEALER = "Takes care of leggy friends",
+        SPIDER_REPELLENT = "Clicky-clack!",
+        SPIDER_HEALER_ITEM = "Gloopy",
+
 		-- Wendy
 		GHOSTLYELIXIR_SLOWREGEN = "For ghost friend",
 		GHOSTLYELIXIR_FASTREGEN = "For ghost friend",
@@ -3374,7 +3534,7 @@ return{
 			COOKING_SHORT = "Done soon",
 			EMPTY = "Empty...",
         },
-        
+
         PORTABLEBLENDER_ITEM = "Chops belly stuff",
         PORTABLESPICER_ITEM =
         {
@@ -3409,24 +3569,24 @@ return{
         TURNIP = "Cute little dirt friend",
         TURNIP_COOKED = "Makes good belly stuff",
         TURNIP_SEEDS = "Mystery baby",
-        
+
         GARLIC = "Mmm... Smelly Dirt thing!",
         GARLIC_COOKED = "Mmm... Smells good",
         GARLIC_SEEDS = "Mystery baby",
-        
+
         ONION = "Makes eyes wet",
         ONION_COOKED = "Smells nice",
         ONION_SEEDS = "Mystery baby",
-        
+
         POTATO = "Thanks, dirt!",
         POTATO_COOKED = "Dirt makes good belly stuff",
         POTATO_SEEDS = "Mystery baby",
-        
+
         TOMATO = "Oh! Squishy ball",
         TOMATO_COOKED = "Made little red circles",
         TOMATO_SEEDS = "Mystery baby",
 
-        ASPARAGUS = "Sticks for belly", 
+        ASPARAGUS = "Sticks for belly",
         ASPARAGUS_COOKED = "Smells pointy",
         ASPARAGUS_SEEDS = "Grows the belly sticks",
 
@@ -3443,13 +3603,13 @@ return{
         {
             GENERIC = "Place for big Glub Glub",
             BURNT = "Oh. Gone",
-        },        
+        },
         MERMTHRONE_CONSTRUCTION =
         {
             GENERIC = "Making something",
             BURNT = "All gone",
-        },        
-        MERMHOUSE_CRAFTED = 
+        },
+        MERMHOUSE_CRAFTED =
         {
             GENERIC = "Glub Glub house",
             BURNT = "Oh...",
@@ -3466,13 +3626,13 @@ return{
 		GHOSTFLOWER = "Friend...?",
         SMALLGHOST = "Floaty is... sad?",
 
-        CRABKING = 
+        CRABKING =
         {
             GENERIC = "Crabby...",
             INERT = "Something missing?",
         },
 		CRABKING_CLAW = "Scary!",
-		
+
 		MESSAGEBOTTLE = "Holding thing",
 		MESSAGEBOTTLEEMPTY = "Empty",
 
@@ -3569,20 +3729,20 @@ return{
         },
 
         ARCHIVE_MOON_STATUE = "Friends of night ball",
-        ARCHIVE_RUNE_STATUE = 
+        ARCHIVE_RUNE_STATUE =
         {
             LINE_1 = "Skritch scratches",
             LINE_2 = "Pretty",
             LINE_3 = "Skritch scratches",
             LINE_4 = "Pretty",
             LINE_5 = "Skritch scratches",
-        },        
+        },
 
         ARCHIVE_RESONATOR = {
             GENERIC = "That way",
             IDLE = "Done",
         },
-        
+
         ARCHIVE_RESONATOR_ITEM = "Hmmmm",
 
         ARCHIVE_LOCKBOX_DISPENCER = {
@@ -3620,11 +3780,310 @@ return{
         TURFCRAFTINGSTATION = "Make dirt!",
 
         MOON_ALTAR_LINK = "Seed",
+
+        -- FARMING
+        COMPOSTINGBIN =
+        {
+            GENERIC = "Yum!",
+            WET = "Too wet",
+            DRY = "Too dry",
+            BALANCED = "Is good",
+            BURNT = "Nooooo!",
+        },
+        COMPOST = "Mmmm...",
+        SOIL_AMENDER =
+		{
+			GENERIC = "Drink stuff, good for friends",
+			STALE = "Getting better",
+			SPOILED = "Really good!",
+		},
+
+		SOIL_AMENDER_FERMENTED = "Really-really good!",
+
+        WATERINGCAN =
+        {
+            GENERIC = "Drink can",
+            EMPTY = "Oh. Empty",
+        },
+        PREMIUMWATERINGCAN =
+        {
+            GENERIC = "Fancy drink can",
+            EMPTY = "Oh. Empty",
+        },
+
+		FARM_PLOW = "Make ground soft and nice",
+		FARM_PLOW_ITEM = "Where will friends live?",
+		FARM_HOE = "Tuck in babies",
+		GOLDEN_FARM_HOE = "Pretty dirt mover",
+		NUTRIENTSGOGGLESHAT = "Friend looks cozy there",
+		PLANTREGISTRYHAT = "Wear friend on head!",
+
+        FARM_SOIL_DEBRIS = "Friends don't like it",
+
+		FIRENETTLES = "Hot hot friends",
+		FORGETMELOTS = "Pretty friends",
+		SWEETTEA = "Mmmm... ahhh",
+		TILLWEED = "Stubborn friends",
+		TILLWEEDSALVE = "Thank you friends!",
+
+		TROPHYSCALE_OVERSIZEDVEGGIES =
+		{
+			GENERIC = "Friend holder",
+			HAS_ITEM = "Weight: {weight}\nHarvested on day: {day}\nGood job!",
+			HAS_ITEM_HEAVY = "Weight: {weight}\nHarvested on day: {day}\nProud of you!",
+            HAS_ITEM_LIGHT = "Did their best",
+			BURNING = "No! Oh no!",
+			BURNT = "Gone...",
+        },
+
+        CARROT_OVERSIZED = "Good job!",
+        CORN_OVERSIZED = "Biiiig belly stuff!",
+        PUMPKIN_OVERSIZED = "So big!",
+        EGGPLANT_OVERSIZED = "Big tasty!",
+        DURIAN_OVERSIZED = "Big smell",
+        POMEGRANATE_OVERSIZED = "Big seedy fruit",
+        DRAGONFRUIT_OVERSIZED = "Pretty! Big!",
+        WATERMELON_OVERSIZED = "Big watery fruit",
+        TOMATO_OVERSIZED = "Big squishy ball",
+        POTATO_OVERSIZED = "Big!",
+        ASPARAGUS_OVERSIZED = "Big pointy",
+        ONION_OVERSIZED = "Crunchy",
+        GARLIC_OVERSIZED = "Mmmm!",
+        PEPPER_OVERSIZED = "Hot hot belly stuff",
+
+        VEGGIE_OVERSIZED_ROTTEN = "So sorry",
+
+		FARM_PLANT =
+		{
+			GENERIC = "Friend",
+			SEED = "Baby",
+			GROWING = "Doing so good!",
+			FULL = "Good job!",
+			ROTTEN = "Oh",
+			FULL_OVERSIZED = "Biiiig!",
+			ROTTEN_OVERSIZED = "So sorry",
+			FULL_WEED = "Don't bully other friends!",
+
+			BURNING = "Oh no oh no!",
+		},
+
+        FRUITFLY = "Mean!",
+        LORDFRUITFLY = "No! Leave friends alone!",
+        FRIENDLYFRUITFLY = "Nice to friends",
+        FRUITFLYFRUIT = "Fruit bug friend maker",
+
+        SEEDPOUCH = "Seed carry-arounder",
+
+		-- Crow Carnival
+		CARNIVAL_HOST = "Oooh, Big Tweeter!",
+		CARNIVAL_CROWKID = "Hello!",
+		CARNIVAL_GAMETOKEN = "Shiny",
+		CARNIVAL_PRIZETICKET =
+		{
+			GENERIC = "Win paper",
+			GENERIC_SMALLSTACK = "Lots of win papers",
+			GENERIC_LARGESTACK = "Lots and lots of win papers!",
+		},
+
+		CARNIVALGAME_FEEDCHICKS_NEST = "Hello? Hiding?",
+		CARNIVALGAME_FEEDCHICKS_STATION =
+		{
+			GENERIC = "Needs shiny",
+			PLAYING = "Tweeters hungry",
+		},
+		CARNIVALGAME_FEEDCHICKS_KIT = "Tweeter games!",
+		CARNIVALGAME_FEEDCHICKS_FOOD = "Wigglers!",
+
+		CARNIVALGAME_MEMORY_KIT = "Tweeter games!",
+		CARNIVALGAME_MEMORY_STATION =
+		{
+			GENERIC = "Needs shiny",
+			PLAYING = "Remembery game, hmm...",
+		},
+		CARNIVALGAME_MEMORY_CARD =
+		{
+			GENERIC = "Hello? Hiding?",
+			PLAYING = "That one!",
+		},
+
+		CARNIVALGAME_HERDING_KIT = "Tweeter games!",
+		CARNIVALGAME_HERDING_STATION =
+		{
+			GENERIC = "Needs shiny",
+			PLAYING = "Run run run!",
+		},
+		CARNIVALGAME_HERDING_CHICK = "Over here!",
+
+		CARNIVAL_PRIZEBOOTH_KIT = "Make house for Tweeter treasure",
+		CARNIVAL_PRIZEBOOTH =
+		{
+			GENERIC = "Trade?",
+		},
+
+		CARNIVALCANNON_KIT = "Not finished yet",
+		CARNIVALCANNON =
+		{
+			GENERIC = "Boom maker",
+			COOLDOWN = "Boom!",
+		},
+
+		CARNIVAL_PLAZA_KIT = "New friend!",
+		CARNIVAL_PLAZA =
+		{
+			GENERIC = "Make fancy?",
+			LEVEL_2 = "Big Tweeters like decoration",
+			LEVEL_3 = "Oooh, friend look so nice!",
+		},
+
+		CARNIVALDECOR_EGGRIDE_KIT = "Prize!",
+		CARNIVALDECOR_EGGRIDE = "Wheee!",
+
+		CARNIVALDECOR_LAMP_KIT = "Prize!",
+		CARNIVALDECOR_LAMP = "Friend make nice glowy light",
+		CARNIVALDECOR_PLANT_KIT = "Find nice place for friend",
+		CARNIVALDECOR_PLANT = "Short friend",
+
+		CARNIVALDECOR_FIGURE =
+		{
+			RARE = "Fancy",
+			UNCOMMON = "Pretty",
+			GENERIC = "Ooooh",
+		},
+		CARNIVALDECOR_FIGURE_KIT = "Surprise",
+
+        CARNIVAL_BALL = "Bouncy bounce",
+		CARNIVAL_SEEDPACKET = "Thanks Tweeters!",
+		CARNIVALFOOD_CORNTEA = "Mmmm",
+
+        CARNIVAL_VEST_A = "Made of friend hair!",
+        CARNIVAL_VEST_B = "Look just like tall friends",
+        CARNIVAL_VEST_C = "Friend hair tickles",
+
+        -- YOTB
+        YOTB_SEWINGMACHINE = "Clothes maker",
+        YOTB_SEWINGMACHINE_ITEM = "Clothes maker bits",
+        YOTB_STAGE = "Hello!",
+        YOTB_POST =  "Friend watch Shaggy Buddy please",
+        YOTB_STAGE_ITEM = "Where to plant?",
+        YOTB_POST_ITEM =  "Put on ground",
+
+
+        YOTB_PATTERN_FRAGMENT_1 = "Huh? Not finished",
+        YOTB_PATTERN_FRAGMENT_2 = "Huh? Not finished",
+        YOTB_PATTERN_FRAGMENT_3 = "Huh? Not finished",
+
+        YOTB_BEEFALO_DOLL_WAR = {
+            GENERIC = "Squishy!",
+            YOTB = "Show to shaggy hidey man",
+        },
+        YOTB_BEEFALO_DOLL_DOLL = {
+            GENERIC = "Squishy!",
+            YOTB = "Show to shaggy hidey man",
+        },
+        YOTB_BEEFALO_DOLL_FESTIVE = {
+            GENERIC = "Squishy!",
+            YOTB = "Show to shaggy hidey man",
+        },
+        YOTB_BEEFALO_DOLL_NATURE = {
+            GENERIC = "Squishy!",
+            YOTB = "Show to shaggy hidey man",
+        },
+        YOTB_BEEFALO_DOLL_ROBOT = {
+            GENERIC = "Squishy!",
+            YOTB = "Show to shaggy hidey man",
+        },
+        YOTB_BEEFALO_DOLL_ICE = {
+            GENERIC = "Squishy!",
+            YOTB = "Show to shaggy hidey man",
+        },
+        YOTB_BEEFALO_DOLL_FORMAL = {
+            GENERIC = "Squishy!",
+            YOTB = "Show to shaggy hidey man",
+        },
+        YOTB_BEEFALO_DOLL_VICTORIAN = {
+            GENERIC = "Squishy!",
+            YOTB = "Show to shaggy hidey man",
+        },
+        YOTB_BEEFALO_DOLL_BEAST = {
+            GENERIC = "Squishy!",
+            YOTB = "Show to shaggy hidey man",
+        },
+
+        WAR_BLUEPRINT = "Scary!",
+        DOLL_BLUEPRINT = "Aww",
+        FESTIVE_BLUEPRINT = "Pretty",
+        ROBOT_BLUEPRINT = "Machine?",
+        NATURE_BLUEPRINT = "Covered in friends",
+        FORMAL_BLUEPRINT = "Fancy",
+        VICTORIAN_BLUEPRINT = "Lots of work...",
+        ICE_BLUEPRINT = "Brrr!",
+        BEAST_BLUEPRINT = "Lucky!",
+
+        BEEF_BELL = "Ding dong",
+
+        -- Moon Storm
+        ALTERGUARDIAN_PHASE1 = {
+            GENERIC = "From Night Ball?",
+            DEAD = "Good night",
+        },
+        ALTERGUARDIAN_PHASE2 = {
+            GENERIC = "Not happy!",
+            DEAD = "Sleeping again?",
+        },
+        ALTERGUARDIAN_PHASE2SPIKE = "Spiky wall",
+        ALTERGUARDIAN_PHASE3 = "Very very mad!",
+        ALTERGUARDIAN_PHASE3TRAP = "Sleepy rocks",
+        ALTERGUARDIAN_PHASE3DEADORB = "Hello sometimes-there man",
+        ALTERGUARDIAN_PHASE3DEAD = "Just rocks",
+
+        ALTERGUARDIANHAT = "Helps hear them",
+        ALTERGUARDIANHATSHARD = "Hmm...",
+
+        MOONSTORM_GLASS = {
+            GENERIC = "Just sharp",
+            INFUSED = "Sharp glowy!"
+        },
+
+        MOONSTORM_STATIC = "Little fire?",
+        MOONSTORM_STATIC_ITEM = "Safe inside",
+        MOONSTORM_SPARK = "Zzzt?",
+
+        BIRD_MUTANT = "Tweeter okay?",
+        BIRD_MUTANT_SPITTER = "Tweeter sick?",
+
+        WAGSTAFF_NPC = "Hello! Oh, goodbye... oh, hello!",
+        ALTERGUARDIAN_CONTAINED = "Locked away",
+
+        WAGSTAFF_TOOL_1 = "Thing?",
+        WAGSTAFF_TOOL_2 = "Here it is!",
+        WAGSTAFF_TOOL_3 = "Found it!",
+        WAGSTAFF_TOOL_4 = "Funny thing",
+        WAGSTAFF_TOOL_5 = "Flickery",
+
+        MOONSTORM_GOGGLESHAT = "Belly stuff... for head?",
+
+        MOON_DEVICE = {
+            GENERIC = "Oooooh!",
+            CONSTRUCTION1 = "Lots to do",
+            CONSTRUCTION2 = "Almost done",
+        }
     },
 
     DESCRIBE_GENERIC = "Friend?",
     DESCRIBE_TOODARK = "Where is light?",
     DESCRIBE_SMOLDERING = "Uh oh...",
+
+    DESCRIBE_PLANTHAPPY = "Happy",
+    DESCRIBE_PLANTVERYSTRESSED = "No no no, not happy!",
+    DESCRIBE_PLANTSTRESSED = "Something wrong",
+    DESCRIBE_PLANTSTRESSORKILLJOYS = "Too many bothers around",
+    DESCRIBE_PLANTSTRESSORFAMILY = "Misses family",
+    DESCRIBE_PLANTSTRESSOROVERCROWDING = "Need room",
+    DESCRIBE_PLANTSTRESSORSEASON = "Doesn't like weather now",
+    DESCRIBE_PLANTSTRESSORMOISTURE = "Thirsty",
+    DESCRIBE_PLANTSTRESSORNUTRIENTS = "Needs food!",
+    DESCRIBE_PLANTSTRESSORHAPPINESS = "Wants to talk",
+
     EAT_FOOD =
     {
         TALLBIRDEGG_CRACKED = "Don't feel good",

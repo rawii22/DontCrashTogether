@@ -29,7 +29,7 @@ end)
 
 function CharacterSelect:_BuildCharactersList(additionalCharacters)
     local active_characters = ExceptionArrays(GetActiveCharacterList(), MODCHARACTEREXCEPTIONS_DST)
-    
+
     local characters = {}
     for _,hero in ipairs(active_characters) do
         if TheNet:IsOnlineMode() or not IsRestrictedCharacter( hero ) then
@@ -67,8 +67,11 @@ function CharacterSelect:_BuildCharacterGrid(characters, character_widget_ctor, 
     end
     local function ScrollWidgetApply(context, widget, data, index)
         if data then
-            widget.face:SetCharacter(data)
-            widget.face:Show()
+            if widget.data ~= data then
+                widget.data = data
+                widget.face:SetCharacter(data)
+                widget.face:Show()
+            end
         else
             widget.face:Hide()
         end

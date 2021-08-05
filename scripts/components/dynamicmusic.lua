@@ -35,6 +35,11 @@ local SEASON_DANGER_MUSIC =
 local TRIGGERED_DANGER_MUSIC =
 {
 
+    wagstaff_experiment =
+    {
+        "moonstorm/characters/wagstaff/music_wagstaff_experiment",
+    },
+
     crabking =
     {
         "dontstarve/music/music_epicfight_crabking",
@@ -44,7 +49,7 @@ local TRIGGERED_DANGER_MUSIC =
     {
         "saltydog/music/malbatross",
     },
-        
+
     moonbase =
     {
         "dontstarve/music/music_epicfight_moonbase",
@@ -95,6 +100,19 @@ local TRIGGERED_DANGER_MUSIC =
         "dontstarve/music/music_pigking_minigame",
     },
 
+    alterguardian_phase1 =
+    {
+        "moonstorm/creatures/boss/alterguardian1/music_epicfight",
+    },
+    alterguardian_phase2 =
+    {
+        "moonstorm/creatures/boss/alterguardian2/music_epicfight",
+    },
+    alterguardian_phase3 =
+    {
+        "moonstorm/creatures/boss/alterguardian3/music_epicfight",
+    },
+
     default =
     {
         "dontstarve/music/music_epicfight_ruins",
@@ -111,6 +129,9 @@ local BUSYTHEMES = {
     RACE = 7,
     TRAINING = 8,
     HERMIT = 9,
+    FARMING = 10,
+	CARNIVAL_AMBIENT = 11,
+	CARNIVAL_MINIGAME = 12,
 }
 
 --------------------------------------------------------------------------
@@ -168,7 +189,7 @@ local function StopBusy(inst, istimeout)
 end
 
 local function StartBusy(player)
-    if not (_iscave or _isday) then        
+    if not (_iscave or _isday) then
         return
     elseif _busytask ~= nil then
         _extendtime = GetTime() + 15
@@ -189,7 +210,7 @@ local function StartBusy(player)
                 _busytheme = BUSYTHEMES.CAVE
             end
         else
-            if IsOnLunarIsland(player) then                    
+            if IsOnLunarIsland(player) then
                 if _busytheme ~= BUSYTHEMES.LUNARISLAND then
                     _soundemitter:KillSound("busy")
                     _soundemitter:PlaySound("turnoftides/music/working", "busy")
@@ -203,7 +224,7 @@ local function StartBusy(player)
                 _busytheme = BUSYTHEMES.FOREST
             end
         end
-        
+
         _soundemitter:SetParameter("busy", "intensity", 1)
         _busytask = inst:DoTaskInTime(15, StopBusy, true)
         _extendtime = 0
@@ -303,6 +324,37 @@ local function StartTraining(player)
     end
 end
 
+local function StartBusyTheme(player, theme, sound, duration, extendtime)
+    if _dangertask == nil and (_busytheme ~= theme or _extendtime == 0 or GetTime() >= _extendtime) and _isenabled then
+        if _busytask then
+            _busytask:Cancel()
+            _busytask = nil
+        end
+        if _busytheme ~= theme then
+            _soundemitter:KillSound("busy")
+            _soundemitter:PlaySound(sound, "busy")
+	        _busytheme = theme
+        end
+
+        _soundemitter:SetParameter("busy", "intensity", 1)
+        _busytask = inst:DoTaskInTime(duration, StopBusy, true)
+        _extendtime = extendtime or 0
+    end
+end
+
+local function StartFarming(player)
+	StartBusyTheme(player, BUSYTHEMES.FARMING, "farming/music/farming", 15)
+end
+
+local function StartCarnivalMustic(player, is_game_active)
+	if _dangertask ~= nil or (_busytask ~= nil and _busytheme == BUSYTHEMES.CARNIVAL_MINIGAME and not is_game_active) then
+		return
+	end
+
+	local theme = is_game_active and BUSYTHEMES.CARNIVAL_MINIGAME or BUSYTHEMES.CARNIVAL_AMBIENT
+	StartBusyTheme(player, theme, theme == BUSYTHEMES.CARNIVAL_MINIGAME and "summerevent/music/2" or "summerevent/music/1", 2)
+end
+
 local function ExtendBusy()
     if _busytask ~= nil then
         _extendtime = math.max(_extendtime, GetTime() + 10)
@@ -366,6 +418,9 @@ local function StartTriggeredDanger(player, data)
         music = music[level] or music[1]
         if #music > 0 then
             _soundemitter:PlaySound(music, "danger")
+            if _hasinspirationbuff then
+                _soundemitter:SetParameter("danger", "wathgrithr_intensity", _hasinspirationbuff)
+            end
         end
         _dangertask = inst:DoTaskInTime(data.duration or 10, StopDanger, true)
         _triggeredlevel = level
@@ -470,10 +525,12 @@ local function StartPlayerListeners(player)
     inst:ListenForEvent("triggeredevent", StartTriggeredDanger, player)
     inst:ListenForEvent("boatspedup", StartTriggeredWater, player)
     inst:ListenForEvent("isfeasting", StartTriggeredFeasting, player)
-    inst:ListenForEvent("playracemusic", StartRacing, player)   
-    inst:ListenForEvent("playhermitmusic", StartHermit, player)   
+    inst:ListenForEvent("playracemusic", StartRacing, player)
+    inst:ListenForEvent("playhermitmusic", StartHermit, player)
     inst:ListenForEvent("playtrainingmusic", StartTraining, player)
+    inst:ListenForEvent("playfarmingmusic", StartFarming, player)
     inst:ListenForEvent("hasinspirationbuff", OnHasInspirationBuff, player)
+    inst:ListenForEvent("playcarnivalmusic", StartCarnivalMustic, player)
 end
 
 local function StopPlayerListeners(player)
@@ -489,7 +546,9 @@ local function StopPlayerListeners(player)
     inst:RemoveEventCallback("playracemusic", StartRacing, player)
     inst:RemoveEventCallback("playhermitmusic", StartHermit, player)
     inst:RemoveEventCallback("playtrainingmusic", StartTraining, player)
+    inst:RemoveEventCallback("playfarmingmusic", StartFarming, player)
     inst:RemoveEventCallback("hasinspirationbuff", OnHasInspirationBuff, player)
+    inst:RemoveEventCallback("playcarnivalmusic", StartCarnivalMustic, player)
 end
 
 local function OnPhase(inst, phase)
@@ -542,6 +601,7 @@ local function StopSoundEmitter()
         inst:StopWatchingWorldState("phase", OnPhase)
         inst:StopWatchingWorldState("season", OnSeason)
         _isday = nil
+		_busytheme = nil
         _isbusydirty = nil
         _extendtime = nil
         _soundemitter = nil

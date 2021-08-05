@@ -84,7 +84,7 @@ local states =
     State{
         name = "death",
         tags = { "busy" },
-        
+
         onenter = function(inst)
             inst.AnimState:PlayAnimation("death")
             inst.Physics:Stop()
@@ -167,7 +167,7 @@ local states =
             if y < 2 then
                 inst.Physics:SetMotorVel(0, 0, 0)
             end
-            if y <= .1 then
+            if y <= 0.1 then
                 inst.Physics:Stop()
                 inst.Physics:Teleport(x, 0, z)
                 inst.AnimState:PlayAnimation("land")
@@ -237,7 +237,7 @@ local states =
             inst.DynamicShadow:Enable(false)
             inst.SoundEmitter:PlaySound(inst.sounds.takeoff)
 
-            if inst.components.periodicspawner ~= nil and math.random() <= TUNING.CROW_LEAVINGS_CHANCE then
+            if inst.components.periodicspawner ~= nil and math.random() <= TUNING.BIRD_LEAVINGS_CHANCE then
                 inst.components.periodicspawner:TrySpawn()
             end
 
@@ -266,7 +266,7 @@ local states =
         name = "hop",
         tags = { "moving", "canrotate", "hopping" },
 
-        onenter = function(inst) 
+        onenter = function(inst)
             inst.AnimState:PlayAnimation("hop")
             inst.Physics:SetMotorVel(5, 0, 0)
         end,
@@ -355,7 +355,7 @@ local states =
         name = "stunned",
         tags = { "busy" },
 
-        onenter = function(inst) 
+        onenter = function(inst)
             inst.Physics:Stop()
             inst.AnimState:PlayAnimation("stunned_loop", true)
             inst.sg:SetTimeout(GetRandomWithVariance(6, 2))

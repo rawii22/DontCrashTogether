@@ -50,7 +50,7 @@ local function SpawnOasisBugs(inst)
         local bug = SpawnPrefab("fireflies")
         bug.Transform:SetPosition((pos + offset + Vector3(math.random()*BUG_RANDOM_RANGE, 0, math.random()*BUG_RANDOM_RANGE)):Get())
         table.insert(bug_pts, bug:GetPosition())
-    end 
+    end
 end
 
 local MAX_SUCCULENTS = 18
@@ -136,7 +136,7 @@ local function TryFillLake(inst, skipanim, OnSandstormChanged)
     inst.Physics:CollidesWith(COLLISION.CHARACTERS)
     inst.Physics:CollidesWith(COLLISION.GIANTS)
 
-    inst:AddTag("watersource")
+    inst.components.watersource.available = true
     inst:RemoveTag("NOCLICK")
 end
 
@@ -166,14 +166,18 @@ local function OnSandstormChanged(inst, active, skipanim)
         inst.Physics:ClearCollisionMask()
         inst.Physics:CollidesWith(COLLISION.ITEMS)
 
-        inst:RemoveTag("watersource")
+        inst.components.watersource.available = false
         inst:AddTag("NOCLICK")
     end
 end
 
 local function OnInit(inst)
     inst.task = nil
-    inst:ListenForEvent("ms_sandstormchanged", function(src, data) OnSandstormChanged(inst, data) end, TheWorld)
+    inst:ListenForEvent("ms_stormchanged", function(src, data)
+            if data.stormtype == STORM_TYPES.SANDSTORM then
+                OnSandstormChanged(inst, data.setting)
+            end
+        end, TheWorld)
     OnSandstormChanged(inst, TheWorld.components.sandstorms ~= nil and TheWorld.components.sandstorms:IsSandstormActive(), true)
 end
 
@@ -214,6 +218,7 @@ local function fn()
 
     inst.MiniMapEntity:SetIcon("oasis.png")
 
+    -- From watersource component
     inst:AddTag("watersource")
     inst:AddTag("birdblocker")
     inst:AddTag("antlion_sinkhole_blocker")
@@ -239,6 +244,8 @@ local function fn()
 
     inst:AddComponent("oasis")
     inst.components.oasis.radius = TUNING.SANDSTORM_OASIS_RADIUS
+
+    inst:AddComponent("watersource")
 
     inst.isdamp = false
     inst.driedup = false

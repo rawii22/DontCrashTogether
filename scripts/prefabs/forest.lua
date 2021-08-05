@@ -21,12 +21,13 @@ local assets =
     Asset("IMAGE", "images/colour_cubes/insane_night_cc.tex"),
 	Asset("IMAGE", "images/colour_cubes/lunacy_regular_cc.tex"),
     Asset("IMAGE", "images/colour_cubes/purple_moon_cc.tex"),
+    Asset("IMAGE", "images/colour_cubes/moonstorm_cc.tex"),
 
     Asset("ANIM", "anim/snow.zip"),
     Asset("ANIM", "anim/lightning.zip"),
 
     Asset("SOUND", "sound/forest_stream.fsb"),
-    Asset("SOUND", "sound/amb_stream.fsb"),    
+    Asset("SOUND", "sound/amb_stream.fsb"),
     Asset("SOUND", "sound/turnoftides_music.fsb"),
     Asset("SOUND", "sound/turnoftides_amb.fsb"),
 
@@ -160,11 +161,11 @@ local assets =
     Asset("IMAGE", "images/lunacy_over_lunacy_over0037.tex"),
     Asset("IMAGE", "images/lunacy_over_lunacy_over0038.tex"),
     Asset("IMAGE", "images/lunacy_over_lunacy_over0039.tex"),
-    Asset("IMAGE", "images/lunacy_over_lunacy_over0040.tex"),    
-    Asset("IMAGE", "images/lunacy_over_lunacy_over0041.tex"),    
-    Asset("IMAGE", "images/lunacy_over_lunacy_over0042.tex"),    
-    Asset("IMAGE", "images/lunacy_over_lunacy_over0043.tex"),    
-    Asset("IMAGE", "images/lunacy_over_lunacy_over0044.tex"),  
+    Asset("IMAGE", "images/lunacy_over_lunacy_over0040.tex"),
+    Asset("IMAGE", "images/lunacy_over_lunacy_over0041.tex"),
+    Asset("IMAGE", "images/lunacy_over_lunacy_over0042.tex"),
+    Asset("IMAGE", "images/lunacy_over_lunacy_over0043.tex"),
+    Asset("IMAGE", "images/lunacy_over_lunacy_over0044.tex"),
 
     Asset("ATLAS", "images/lunacy_over_lunacy_over0001.xml"),
     Asset("ATLAS", "images/lunacy_over_lunacy_over0002.xml"),
@@ -205,11 +206,11 @@ local assets =
     Asset("ATLAS", "images/lunacy_over_lunacy_over0037.xml"),
     Asset("ATLAS", "images/lunacy_over_lunacy_over0038.xml"),
     Asset("ATLAS", "images/lunacy_over_lunacy_over0039.xml"),
-    Asset("ATLAS", "images/lunacy_over_lunacy_over0040.xml"),    
-    Asset("ATLAS", "images/lunacy_over_lunacy_over0041.xml"),    
-    Asset("ATLAS", "images/lunacy_over_lunacy_over0042.xml"),    
-    Asset("ATLAS", "images/lunacy_over_lunacy_over0043.xml"),    
-    Asset("ATLAS", "images/lunacy_over_lunacy_over0044.xml"),          
+    Asset("ATLAS", "images/lunacy_over_lunacy_over0040.xml"),
+    Asset("ATLAS", "images/lunacy_over_lunacy_over0041.xml"),
+    Asset("ATLAS", "images/lunacy_over_lunacy_over0042.xml"),
+    Asset("ATLAS", "images/lunacy_over_lunacy_over0043.xml"),
+    Asset("ATLAS", "images/lunacy_over_lunacy_over0044.xml"),
 }
 
 local prefabs =
@@ -249,11 +250,11 @@ local prefabs =
     "teleportato_box",
     "teleportato_crank",
     "teleportato_potato",
-    "pond", 
-    "marsh_tree", 
-    "marsh_bush", 
+    "pond",
+    "marsh_tree",
+    "marsh_bush",
     "burnt_marsh_bush",
-    "reeds", 
+    "reeds",
     "mist",
     "snow",
     "rain",
@@ -325,7 +326,7 @@ local prefabs =
 	"bullkelp_plant",
 	"cookiecutter",
 	"cookiecutter_spawner",
-    "crabking",
+    "crabking_spawner",
     "driftwood_log",
     "driftwood_small1",
     "driftwood_small2",
@@ -371,7 +372,7 @@ local prefabs =
 	"moon_altar_rock_glass",
 	"moon_altar_rock_seed",
     "carrat_planted",
-    "hermitcrab",	
+    "hermitcrab",
 	"hermithouse_construction1",
 
 	-- fish
@@ -386,6 +387,23 @@ local prefabs =
 
     "moon_altar_astral",
     "archive_resonator",
+
+    -- moon geyser
+    "wagstaff_npc",
+
+    "moon_device",
+    "moon_device_construction1",
+    "moon_device_construction2",
+
+    "alterguardian_phase1",
+
+    "moonstormmarker_big",
+    "moonstorm_ground_lightning_fx",
+    "moonstorm_lightning",
+    "moonstorm_glass",
+    "moonstorm_spark",
+    "bird_mutant",
+    "bird_mutant_spitter",
 }
 
 local FISH_DATA = require("prefabs/oceanfishdef")
@@ -463,6 +481,7 @@ local function common_postinit(inst)
         inst:AddComponent("colourcube")
         inst:AddComponent("hallucinations")
         inst:AddComponent("wavemanager")
+        inst:AddComponent("moonstormlightningmanager")
         inst.Map:SetTransparentOcean(true)
     end
 end
@@ -514,9 +533,16 @@ local function master_postinit(inst)
     if IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) then
         inst:AddComponent("gingerbreadhunter")
     end
-    
+
     inst:AddComponent("feasts")
+
+    inst:AddComponent("carnivalevent")
+
     inst:AddComponent("yotc_raceprizemanager")
+    inst:AddComponent("yotb_stagemanager")
+
+    inst:AddComponent("moonstormmanager")
+
     inst:AddComponent("sharklistener")
 
     if METRICS_ENABLED then

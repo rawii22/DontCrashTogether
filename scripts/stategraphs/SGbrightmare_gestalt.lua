@@ -14,7 +14,7 @@ local events =
 
     EventHandler("doattack", function(inst)
         if not (inst.sg:HasStateTag("busy")) then
-            inst.sg:GoToState(inst.isguard and "guardattack" 
+            inst.sg:GoToState(inst.isguard and "guardattack"
 								or "attack")
         end
     end),
@@ -23,7 +23,7 @@ local events =
 local function FindBestAttackTarget(inst)
 	local x, y, z = inst.Transform:GetWorldPosition()
     local closestPlayer = nil
-	local rangesq = TUNING.GESTALT.ATTACK_HIT_RANGE_SQ
+	local rangesq = TUNING.GESTALT_ATTACK_HIT_RANGE_SQ
     for i, v in ipairs(AllPlayers) do
         if (not(v.replica.health:IsDead() or v:HasTag("playerghost"))) and
 			not (v.sg:HasStateTag("knockout") or v.sg:HasStateTag("sleeping") or v.sg:HasStateTag("bedroll") or v.sg:HasStateTag("tent") or v.sg:HasStateTag("waking")) and
@@ -39,12 +39,12 @@ local function FindBestAttackTarget(inst)
 end
 
 local function DoSpecialAttack(inst, target)
-	if target.components.sanity ~= nil then 
-		target.components.sanity:DoDelta(TUNING.GESTALT.ATTACK_DAMAGE_SANITY)
+	if target.components.sanity ~= nil then
+		target.components.sanity:DoDelta(TUNING.GESTALT_ATTACK_DAMAGE_SANITY)
 	end
 	local grogginess = target.components.grogginess
-	if grogginess ~= nil then 
-		grogginess:AddGrogginess(TUNING.GESTALT.ATTACK_DAMAGE_GROGGINESS, TUNING.GESTALT.ATTACK_DAMAGE_KO_TIME)
+	if grogginess ~= nil then
+		grogginess:AddGrogginess(TUNING.GESTALT_ATTACK_DAMAGE_GROGGINESS, TUNING.GESTALT_ATTACK_DAMAGE_KO_TIME)
 		if grogginess.knockoutduration == 0 then
 			target:PushEvent("attacked", {attacker = inst, damage = 0})
 		else
@@ -60,7 +60,7 @@ local states=
     State{
         name = "idle",
         tags = {"idle", "canrotate"},
-		
+
         onenter = function(inst)
             inst.components.locomotor:Stop()
             inst.AnimState:PlayAnimation("idle")
@@ -75,7 +75,7 @@ local states=
     State{
         name = "emerge",
         tags = {"busy", "noattack", "canrotate"},
-		
+
         onenter = function(inst)
             inst.components.locomotor:Stop()
             inst.AnimState:PlayAnimation("emerge")
@@ -85,7 +85,7 @@ local states=
         {
             --TimeEvent(5*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve/rabbit/hop") end ),
         },
-        
+
         events =
         {
             EventHandler("animover", function(inst) inst.sg:GoToState("idle") end),
@@ -95,7 +95,7 @@ local states=
     State{
         name = "death",
         tags = {"busy", "noattack"},
-		
+
         onenter = function(inst)
             inst.components.locomotor:Stop()
             inst.AnimState:PlayAnimation("melt")
@@ -114,7 +114,7 @@ local states=
     State{
         name = "relocate",
         tags = {"busy", "noattack", "canrotate"},
-		
+
         onenter = function(inst)
             inst.components.locomotor:Stop()
             inst.AnimState:PlayAnimation("melt")
@@ -124,11 +124,11 @@ local states=
         {
             --TimeEvent(5*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve/rabbit/hop") end ),
         },
-        
+
         events =
         {
             EventHandler("animover", function(inst)
-				inst.sg:GoToState("relocating") 
+				inst.sg:GoToState("relocating")
 			end),
         },
     },
@@ -136,17 +136,17 @@ local states=
     State{
         name = "relocating",
         tags = {"busy", "noattack", "hidden"},
-		
+
         onenter = function(inst)
             inst.components.locomotor:Stop()
 			inst:Hide()
             inst.sg:SetTimeout(math.random() * 0.5 + 0.25)
         end,
-        
+
         ontimeout = function(inst)
 			inst.sg.statemem.dest = inst:FindRelocatePoint()
 			if inst.sg.statemem.dest ~= nil then
-				inst.sg:GoToState("emerge") 
+				inst.sg:GoToState("emerge")
 			else
 				inst:Remove()
 			end
@@ -165,7 +165,7 @@ local states=
     State{
         name = "attack",
         tags = { "busy", "noattack", "attack", "jumping" },
-		
+
         onenter = function(inst)
             inst.AnimState:PlayAnimation("attack")
 
@@ -175,21 +175,21 @@ local states=
 			end
 	        inst.components.combat:StartAttack()
 		end,
-        
+
         timeline=
         {
-            TimeEvent(15*FRAMES, function(inst) 
+            TimeEvent(15*FRAMES, function(inst)
 					inst.Physics:SetMotorVelOverride(20, 0, 0)
 					inst.sg.statemem.enable_attack = true
 				end ),
-            TimeEvent(25*FRAMES, function(inst) 
+            TimeEvent(25*FRAMES, function(inst)
 					inst.Physics:ClearMotorVelOverride()
 					inst.components.locomotor:Stop()
 					inst.sg.statemem.enable_attack = false
 					inst.components.combat:DropTarget()
 				end ),
         },
-        
+
         onupdate = function(inst)
 			if inst.sg.statemem.enable_attack then
 				local target = FindBestAttackTarget(inst)
@@ -201,11 +201,11 @@ local states=
 				end
 			end
         end,
-        
+
         events =
         {
-            EventHandler("animover", function(inst) 
-				inst.sg:GoToState("idle") 
+            EventHandler("animover", function(inst)
+				inst.sg:GoToState("idle")
 			end),
         },
 
@@ -221,7 +221,7 @@ local states=
     State{
         name = "guardattack",
         tags = { "busy", "noattack", "attack", "jumping" },
-		
+
         onenter = function(inst)
             inst.AnimState:PlayAnimation("attack")
 			inst.components.locomotor:Stop()
@@ -230,28 +230,28 @@ local states=
 			end
 	        inst.components.combat:StartAttack()
 		end,
-        
+
         timeline=
         {
-            TimeEvent(8*FRAMES, function(inst) 
+            TimeEvent(8*FRAMES, function(inst)
 					if inst.components.combat.target ~= nil then
 						inst:ForceFacePoint(inst.components.combat.target.Transform:GetWorldPosition())
 					end
 					inst.Physics:SetMotorVelOverride(30, 0, 0)
 					inst.sg.statemem.enable_attack = true
 				end ),
-            TimeEvent(19*FRAMES, function(inst) 
+            TimeEvent(19*FRAMES, function(inst)
 					inst.Physics:ClearMotorVelOverride()
 					inst.components.locomotor:Stop()
 					inst.sg.statemem.enable_attack = false
 					inst.components.combat:DropTarget()
 				end ),
         },
-        
+
         onupdate = function(inst)
 			if inst.sg.statemem.enable_attack then
 				local target = inst.components.combat.target
-				if target ~= nil and target:IsValid() and inst:GetDistanceSqToInst(target) <= TUNING.GESTALT.ATTACK_HIT_RANGE_SQ then
+				if target ~= nil and target:IsValid() and inst:GetDistanceSqToInst(target) <= TUNING.GESTALT_ATTACK_HIT_RANGE_SQ then
                     if inst.components.combat:CanTarget(target) then
 						inst.components.combat:DoAttack(target)
 						inst.sg:GoToState("mutate_pre", 6)
@@ -259,11 +259,11 @@ local states=
 				end
 			end
         end,
-        
+
         events =
         {
-            EventHandler("animover", function(inst) 
-				inst.sg:GoToState("idle") 
+            EventHandler("animover", function(inst)
+				inst.sg:GoToState("idle")
 			end),
         },
 
@@ -276,7 +276,7 @@ local states=
     State{
         name = "mutate_pre",
         tags = {"busy", "noattack", "jumping"},
-		
+
         onenter = function(inst, speed)
 			inst.Physics:SetMotorVelOverride(speed or 2, 0, 0)
             inst.AnimState:PlayAnimation("mutate")
@@ -287,7 +287,7 @@ local states=
         {
             --TimeEvent(5*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve/rabbit/hop") end ),
         },
-        
+
         events =
         {
             EventHandler("animover", function(inst)

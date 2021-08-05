@@ -35,18 +35,14 @@ local function onghostdrainmult(self, ghostdrainmult)
     self.inst.replica.sanity:SetGhostDrainMult(ghostdrainmult)
 end
 
-local function OnChangeArea(inst, area)
-	local area_sanity_mode = area ~= nil and area.tags and table.contains(area.tags, "lunacyarea") and SANITY_MODE_LUNACY or SANITY_MODE_INSANITY
-	inst.components.sanity:SetSanityMode(area_sanity_mode)
-end
-
 local Sanity = Class(function(self, inst)
     self.inst = inst
     self.max = 100
     self.current = self.max
 
 	self.mode = SANITY_MODE_INSANITY
-    
+	self._lunacy_sources = SourceModifierList(inst, false, SourceModifierList.boolean)
+
     self.rate = 0
     self.ratescale = RATE_SCALE.NEUTRAL
     self.rate_modifier = 1
@@ -57,7 +53,7 @@ local Sanity = Class(function(self, inst)
     self.inducedinsanity = nil
     self.inducedinsanity_sources = nil
     self.night_drain_mult = 1
-    
+
     self.neg_aura_mult = 1 -- Deprecated, use the SourceModifier below
     self.neg_aura_modifiers = SourceModifierList(self.inst)
     self.neg_aura_absorb = 0
@@ -83,8 +79,6 @@ local Sanity = Class(function(self, inst)
 
     self.inst:StartUpdatingComponent(self)
     self:RecalcGhostDrain()
-
-	self.inst:ListenForEvent("changearea", OnChangeArea)
 end,
 nil,
 {
@@ -117,11 +111,7 @@ function Sanity:IsCrazy()
 end
 
 function Sanity:SetSanityMode(mode)
-	if self.mode ~= mode then
-		self.mode = mode
-        self.inst:PushEvent("sanitymodechanged", {mode = self.mode})
-		self:DoDelta(0)
-	end
+	-- Deprecated
 end
 
 function Sanity:IsInsanityMode()
@@ -136,6 +126,16 @@ function Sanity:GetSanityMode()
 	return self.mode
 end
 
+function Sanity:EnableLunacy(enable, sorce)
+	self._lunacy_sources:SetModifier(self.inst, enable, sorce)
+
+	local mode = self._lunacy_sources:Get() and SANITY_MODE_LUNACY or SANITY_MODE_INSANITY
+	if self.mode ~= mode then
+		self.mode = mode
+        self.inst:PushEvent("sanitymodechanged", {mode = self.mode})
+		self:DoDelta(0)
+	end
+end
 
 function Sanity:AddSanityPenalty(key, mod)
     self.sanity_penalties[key] = mod
@@ -149,7 +149,7 @@ end
 
 function Sanity:RecalculatePenalty()
     local penalty = 0
-    
+
     for k,v in pairs(self.sanity_penalties) do
         penalty = penalty + v
     end
@@ -335,6 +335,7 @@ end
 
 function Sanity:OnUpdate(dt)
     if not (self.inst.components.health:IsInvincible() or
+            self.inst:HasTag("spawnprotection") or
             self.inst.sg:HasStateTag("sleeping") or --need this now because you are no longer invincible during sleep
             self.inst.is_teleporting or
             (self.ignore and self.redirect == nil)) then
@@ -385,12 +386,12 @@ local SANITYRECALC_MUST_TAGS = { "sanityaura" }
 local SANITYRECALC_CANT_TAGS = { "FX", "NOCLICK", "DECOR","INLIMBO" }
 function Sanity:Recalc(dt)
 	local dapper_delta = 0
-	if self.dapperness_mult ~= 0 then 
+	if self.dapperness_mult ~= 0 then
 		local total_dapperness = self.dapperness
 		for k, v in pairs(self.inst.components.inventory.equipslots) do
 			local equippable = v.components.equippable
 			if equippable ~= nil and (not self.only_magic_dapperness or equippable.is_magic_dapperness) then
-				total_dapperness = total_dapperness + equippable:GetDapperness(self.inst)
+				total_dapperness = total_dapperness + equippable:GetDapperness(self.inst, self.no_moisture_penalty)
 			end
 		end
 
@@ -398,7 +399,7 @@ function Sanity:Recalc(dt)
 		dapper_delta = total_dapperness * TUNING.SANITY_DAPPERNESS
 	end
 
-    local moisture_delta = easing.inSine(self.inst.components.moisture:GetMoisture(), 0, TUNING.MOISTURE_SANITY_PENALTY_MAX, self.inst.components.moisture:GetMaxMoisture())
+    local moisture_delta = self.no_moisture_penalty and 0 or easing.inSine(self.inst.components.moisture:GetMoisture(), 0, TUNING.MOISTURE_SANITY_PENALTY_MAX, self.inst.components.moisture:GetMaxMoisture())
 
     local light_sanity_drain = LIGHT_SANITY_DRAINS[self.mode]
 	local light_delta = 0
@@ -420,7 +421,7 @@ function Sanity:Recalc(dt)
 	if not self.sanity_aura_immune then
 		local x, y, z = self.inst.Transform:GetWorldPosition()
 	    local ents = TheSim:FindEntities(x, y, z, TUNING.SANITY_AURA_SEACH_RANGE, SANITYRECALC_MUST_TAGS, SANITYRECALC_CANT_TAGS)
-	    for i, v in ipairs(ents) do 
+	    for i, v in ipairs(ents) do
 	        if v.components.sanityaura ~= nil and v ~= self.inst then
                 local is_aura_immune = false
 				if self.sanity_aura_immunities ~= nil then

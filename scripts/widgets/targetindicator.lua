@@ -120,6 +120,10 @@ function TargetIndicator:OnUpdate()
         self.head:SetTexture(self:GetAvatarAtlas(), self:GetAvatar(), DEFAULT_AVATAR)
     end
 
+    if not self.target:IsValid() then
+        return
+    end
+
     local dist = self.owner:GetDistanceSqToInst(self.target)
     dist = math.sqrt(dist)
 
@@ -198,13 +202,13 @@ function TargetIndicator:UpdatePosition(targX, targZ)
     local x = GetXCoord(indicatorAngle, screenWidth)
     local y = GetYCoord(indicatorAngle, screenHeight)
 
-    if x <= LEFT_EDGE_BUFFER + (.5 * w * scale.x) then 
+    if x <= LEFT_EDGE_BUFFER + (.5 * w * scale.x) then
         x = LEFT_EDGE_BUFFER + (.5 * w * scale.x)
     elseif x >= screenWidth - RIGHT_EDGE_BUFFER - (.5 * w * scale.x) then
         x = screenWidth - RIGHT_EDGE_BUFFER - (.5 * w * scale.x)
     end
 
-    if y <= BOTTOM_EDGE_BUFFER + (.5 * h * scale.y) then 
+    if y <= BOTTOM_EDGE_BUFFER + (.5 * h * scale.y) then
         y = BOTTOM_EDGE_BUFFER + (.5 * h * scale.y)
     elseif y >= screenHeight - TOP_EDGE_BUFFER - (.5 * h * scale.y) then
         y = screenHeight - TOP_EDGE_BUFFER - (.5 * h * scale.y)

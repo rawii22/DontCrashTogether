@@ -14,9 +14,15 @@ local SWIMMING_COLLISION_MASK   = COLLISION.GROUND
 								+ COLLISION.LAND_OCEAN_LIMITS
 								+ COLLISION.OBSTACLES
                                 + COLLISION.SMALLOBSTACLES
-                                
+
 local function OnSalvage(inst)
     return inst.components.inventory:GetItemInSlot(1)
+end
+
+local function onitemlose(inst)
+    -- itemlose is pushed before the item is actually removed from
+    -- the inventory, hence wait a frame before removing this prefab.
+    inst:DoTaskInTime(0, inst.Remove)
 end
 
 local function fn(data)
@@ -30,7 +36,7 @@ local function fn(data)
 
     inst.entity:AddMiniMapEntity()
     inst.MiniMapEntity:SetIcon("flotsam_heavy.png")
-	
+
     inst.Physics:SetCollisionGroup(COLLISION.CHARACTERS)
 	inst.Physics:SetCollisionMask(SWIMMING_COLLISION_MASK)
     inst.Physics:SetCapsule(0.5, 1)
@@ -56,12 +62,14 @@ local function fn(data)
 
     inst:AddComponent("winchtarget")
     inst.components.winchtarget:SetSalvageFn(OnSalvage)
-    
+
     inst:AddComponent("treasuremarked")
 
 	inst:AddComponent("inventory")
 	inst.components.inventory.ignorescangoincontainer = true
-	inst.components.inventory.maxslots = 1
+    inst.components.inventory.maxslots = 1
+
+    inst:ListenForEvent("itemlose", onitemlose)
 
     return inst
 end

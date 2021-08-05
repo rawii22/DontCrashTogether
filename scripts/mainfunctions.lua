@@ -64,8 +64,8 @@ end
 ---PREFABS AND ENTITY INSTANTIATION
 
 function ShouldIgnoreResolve( filename, assettype )
-    if assettype == "INV_IMAGE" then 
-        return true 
+    if assettype == "INV_IMAGE" then
+        return true
     end
     if assettype == "MINIMAP_IMAGE" then
         return true
@@ -81,7 +81,7 @@ function ShouldIgnoreResolve( filename, assettype )
         if assettype == "SOUND" then
             return true
         end
-        if filename:find(".ogv") then 
+        if filename:find(".ogv") then
             return true
         end
         if filename:find(".fev") and assettype == "PKGREF" then
@@ -100,22 +100,22 @@ local modprefabinitfns = {}
 function RegisterPrefabsImpl(prefab, resolve_fn)
     --print ("Register " .. tostring(prefab))
     -- allow mod-relative asset paths
-	
+
     for i,asset in ipairs(prefab.assets) do
-        if not ShouldIgnoreResolve(asset.file, asset.type) then 
+        if not ShouldIgnoreResolve(asset.file, asset.type) then
        		resolve_fn(prefab, asset)
         end
     end
 
     modprefabinitfns[prefab.name] = ModManager:GetPostInitFns("PrefabPostInit", prefab.name)
     Prefabs[prefab.name] = prefab
-    
+
     TheSim:RegisterPrefab(prefab.name, prefab.assets, prefab.deps)
 end
 
 local function RegisterPrefabsResolveAssets(prefab, asset)
 	--print(" - - RegisterPrefabsResolveAssets: " .. asset.file, debugstack())
-    local resolvedpath = resolvefilepath(asset.file, prefab.force_path_search)
+    local resolvedpath = resolvefilepath(asset.file, prefab.force_path_search, prefab.search_asset_first_path)
     assert(resolvedpath, "Could not find "..asset.file.." required by "..prefab.name)
     TheSim:OnAssetPathResolve(asset.file, resolvedpath)
     asset.file = resolvedpath
@@ -123,8 +123,8 @@ end
 
 local function VerifyPrefabAssetExistsAsync(prefab, asset)
 	-- this is being done to prime the HDD's file cache and ensure all the assets exist before going into game
-	--TheSim:VerifyFileExistsAsync(asset.file) 
-	TheSim:AddBatchVerifyFileExists(asset.file) 
+	--TheSim:VerifyFileExistsAsync(asset.file)
+	TheSim:AddBatchVerifyFileExists(asset.file)
 end
 
 function RegisterPrefabs(...)
@@ -133,9 +133,16 @@ function RegisterPrefabs(...)
 	end
 end
 
+function RegisterSinglePrefab(prefab)
+	RegisterPrefabsImpl(prefab, RegisterPrefabsResolveAssets)
+end
+
 PREFABDEFINITIONS = {}
 
-function LoadPrefabFile( filename, async_batch_validation )
+function LoadPrefabFile( filename, async_batch_validation, search_asset_first_path )
+    --not is used as cast to boolean
+    --this check ensures that both values are not defined, while still allowing both to be undefined.
+    assert(not async_batch_validation or not search_asset_first_path, "search_asset_first_path and async_batch_validation cannot both be defined")
     --print("Loading prefab file "..filename)
     local fn, r = loadfile(filename)
     assert(fn, "Could not load file ".. filename)
@@ -155,10 +162,11 @@ function LoadPrefabFile( filename, async_batch_validation )
     if ret then
         for i,val in ipairs(ret) do
             if type(val)=="table" and val.is_a and val:is_a(Prefab) then
+                val.search_asset_first_path = search_asset_first_path
 				if async_batch_validation then
 					RegisterPrefabsImpl(val, VerifyPrefabAssetExistsAsync)
 				else
-	                RegisterPrefabs(val)
+					RegisterSinglePrefab(val)
 	            end
                 PREFABDEFINITIONS[val.name] = val
             end
@@ -168,10 +176,44 @@ function LoadPrefabFile( filename, async_batch_validation )
     return ret
 end
 
+
+local MOD_FRONTEND_PREFABS = {}
+function ModUnloadFrontEndAssets(modname)
+    if modname == nil then
+        TheSim:UnloadPrefabs(MOD_FRONTEND_PREFABS)
+        TheSim:UnregisterPrefabs(MOD_FRONTEND_PREFABS)
+        MOD_FRONTEND_PREFABS = {}
+    else
+        local prefab = {table.removearrayvalue(MOD_FRONTEND_PREFABS, "MODFRONTEND_"..modname)}
+        if not IsTableEmpty(prefab) then
+            TheSim:UnloadPrefabs(prefab)
+            TheSim:UnregisterPrefabs(prefab)
+        end
+    end
+end
+
+function ModReloadFrontEndAssets(assets, modname)
+    assert(KnownModIndex:DoesModExistAnyVersion(modname), "modname "..modname.." must refer to a valid mod!")
+    if assets then
+        ModUnloadFrontEndAssets(modname)
+
+        assets = shallowcopy(assets) --make a copy so that changes to the table in the mod code don't do anything funky
+
+        for i, v in ipairs(assets) do
+            local modroot = MODS_ROOT..modname.."/"
+            resolvefilepath_soft(v.file, nil, modroot)
+        end
+        local prefab = Prefab("MODFRONTEND_"..modname, nil, assets, nil)
+        table.insert(MOD_FRONTEND_PREFABS, prefab.name)
+        RegisterSinglePrefab(prefab)
+        TheSim:LoadPrefabs({prefab.name})
+    end
+end
+
 function RegisterAchievements(achievements)
     for i, achievement in ipairs(achievements) do
         --print ("Registering achievement:", achievement.name, achievement.id.steam, achievement.id.psn)
-        TheGameService:RegisterAchievement(achievement.name, achievement.id.steam, achievement.id.psn)        
+        TheGameService:RegisterAchievement(achievement.name, achievement.id.steam, achievement.id.psn)
     end
 end
 
@@ -279,7 +321,7 @@ function SpawnPrefabFromSim(name)
             for k,prefabpostinitany in pairs(ModManager:GetPostInitFns("PrefabPostInitAny")) do
                 prefabpostinitany(inst)
             end
-            
+
             return inst.entity:GetGUID()
         else
             print( "Failed to spawn", name )
@@ -309,7 +351,7 @@ end
 
 function ReplacePrefab(original_inst, name, skin, skin_id, creator)
     local x,y,z = original_inst.Transform:GetWorldPosition()
-    
+
     local replacement_inst = SpawnPrefab(name, skin, skin_id, creator)
     replacement_inst.Transform:SetPosition(x,y,z)
 
@@ -326,7 +368,7 @@ function SpawnSaveRecord(saved, newents)
 		if saved.alt_skin_ids then
 			inst.alt_skin_ids = saved.alt_skin_ids
 		end
-		
+
         inst.Transform:SetPosition(saved.x or 0, saved.y or 0, saved.z or 0)
         if not inst.entity:IsValid() then
             --print(string.format("SpawnSaveRecord [%s, %s] FAILED - entity invalid", tostring(saved.id), saved.prefab))
@@ -337,9 +379,9 @@ function SpawnSaveRecord(saved, newents)
 
             --this is kind of weird, but we can't use non-saved ids because they might collide
             if saved.id  then
-                newents[saved.id] = {entity=inst, data=saved.data} 
+                newents[saved.id] = {entity=inst, data=saved.data}
             else
-                newents[inst] = {entity=inst, data=saved.data} 
+                newents[inst] = {entity=inst, data=saved.data}
             end
 
         end
@@ -667,6 +709,104 @@ function SetPurchases(purchases)
     end
 end
 
+
+local function UpdateWorldGenOverride(overrides, cb, slot, shard)
+    local Levels = require("map/levels")
+    local filename = "../worldgenoverride.lua"
+
+    local function SetPersistentString(str)
+        if shard ~= nil then
+            TheSim:SetPersistentStringInClusterSlot(slot, shard, filename, str, false, cb)
+        else
+            TheSim:SetPersistentString(filename, str, false, cb)
+        end
+    end
+
+    local function GenerateWorldGenOverride(savedata)
+        local out = {}
+        table.insert(out, "return {")
+        table.insert(out, "\toverride_enabled = true,")
+
+        local worldgen_preset = savedata.worldgen_preset or savedata.preset
+        if worldgen_preset and Levels.GetDataForWorldGenID(worldgen_preset) then
+            table.insert(out, string.format("\tworldgen_preset = %q,", worldgen_preset))
+        end
+
+        local settings_preset = savedata.settings_preset or savedata.preset
+        if settings_preset and Levels.GetDataForWorldGenID(settings_preset) then
+            table.insert(out, string.format("\tsettings_preset = %q,", settings_preset))
+        end
+
+        table.insert(out, "\toverrides = {")
+        for name, value in orderedPairs(savedata.overrides) do
+            if not name:match('^[_%a][_%w]*$') then
+                name = string.format("[%q]", name)
+            end
+            if type(value) == "string" then
+                value = string.format("%q", value)
+            else
+                value = tostring(value)
+            end
+            table.insert(out, string.format("\t\t%s = %s,", name, value))
+        end
+        table.insert(out, "\t},")
+        table.insert(out, "}")
+
+        SetPersistentString(table.concat(out, "\n"))
+    end
+
+    local function onload(load_success, str)
+        if load_success == true then
+            local success, savedata = RunInSandboxSafe(str)
+            if success and savedata then
+                local savefileupgrades = require("savefileupgrades")
+                savedata = savefileupgrades.utilities.UpgradeWorldgenoverrideFromV1toV2(savedata)
+                if savedata.override_enabled then
+                    local worldgen_preset = savedata.worldgen_preset or savedata.preset
+                    local worldgen_presetdata = {overrides = {}}
+                    if worldgen_preset then
+                        worldgen_presetdata = Levels.GetDataForWorldGenID(worldgen_preset) or worldgen_presetdata
+                    end
+
+                    local settings_preset = savedata.settings_preset or savedata.preset
+                    local settings_presetdata = {overrides = {}}
+                    if settings_preset then
+                        settings_presetdata = Levels.GetDataForSettingsID(settings_preset) or settings_presetdata
+                    end
+
+                    local location = worldgen_presetdata.location or "forest"
+
+                    local Customize = require("map/customize")
+                    local defaultoptions = Customize.GetOptionsWithLocationDefaults(location, true)
+
+                    savedata.overrides = savedata.overrides or {}
+
+                    for override_name, override_option in pairs(overrides) do
+                        local current_option = (worldgen_presetdata.overrides[override_name] or settings_presetdata.overrides[override_name]) or defaultoptions[override_name] or Customize.GetDefaultForOption(override_name)
+                        if current_option and override_option ~= current_option and Customize.IsCustomizeOption(override_name) then
+                            savedata.overrides[override_name] = override_option
+                        else
+                            savedata.overrides[override_name] = nil
+                        end
+                    end
+
+                    return GenerateWorldGenOverride(savedata)
+                end
+            end
+        end
+
+        if cb then
+            cb()
+        end
+    end
+
+    if shard ~= nil then
+        TheSim:GetPersistentStringInClusterSlot(slot, shard, filename, onload)
+    else
+        TheSim:GetPersistentString(filename, onload)
+    end
+end
+
 --isshutdown means players have been cleaned up by OnDespawn()
 --and the sim will shutdown after saving
 function SaveGame(isshutdown, cb)
@@ -688,7 +828,7 @@ function SaveGame(isshutdown, cb)
     local references = {}
     for k, v in pairs(Ents) do
         if v.persists and v.prefab ~= nil and v.Transform ~= nil and v.entity:GetParent() == nil and v:IsValid() then
-            local x, y, z = v.Transform:GetWorldPosition()   
+            local x, y, z = v.Transform:GetWorldPosition()
             local record, new_references = v:GetSaveRecord()
             record.prefab = nil
 
@@ -790,15 +930,37 @@ function SaveGame(isshutdown, cb)
     local PRETTY_PRINT = BRANCH == "dev"
     local data = DataDumper(save, nil, not PRETTY_PRINT)
 
+    local patterns
+    if BRANCH == "dev" then
+        patterns = {"=nan", "=-nan", "=inf", "=-inf"}
+    else
+        patterns = {"=-1#.IND", "=1.#QNAN", "=1.#INF", "=-1.#INF"}
+    end
+    for i, corrupt_pattern in ipairs(patterns) do
+        local found = string.find(data, corrupt_pattern, 1, true)
+        if found ~= nil then
+            print(string.sub(data, found - 100, found + 50))
+            error("Error saving game, corruption detected.")
+        end
+    end
+
+
     local function callback()
         if isshutdown or #AllPlayers <= 0 then
             TheNet:TruncateSnapshots(save.meta.session_identifier)
         end
         TheNet:IncrementSnapshot()
-        local function onsaved()
-            ShardGameIndex:WriteTimeFile(cb)
+        local function onupdateoverrides()
+            local function onsaved()
+                ShardGameIndex:WriteTimeFile(cb)
+            end
+            ShardGameIndex:Save(onsaved)
         end
-        ShardGameIndex:Save(onsaved)
+        local options = ShardGameIndex:GetGenOptions()
+        --copy overrides from the world back to the shard index and worldgenoverrides.
+        local overrides = deepcopy(save.map.topology.overrides)
+        options.overrides = overrides
+        UpdateWorldGenOverride(overrides, onupdateoverrides, ShardGameIndex:GetSlot(), ShardGameIndex:GetShard())
     end
 
     --todo, if we add more values to this, turn this into a function thats called both here and gamelogic.lua@DoGenerateWorld
@@ -817,7 +979,7 @@ function ProcessJsonMessage(message)
 
     local player = ThePlayer
 
-    local command = TrackedAssert("ProcessJsonMessage",  json.decode, message) 
+    local command = TrackedAssert("ProcessJsonMessage",  json.decode, message)
 
     -- Sim commands
     if command.sim ~= nil then
@@ -953,6 +1115,7 @@ function Start()
 
     known_assert(TheSim:CanWriteConfigurationDirectory(), "CONFIG_DIR_WRITE_PERMISSION")
     known_assert(TheSim:CanReadConfigurationDirectory(), "CONFIG_DIR_READ_PERMISSION")
+    known_assert(TheSim:HasValidLogFile(), "CONFIG_DIR_CLIENT_LOG_PERMISSION")
     known_assert(TheSim:HasEnoughFreeDiskSpace(), "CONFIG_DIR_DISK_SPACE")
 
     --load the user's custom commands into the game
@@ -1063,6 +1226,9 @@ function SimReset(instanceparameters)
     instanceparameters.last_world_specialevent = Settings.current_world_specialevent
     instanceparameters.loaded_characters = Settings.loaded_characters
     instanceparameters.loaded_mods = ModManager:GetUnloadPrefabsData()
+    if Settings.current_asset_set == "BACKEND" then
+        instanceparameters.memoizedFilePaths = GetMemoizedFilePaths()
+    end
 
     local params = json.encode(instanceparameters)
     TheSim:SetInstanceParameters(params)
@@ -1209,7 +1375,7 @@ end
 local function postsavefn()
     TheNet:Disconnect(true)
     EnableAllMenuDLC()
-    
+
     if TheNet:GetIsHosting() then
         TheSystemService:StopDedicatedServers()
     end
@@ -1225,7 +1391,7 @@ local function savefn()
         postsavefn()
     elseif TheWorld.ismastersim then
         DoWorldOverseerShutdown()
-        
+
         for i, v in ipairs(AllPlayers) do
             v:OnDespawn()
         end
@@ -1271,7 +1437,7 @@ end
 
 -- Receive a message that does not disconnect the user
 function OnPushPopupDialog( message )
-    local title = STRINGS.UI.POPUPDIALOG.TITLE[message] or STRINGS.UI.POPUPDIALOG.TITLE.DEFAULT 
+    local title = STRINGS.UI.POPUPDIALOG.TITLE[message] or STRINGS.UI.POPUPDIALOG.TITLE.DEFAULT
     message = STRINGS.UI.POPUPDIALOG.BODY[message] or STRINGS.UI.POPUPDIALOG.BODY.DEFAULT
 
     local function doclose( )
@@ -1316,7 +1482,7 @@ function OnNetworkDisconnect( message, should_reset, force_immediate_reset, deta
         accounts_link = {text=STRINGS.UI.NETWORKDISCONNECT.ACCOUNTS, cb = function() TheFrontEnd:GetAccountManager():VisitAccountPage() end}
     end
 
-    local title = STRINGS.UI.NETWORKDISCONNECT.TITLE[message] or STRINGS.UI.NETWORKDISCONNECT.TITLE.DEFAULT 
+    local title = STRINGS.UI.NETWORKDISCONNECT.TITLE[message] or STRINGS.UI.NETWORKDISCONNECT.TITLE.DEFAULT
     message = STRINGS.UI.NETWORKDISCONNECT.BODY[message] or STRINGS.UI.NETWORKDISCONNECT.BODY.DEFAULT
 
     local screen = TheFrontEnd:GetActiveScreen()
@@ -1600,13 +1766,13 @@ function BuildTagsStringCommon(tagsTable)
     for i, mod_tag in ipairs(KnownModIndex:GetEnabledModTags()) do
         table.insert(tagsTable, mod_tag)
     end
-    
+
     -- Beta tag (forced to front of list)
     if BRANCH == "staging" and CURRENT_BETA > 0 then
         table.insert(tagsTable, 1, BETA_INFO[CURRENT_BETA].SERVERTAG)
         table.insert(tagsTable, 1, BETA_INFO[PUBLIC_BETA].SERVERTAG)
     end
-    
+
     -- Language tag (forced to front of list, don't put anything else at slot 1, or language detection will fail!)
     table.insert(tagsTable, 1, STRINGS.PRETRANSLATED.LANGUAGES[LOC.GetLanguage()] or "")
 
@@ -1640,6 +1806,26 @@ end
 
 function IsInFrontEnd()
 	return Settings.reset_action == nil or Settings.reset_action == RESET_ACTION.LOAD_FRONTEND
+end
+
+local currently_displaying = nil
+function DisplayAntiAddictionNotification( notification )
+    if notification ~= currently_displaying then
+        local Text = require "widgets/text"
+        local title = Text(CHATFONT_OUTLINE, 35)
+        title:SetString(STRINGS.ANTIADDICTION[notification])
+        title:SetPosition(0, -50, 0)
+        title:Show()
+        title:SetVAnchor(ANCHOR_TOP)
+        title:SetHAnchor(ANCHOR_MIDDLE)
+        currently_displaying = notification
+
+        CreateEntity():DoTaskInTime(10.5, function(inst)
+            title:Kill()
+            inst.entity:Retire()
+            currently_displaying = nil
+        end)
+    end
 end
 
 require("dlcsupport")

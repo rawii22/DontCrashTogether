@@ -337,14 +337,14 @@ local function getsomecommands(user, targetid, predicate)
     for hash,command in pairs(usercommands) do
         if command.aliasfor == nil and predicate(command) then
             local exectype = user and getexectype(command, user, targetid) or COMMAND_RESULT.ALLOW
-            table.insert(ret, {commandname=command.name, prettyname=prettyname(command), exectype=exectype})
+            table.insert(ret, {commandname=command.name, prettyname=prettyname(command), desc=ResolveCommandStringProperty(command, "desc", ""), exectype=exectype, menusort=command.menusort or 100})
         end
     end
     for mod, modcommands in pairs(modusercommands) do
         for hash, command in pairs(modcommands) do
             if command.aliasfor == nil and predicate(command) then
                 local exectype = user and getexectype(command, user, targetid) or COMMAND_RESULT.ALLOW
-                table.insert(ret, {commandname=command.name, prettyname=prettyname(command), exectype=exectype, mod=mod})
+                table.insert(ret, {commandname=command.name, prettyname=prettyname(command), desc=ResolveCommandStringProperty(command, "desc", ""), exectype=exectype, menusort=command.menusort or 100, mod=mod})
             end
         end
     end
@@ -519,17 +519,17 @@ if PLATFORM == "WIN32_RAIL" then
 
 		usercommands[hash].displayname = displayname
 		usercommands[hash].displayparams = displayparams
-		
+
 		if usercommands[hash].aliases == nil then usercommands[hash].aliases = {} end
 		table.insert( usercommands[hash].aliases, displayname )
 		if extra_alias ~= nil then
-			table.insert( usercommands[hash].aliases, extra_alias )	
+			table.insert( usercommands[hash].aliases, extra_alias )
 		end
         local alias_hash = smallhash(displayname)
         usercommands[alias_hash] = {aliasfor=name}
 	end
-	
-	
+
+
 	function RailUserCommandRemove( name )
 		local hash = smallhash(name)
 		local data = usercommands[hash]
@@ -596,7 +596,7 @@ function UserToClient(input)
     -- String matching priority (highest to lowest):
     --  3: userid
     --  2: case-sensitive name
-    --  1: case-insensitive name 
+    --  1: case-insensitive name
     local clientmatch = nil
     local lowerinput = string.lower(input)
     local priority = 0
@@ -667,9 +667,9 @@ function GetEmotesWordPredictionDictionary()
 			end
         end
     end
-        
+
    	local data = {
-		words = emotes, 
+		words = emotes,
 		delim = "/",
 	}
 	data.GetDisplayString = function(word) return data.delim .. word end

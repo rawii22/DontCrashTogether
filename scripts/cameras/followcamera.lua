@@ -19,7 +19,7 @@ local FollowCamera = Class(function(self, inst)
     self:Snap()
     self.time_since_zoom = nil
     self.onupdatefn = dummyfn
-    
+
     self.gamemode_defaultfn = GetGameModeProperty("cameraoverridefn")
 end)
 
@@ -46,9 +46,9 @@ function FollowCamera:SetDefault()
 
     self.mindist = 15
     self.maxdist = 50 --40
-   
+
     self.mindistpitch = 30
-    self.maxdistpitch = 60--60 
+    self.maxdistpitch = 60--60
     self.paused = false
     self.shake = nil
     self.controllable = true
@@ -81,6 +81,15 @@ function FollowCamera:GetDownVec()
     return Vector3(math.cos(heading), 0, math.sin(heading))
 end
 
+function FollowCamera:GetPitchDownVec()
+    local pitch = self.pitch * DEGREES
+    local heading = self.heading * DEGREES
+    local cos_pitch = -math.cos(pitch)
+    local cos_heading = math.cos(heading)
+    local sin_heading = math.sin(heading)
+    return Vector3(cos_pitch * cos_heading, -math.sin(pitch), cos_pitch * sin_heading)
+end
+
 function FollowCamera:SetPaused(val)
 	self.paused = val
 end
@@ -96,8 +105,8 @@ end
 function FollowCamera:SetGains(pan, heading, distance)
     self.pangain = pan
     self.headinggain = heading
-    self.distancegain = distance    
-    
+    self.distancegain = distance
+
 end
 
 function FollowCamera:GetGains(pan, heading, distance)
@@ -146,7 +155,7 @@ function FollowCamera:Shake(type, duration, speed, scale)
     if Profile:IsScreenShakeEnabled() then
         self.shake = CameraShake(type, duration, speed, scale)
     end
-    TheInputProxy:AddVibration(VIBRATION_CAMERA_SHAKE, duration, math.max(0, math.min(scale * .25, 1)), false)    
+    TheInputProxy:AddVibration(VIBRATION_CAMERA_SHAKE, duration, math.max(0, math.min(scale * .25, 1)), false)
 end
 
 function FollowCamera:SetTarget(inst)

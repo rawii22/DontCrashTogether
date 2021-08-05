@@ -11,6 +11,7 @@ local shared_prefabs =
     "collapse_small",
     "moon_altar_link",
     "moon_altar_link_fx_spawner",
+    "moonstorm_spark_shock_fx",
 }
 
 local moon_altar_prefabs =
@@ -72,7 +73,7 @@ local sounds =
         prototyper_loop = "grotto/common/moon_alter/claw/LP",
         prototyper_use = "grotto/common/moon_alter/claw/use",
         hit = "dontstarve/wilson/chest_close",
-    },    
+    },
 }
 
 local LIGHT_RADIUS = 0.9
@@ -103,11 +104,11 @@ local function StartPrototyperSound(inst)
 end
 
 local function onturnon(inst)
-    if inst._stage == nil or inst._stage == 3 or (inst.components.workable.maxwork == TUNING.MOON_ALTAR_ASTRAL_COMPLETE_WORK and inst._stage == 2) then
+    if not inst._force_on and (inst._stage == nil or inst._stage == 3 or (inst.components.workable.maxwork == TUNING.MOON_ALTAR_ASTRAL_COMPLETE_WORK and inst._stage == 2)) then
         if inst.AnimState:IsCurrentAnimation("proximity_pre") or
             inst.AnimState:IsCurrentAnimation("proximity_loop") or
             inst.AnimState:IsCurrentAnimation(GetStageAnim(inst, "place")) then
-            
+
             if inst.components.moonaltarlinktarget.link == nil then
                 --NOTE: push again even if already playing, in case an idle was also pushed
                 inst.AnimState:PushAnimation("proximity_pre")
@@ -130,16 +131,18 @@ local function onturnon(inst)
 end
 
 local function onturnoff(inst)
-    if (inst._stage == nil or inst._stage == 3 or (inst.components.workable.maxwork == TUNING.MOON_ALTAR_ASTRAL_COMPLETE_WORK and inst._stage == 2))
-        and inst.components.moonaltarlinktarget.link == nil then
+    if not inst._force_on then
+        if (inst._stage == nil or inst._stage == 3 or (inst.components.workable.maxwork == TUNING.MOON_ALTAR_ASTRAL_COMPLETE_WORK and inst._stage == 2))
+            and inst.components.moonaltarlinktarget.link == nil then
 
-        inst.AnimState:PlayAnimation("proximity_pst")
-        inst.AnimState:PushAnimation(GetStageAnim(inst, "idle"), false)
-    end
+            inst.AnimState:PlayAnimation("proximity_pst")
+            inst.AnimState:PushAnimation(GetStageAnim(inst, "idle"), false)
+        end
 
-    inst.SoundEmitter:KillSound("prototyper_loop")
-    if inst.components.moonaltarlinktarget.link == nil then
-        inst.SoundEmitter:PlaySound(inst._sounds.prototyper_off)
+        inst.SoundEmitter:KillSound("prototyper_loop")
+        if inst.components.moonaltarlinktarget.link == nil then
+            inst.SoundEmitter:PlaySound(inst._sounds.prototyper_off)
+        end
     end
 end
 
@@ -230,7 +233,6 @@ local function check_piece(inst, piece)
 end
 
 local function check_pieceastral(inst, piece)
-    print("CHECK PIECE",inst._stage , piece.prefab)
     if (inst._stage == 1 and piece.prefab == "moon_altar_ward") then
         return true
     else
@@ -284,24 +286,35 @@ local function onhammered(inst, worker)
 end
 
 local function onhit(inst, hitter, work_left, work_done)
-    -- If we have no work left, we're going to revert to crack_idle anyway, so don't play any anims.
-    if work_left > 0 then
-        if (inst.components.prototyper ~= nil and inst.components.prototyper.on)
-            or inst.components.moonaltarlinktarget.link ~= nil then
+    if inst._force_on or (inst.components.moonaltarlinktarget ~= nil and inst.components.moonaltarlinktarget.link ~= nil) then
+        -- Undo work
+        inst.components.workable.workleft = math.min(inst.components.workable.maxwork, inst.components.workable.workleft + math.ceil(work_done))
 
-            inst.AnimState:PlayAnimation("hit_proximity")
-            inst.AnimState:PushAnimation("proximity_loop", true)
-        else
-            inst.AnimState:PlayAnimation(GetStageAnim(inst, "hit_inactive"))
-            inst.AnimState:PushAnimation(GetStageAnim(inst, "idle"), false)
+        if hitter.components.combat ~= nil and (hitter.components.inventory == nil or not hitter.components.inventory:IsInsulated()) then
+            hitter.components.combat:GetAttacked(inst, TUNING.LIGHTNING_DAMAGE, nil, "electric")
         end
 
-        if inst._activetask ~= nil then
-            inst._activetask:Cancel()
-            inst._activetask = nil
-        end
+        inst:SpawnChild("moonstorm_spark_shock_fx")
+    else
+        -- If we have no work left, we're going to revert to crack_idle anyway, so don't play any anims.
+        if work_left > 0 then
+            if (inst.components.prototyper ~= nil and inst.components.prototyper.on)
+                or inst.components.moonaltarlinktarget.link ~= nil then
 
-        -- inst.SoundEmitter:PlaySound(inst._sounds.hit)
+                inst.AnimState:PlayAnimation("hit_proximity")
+                inst.AnimState:PushAnimation("proximity_loop", true)
+            else
+                inst.AnimState:PlayAnimation(GetStageAnim(inst, "hit_inactive"))
+                inst.AnimState:PushAnimation(GetStageAnim(inst, "idle"), false)
+            end
+
+            if inst._activetask ~= nil then
+                inst._activetask:Cancel()
+                inst._activetask = nil
+            end
+
+            -- inst.SoundEmitter:PlaySound(inst._sounds.hit)
+        end
     end
 end
 
@@ -339,6 +352,8 @@ local function OnFissureSocket_CosmicPost(inst)
 end
 
 local function OnLink(inst, link)
+    inst._force_on = true
+
     if inst.AnimState:IsCurrentAnimation("hit_proximity")
         or (inst.AnimState:IsCurrentAnimation("place"))
         or (inst.AnimState:IsCurrentAnimation("place3")
@@ -357,11 +372,13 @@ local function OnLink(inst, link)
 end
 
 local function OnLinkBroken(inst, link)
-    if inst.components.prototyper ~= nil and not inst.components.prototyper.on then
-        inst.AnimState:PushAnimation("proximity_pst")
-    end
+    if not inst._force_on then
+        if inst.components.prototyper ~= nil and not inst.components.prototyper.on then
+            inst.AnimState:PushAnimation("proximity_pst")
+        end
 
-    inst.AnimState:PushAnimation(GetStageAnim(inst, "idle"))
+        inst.AnimState:PushAnimation(GetStageAnim(inst, "idle"))
+    end
 end
 
 local function OnFoundOtherAltar(inst, other_altar)
@@ -399,11 +416,45 @@ end
 
 local function moon_altar_on_save(inst, data)
     data.stage = inst._stage
+    data.force_on = inst._force_on
 end
 
 local function moon_altar_on_load(inst, data)
-    if data ~= nil and data.stage ~= nil then
-        set_stage(inst, data.stage)
+    if data ~= nil then
+        if data.stage ~= nil then
+            set_stage(inst, data.stage)
+        end
+
+        if data.force_on then
+            inst._force_on = true
+        end
+    end
+end
+
+local function moon_altar_cosmic_on_save(inst, data)
+    data.force_on = inst._force_on
+end
+
+local function moon_altar_cosmic_on_load(inst, data)
+    if data ~= nil and data.force_on then
+        inst._force_on = true
+    end
+end
+
+local function moon_altar_astral_on_save(inst, data)
+    data.stage = inst._stage
+    data.force_on = inst._force_on
+end
+
+local function moon_altar_astral_on_load(inst, data)
+    if data ~= nil then
+        if data.stage ~= nil then
+            set_stage(inst, data.stage)
+        end
+
+        if data.force_on then
+            inst._force_on = true
+        end
     end
 end
 
@@ -425,7 +476,7 @@ local function moon_altar_master_postinit(inst)
     inst.components.workable.workleft = TUNING.MOON_ALTAR_COMPLETE_WORK / 3
 
     AddRepairable(inst)
-    
+
     inst.components.moonaltarlinktarget.canbelinkedfn = MoonAltarCanBeLinked
 
     inst.OnSave = moon_altar_on_save
@@ -438,8 +489,11 @@ local function moon_altar_cosmic_master_postinit(inst)
     addprototyper(inst)
 
     inst:ListenForEvent("on_fissure_socket", OnFissureSocket_CosmicPost)
-    
+
     inst.components.moonaltarlinktarget.canbelinkedfn = MoonAltarCosmicCanBeLinked
+
+    inst.OnSave = moon_altar_cosmic_on_save
+    inst.OnLoad = moon_altar_cosmic_on_load
 end
 
 local function moon_altar_astral_master_postinit(inst)
@@ -458,8 +512,25 @@ local function moon_altar_astral_master_postinit(inst)
 
     inst.components.moonaltarlinktarget.canbelinkedfn = MoonAltarAstralCanBeLinked
 
-    inst.OnSave = moon_altar_on_save
-    inst.OnLoad = moon_altar_on_load
+    inst.OnSave = moon_altar_astral_on_save
+    inst.OnLoad = moon_altar_astral_on_load
+end
+
+local link_device_oneof_tags = { "moon_altar_link", "moon_device" }
+local function OnLoadPostPass(inst)
+    if inst._force_on then
+        local x, _, z = inst.Transform:GetWorldPosition()
+        local ents = TheSim:FindEntities(x, 0, z, 25, nil, nil, link_device_oneof_tags)
+        if ents == nil or #ents == 0 then
+            -- Broken state, so we make the altar hammerable so the altar
+            -- linking and device construction process can be restarted
+            inst._force_on = false
+            return
+        end
+
+        onturnon(inst)
+        inst.AnimState:PlayAnimation("proximity_loop", true)
+    end
 end
 
 local function MakeAltar(name, bank, build, anim, common_postinit, master_postinit, prefabs, work)
@@ -512,6 +583,9 @@ local function MakeAltar(name, bank, build, anim, common_postinit, master_postin
 
         inst._sounds = sounds[name]
         -- inst._activetask = nil
+        inst._force_on = false
+
+        inst.set_stage_fn = set_stage
 
         inst:AddComponent("inspectable")
 
@@ -538,6 +612,8 @@ local function MakeAltar(name, bank, build, anim, common_postinit, master_postin
 
         inst.OnEntitySleep = OnEntitySleep
         inst.OnEntityWake = OnEntityWake
+
+        inst.OnLoadPostPass = OnLoadPostPass
 
         inst:ListenForEvent("on_fissure_socket", OnFissureSocket)
         inst:ListenForEvent("calling_moon_relics", function(theworld,data)

@@ -1,3 +1,5 @@
+local prefabs = {}
+
 local assets =
 {
 	Asset("ATLAS", "images/quagmire_food_common_inv_images.xml"),
@@ -24,6 +26,11 @@ local assets =
     Asset("IMAGE", "images/customisation.tex"),
     Asset("ATLAS", "images/customisation.xml"),
 
+    Asset("IMAGE", "images/worldgen_customization.tex"),
+    Asset("ATLAS", "images/worldgen_customization.xml"),
+    Asset("IMAGE", "images/worldsettings_customization.tex"),
+    Asset("ATLAS", "images/worldsettings_customization.xml"),
+
     --BETA
     Asset("DYNAMIC_ATLAS", "images/anr_silhouettes.xml"),
     Asset("PKGREF", "images/anr_silhouettes.tex"),
@@ -33,11 +40,11 @@ local assets =
 
     Asset("ATLAS", "images/frontscreen.xml"),
     Asset("IMAGE", "images/frontscreen.tex"),
-        
+
     -- Asset("ANIM", "anim/portrait_frame.zip"), -- Not currently used, but likely to come back
 
     Asset("ANIM", "anim/build_status.zip"),
-    
+
     -- Swirly fire frontend menu background
     --~ Asset("ANIM", "anim/animated_title.zip"), -- Not currently used, but likely to come back
     --~ Asset("ANIM", "anim/animated_title2.zip"), -- Not currently used, but likely to come back
@@ -62,6 +69,10 @@ local assets =
     Asset("FILE", "images/motd_box4.xml"),
     Asset("FILE", "images/motd_box5.xml"),
     Asset("FILE", "images/motd_box6.xml"),
+    Asset("FILE", "images/motd_box7.xml"),
+    Asset("FILE", "images/motd_box8.xml"),
+    Asset("FILE", "images/motd_box9.xml"),
+    Asset("FILE", "images/motd_box10.xml"),
     Asset("DYNAMIC_ATLAS", "images/motd_fallbacks_box1.xml"),
     Asset("PKGREF", "images/motd_fallbacks_box1.tex"),
     Asset("DYNAMIC_ATLAS", "images/motd_fallbacks_box2.xml"),
@@ -81,6 +92,14 @@ local assets =
     Asset("IMAGE", "images/bg_redux_dark_bottom_solid.tex"),
 	Asset("ATLAS", "images/bg_redux_dark_bottom_vignette1.xml"),
 	Asset("IMAGE", "images/bg_redux_dark_bottom_vignette1.tex"),
+	Asset("ATLAS", "images/bg_redux_motd_frame_small_gold.xml"),
+	Asset("IMAGE", "images/bg_redux_motd_frame_small_gold.tex"),
+	Asset("ATLAS", "images/bg_redux_motd_frame_small_gold2.xml"),
+	Asset("IMAGE", "images/bg_redux_motd_frame_small_gold2.tex"),
+	Asset("ATLAS", "images/bg_redux_motd_frame_large_gold.xml"),
+	Asset("IMAGE", "images/bg_redux_motd_frame_large_gold.tex"),
+	Asset("ATLAS", "images/bg_redux_black_sidebar.xml"),
+	Asset("IMAGE", "images/bg_redux_black_sidebar.tex"),
 
     --character portraits
     Asset("ATLAS", "images/saveslot_portraits.xml"),
@@ -99,21 +118,24 @@ local assets =
     Asset("ANIM", "anim/skin_progressbar.zip"),
     Asset("ANIM", "anim/player_emotes.zip"), -- item emotes
     Asset("ANIM", "anim/player_emote_extra.zip"), -- item emotes
+    Asset("ANIM", "anim/player_emotes_dance0.zip"),
     Asset("ANIM", "anim/player_emotes_dance2.zip"), -- item emotes
     Asset("ANIM", "anim/player_emotes_sit.zip"),
     Asset("ANIM", "anim/player_actions_item.zip"),
     Asset("ANIM", "anim/player_idles_warly.zip"),
     Asset("ANIM", "anim/player_idles_wendy.zip"),
-    Asset("ANIM", "anim/player_idles_willow.zip"),    
+    Asset("ANIM", "anim/player_idles_willow.zip"),
     Asset("ANIM", "anim/player_idles_winona.zip"),
     Asset("ANIM", "anim/player_idles_woodie.zip"),
     Asset("ANIM", "anim/player_idles_wormwood.zip"),
-    Asset("ANIM", "anim/player_idles_wortox.zip"),    
+    Asset("ANIM", "anim/player_idles_wortox.zip"),
     Asset("ANIM", "anim/player_idles_wurt.zip"),
     Asset("ANIM", "anim/player_idles_wathgrithr.zip"),
+    Asset("ANIM", "anim/player_idles_wes.zip"),
+    Asset("ANIM", "anim/player_idles_webber.zip"),
     Asset("ANIM", "anim/bernie_build.zip"),
     Asset("ANIM", "anim/swap_lucy_axe.zip"),
-    
+
     -- Wardrobe
     Asset("ANIM", "anim/player_emotesxl.zip"), -- idle emote animations
 
@@ -123,7 +145,7 @@ local assets =
     Asset("DYNAMIC_ATLAS", "images/serverbrowser.xml"),
     Asset("PKGREF", "images/serverbrowser.tex"),
     --
-    
+
     Asset("ATLAS", "images/tradescreen.xml"),
     Asset("IMAGE", "images/tradescreen.tex"),
     Asset("ATLAS", "images/tradescreen_overflow.xml"),
@@ -139,7 +161,7 @@ local assets =
 
 
     Asset("ANIM", "anim/mod_player_build.zip"),
-    
+
 
     -- DISABLE SPECIAL RECIPES
     --Asset("ANIM", "anim/button_weeklyspecial.zip"),
@@ -157,6 +179,8 @@ local assets =
     Asset("ANIM", "anim/shoppe_frames.zip"),
     Asset("ANIM", "anim/skin_collector.zip"),
     Asset("ANIM", "anim/textbox.zip"),
+
+    Asset("ANIM", "anim/kleipoints.zip"),
 
     Asset("ANIM", "anim/chest_bg.zip"),
 
@@ -181,12 +205,13 @@ local assets =
     Asset("DYNAMIC_ANIM", "anim/dynamic/box_shared.zip"),
     Asset("PKGREF", "anim/dynamic/box_shared.dyn"),
 
-    
+
     Asset("DYNAMIC_ANIM", "anim/dynamic/box_bolt.zip"),
     Asset("PKGREF", "anim/dynamic/box_bolt.dyn"),
 
-    
+
     --Mini Game Assets
+    Asset("ANIM", "anim/crow_kids.zip"),
     Asset("ANIM", "anim/crow.zip"),
     Asset("ANIM", "anim/crow_build.zip"),
     Asset("ANIM", "anim/robin_winter_build.zip"),
@@ -223,6 +248,8 @@ local assets =
     Asset("PKGREF", "anim/dynamic/oddment_gravy.dyn"),
     Asset("PKGREF", "anim/dynamic/oddment_berrysauce.dyn"),
     Asset("PKGREF", "anim/dynamic/oddment_pumpkinpie.dyn"),
+    Asset("DYNAMIC_ATLAS", "images/maze.xml"),
+    Asset("ASSET_PKGREF", "images/maze.tex"),
 }
 
 --Including these here as well as global to ensure the exporter's resizing dependency works
@@ -293,6 +320,14 @@ if not QUAGMIRE_USE_KLUMP then
     end
 end
 
+-- adding these here so they can be used in the FrontEnd
+table.insert( assets, Asset("ANIM", "anim/trophyscale_oversizedveggies.zip") )
+for k, v in pairs(require("prefabs/farm_plant_defs").PLANT_DEFS) do
+	table.insert(prefabs, v.prefab)
+end
+for k, v in pairs(require("prefabs/weed_defs").WEED_DEFS) do
+	table.insert(prefabs, v.prefab)
+end
 
 
 --we don't actually instantiate this prefab. It's used for controlling asset loading
@@ -300,4 +335,4 @@ local function fn()
     return CreateEntity()
 end
 
-return Prefab("frontend", fn, assets)
+return Prefab("frontend", fn, assets, prefabs)

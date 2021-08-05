@@ -1,3 +1,5 @@
+require("worldsettingsutil")
+
 local assets =
 {
     Asset("ANIM", "anim/catcoon_den.zip"),
@@ -158,6 +160,10 @@ local function canspawn(inst)
     return not TheWorld.state.israining
 end
 
+local function OnPreLoad(inst, data)
+    WorldSettings_ChildSpawner_PreLoad(inst, data, TUNING.CATCOONDEN_RELEASE_TIME, TUNING.CATCOONDEN_REGEN_TIME)
+end
+
 local function fn()
     local inst = CreateEntity()
 
@@ -176,7 +182,7 @@ local function fn()
     inst.AnimState:PlayAnimation("idle")
 
     inst:AddTag("structure")
-    inst:AddTag("chewable") -- by werebeaver
+    inst:AddTag("beaverchewable") -- by werebeaver
     inst:AddTag("catcoonden")
 
     MakeSnowCoveredPristine(inst)
@@ -192,14 +198,21 @@ local function fn()
     inst.components.workable:SetWorkAction(ACTIONS.HAMMER)
     inst.components.workable:SetWorkLeft(4)
     inst.components.workable:SetOnFinishCallback(onhammered)
-    inst.components.workable:SetOnWorkCallback(onhit)       
+    inst.components.workable:SetOnWorkCallback(onhit)
 
     -------------------
     inst:AddComponent("childspawner")
     inst.components.childspawner.childname = "catcoon"
     inst.components.childspawner:SetRegenPeriod(TUNING.CATCOONDEN_REGEN_TIME)
     inst.components.childspawner:SetSpawnPeriod(TUNING.CATCOONDEN_RELEASE_TIME)
-    inst.components.childspawner:SetMaxChildren(1)
+    inst.components.childspawner:SetMaxChildren(TUNING.CATCOONDEN_MAXCHILDREN)
+
+    WorldSettings_ChildSpawner_SpawnPeriod(inst, TUNING.CATCOONDEN_RELEASE_TIME, TUNING.CATCOONDEN_ENABLED)
+    WorldSettings_ChildSpawner_RegenPeriod(inst, TUNING.CATCOONDEN_REGEN_TIME, TUNING.CATCOONDEN_ENABLED)
+    if not TUNING.CATCOONDEN_ENABLED then
+        inst.components.childspawner.childreninside = 0
+    end
+
     inst.components.childspawner.canspawnfn = canspawn
     inst.components.childspawner:StartSpawning()
 
@@ -231,6 +244,8 @@ local function fn()
     inst.OnLoad = onload
 
     MakeHauntableIgnite(inst)
+
+    inst.OnPreLoad = OnPreLoad
 
     return inst
 end

@@ -26,6 +26,7 @@ local ChatQueue = require "widgets/chatqueue"
 local Desync = require "widgets/desync"
 local WorldResetTimer = require "widgets/worldresettimer"
 local GiftItemToast = require "widgets/giftitemtoast"
+local YotbToast = require "widgets/yotbtoast"
 local VoteDialog = require "widgets/votedialog"
 local TEMPLATES = require "widgets/templates"
 local easing = require("easing")
@@ -75,6 +76,9 @@ local Controls = Class(Widget, function(self, owner)
 
     self.item_notification = self.topleft_root:AddChild(GiftItemToast(self.owner))
     self.item_notification:SetPosition(115, 150, 0)
+
+    self.yotb_notification = self.topleft_root:AddChild(YotbToast(self.owner))
+    self.yotb_notification:SetPosition(215, 150, 0)
 
     self.worldresettimer = self.bottom_root:AddChild(WorldResetTimer(self.owner))
     self.inv = self.bottom_root:AddChild(Inv(self.owner))
@@ -236,7 +240,7 @@ function Controls:MakeScalingNodes()
     self.right_root:SetScaleMode(SCALEMODE_PROPORTIONAL)
     self.right_root:SetHAnchor(ANCHOR_RIGHT)
     self.right_root:SetVAnchor(ANCHOR_MIDDLE)
-    self.right_root:SetMaxPropUpscale(MAX_HUD_SCALE)   
+    self.right_root:SetMaxPropUpscale(MAX_HUD_SCALE)
 
     self.bottomright_root = self:AddChild(Widget("bottomright"))
     self.bottomright_root:SetScaleMode(SCALEMODE_PROPORTIONAL)
@@ -248,7 +252,7 @@ function Controls:MakeScalingNodes()
     self.left_root:SetScaleMode(SCALEMODE_PROPORTIONAL)
     self.left_root:SetHAnchor(ANCHOR_LEFT)
     self.left_root:SetVAnchor(ANCHOR_MIDDLE)
-    self.left_root:SetMaxPropUpscale(MAX_HUD_SCALE)    
+    self.left_root:SetMaxPropUpscale(MAX_HUD_SCALE)
 
     self.topright_over_root = self:AddChild(Widget("topright_over"))
     self.topright_over_root:SetScaleMode(SCALEMODE_PROPORTIONAL)
@@ -353,7 +357,7 @@ function Controls:OnUpdate(dt)
             elseif self.owner.components.playercontroller.placer ~= nil then
                 self.groundactionhint:Show()
                 self.groundactionhint:SetTarget(self.owner)
-                self.groundactionhint.text:SetString(TheInput:GetLocalizedControl(controller_id, CONTROL_CONTROLLER_ACTION) .. " " .. STRINGS.UI.HUD.BUILD.."\n" .. TheInput:GetLocalizedControl(controller_id, CONTROL_CONTROLLER_ALTACTION) .. " " .. STRINGS.UI.HUD.CANCEL.."\n")    
+                self.groundactionhint.text:SetString(TheInput:GetLocalizedControl(controller_id, CONTROL_CONTROLLER_ACTION) .. " " .. STRINGS.UI.HUD.BUILD.."\n" .. TheInput:GetLocalizedControl(controller_id, CONTROL_CONTROLLER_ALTACTION) .. " " .. STRINGS.UI.HUD.CANCEL.."\n")
             end
         else
             local aoetargeting = self.owner.components.playercontroller:IsAOETargeting()
@@ -498,7 +502,7 @@ function Controls:OnUpdate(dt)
         self.dismounthintdelay = self.dismounthintdelay - dt
     end
 
-    --default offsets   
+    --default offsets
     self.playeractionhint:SetScreenOffset(0,0)
     self.attackhint:SetScreenOffset(0,0)
 
@@ -608,7 +612,7 @@ function Controls:FocusMapOnWorldPosition(mapscreen, worldx, worldz)
 
 	local player_x, player_y, player_z = self.owner.Transform:GetWorldPosition()
 	local dx, dy = worldx - player_x, worldz - player_z
-	
+
 	local angle_correction = (PI / 4) * (10 - (math.fmod(TheCamera:GetHeadingTarget() / 360, 1) * 8))
 	local theta = math.atan2(dy, dx)
 	local mag = math.sqrt(dx * dx + dy * dy)
@@ -655,6 +659,7 @@ function Controls:ShowCraftingAndInventory()
         self.inv:Show()
         self.containerroot_side:Show()
         self.item_notification:ToggleCrafting(false)
+        self.yotb_notification:ToggleCrafting(false)
         if self.status.ToggleCrafting ~= nil then
             self.status:ToggleCrafting(false)
         end
@@ -676,6 +681,7 @@ function Controls:HideCraftingAndInventory()
         self.inv:Hide()
         self.containerroot_side:Hide()
         self.item_notification:ToggleCrafting(true)
+        self.yotb_notification:ToggleCrafting(true)
         if self.status.ToggleCrafting ~= nil then
             self.status:ToggleCrafting(true)
         end

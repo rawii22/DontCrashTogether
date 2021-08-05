@@ -41,6 +41,9 @@ local PlayerProfile = Class(function(self)
         self.persistdata.controller_popup = false
         self.persistdata.warn_mods_enabled = true
         self.persistdata.texture_streaming = true
+		self.persistdata.threaded_renderer = true
+		self.persistdata.bloom = true
+		self.persistdata.distortion = true
     end
 
     self.dirty = true
@@ -73,6 +76,9 @@ function PlayerProfile:Reset()
         self.persistdata.controller_popup = false
         self.persistdata.warn_mods_enabled = true
         self.persistdata.texture_streaming = true
+		self.persistdata.threaded_renderer = true
+		self.persistdata.bloom = true
+		self.persistdata.distortion = true
     end
 
     --self.persistdata.starts = 0 -- save starts?
@@ -115,7 +121,7 @@ end
 function PlayerProfile:GetSkins()
 	local owned_skins = {}
 
-	for prefab, skins in pairs(PREFAB_SKINS) do 
+	for prefab, skins in pairs(PREFAB_SKINS) do
 		local skins = self:GetSkinsForPrefab(prefab)
 		owned_skins = JoinArrays(owned_skins, skins)
 	end
@@ -159,7 +165,7 @@ function PlayerProfile:GetLastSelectedCharacter()
     if not table.contains(DST_CHARACTERLIST, character) then
         character = DST_CHARACTERLIST[1]
 	end
-	
+
 	if not IsCharacterOwned( character ) then
 		character = "wilson"
 	end
@@ -183,7 +189,7 @@ function PlayerProfile:GetSkinPresetForCharacter(character, preset_index)
 	if not self.persistdata.skin_presets[character] then
         self.persistdata.skin_presets[character] = {}
 	end
-    
+
     --Do skins validation to ensure that the saved skins aren't available anymore
     --ValidateItemsLocal(character, self.persistdata.skin_presets[character][preset_index])
 
@@ -230,7 +236,7 @@ function PlayerProfile:GetSkinsForCharacter(character)
 		    self.persistdata.character_skins[character] = { base = character.."_none" }
         end
 	end
-    
+
     --Do skins validation to ensure that the saved skins aren't available anymore
     ValidateItemsLocal(character, self.persistdata.character_skins[character])
 
@@ -370,7 +376,7 @@ end
 
 function PlayerProfile:SetShopHash(_hash)
 	self.persistdata.purchase_screen_hash = _hash
-	
+
 	self:Save()
 end
 
@@ -388,7 +394,7 @@ end
 function PlayerProfile:GetRecipeTimestamp(recipe)
 	if self.persistdata.recipe_timestamps then
 		return self.persistdata.recipe_timestamps[recipe] or -10000
-	else 
+	else
 		return -10000
 	end
 end
@@ -486,9 +492,9 @@ end
 
 function PlayerProfile:GetBloomEnabled()
  	if USE_SETTINGS_FILE then
-		return TheSim:GetSetting("graphics", "bloom") == "true"
+		return TheSim:GetSetting("graphics", "bloom") ~= "false"
 	else
-		return self:GetValue("bloom")
+		return self:GetValue("bloom") ~= false
 	end
 end
 
@@ -520,9 +526,9 @@ end
 
 function PlayerProfile:GetDistortionEnabled()
  	if USE_SETTINGS_FILE then
-		return TheSim:GetSetting("graphics", "distortion") == "true"
+		return TheSim:GetSetting("graphics", "distortion") ~= "false"
 	else
-		return self:GetValue("distortion")
+		return self:GetValue("distortion") ~= false
 	end
 end
 
@@ -616,7 +622,7 @@ function PlayerProfile:IsCampfireStoryCameraEnabled()
  	if USE_SETTINGS_FILE then
  		return TheSim:GetSetting("misc", "campfirestorycamera") ~= "false"
 	else
-		return self:GetValue("campfirestorycamera") ~= false 
+		return self:GetValue("campfirestorycamera") ~= false
 	end
 end
 
@@ -689,6 +695,14 @@ function PlayerProfile:SetTextureStreamingEnabled(enabled)
     end
 end
 
+function PlayerProfile:SetThreadedRenderEnabled(enabled)
+    if USE_SETTINGS_FILE then
+        TheSim:SetSetting("misc", "use_threaded_renderer", tostring(enabled))
+    else
+        self:SetValue("threaded_renderer", enabled)
+        self.dirty = true
+    end
+end
 
 function PlayerProfile:GetMovementPredictionEnabled()
     -- an undefined movementprediction is considered to be enabled
@@ -755,6 +769,27 @@ function PlayerProfile:GetAutoLoginEnabled()
 	end
 end
 
+function PlayerProfile:SetAnimatedHeadsEnabled(enabled)
+	if USE_SETTINGS_FILE then
+	   TheSim:SetSetting("misc", "animatedheads", tostring(enabled))
+   else
+	   self:SetValue("animatedheads", enabled)
+	   self.dirty = true
+   end
+end
+
+function PlayerProfile:GetAnimatedHeadsEnabled()
+	if USE_SETTINGS_FILE then
+		local animatedheads = TheSim:GetSetting("misc", "animatedheads")
+		if animatedheads == nil then
+			return true
+		end
+		return animatedheads == "true"
+	else
+		return GetValueOrDefault( self.persistdata.animatedheads, true )
+	end
+end
+
 function PlayerProfile:SetAutoCavesEnabled(enabled)
 	if USE_SETTINGS_FILE then
 	   TheSim:SetSetting("misc", "autocaves", tostring(enabled))
@@ -769,6 +804,40 @@ function PlayerProfile:GetAutoCavesEnabled()
 		return TheSim:GetSetting("misc", "autocaves") == "true"
 	else
 		return GetValueOrDefault( self.persistdata.autocaves, false )
+	end
+end
+
+function PlayerProfile:SetModsWarning(enabled)
+	if USE_SETTINGS_FILE then
+	   TheSim:SetSetting("misc", "modswarning", tostring(enabled))
+   else
+	   self:SetValue("modswarning", enabled)
+	   self.dirty = true
+   end
+end
+
+function PlayerProfile:GetModsWarning()
+	if USE_SETTINGS_FILE then
+		return TheSim:GetSetting("misc", "modswarning") ~= "false"
+	else
+		return GetValueOrDefault( self.persistdata.modswarning, true )
+	end
+end
+
+function PlayerProfile:SetPresetMode(mode)
+	if USE_SETTINGS_FILE then
+	   TheSim:SetSetting("misc", "presetmode", mode)
+   else
+	   self:SetValue("presetmode", mode)
+	   self.dirty = true
+   end
+end
+
+function PlayerProfile:GetPresetMode()
+	if USE_SETTINGS_FILE then
+		return TheSim:GetSetting("misc", "presetmode") or "combined"
+	else
+		return GetValueOrDefault( self.persistdata.presetmode, "combined" )
 	end
 end
 
@@ -796,6 +865,14 @@ function PlayerProfile:GetTextureStreamingEnabled()
 	else
 		return self:GetValue("texturestreaming")
 	end
+end
+
+function PlayerProfile:GetThreadedRenderEnabled()
+    if USE_SETTINGS_FILE then
+		return TheSim:GetSetting("misc", "use_threaded_renderer") == "true"
+    else
+		return self:GetValue("threaded_renderer")
+    end
 end
 
 -- "enter_tab", "disabled", "tab", "enter", "mouseonly"
@@ -830,7 +907,7 @@ local function UpgradeProfilePresets(presets_string)
                     presets[i] = savefileupgrades.utilities.UpgradeUserPresetFromV1toV2(preset, presets)
                     didupgrade = true
                 end
-                
+
                 if preset.version == 2 then
                     presets[i] = savefileupgrades.utilities.UpgradeUserPresetFromV2toV3(preset, presets)
                     didupgrade = true
@@ -1047,7 +1124,7 @@ function PlayerProfile:Set(str, callback, minimal_load)
         if self.persistdata.play_instance == nil then
             self.persistdata.play_instance = 0
 		end
-		
+
 		if self.persistdata.favorite_mods == nil then
 			self.persistdata.favorite_mods = {}
 		end
@@ -1074,10 +1151,10 @@ function PlayerProfile:Set(str, callback, minimal_load)
                 self.persistdata.movementprediction = true
 		    end
 		end
-        
+
         if minimal_load then
             assert(callback == nil)
-            return 
+            return
         end
 
 
@@ -1112,8 +1189,8 @@ function PlayerProfile:Set(str, callback, minimal_load)
 				end
 			end
 			print("bloom_enabled",bloom_enabled)
-			TheFrontEnd:GetGraphicsOptions():SetBloomEnabled( bloom_enabled )
-			TheFrontEnd:GetGraphicsOptions():SetDistortionEnabled( distortion_enabled )
+			PostProcessor:SetBloomEnabled( bloom_enabled )
+			PostProcessor:SetDistortionEnabled( distortion_enabled )
 		end
 
 		-- old save data will not have the controls section so create it
@@ -1296,7 +1373,7 @@ function PlayerProfile:SaveKlumpCipher(file, cipher)
         --we've already saved the cipher for this klump, no need to save it again
         return
     end
-    
+
     if self.persistdata.klump_ciphers[file] ~= nil then
         print("ERROR: New klump cipher detected for file:", file)
         print("old cipher", self.persistdata.klump_ciphers[file])
@@ -1314,7 +1391,7 @@ function PlayerProfile:GetKlumpCipher(file)
         print("~~~ERROR~~~ GetKlumpCipher should never be called on console")
         return ""
     end
-     
+
 	if not self.persistdata.klump_ciphers then
 		return nil
 	end
@@ -1366,7 +1443,7 @@ function PlayerProfile:GetLanguageID()
 	if self:GetValue("language_id") ~= nil then
 		return self:GetValue("language_id")
 	elseif IsConsole() then
-		return TheSystemService:GetLanguage()	
+		return TheSystemService:GetLanguage()
 	else
 		return LANGUAGE.ENGLISH
 	end

@@ -42,6 +42,37 @@ local waterstreak_prefabs =
     "waterstreak_burst",
 }
 
+
+local bile_assets =
+{
+    Asset("ANIM", "anim/bird_bileshoot.zip"),
+}
+
+local bile_prefabs =
+{
+    "bile_splash",
+    "bile_puddle_land",
+    "bile_puddle_water",
+}
+
+local function OnHitBile(inst, attacker, target)
+    SpawnPrefab("bile_splash").Transform:SetPosition(inst.Transform:GetWorldPosition())
+    if inst:IsOnOcean() then
+        SpawnPrefab("bile_puddle_water").Transform:SetPosition(inst.Transform:GetWorldPosition())
+    else
+        SpawnPrefab("bile_puddle_land").Transform:SetPosition(inst.Transform:GetWorldPosition())
+    end
+    local pt = Vector3(inst.Transform:GetWorldPosition())
+    local ents = TheSim:FindEntities(pt.x, pt.y, pt.z, 2)
+    for i,ent in ipairs(ents) do
+        if ent.components.combat and not ent:HasTag("INLIMBO") and not ent:HasTag("playerghost") then
+            ent.components.combat:GetAttacked(inst.shooter or inst, TUNING.MUTANT_BIRD_SPLASH_DAMAGE)
+        end
+    end
+    inst:Remove()
+end
+
+
 local function OnHitInk(inst, attacker, target)
     SpawnPrefab("ink_splash").Transform:SetPosition(inst.Transform:GetWorldPosition())
     if inst:IsOnOcean() then
@@ -201,6 +232,14 @@ local function ReticuleTargetFn()
     return pos
 end
 
+local function onuseaswatersource(inst)
+    if inst.components.stackable:IsStack() then
+        inst.components.stackable:Get():Remove()
+    else
+        inst:Remove()
+    end
+end
+
 local function waterballoon_fn()
     --weapon (from weapon component) added to pristine state for optimization
     local inst = common_fn("waterballoon", "waterballoon", "idle", "weapon", true)
@@ -210,6 +249,9 @@ local function waterballoon_fn()
     inst.components.reticule.ease = true
 
     MakeInventoryFloatable(inst, "med", 0.05, 0.65)
+
+    -- From watersource component
+    inst:AddTag("watersource")
 
     if not TheWorld.ismastersim then
         return inst
@@ -240,6 +282,10 @@ local function waterballoon_fn()
     inst.components.equippable:SetOnEquip(onequip)
     inst.components.equippable:SetOnUnequip(onunequip)
     inst.components.equippable.equipstack = true
+
+    inst:AddComponent("watersource")
+    inst.components.watersource.onusefn = onuseaswatersource
+    inst.components.watersource.override_fill_uses = 1
 
     MakeHauntableLaunch(inst)
 
@@ -306,7 +352,35 @@ local function waterstreak_fn()
     return inst
 end
 
+local function bile_fn()
+    local inst = common_fn("bird_bileshoot", "bird_bileshoot", "spin_loop", "NOCLICK")
+
+    inst.AnimState:PlayAnimation("spin_pre",false)
+    inst.AnimState:PlayAnimation("spin_loop",true)
+
+    if not TheWorld.ismastersim then
+        return inst
+    end
+
+    inst.persists = false
+
+    inst.components.complexprojectile:SetHorizontalSpeed(15)
+    inst.components.complexprojectile:SetGravity(-25)
+    inst.components.complexprojectile:SetLaunchOffset(Vector3(0, 2.5, 0))
+    inst.components.complexprojectile:SetOnHit(OnHitBile)
+
+    inst.components.wateryprotection.extinguishheatpercent = TUNING.FIRESUPPRESSOR_EXTINGUISH_HEAT_PERCENT
+    inst.components.wateryprotection.temperaturereduction = TUNING.FIRESUPPRESSOR_TEMP_REDUCTION
+    inst.components.wateryprotection.witherprotectiontime = TUNING.FIRESUPPRESSOR_PROTECTION_TIME
+    inst.components.wateryprotection.addcoldness = TUNING.FIRESUPPRESSOR_ADD_COLDNESS
+    inst.components.wateryprotection:AddIgnoreTag("player")
+
+    return inst
+end
+
+
 return Prefab("snowball", snowball_fn, snowball_assets, snowball_prefabs),
     Prefab("waterballoon", waterballoon_fn, waterballoon_assets, waterballoon_prefabs),
     Prefab("inksplat", ink_fn, ink_assets, ink_prefabs),
+    Prefab("bilesplat", bile_fn, bile_assets, bile_prefabs),
     Prefab("waterstreak_projectile", waterstreak_fn, waterstreak_assets, waterstreak_prefabs)

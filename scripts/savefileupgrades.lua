@@ -70,7 +70,7 @@ t = {
 					preset.ordered_story_setpieces = {}
 				end
 				preset.ordered_story_setpieces = ArrayUnion(preset.ordered_story_setpieces, {"Sculptures_1"})
-				
+
 				if preset.random_set_pieces == nil then
 					preset.random_set_pieces = {}
 				end
@@ -125,7 +125,7 @@ t = {
             end
 
             local Levels = require"map/levels"
-            local Customise = require"map/customise"
+            local Customize = require"map/customize"
 
             local ret = Levels.GetDataForLevelID(basepreset)
             if ret == nil then
@@ -140,7 +140,7 @@ t = {
             end
             ret.location = location or ret.location or "forest"
 
-            local options = Customise.GetOptionsWithLocationDefaults(ret.location, master_world)
+            local options = Customize.GetOptionsWithLocationDefaults(ret.location, master_world)
             for i, option in ipairs(options) do
                 ret.overrides[option.name] = option.default
             end
@@ -165,7 +165,7 @@ t = {
             if level.version ~= 2 then
                 return level
             end
-            
+
             print(string.format("Upgrading saved level data for '%s' from v2 to v3 (A New Reign Part 1).", tostring(level.id)))
 
             if level.location == "forest" then
@@ -173,7 +173,7 @@ t = {
 					level.ordered_story_setpieces = {}
 				end
 				level.ordered_story_setpieces = ArrayUnion(level.ordered_story_setpieces, {"Sculptures_1"})
-				
+
 				if level.random_set_pieces == nil then
 					level.random_set_pieces = {}
 				end
@@ -181,7 +181,7 @@ t = {
 			end
 
 			level.version = 3
-            return level        
+            return level
         end,
         UpgradeSavedLevelFromV3toV4 = function(level, master_world)
             if level.version ~= 3 then
@@ -247,10 +247,51 @@ t = {
             shardindex.version = 2
             shardindex:MarkDirty()
         end,
+        UpgradeShardIndexFromV2toV3 = function(shardindex)
+            if shardindex.version ~= 2 then
+                return
+            end
+
+            local level = shardindex:GetGenOptions()
+            if level == nil then
+                return
+            end
+
+            if string.sub(level.id, 1, 14) == "CUSTOM_PRESET_" then
+                print(string.format("Upgrading saved level data for '%s' from v2 to v3.", tostring(level.id)))
+
+                local customid = "CUSTOM_CUSTOM PRESET "..string.sub(level.id, 15)
+                level.id = (level.location == "forest" and "SURVIVAL_TOGETHER") or (level.location == "cave" and "DST_CAVE") or (nil)
+
+                level.custom_settings_id = customid
+                level.custom_worldgen_id = customid
+
+                level.custom_settings_name = level.name
+                level.custom_worldgen_name = level.name
+
+                level.custom_settings_desc = level.desc
+                level.custom_worldgen_desc = level.desc
+            end
+
+            shardindex.version = 3
+            shardindex:MarkDirty()
+        end,
+        UpgradeShardIndexFromV3toV4 = function(shardindex)
+            if shardindex.version ~= 3 then
+                return
+            end
+
+            --console only upgrade, added to stay in sync on the shardindex version wise.
+
+            shardindex.version = 4
+            shardindex:MarkDirty()
+        end,
         UpgradeWorldgenoverrideFromV1toV2 = function(wgo)
             local validfields = {
                 overrides = true,
                 preset = true,
+                worldgen_preset = true,
+                settings_preset = true,
                 override_enabled = true,
             }
             local needsupgrade = false
@@ -270,8 +311,10 @@ t = {
             local ret = {}
 
             ret.preset = wgo.actualpreset or wgo.preset
-            ret.overrides = deepcopy(wgo.overrides or {})
+            ret.worldgen_preset = wgo.worldgen_preset
+            ret.settings_preset = wgo.settings_preset
             ret.override_enabled = wgo.override_enabled
+            ret.overrides = deepcopy(wgo.overrides or {})
 
             if wgo.presetdata and wgo.presetdata.overrides then
                 for i,override in ipairs(wgo.presetdata.overrides) do
@@ -281,7 +324,7 @@ t = {
             wgo.presetdata = nil
 
             -- We'll just assume that all nested tables contain override data.
-            for _,t in pairs(wgo) do
+            for _, t in pairs(wgo) do
                 if type(t) == "table" then
                     for tweak,value in pairs(t) do
                         ret.overrides[tweak] = value
@@ -318,7 +361,7 @@ t = {
         ConvertSaveIndexSlotToShardIndexSlots = function(savegameindex, shardsavegameindex, slot, ismultilevel)
             local masterShardIndex = shardsavegameindex:GetShardIndex(slot, "Master", true)
             masterShardIndex:NewShardInSlot(slot, "Master")
-            
+
             if not ismultilevel then
                 if TheSim:EnsureShardIndexPathExists(slot) then
                     t.utilities.ConvertSaveSlotToShardIndex(savegameindex, slot, masterShardIndex)
@@ -344,7 +387,7 @@ t = {
                     t.utilities.ConvertSaveSlotToShardIndex(masterSaveIndex, 1, masterShardIndex)
                     masterShardIndex.enabled_mods = enabled_mods
                 end)
-                
+
                 local cavesSaveIndex = SaveIndex()
                 cavesSaveIndex:LoadClusterSlot(slot, "Caves", function()
                     t.utilities.ConvertSaveSlotToShardIndex(cavesSaveIndex, 1, cavesShardIndex)
@@ -497,7 +540,7 @@ t = {
                         else
                             overrides.original = original
                         end
-                        
+
                     else
                         print("No overrides found, supplying Vanilla versions")
                         savedata.map.topology.overrides = {
@@ -580,7 +623,7 @@ t = {
 						savedata.map.persistdata.retrofitcavemap_anr = {}
 					end
 					savedata.map.persistdata.retrofitcavemap_anr.retrofit_artsandcrafts = true
-					
+
 				elseif savedata.map ~= nil and savedata.map.prefab == "forest" and savedata.map.persistdata ~= nil then
                     if savedata.map.persistdata.retrofitforestmap_anr == nil then
 						savedata.map.persistdata.retrofitforestmap_anr = {}
@@ -617,7 +660,7 @@ t = {
                 end
             end,
         },
-        
+
         {
             version = 4.5, -- ANR: Cute Herd Mentality
             fn = function(savedata)
@@ -632,7 +675,7 @@ t = {
                 end
             end,
         },
-        
+
         {
             version = 4.6, -- ANR: Against the Grain
             fn = function(savedata)
@@ -663,7 +706,7 @@ t = {
 				end
             end,
         },
- 
+
         {
             version = 4.72, -- ANR: Heart of the Ruins - fix for ruinsrespawners
             fn = function(savedata)
@@ -679,7 +722,7 @@ t = {
 				end
             end,
         },
- 
+
         {
             version = 4.73, -- ANR: Heart of the Ruins - altars
             fn = function(savedata)
@@ -859,7 +902,7 @@ t = {
              end,
         },
 
-		
+
         {
             version = 5.031, -- RoT: Brine Pool fixup - fixup for people who took a particular retrofitting path the resulted in no brine pools (salt stacks and cookie cutters).
             fn = function(savedata)
@@ -1014,9 +1057,9 @@ t = {
                 end
             end,
         },
-		
+
         {
-            version = 5.064, -- RoT: Forgotten Knowledge - fix converting the hermit crab's island to lunacy from retrofit_nodeidtilemap_secondpass 
+            version = 5.064, -- RoT: Forgotten Knowledge - fix converting the hermit crab's island to lunacy from retrofit_nodeidtilemap_secondpass
             fn = function(savedata)
                 if savedata ~= nil and savedata.map ~= nil then
                     if savedata.map.persistdata == nil then
@@ -1039,7 +1082,27 @@ t = {
                 end
             end,
         },
-		
+
+        {
+            version = 5.065, -- RoT: Eye of the Storm - remove erroneously spawned altar pieces via boss drop bug during beta
+            fn = function(savedata)
+                -- This retrofit was a BETA-ONLY change, and may poorly affect legitimate game states outside of beta,
+                -- so it was removed before the beta was released.
+                -- The version update is left to not confuse any saves being copied between the two/future betas.
+
+                --if savedata ~= nil and savedata.map ~= nil then
+                --    if savedata.map.prefab == "forest" then
+                --        if savedata.map.persistdata == nil then
+                --            savedata.map.persistdata = {}
+                --        end
+                --        if savedata.map.persistdata.retrofitforestmap_anr == nil then
+                --            savedata.map.persistdata.retrofitforestmap_anr = {}
+                --        end
+                --        savedata.map.persistdata.retrofitforestmap_anr.retrofit_removeextraaltarpieces = true
+                --    end
+                --end
+            end,
+        },
     },
 }
 

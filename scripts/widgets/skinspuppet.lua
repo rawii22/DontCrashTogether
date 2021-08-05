@@ -16,14 +16,16 @@ local player_emotes_to_choose = {
 	woodie = "idle_woodie",
 	wormwood = "idle_wormwood",
 	wortox = "idle_wortox",
-	wurt = "idle_wurt"
+	wurt = "idle_wurt",
+	wes = "idle_wes",
+	webber = "idle_webber",
 }
 
 local emote_min_time = 6
 local emote_max_time = 12
 
 local change_delay_time = .5
-local change_emotes = 
+local change_emotes =
 {
 	base = { "emote_hat" },
 	body = { "emote_strikepose" },
@@ -56,7 +58,7 @@ local SkinsPuppet = Class(Button, function(self, emote_min_time, emote_max_time)
     self.animstate:AddOverrideBuild("player_emote_extra")
     self.animstate:PlayAnimation(self.current_idle_anim, true)
 	self.animstate:SetTime(math.random()*1.5)
-	
+
 	self.anim:SetFacing(FACING_DOWN)
 
     self.animstate:Hide("ARM_carry")
@@ -64,9 +66,9 @@ local SkinsPuppet = Class(Button, function(self, emote_min_time, emote_max_time)
     self.animstate:Hide("HAIR_HAT")
 
     self.anim:SetScale(.25)
-    
+
     self.last_skins = { prefabname = "", base_skin = "", body = "", hand = "", legs = "", feet = "" }
-    
+
     self.enable_idle_emotes = true
     self:_ResetIdleEmoteTimer()
     self.time_to_change_emote = -1
@@ -118,7 +120,7 @@ function SkinsPuppet:DoIdleEmote()
 		if r > 0.8 then
 			self.queued_change_slot = GetRandomKey(change_emotes) --Hack to queue up a change emote
 			self:DoChangeEmote()
-			return 
+			return
 		end
 	end
 	if player_emotes_to_choose[self.prefabname] then
@@ -142,20 +144,26 @@ function SkinsPuppet:DoIdleEmote()
 				end
 				self.animstate:Show("ARM_carry")
 				self.animstate:Hide("ARM_normal")
-				
+
 				self.animstate:PlayAnimation("item_out")
 				self.item_equip = true
-			
+
 			elseif self.prefabname == "woodie" then
 				self.animstate:OverrideSymbol("swap_object", "swap_lucy_axe", "swap_lucy_axe")
 
 				self.animstate:Show("ARM_carry")
 				self.animstate:Hide("ARM_normal")
-				
+
 				self.animstate:PlayAnimation("item_out")
 				self.item_equip = true
+			elseif self.prefabname == "wes" then
+				self.override_build = "player_idles_wes"
+				self.animstate:AddOverrideBuild(self.override_build)
+			elseif self.prefabname == "webber" then
+				self.override_build = "player_idles_webber"
+				self.animstate:AddOverrideBuild(self.override_build)
 			end
-			
+
 			if self.prefabname == "wormwood" and not self.animstate:CompareSymbolBuilds("hand", "hand_idle_wormwood") then
 				--don't do player anim
 			else
@@ -169,14 +177,14 @@ function SkinsPuppet:DoIdleEmote()
 			end
 		end
 	end
-	
-    local r = math.random(1,#emotes_to_choose) 
+
+    local r = math.random(1,#emotes_to_choose)
     self:DoEmote(emotes_to_choose[r])
 end
 
 function SkinsPuppet:DoChangeEmote()
 	if self.queued_change_slot ~= "" then --queued_change_slot is empty when we first load up the puppet and the dressuppanel is initializing
-		local r = math.random( 1, #change_emotes[self.queued_change_slot] )  
+		local r = math.random( 1, #change_emotes[self.queued_change_slot] )
 		self:DoEmote( change_emotes[self.queued_change_slot][r] )
 		self.queued_change_slot = "" --clear it out now so that we can get a new one
 	end
@@ -196,7 +204,7 @@ function SkinsPuppet:EmoteUpdate(dt)
 	if self.sitting then
 		return
 	end
-	
+
 	if self.item_equip and self.animstate:IsCurrentAnimation("item_in") then
 		self:RemoveEquipped()
 	end
@@ -209,7 +217,7 @@ function SkinsPuppet:EmoteUpdate(dt)
 			if self.play_non_idle_emotes then self:DoIdleEmote() end
 		end
 	end
-		
+
 	if self.time_to_change_emote > 0 then
 		self.time_to_change_emote = self.time_to_change_emote - dt
 		if self.time_to_change_emote <= 0 then
@@ -220,21 +228,21 @@ function SkinsPuppet:EmoteUpdate(dt)
 			else
 				self.time_to_change_emote = 0.25 --ensure that we wait a little bit before trying to start the change emote, so that it doesn't play back to back with
 			end
-		end 
+		end
 	end
-		
+
 	if not self.looping and self.animstate:AnimDone() then
 		if self.play_non_idle_emotes then
 			self.animstate:SetBank(self.currentanimbank)
 		end
-		
+
 		if self.override_build then
 			self.animstate:ClearOverrideBuild( self.override_build )
 		end
 		self.animstate:PlayAnimation(self.current_idle_anim, true)
 	end
 end
-    
+
 function SkinsPuppet:SetCharacter(character)
 	self.animstate:SetBuild(character)
 end
@@ -293,10 +301,10 @@ function SkinsPuppet:SetSkins(prefabname, base_item, clothing_names, skip_change
 	end
 
 	self.play_non_idle_emotes = skinmode.play_emotes
-	
 
 
-	if not skip_change_emote then 
+
+	if not skip_change_emote then
         --the logic here checking queued_change_slot and time_to_change_emote is to ensure we get the last thing to change (when dealing with multiple changes on one frame caused by the UI refreshing)
 		if self.play_non_idle_emotes and (self.queued_change_slot == "" or self.time_to_change_emote < change_delay_time ) then
 			if self.last_skins.prefabname ~= prefabname or self.last_skins.base_skin ~= base_build then
@@ -319,7 +327,7 @@ function SkinsPuppet:SetSkins(prefabname, base_item, clothing_names, skip_change
 	else
 		self.queued_change_slot = ""
 	end
-	
+
 	if prefabname == "scarecrow" then
         self.animstate:SetBank("scarecrow")
 		if self.scarecrow_pose == nil then
@@ -327,7 +335,7 @@ function SkinsPuppet:SetSkins(prefabname, base_item, clothing_names, skip_change
 		end
 		self.animstate:PlayAnimation( self.scarecrow_pose, true )
 	end
-	
+
 	self.last_skins.prefabname = prefabname
 	self.last_skins.base_skin = base_build
 	self.last_skins.body = clothing_names.body

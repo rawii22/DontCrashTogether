@@ -45,7 +45,7 @@ function Armor:AddWeakness(tag, bonus_damage)
     if bonus_damage <= 0 then
         self:RemoveWeakness(tag)
     elseif self.weakness == nil then
-        self.weakness = { tag = bonus_damage }
+        self.weakness = { [tag] = bonus_damage }
     else
         self.weakness[tag] = bonus_damage
     end
@@ -72,7 +72,7 @@ function Armor:SetCondition(amount)
 	if self.indestructible then
 		return
 	end
-	
+
     self.condition = math.min(amount, self.maxcondition)
     self.inst:PushEvent("percentusedchange", { percent = self:GetPercent() })
 

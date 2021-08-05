@@ -14,7 +14,7 @@ local OFFSETS =
 	{ x = -CHECK_SPACING, z = CHECK_SPACING },		{ x = 0, z = CHECK_SPACING }, 		{ x = CHECK_SPACING, z = CHECK_SPACING },
 }
 
-local function CheckNearbyTiles(x, y, z, debug)
+local function CheckNearbyTiles(x, y, z)
 	local waterpoints = {}
 	local landpoints = {}
 	local area_free = true
@@ -71,7 +71,7 @@ function Submersible:Submerge()
 	local can_deploy_at_point = TheWorld.Map:IsSurroundedByWater(pt.x, pt.y, pt.z, TUNING.MAX_WALKABLE_PLATFORM_RADIUS + 0.2)
 
 	local has_moved = false
-	
+
 	local x, y, z = pt.x, pt.y, pt.z
 	local spawn_x, spawn_y, spawn_z = x, y, z
 	local data = CheckNearbyTiles(x, y, z)
@@ -127,7 +127,7 @@ function Submersible:Submerge()
 						break
 					end
 				end
-				
+
 				move_to_land = not found_applicable_waterpoint
 			end
 		else
@@ -152,21 +152,25 @@ function Submersible:Submerge()
 		SpawnPrefab("splash_green").Transform:SetPosition(x, 0, z)
 		self.inst.Transform:SetPosition(spawn_x, 0, spawn_z)
 	else
-		if TheWorld.Map:IsOceanAtPoint(spawn_x, 0, spawn_z) then
-			underwater_object = SpawnPrefab("underwater_salvageable")
-
-			if underwater_object ~= nil then
-				underwater_object.Transform:SetPosition(spawn_x, 0, spawn_z)
-				underwater_object.components.inventory:GiveItem(self.inst)
-
-				self.inst:PushEvent("on_submerge", { underwater_object = underwater_object })
-				
-				SpawnPrefab("splash_green").Transform:SetPosition(spawn_x, 0, spawn_z)
-			end
-		end
+		self:MakeSunken(spawn_x, spawn_z)
 	end
 
 	return has_moved
+end
+
+function Submersible:MakeSunken(x, z)
+	if TheWorld.Map:IsOceanAtPoint(x, 0, z) then
+		local underwater_object = SpawnPrefab("underwater_salvageable")
+
+		if underwater_object ~= nil then
+			underwater_object.Transform:SetPosition(x, 0, z)
+			underwater_object.components.inventory:GiveItem(self.inst)
+
+			self.inst:PushEvent("on_submerge", { underwater_object = underwater_object })
+
+			SpawnPrefab("splash_green").Transform:SetPosition(x, 0, z)
+		end
+	end
 end
 
 return Submersible

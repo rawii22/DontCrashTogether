@@ -2,6 +2,7 @@ require "util"
 local TechTree = require("techtree")
 
 PI = 3.14159
+PI2 = PI*2
 DEGREES = PI/180
 RADIANS = 180/PI
 FRAMES = 1/30
@@ -27,16 +28,23 @@ FACING_NONE = 8
 LAYER_BACKDROP = 0
 LAYER_BELOW_OCEAN = 1
 LAYER_BELOW_GROUND = 2
-LAYER_BACKGROUND = 3
-LAYER_WORLD_BACKGROUND = 4
-LAYER_WORLD = 5
+LAYER_GROUND = 3
+LAYER_BACKGROUND = 4
+LAYER_WORLD_BACKGROUND = 5
+LAYER_WORLD = 6
 -- client-only layers go below here --
-LAYER_WORLD_DEBUG = 6
-LAYER_FRONTEND = 7
-LAYER_FRONTEND_DEBUG = 8
+LAYER_WORLD_DEBUG = 7
+LAYER_FRONTEND = 8
+LAYER_FRONTEND_DEBUG = 9
 
 LAYER_WIP_BELOW_OCEAN = 2 --1
 
+-- From SortKeyConsts in scenegraphnode.h
+FINALOFFSET_MIN = -7
+FINALOFFSET_MAX = 7
+
+SORTORDER_MIN = -3
+SORTORDER_MAX = 3
 
 ANCHOR_MIDDLE = 0
 ANCHOR_LEFT = 1
@@ -64,7 +72,7 @@ NUM_CRAFTING_RECIPES = 10
 --push priorities
 STATIC_PRIORITY = 10000
 
--- Controls: 
+-- Controls:
 -- Must match the Control enum in DontStarveInputHandler.h
 -- Must match STRINGS.UI.CONTROLSSCREEN.CONTROLS
 
@@ -90,7 +98,7 @@ CONTROL_ROTATE_RIGHT = 12 -- right shoulder
 
 -- player movement controls
 CONTROL_PAUSE = 13  -- start
-CONTROL_MAP = 14 
+CONTROL_MAP = 14
 CONTROL_INV_1 = 15
 CONTROL_INV_2 = 16
 CONTROL_INV_3 = 17
@@ -141,7 +149,7 @@ CONTROL_PUTSTACK = 55
 CONTROL_CONTROLLER_ATTACK = 56 -- X on xbox controller
 CONTROL_CONTROLLER_ACTION = 57 -- A
 CONTROL_CONTROLLER_ALTACTION = 58 -- B
-CONTROL_USE_ITEM_ON_ITEM = 59 
+CONTROL_USE_ITEM_ON_ITEM = 59
 
 CONTROL_MAP_ZOOM_IN = 60
 CONTROL_MAP_ZOOM_OUT = 61
@@ -172,6 +180,16 @@ CONTROL_TARGET_CYCLE_BACK = CONTROL_ROTATE_LEFT
 CONTROL_TARGET_CYCLE_FORWARD = CONTROL_ROTATE_RIGHT
 
 KEY_TAB = 9
+KEY_KP_0			= 256
+KEY_KP_1			= 257
+KEY_KP_2			= 258
+KEY_KP_3			= 259
+KEY_KP_4			= 260
+KEY_KP_5			= 261
+KEY_KP_6			= 262
+KEY_KP_7			= 263
+KEY_KP_8			= 264
+KEY_KP_9			= 265
 KEY_KP_PERIOD		= 266
 KEY_KP_DIVIDE		= 267
 KEY_KP_MULTIPLY		= 268
@@ -340,28 +358,29 @@ DST_CHARACTERLIST =
 
 CHARACTER_VIDEOS =
 {
-	wilson = {"https://www.youtube.com/watch?v=N0QhvmisGWU&list=PLXtRs5MEBxEiuAIG26uLmh3yR-ACXBfYW"},
-	willow = {"https://www.youtube.com/watch?v=TKKXXKtFiQw&list=PLXtRs5MEBxEiuAIG26uLmh3yR-ACXBfYW"},
-	wendy = {"https://www.youtube.com/watch?v=7ozRwX35fHE&list=PLXtRs5MEBxEiuAIG26uLmh3yR-ACXBfYW"},
+	wilson = {"https://bit.ly/3w9VYcN"},
+	willow = {"https://bit.ly/3rFOkU3"},
+	wendy = {"https://bit.ly/3fI3PbR"},
 --	wolfgang = {},
 --	wx78 = {},
 --	wickerbottom = {},
-	wes = {"https://www.youtube.com/watch?v=Nf2Stngxj0U&list=PLXtRs5MEBxEiuAIG26uLmh3yR-ACXBfYW"},
-	waxwell = {"https://youtu.be/8BUcTVIV5y0"},
-	woodie = {"https://www.youtube.com/watch?v=d0r0WfV2y5s&list=PLXtRs5MEBxEiuAIG26uLmh3yR-ACXBfYW"},
-	wathgrithr = {"https://www.youtube.com/watch?v=G16-w-hMKTU&list=PLXtRs5MEBxEiuAIG26uLmh3yR-ACXBfYW"},
---	webber = {},
-	winona = {"https://www.youtube.com/watch?v=G-Kn9tgO0mQ&list=PLXtRs5MEBxEiuAIG26uLmh3yR-ACXBfYW"},
-    wortox = {"https://www.youtube.com/watch?v=tcYbA7ohJLM&list=PLXtRs5MEBxEiuAIG26uLmh3yR-ACXBfYW"},
-    wormwood = {"https://www.youtube.com/watch?v=4hugrMLgDsQ&list=PLXtRs5MEBxEiuAIG26uLmh3yR-ACXBfYW"},
-    warly = {"https://www.youtube.com/watch?v=SH1VebvIOSk&list=PLXtRs5MEBxEiuAIG26uLmh3yR-ACXBfYW"},
-    wurt = {"https://www.youtube.com/watch?v=jG2euiPFkbg&list=PLXtRs5MEBxEiuAIG26uLmh3yR-ACXBfYW"},
-	walter = {"https://www.youtube.com/watch?v=14ou18F8bhw&list=PLXtRs5MEBxEiuAIG26uLmh3yR-ACXBfYW"},
+	wes = {"https://bit.ly/2QLFpn4"},
+	waxwell = {"https://bit.ly/3rF0UD0"},
+	woodie = {"https://bit.ly/3sHhUK1"},
+	wathgrithr = {"https://bit.ly/3rC8YV6"},
+	webber = {"https://klei.gg/3zXJrLt"},
+	winona = {"https://bit.ly/3fB6LHb"},
+    wortox = {"https://bit.ly/3cBQ10g"},
+    wormwood = {"https://bit.ly/3cBilQq"},
+    warly = {"https://bit.ly/39vp0tG"},
+    wurt = {"https://bit.ly/2QVJup1"},
+	walter = {"https://bit.ly/31Ajrpj"},
 }
 
 
 require("prefabskins")
 require("clothing")
+require("beefalo_clothing")
 require("misc_items")
 require("emote_items")
 require("item_blacklist")
@@ -397,6 +416,44 @@ CLOTHING.feet_default1 =
 MISC_ITEMS.beard_default1 =
 {
     type = "beard",
+    skin_tags = {},
+    is_default = true,
+    release_group = 999,
+}
+
+
+
+BEEFALO_CLOTHING.beef_body_default1 =
+{
+    type = "beef_body",
+    skin_tags = {},
+    is_default = true,
+    release_group = 999,
+}
+BEEFALO_CLOTHING.beef_horn_default1 =
+{
+    type = "beef_horn",
+    skin_tags = {},
+    is_default = true,
+    release_group = 999,
+}
+BEEFALO_CLOTHING.beef_head_default1 =
+{
+    type = "beef_head",
+    skin_tags = {},
+    is_default = true,
+    release_group = 999,
+}
+BEEFALO_CLOTHING.beef_feet_default1 =
+{
+    type = "beef_feet",
+    skin_tags = {},
+    is_default = true,
+    release_group = 999,
+}
+BEEFALO_CLOTHING.beef_tail_default1 =
+{
+    type = "beef_tail",
     skin_tags = {},
     is_default = true,
     release_group = 999,
@@ -502,7 +559,7 @@ GROUND =
 {
 	INVALID = 255,
     IMPASSABLE = 1,
-    
+
     ROAD = 2,
     ROCKY = 3,
     DIRT = 4,
@@ -552,6 +609,8 @@ GROUND =
     ARCHIVE = 45,
     FUNGUSMOON = 46,
 
+    FARMING_SOIL = 47,
+
 	-- PUBLIC USE SPACE FOR MODS is 70 to 89 --
 
     --NOISE -- from 110 to 127 -- TODO: move noise tile range to > 255
@@ -593,11 +652,10 @@ GROUND =
 	OCEAN_BRINEPOOL = 205,
 	OCEAN_BRINEPOOL_SHORE = 206,
 	OCEAN_HAZARDOUS = 207,
-	
+
 	-- MODS OCEAN TILES [231, 247]  <--PUBLIC USE SPACE FOR MODS --
 
 	OCEAN_END = 247, -- enum for checking if tile is ocean water
-
 
 --	STILL_WATER_SHALLOW = 130,
 --	STILL_WATER_DEEP = 131,
@@ -617,12 +675,14 @@ SPECIAL_EVENTS =
     NONE = "none",
     HALLOWED_NIGHTS = "hallowed_nights",
     WINTERS_FEAST = "winters_feast",
+	CARNIVAL = "crow_carnival",
     YOTG = "year_of_the_gobbler",
     YOTV = "year_of_the_varg",
     YOTP = "year_of_the_pig",
     YOTC = "year_of_the_carrat",
+    YOTB = "year_of_the_beefalo",
 }
-WORLD_SPECIAL_EVENT = SPECIAL_EVENTS.WINTERS_FEAST
+WORLD_SPECIAL_EVENT = SPECIAL_EVENTS.NONE
 
 FESTIVAL_EVENTS =
 {
@@ -692,6 +752,20 @@ SPECIAL_EVENT_MUSIC =
         bank = "music_frontend_yotc.fsb",
         sound = "dontstarve/music/music_FE_yotc",
     },
+
+    --year of the beefalo
+    [SPECIAL_EVENTS.YOTB] =
+    {
+        bank = "music_frontend_yotb.fsb",
+        sound = "yotb_2021/music/FE",
+    },
+
+	-- crow carnival
+    [SPECIAL_EVENTS.CARNIVAL] =
+    {
+        bank = "music_frontend.fsb",
+        sound = "dontstarve/music/music_FE_summerevent",
+    },
 }
 
 FESTIVAL_EVENT_MUSIC =
@@ -757,13 +831,12 @@ end
 ---------------------------------------------------------
 -- Checks if any of the "Year of the <creature>" events are active
 function IsAny_YearOfThe_EventActive()
-	return WORLD_SPECIAL_EVENT == SPECIAL_EVENTS.YOTG or WORLD_SPECIAL_EVENT == SPECIAL_EVENTS.YOTV or WORLD_SPECIAL_EVENT == SPECIAL_EVENTS.YOTP or WORLD_SPECIAL_EVENT == SPECIAL_EVENTS.YOTC
+	return WORLD_SPECIAL_EVENT == SPECIAL_EVENTS.YOTG or WORLD_SPECIAL_EVENT == SPECIAL_EVENTS.YOTV or WORLD_SPECIAL_EVENT == SPECIAL_EVENTS.YOTP or WORLD_SPECIAL_EVENT == SPECIAL_EVENTS.YOTC or WORLD_SPECIAL_EVENT == SPECIAL_EVENTS.YOTB
 end
 
 function GetSpecialEventSkinTag()
     return SPECIAL_EVENT_SKIN_TAGS[WORLD_SPECIAL_EVENT]
 end
-
 
 ---------------------------------------------------------
 -- Refers to intermittent scheduled events.
@@ -844,9 +917,9 @@ end
 FE_MUSIC =
     (FESTIVAL_EVENT_MUSIC[WORLD_FESTIVAL_EVENT] ~= nil and FESTIVAL_EVENT_MUSIC[WORLD_FESTIVAL_EVENT].sound) or
     (SPECIAL_EVENT_MUSIC[WORLD_SPECIAL_EVENT] ~= nil and SPECIAL_EVENT_MUSIC[WORLD_SPECIAL_EVENT].sound) or
-    "turnoftides/sanity/lunacy_FE"
-   -- "dontstarve_DLC001/music/music_wigfrid_FE"
-   -- "dontstarve/music/music_FE"
+    --"dontstarve/music/music_moonstorm_FE"
+   "dontstarve/music/music_FE_webber"
+   --"dontstarve/music/music_FE"
 
 
 ---------------------------------------------------------
@@ -874,8 +947,9 @@ TECH =
     ANCIENT_FOUR = { ANCIENT = 4 },
 
     CELESTIAL_ONE = { CELESTIAL = 1 },
+    CELESTIAL_THREE = { CELESTIAL = 3 },
 
-	MOON_ALTAR_TWO = { MOON_ALTAR = 2 },
+	MOON_ALTAR_TWO = { CELESTIAL = 3 }, -- deprecated, use CELESTIAL_THREE
 
     SHADOW_TWO = { SHADOW = 3 },
 
@@ -893,7 +967,12 @@ TECH =
     WARGOFFERING_THREE = { WARGOFFERING = 3 },
     PIGOFFERING_THREE = { PIGOFFERING = 3 },
     CARRATOFFERING_THREE = { CARRATOFFERING = 3 },
+    BEEFOFFERING_THREE = { BEEFOFFERING = 3 },
     MADSCIENCE_ONE = { MADSCIENCE = 1 },
+	CARNIVAL_PRIZESHOP_ONE = { CARNIVAL_PRIZESHOP = 1 },
+	CARNIVAL_HOSTSHOP_ONE = { CARNIVAL_HOSTSHOP = 1 },
+	CARNIVAL_HOSTSHOP_THREE = { CARNIVAL_HOSTSHOP = 3 },
+
     FOODPROCESSING_ONE = { FOODPROCESSING = 1 },
 	FISHING_ONE = { FISHING = 1 },
 
@@ -912,8 +991,11 @@ TECH =
     YOTV = { SCIENCE = 10 }, -- ApplySpecialEvent() will change this from lost to 0
     YOTP = { SCIENCE = 10 }, -- ApplySpecialEvent() will change this from lost to 0
     YOTC = { SCIENCE = 10 }, -- ApplySpecialEvent() will change this from lost to 0
+    YOTB = { SCIENCE = 10 }, -- ApplySpecialEvent() will change this from lost to 0
 
     LOST = { MAGIC = 10, SCIENCE = 10, ANCIENT = 10 },
+
+    SPIDERCRAFT_ONE = { SPIDERCRAFT = 1 }
 }
 
 -- See cell_data.h
@@ -926,7 +1008,7 @@ NODE_TYPE =
     Blocker = 4,		-- Adds 2 Blank nodes beside it
     Room = 5,			-- Land can only touch the room(s) it is connected to by the graph (adds impassable around its parameter with a single land bidge)
     BackgroundRoom = 6,
-	SeparatedRoom = 7,	-- adds impassable around its entire parameter 
+	SeparatedRoom = 7,	-- adds impassable around its entire parameter
 }
 
 -- See cell_data.h
@@ -1034,7 +1116,7 @@ LAYOUT_ROTATION =
 	WEST = 3, 	-- 270 Degrees
 }
 
-PLACE_MASK = 
+PLACE_MASK =
 {
 	NORMAL = 0,
 	IGNORE_IMPASSABLE = 1,
@@ -1053,11 +1135,19 @@ MAP_SAMPLE_STYLE =
 	MARCHING_SQUARES = 1, -- Note to modders: this approach is still a prototype
 }
 
+--keep up to date with luabit.h
+LUABIT =
+{
+    WIDTH8BIT = 1,
+    WIDTH16BIT = 2,
+    --WIDTH32BIT = 3, --if 1 or 2 isn't passed, its assumed to be 32 bit width
+}
+
 
 -- keep up to date with COLLISION_GROUP in simconstants.h
 COLLISION =
 {
-    GROUND            = 32, 
+    GROUND            = 32,
 	BOAT_LIMITS       = 64,
 	LAND_OCEAN_LIMITS = 128,             -- physics wall between water and land
     LIMITS            = 128 + 64,        -- BOAT_LIMITS + LAND_OCEAN_LIMITS
@@ -1107,12 +1197,14 @@ RECIPETABS =
     --Crafting stations
     ANCIENT =				{ str = "ANCIENT",				sort = 100, icon = "tab_crafting_table.tex",	crafting_station = true },
     CELESTIAL =				{ str = "CELESTIAL",			sort = 100, icon = "tab_celestial.tex",			crafting_station = true },
-    MOON_ALTAR =			{ str = "MOON_ALTAR",			sort = 100, icon = "tab_moonaltar.tex",			crafting_station = true },
+    MOON_ALTAR =			{ str = "MOON_ALTAR",			sort = 100, icon = "tab_moonaltar.tex",			crafting_station = true }, -- deprecated, all recipes have been moved into CELESTIAL
     CARTOGRAPHY =			{ str = "CARTOGRAPHY",			sort = 100, icon = "tab_cartography.tex",		crafting_station = true },
     SCULPTING =				{ str = "SCULPTING",			sort = 100, icon = "tab_sculpt.tex",			crafting_station = true },
     ORPHANAGE =				{ str = "ORPHANAGE",			sort = 100, icon = "tab_orphanage.tex",			crafting_station = true },
     PERDOFFERING =			{ str = "PERDOFFERING",			sort = 100, icon = "tab_perd_offering.tex",		crafting_station = true },
     MADSCIENCE =			{ str = "MADSCIENCE",			sort = 100, icon = "tab_madscience_lab.tex",	crafting_station = true, manufacturing_station = true },
+	CARNIVAL_PRIZESHOP =	{ str = "CARNIVAL_PRIZESHOP",	sort = 100, icon = "tab_prizebooth.tex",		crafting_station = true , shop = true, icon_atlas = "images/hud2.xml"},
+	CARNIVAL_HOSTSHOP =		{ str = "CARNIVAL_HOSTSHOP",	sort = 100, icon = "tab_host.tex",				crafting_station = true , shop = true, icon_atlas = "images/hud2.xml"},
     FOODPROCESSING =		{ str = "FOODPROCESSING",		sort = 100, icon = "tab_foodprocessing.tex",	crafting_station = true },
 	FISHING =				{ str = "FISHING",				sort = 100, icon = "tab_fishing.tex",			crafting_station = true },
 	WINTERSFEASTCOOKING =	{ str = "WINTERSFEASTCOOKING",	sort = 100, icon = "tab_feast_oven.tex",		crafting_station = true },
@@ -1126,9 +1218,11 @@ CUSTOM_RECIPETABS =
     SHADOW        = { str = "SHADOW",			sort = 999, icon = "tab_shadow.tex",        owner_tag = "shadowmagic"  },
     ENGINEERING   = { str = "ENGINEERING",		sort = 999, icon = "tab_engineering.tex",   owner_tag = "handyperson"  },
 	ELIXIRBREWING = { str = "ELIXIRBREWING",	sort = 999, icon = "tab_elixirbrewing.tex", owner_tag = "elixirbrewer" },
-    BATTLESONGS   = { str = "BATTLESONGS",      sort = 999, icon = "tab_battlesongs.tex",   owner_tag = "battlesinger", icon_atlas = "images/hud2.xml" },
+    BATTLESONGS   = { str = "BATTLESONGS",      sort = 999, icon = "tab_battlesongs.tex",   owner_tag = "battlesinger",    icon_atlas = "images/hud2.xml" },
+    SPIDERCRAFT   = { str = "SPIDERCRAFT",      sort = 999, icon = "tab_spidercraft.tex",   owner_tag = "spiderwhisperer", icon_atlas = "images/hud2.xml" },
     NATURE        = { str = "NATURE",			sort = 999, icon = "tab_nature.tex",        owner_tag = "plantkin"     },
 	SLINGSHOTAMMO =	{ str = "SLINGSHOTAMMO",	sort = 999, icon = "tab_slingshot.tex",	    owner_tag = "pebblemaker"  },
+	BALLOONOMANCY = { str = "BALLOONOMANCY",	sort = 999, icon = "tab_balloonomancy.tex",	owner_tag = "balloonomancer", icon_atlas = "images/hud2.xml" },
 }
 
 QUAGMIRE_RECIPETABS =
@@ -1169,6 +1263,13 @@ SEASONS =
 	CAVES = "caves",
 }
 
+LEVELCATEGORY = {
+    LEVEL = "LEVEL",
+    SETTINGS = "SETTINGS",
+    COMBINED = "COMBINED",
+    WORLDGEN = "WORLDGEN",
+}
+
 RENDER_QUALITY =
 {
 	LOW = 0,
@@ -1188,7 +1289,7 @@ ANIM_SORT_ORDER_BELOW_GROUND =
 {
     UNDERWATER = 0,
     BOAT_TRAIL = 1,
-    BOAT_LIP = 2,    
+    BOAT_LIP = 2,
     UNUSED = 3,
 }
 
@@ -1372,7 +1473,7 @@ ANNOUNCEMENT_ICONS =
     ["mod"] =               { atlas = "images/button_icons.xml", texture = "mod_announcement.tex" },
 }
 
-ROAD_STRIPS = 
+ROAD_STRIPS =
 {
 	CORNERS = 0,
 	ENDS = 1,
@@ -1380,13 +1481,52 @@ ROAD_STRIPS =
 	CENTER = 3,
 }
 
-WRAP_MODE = 
+WRAP_MODE =
 {
 	WRAP = 0,
 	CLAMP = 1,
 	MIRROR = 2,
 	CLAMP_TO_EDGE = 3,
 }
+
+FILTER_MODE =
+{
+    POINT = 0,
+	LINEAR = 1,
+	ANISOTROPIC = 2,
+    NONE = 3,
+}
+
+MIP_FILTER_MODE =
+{
+    NONE = 0,
+    POINT = 1,
+    LINEAR = 2,
+}
+
+SamplerEffectBase = {
+    PostProcessSampler = 0,
+    BloomSampler = 1,
+    Shader = 2,
+    Texture = 3,
+    Smoke = 4,
+}
+
+SamplerSizes = {
+    Relative = 0,
+    Static = 1,
+}
+
+SamplerColourMode = {
+    RGBA = 0,
+    RGB = 1,
+}
+
+TexSamplers = {}
+UniformVariables = {
+}
+SamplerEffects = {}
+PostProcessorEffects = {}
 
 RESET_ACTION =
 {
@@ -1412,9 +1552,9 @@ NUM_SKIN_PRESET_SLOTS = 10
 NUM_SAVE_SLOTS = 5
 NUM_DST_SAVE_SLOTS = NUM_SAVE_SLOTS
 
-SAVELOAD = 
-{    
-    OPERATION = 
+SAVELOAD =
+{
+    OPERATION =
     {
         PREPARE = 0,
         LOAD = 1,
@@ -1422,8 +1562,8 @@ SAVELOAD =
         DELETE = 3,
         NONE = 4,
     },
-    
-    STATUS = 
+
+    STATUS =
     {
         OK = 0,
         DAMAGED = 1,
@@ -1550,10 +1690,10 @@ FOODGROUP =
         },
     },
 
-    VEGETARIAN = 
+    VEGETARIAN =
     {
         name = "VEGETARIAN",
-        types = 
+        types =
         {
             FOODTYPE.VEGGIE,
             FOODTYPE.SEEDS,
@@ -1561,6 +1701,13 @@ FOODGROUP =
             FOODTYPE.GOODIES,
         },
     },
+}
+
+FARM_PLANT_STRESS = {
+	NONE = 1,
+	LOW = 2,
+	MODERATE = 3,
+	HIGH = 4,
 }
 
 CHARACTER_INGREDIENT =
@@ -1657,7 +1804,8 @@ DEPLOYSPACING_RADIUS =
 
 TROPHYSCALE_TYPES =
 {
-	FISH = "fish",
+    FISH = "fish",
+    OVERSIZEDVEGGIES = "oversizedveggies",
 }
 
 NAUGHTY_VALUE =
@@ -1683,6 +1831,7 @@ NAUGHTY_VALUE =
     ["catcoon"] = 5,
     ["lightflier"] = 1,
     ["dustmoth"] = 4,
+    ["friendlyfruitfly"] = 20,
 }
 
 DONT_STARVE_TOGETHER_APPID = 322330
@@ -1732,6 +1881,11 @@ UICOLOURS = {
 	SILVER = RGB(192, 192, 192, 1),
 }
 
+PLANTREGISTRYUICOLOURS = {
+    LOCKEDBROWN = RGB(76, 50, 34, 1),
+    UNLOCKEDBROWN = RGB(76, 50, 34, 1), --UICOLOURS.EGGSHELL,
+}
+
 
 MAX_CHAT_INPUT_LENGTH = 150
 MAX_WRITEABLE_LENGTH = 200
@@ -1774,7 +1928,7 @@ RATE_SCALE =
 }
 
 -- Twitch status codes
-TWITCH = 
+TWITCH =
 {
     UNDEFINED = -1,
     CHAT_CONNECTED = 0,
@@ -1818,7 +1972,7 @@ HOUNDWARNINGTYPE =
     LVL1_WORM = 4,
     LVL2_WORM = 5,
     LVL3_WORM = 6,
-    LVL4_WORM = 7,    
+    LVL4_WORM = 7,
 }
 
 -- Domestication tendencies
@@ -1869,6 +2023,7 @@ LEVELTYPE = {
     TEST = "TEST",
     UNKNOWN = "UNKNOWN",
     CUSTOM = "CUSTOM",
+    CUSTOMPRESET = "CUSTOMPRESET",
 }
 
 if BRANCH == "dev" then
@@ -1890,6 +2045,14 @@ EVENTSERVER_LEVEL_LOCATIONS =
 {
 	[LEVELTYPE.LAVAARENA] = { "lavaarena" },
 	[LEVELTYPE.QUAGMIRE] = { "quagmire" },
+}
+
+DEFAULT_LOCATION = "forest"
+
+SERVER_LEVEL_SHARDS =
+{
+    "Master",
+    "Caves",
 }
 
 SERVER_LEVEL_CONFIGS =
@@ -1917,13 +2080,13 @@ COMMAND_RESULT = {
     INVALID = "INVALID",
 }
 
-CARRAT_MUSIC_STATES = {   
+CARRAT_MUSIC_STATES = {
     NONE = 0,
     TRAINING = 1,
     RACE = 2,
 }
 
-LOCALPLAYER_MUSIC = {   
+LOCALPLAYER_MUSIC = {
     NONE = 0,
     WINTERS_FEAST = 1,
 }
@@ -1933,7 +2096,7 @@ MAX_VOTE_OPTIONS = 6
 USER_HISTORY_EXPIRY_TIME = 60*60*24*30 -- 30 days
 
 -- Mirrors enum in SystemService.h
-LANGUAGE = 
+LANGUAGE =
 {
     ENGLISH = 0,
     ENGLISH_UK = 1,
@@ -2000,7 +2163,7 @@ OCEAN_POPULATION_EDGE_DIST = 4
 OCEAN_WATERFALL_MAX_DIST = 14
 
 -- needs to be kept synchronized with InventoryProgress enum in InventoryManager.h
-INVENTORY_PROGRESS = 
+INVENTORY_PROGRESS =
 {
 	IDLE = 0,
 	CHECK_SHOP = 1,
@@ -2008,7 +2171,8 @@ INVENTORY_PROGRESS =
 	CHECK_DLC = 3,
 	CHECK_DAILY_GIFT = 4,
 	CHECK_COOKBOOK = 5,
-	CHECK_INVENTORY = 6,
+	CHECK_PLANTREGISTRY = 6,
+	CHECK_INVENTORY = 7,
 }
 
 CURRENT_BETA = 1 -- set to 0 if there is no beta. Note: release builds wont use this so only staging and dev really care
@@ -2021,7 +2185,7 @@ BETA_INFO =
 		URL = "https://forums.kleientertainment.com/forums/topic/106156-how-to-opt-in-to-return-of-them-beta-for-dont-starve-together/ ",
 	},
 
-    {	
+    {
 		NAME = "ANRBETA",
 		SERVERTAG = "a_new_reign_beta",
 		VERSION_MISMATCH_STRING = "VERSION_MISMATCH_ARNBETA",
@@ -2044,3 +2208,63 @@ TEMP_ITEM_ID = "0"
 --matches enum eIAPType
 IAP_TYPE_REAL = 0
 IAP_TYPE_VIRTUAL = 1
+
+--matches enum ETextFilteringContext
+TEXT_FILTER_CTX_UNKNOWN = 0
+TEXT_FILTER_CTX_GAME = 1
+TEXT_FILTER_CTX_CHAT = 2
+TEXT_FILTER_CTX_NAME = 3
+
+
+CHARACTER_BUTTON_OFFSET =
+{
+    wilson = -51,
+    wendy = -45,
+    waxwell = -45,
+    wortox = -53,
+    wormwood = -53,
+    winona = -49,
+    wurt = -45,
+    webber = -45,
+
+    default = -47,
+}
+
+CHARACTER_BUTTON_SCALE =
+{
+    wurt = 0.24,
+
+    default = 0.23,
+}
+
+YOTB_COSTUMES =
+{
+    WAR         = 1,
+    DOLL        = 2,
+    ROBOT       = 4,
+    NATURE      = 8,
+    FORMAL      = 16,
+    VICTORIAN   = 32,
+    ICE         = 64,
+    FESTIVE     = 128,
+    BEAST       = 256,
+}
+
+SKIN_TYPES_THAT_RECEIVE_CLOTHING =
+{
+    "normal_skin",
+	"wimpy_skin",
+    "mighty_skin",
+	"stage_2",
+    "stage_3",
+    "stage_4",
+	"powerup",
+	"NO_BASE",
+}
+
+STORM_TYPES =
+{
+    NONE = 0,
+    SANDSTORM = 1,
+    MOONSTORM = 2,
+}

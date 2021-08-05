@@ -61,7 +61,7 @@ local function OnPlayerFar(inst)
     if inst.chased_by_player then
         inst.chased_by_player = false
         if TheWorld.components.gingerbreadhunter and TheWorld.components.gingerbreadhunter:GenerateCrumbPoints(inst:GetPosition(), 5) then
-            TheWorld.components.gingerbreadhunter:SpawnCrumbTrail(GetTaskRemaining(inst.killtask) or 1.5 * TUNING.TOTAL_DAY_TIME)
+            TheWorld.components.gingerbreadhunter:SpawnCrumbTrail(GetTaskRemaining(inst.killtask) or (1.5 * TUNING.TOTAL_DAY_TIME))
             ReplacePrefab(inst, "crumbs")
         end
     end
@@ -138,7 +138,7 @@ local function fn()
     inst.components.lootdropper:SetLoot(loot)
 
     inst:AddComponent("inspectable")
-    
+
     inst:AddComponent("sleeper")
     inst.components.sleeper:SetSleepTest(ShouldSleep)
     inst.components.sleeper:SetWakeTest(ShouldWakeUp)
@@ -150,7 +150,7 @@ local function fn()
     MakeHauntablePanic(inst)
 
     inst.StartDroppingCrumbs = StartDroppingCrumbs
-    inst:ListenForEvent("onremove", function() 
+    inst:ListenForEvent("onremove", function()
         if inst.crumb_task then
             inst.crumb_task:Cancel()
             inst.crumb_task = nil

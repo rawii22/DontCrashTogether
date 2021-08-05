@@ -1,7 +1,7 @@
 require "prefabutil"
 
 local assets =
-{    
+{
 	Asset("MINIMAP_IMAGE", "archive_resonator"),
     Asset("ANIM", "anim/archive_resonator.zip"),
 }
@@ -20,7 +20,7 @@ local light_params =
         falloff = .6,
         colour = {237/255, 237/255, 209/255},
         time = 0.2,
-    },    
+    },
 
     off =
     {
@@ -31,7 +31,7 @@ local light_params =
         time = 1,
     },
 
-    beam = 
+    beam =
     {
         radius = 4,
         intensity = .8,
@@ -39,7 +39,7 @@ local light_params =
         colour = { 237/255, 237/255, 209/255 },
         time = 0.4,
     },
-    
+
     idle =
     {
         radius = 1,
@@ -47,7 +47,7 @@ local light_params =
         falloff = .6,
         colour = {237/255, 237/255, 209/255},
         time = 0.2,
-    },     
+    },
 }
 
 local function pushparams(inst, params)
@@ -55,14 +55,13 @@ local function pushparams(inst, params)
     inst.Light:SetIntensity(params.intensity)
     inst.Light:SetFalloff(params.falloff)
     inst.Light:SetColour(unpack(params.colour))
-    
-    if TheWorld.ismastersim then
-        if params.intensity > 0 then
-            inst.Light:Enable(true)
-        else
-            inst.Light:Enable(false)
-        end
+
+    if params.intensity > 0 then
+        inst.Light:Enable(true)
+    else
+        inst.Light:Enable(false)
     end
+
 end
 
 -- Not using deepcopy because we want to copy in place
@@ -96,7 +95,7 @@ local function OnUpdateLight(inst, dt)
     end
     lerpparams(inst._currentlight, inst._startlight, inst._endlight, inst._endlight.time > 0 and inst._currentlight.time / inst._endlight.time or 1)
     pushparams(inst, inst._currentlight)
-    inst.AnimState:SetLightOverride(Remap(inst._currentlight.intensity, light_params.off.intensity,light_params.beam.intensity, 0,1))    
+    inst.AnimState:SetLightOverride(Remap(inst._currentlight.intensity, light_params.off.intensity,light_params.beam.intensity, 0,1))
 end
 
 local function beginfade(inst)
@@ -106,25 +105,26 @@ local function beginfade(inst)
 
     if inst._lighttask == nil then
         inst._lighttask = inst:DoPeriodicTask(FRAMES, OnUpdateLight, nil, FRAMES)
-    end    
+    end
 end
 
 local function ChangeToItem(inst)
     local item = SpawnPrefab("archive_resonator_item")
     item.Transform:SetPosition(inst.Transform:GetWorldPosition())
-    -- 
+    --
     item.components.finiteuses:SetPercent(inst.components.finiteuses:GetPercent())
     return item
 end
 
 local MOON_ALTAR_ASTRAL_MARKER_MUST_TAG =  {"moon_altar_astral_marker"}
+local MOON_ALTAR_ASTRAL_MARKER_NOT_TAG =  {"marker_found"}
 local MOON_RELIC_MUST_TAG =  {"moon_relic"}
 local CRAB_KING_MUST_TAG =  {"crabking"}
 local function scanfordevice(inst)
-	local ent = FindEntity(inst, 9999, nil, MOON_ALTAR_ASTRAL_MARKER_MUST_TAG)
+	local ent = FindEntity(inst, 9999, nil, MOON_ALTAR_ASTRAL_MARKER_MUST_TAG, MOON_ALTAR_ASTRAL_MARKER_NOT_TAG)
 
     if not ent then
-            
+
         inst.registered_devices = {} -- clear, then populate via calling_all_devices
         TheWorld:PushEvent("calling_moon_relics", {caller = inst})
 
@@ -132,7 +132,7 @@ local function scanfordevice(inst)
 
         for i,thisent in ipairs(ents) do
             -- find items in water
-            if thisent:HasTag("INLIMBO") and thisent.components.submersible and thisent.components.submersible:GetUnderwaterObject() then                
+            if thisent:HasTag("INLIMBO") and thisent.components.submersible and thisent.components.submersible:GetUnderwaterObject() then
                 ent = thisent
                 break
             end
@@ -161,31 +161,33 @@ local function scanfordevice(inst)
         end
     end
 
-
 	if ent then
 		if ent:GetDistanceSqToInst(inst) < 4*4 and ent:HasTag("moon_altar_astral_marker") then
             inst.SoundEmitter:KillSound("locating")
             inst.AnimState:PlayAnimation("drill")
             inst.SoundEmitter:PlaySound("grotto/common/archive_resonator/drill")
-            
+
             local swap = "swap_altar_wardpiece"
             if ent.product == "moon_altar_icon" then
                 swap = "swap_altar_iconpiece"
             end
-            
+
             inst.AnimState:OverrideSymbol("swap_body", swap, "swap_body")
             inst.product = ent.product
-            ent:Remove()
+            ent:AddTag("marker_found")
+            inst.target = ent
             inst:ListenForEvent("animover", function()
                 if inst.AnimState:IsCurrentAnimation("drill") then
                     local artifact = SpawnPrefab(inst.product)
                     inst.product = nil
                     artifact.Transform:SetPosition(inst.Transform:GetWorldPosition())
-                    inst.components.finiteuses:Use(1)    
+                    inst.components.finiteuses:Use(1)
                     local item = ChangeToItem(inst)
                     local pt = Vector3(inst.Transform:GetWorldPosition())
                     pt.y = pt.y + 3
                     inst.components.lootdropper:FlingItem(item,pt)
+                    inst.target:Remove()
+                    inst.target = nil
                     inst:Remove()
                 end
             end)
@@ -244,7 +246,7 @@ local function ondeploy(inst, pt, deployer)
         at.Physics:Teleport(pt.x, 0, pt.z)
         at.Physics:SetCollides(true)
         at.AnimState:PlayAnimation("place")
-    
+
         at.SoundEmitter:PlaySound("grotto/common/archive_resonator/place")
         at.SoundEmitter:PlaySound("grotto/common/archive_resonator/idle_LP", "idle_loop")
 
@@ -295,7 +297,7 @@ local function onfinisheduses(inst)
 end
 
 local function onhammered(inst)
-   
+
     inst.components.lootdropper:DropLoot()
     --close it
     local fx = SpawnPrefab("collapse_big")
@@ -330,7 +332,7 @@ local function onhammered(inst)
     inst:Remove()
 end
 
-local function onhit(inst)    
+local function onhit(inst)
     inst.SoundEmitter:PlaySound("dontstarve/common/destroy_stone")
 end
 
@@ -369,17 +371,16 @@ local function mainfn()
     inst.Light:SetIntensity(.4)
     inst.Light:SetRadius(2)
     inst.Light:SetColour(237/255, 237/255, 209/255)
-    inst.Light:Enable(false)
+
+    inst.Light:EnableClientModulation(true)
 
     inst.widthscale = 1
     inst._endlight = {}
-    copyparams(inst._endlight, light_params.idle)
-
     inst._startlight = {}
     inst._currentlight = {}
 
+    copyparams(inst._endlight, light_params.idle)
     copyparams(inst._startlight, inst._endlight)
-
     copyparams(inst._currentlight, inst._endlight)
 
     pushparams(inst, inst._currentlight)
@@ -422,7 +423,7 @@ local function mainfn()
     inst.components.workable:SetWorkAction(ACTIONS.HAMMER)
     inst.components.workable:SetWorkLeft(3)
     inst.components.workable:SetOnFinishCallback(onhammered)
-    inst.components.workable:SetOnWorkCallback(onhit)    
+    inst.components.workable:SetOnWorkCallback(onhit)
 
     inst:AddComponent("portablestructure")
     inst.components.portablestructure:SetOnDismantleFn(OnDismantle)
@@ -431,6 +432,12 @@ local function mainfn()
             return true
         end
     end
+
+    inst:ListenForEvent("onremove", function()
+        if inst.target then
+            inst.target:RemoveTag("marker_found")
+        end
+    end)
 
     inst.OnSave = onsave_main
     inst.OnLoadPostPass = onloadpostpass_main
@@ -474,7 +481,7 @@ local function basefn()
     inst.Light:SetIntensity(.5)
     inst.Light:SetRadius(0.5)
     inst.Light:SetColour(237/255, 237/255, 209/255)
-    inst.Light:Enable(true)    
+    inst.Light:Enable(true)
 
     inst.AnimState:SetBuild("archive_resonator")
     inst.AnimState:SetBank("archive_resonator")
@@ -505,7 +512,7 @@ end
 
 local function itemfn()
     local inst = CreateEntity()
-   
+
     inst.entity:AddTransform()
     inst.entity:AddAnimState()
     inst.entity:AddNetwork()

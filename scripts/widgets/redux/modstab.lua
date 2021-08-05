@@ -10,48 +10,51 @@ local PopupDialogScreen = require "screens/redux/popupdialog"
 local ModConfigurationScreen = require "screens/redux/modconfigurationscreen"
 local ModsListPopup = require "screens/redux/modslistpopup"
 
-local function new_optionwidget()
-    return MetaClass({normal = {}, dl = {}}, nil, {
-        __index = function(t, k)
-            local meta_t = getmetatable(t)
-            local _ = meta_t._
-            --attempting to index this table with numbers will go index the normal and then dl tables
-            if type(k) == "number" then
-                if k <= #_.normal then
-                    return _.normal[k]
-                else
-                    return _.dl[k - #_.normal]
-                end
+require("metaclass")
+
+local OptionWidget = MetaClass(function(self, ...)
+    self.normal = {}
+    self.dl = {}
+end)
+
+function OptionWidget:__index(k)
+    --attempting to index this table with numbers will go index the normal and then dl tables
+    if type(k) == "number" then
+        if k <= #self.normal then
+            return self.normal[k]
+        else
+            return self.dl[k - #self.normal]
+        end
+    end
+    return metarawget(self, k)
+end
+
+function OptionWidget:__newindex(k, v)
+    --setting number values is ignored
+    if type(k) ~= "number" then
+        metarawset(self, k, v)
+    end
+end
+
+--length is the length of both normal and dl tables
+function OptionWidget:__len()
+    return #self.normal + #self.dl
+end
+
+function OptionWidget:__ipairs()
+    --see https://www.lua.org/pil/9.3.html
+    --using a coroutine to maintain a state inside the function
+    --this iterates over first t.normal, and then t.dl
+    local idx_add = 0
+    return coroutine.wrap(function()
+        for _, t in ipairs({self.normal, self.dl}) do
+            for i, v in ipairs(t) do
+                --this is equivalent to return i, v that the next like function for ipairs does.
+                coroutine.yield(i + idx_add, v)
             end
-            return _[k] or meta_t[k]
-        end,
-        --setting number values is ignored
-        __newindex = function(t, k, v)
-            local _ = getmetatable(t)._
-            if type(k) ~= "number" then
-                _[k] = v
-            end
-        end,
-        --length is the length of both normal and dl tables
-        __len = function(t)
-            return #t.normal + #t.dl
-        end,
-        __ipairs = function(t)
-            --see https://www.lua.org/pil/9.3.html
-            --using a coroutine to maintain a state inside the function
-            --this iterates over first t.normal, and then t.dl
-            local idx_add = 0
-            return coroutine.wrap(function()
-                for _, t in ipairs({t.normal, t.dl}) do
-                    for i, v in ipairs(t) do
-                        --this is equivalent to return i, v that the next like function for ipairs does.
-                        coroutine.yield(i + idx_add, v)
-                    end
-                    idx_add = idx_add + #t
-                end
-            end)
-        end,
-    })
+            idx_add = idx_add + #t
+        end
+    end)
 end
 
 local item_width,item_height = 340, 90 -- copied from TEMPLATES.ModListItem
@@ -211,9 +214,9 @@ local ModsTab = Class(Widget, function(self, servercreationscreen, settings)
         self.subscreener:OnMenuButtonSelected("client")
     end
 
-    self.optionwidgets_client = new_optionwidget()
-    self.optionwidgets_server = new_optionwidget()
-    
+    self.optionwidgets_client = OptionWidget()
+    self.optionwidgets_server = OptionWidget()
+
     self:CreateModsScrollList()
 
     local function workshopfnfilter(modname)
@@ -228,7 +231,7 @@ local ModsTab = Class(Widget, function(self, servercreationscreen, settings)
     local function disabledfnfilter(modname)
         return not KnownModIndex:IsModEnabled(modname)
     end
-    
+
     self.modfilterbar = self.mods_page:AddChild(ModFilterBar(self, "modfilter"))
     self.modfilterbar:AddChild(self.modfilterbar:AddModTypeFilter(STRINGS.UI.MODSSCREEN.WORKSHOP_FILTER_FMT, "workshop_filter.tex", "local_filter.tex", "workshoplocal_filter.tex", "workshopfilter", workshopfnfilter, localfnfilter))
     self.modfilterbar:AddChild(self.modfilterbar:AddModStatusFilter(STRINGS.UI.MODSSCREEN.STATUS_FILTER_FMT, "enabled_filter.tex", "disabled_filter.tex", "enableddisabled_filter.tex", "statusfilter", enabledfnfilter, disabledfnfilter))
@@ -613,7 +616,7 @@ function ModsTab:CreateDetailPanel()
 			else
 				no_mods = string.format(STRINGS.UI.MODSSCREEN.NO_MODS_TYPE, self.currentmodtype )
 			end
-           
+
             self.detaildesc_empty:SetString(no_mods)
             self:DisableConfigButton()
             self:DisableUpdateButton("uptodate")
@@ -685,17 +688,34 @@ local function CompareModDLTable( t1, t2 )
     return true
 end
 
+local alpasortcache = {}
 local function alphasort(moda, modb)
     if not moda then return false end
     if not modb then return true end
-    local moda_favorite = Profile:IsModFavorited(moda.modname)
-    local modb_favorite = Profile:IsModFavorited(modb.modname)
-    if moda_favorite ~= modb_favorite then
-        return moda_favorite
+
+    local moda_sort = alpasortcache[moda.modname]
+    local modb_sort = alpasortcache[modb.modname]
+    if not moda_sort then
+        local fancy = KnownModIndex:GetModFancyName(moda.modname)
+        moda_sort = {
+            fav = Profile:IsModFavorited(moda.modname),
+            name = string.lower(fancy):gsub('%W','')..fancy
+        }
+        alpasortcache[moda.modname] = moda_sort
     end
-    local moda_fancyname = KnownModIndex:GetModFancyName(moda.modname)
-    local modb_fancyname = KnownModIndex:GetModFancyName(modb.modname)
-    return string.lower(moda_fancyname):gsub('%W','')..moda_fancyname < string.lower(modb_fancyname):gsub('%W','')..modb_fancyname
+    if not modb_sort then
+        local fancy = KnownModIndex:GetModFancyName(modb.modname)
+        modb_sort = {
+            fav = Profile:IsModFavorited(modb.modname),
+            name = string.lower(fancy):gsub('%W','')..fancy
+        }
+        alpasortcache[modb.modname] = modb_sort
+    end
+
+    if moda_sort.fav ~= modb_sort.fav then
+        return moda_sort.fav
+    end
+    return moda_sort.name < modb_sort.name
 end
 
 function ModsTab:UpdateModsOrder(force_refresh)
@@ -704,6 +724,7 @@ function ModsTab:UpdateModsOrder(force_refresh)
     local curr_modnames_server = KnownModIndex:GetServerModNamesTable()
     table.sort(curr_modnames_client, alphasort)
     table.sort(curr_modnames_server, alphasort)
+    alpasortcache = {}
 
     --update workshop version data into the curr list
     local has_local_client = false
@@ -847,7 +868,7 @@ function ModsTab:UpdateForWorkshop( force_refresh )
         self.forceupdatemodsorder = true
 
         --print("### Do UpdateForWorkshop refresh")
-        
+
         self.modnames_client_dl = curr_modnames_client_dl
         self.modnames_server_dl = curr_modnames_server_dl
         self.downloading_mods_count = #self.modnames_client_dl + #self.modnames_server_dl
@@ -929,7 +950,7 @@ function ModsTab:RefreshModFilter(filter_fn)
     self:UpdateModsOrder(true)
 
     self:_SetModsList(self.currentmodtype, true)
-    
+
     --self:UpdateForWorkshop(true) --Zachary: don't do this, this will cause the game to lag for a teeny bit every time you change the filter options
 end
 
@@ -963,8 +984,7 @@ function ModsTab:OnConfirmEnable(restart, modname)
     local modinfo = KnownModIndex:GetModInfo(modname)
     if KnownModIndex:IsLocalModWarningEnabled() and self.settings.is_configuring_server and
         KnownModIndex:IsModEnabled(modname) and modinfo.all_clients_require_mod then
-        local workshop_prefix = "workshop-"
-        if string.sub( modname, 0, string.len(workshop_prefix) ) ~= workshop_prefix then
+        if not IsWorkshopMod(modname) then
             local warn_txt = STRINGS.UI.MODSSCREEN.MOD_WARNING
 			if IsRail() then
 				warn_txt = STRINGS.UI.MODSSCREEN.MOD_WARNING_RAIL
@@ -1082,7 +1102,7 @@ function ModsTab:ShowModDetails(widget_idx, client_mod)
     local idx = items_table[widget_idx] and items_table[widget_idx].index or nil
 
     local modname = idx and modnames_versions[idx] and modnames_versions[idx].modname or nil
-    
+
     self.currentmodname = modname
     if client_mod and self.currentmodname then
         self.last_client_modname = self.currentmodname
@@ -1091,7 +1111,7 @@ function ModsTab:ShowModDetails(widget_idx, client_mod)
     end
 
     local modinfo = modname and KnownModIndex:GetModInfo(modname) or {}
-    
+
     local iconinfo = modname and self.infoprefabs[modname] or {}
     if iconinfo.icon and iconinfo.icon_atlas then
         self.detailimage:SetTexture(iconinfo.icon_atlas, iconinfo.icon)
@@ -1103,17 +1123,17 @@ function ModsTab:ShowModDetails(widget_idx, client_mod)
     local align = self.detailtitle._align
     self.detailtitle:SetMultilineTruncatedString(modinfo.name or modname or "", align.maxlines, align.width, align.maxchars, true)
     local w,h = self.detailtitle:GetRegionSize()
-    self.detailtitle:SetPosition(w/2 - align.x, align.y)
+    self.detailtitle:SetPosition((w or 0)/2 - align.x, align.y)
 
     align = self.detailauthor._align
     self.detailauthor:SetTruncatedString(modname and string.format(STRINGS.UI.MODSSCREEN.AUTHORBY, modinfo.author or "unknown") or "", align.width, align.maxchars, true)
     w, h = self.detailauthor:GetRegionSize()
-    self.detailauthor:SetPosition(w/2 - align.x, align.y)
+    self.detailauthor:SetPosition((w or 0)/2 - align.x, align.y)
 
     align = self.detaildesc._align
     self.detaildesc:SetMultilineTruncatedString(modinfo.description or "", align.maxlines, align.width, align.maxchars, true)
     w, h = self.detaildesc:GetRegionSize()
-    self.detaildesc:SetPosition(w/2 - 190, 90 - .5 * h)
+    self.detaildesc:SetPosition((w or 0)/2 - 190, 90 - .5 * (h or 0))
 
     if modinfo.dst_compatible then
         if modinfo.dst_compatibility_specified == false then
@@ -1172,7 +1192,7 @@ function ModsTab:ShowModDetails(widget_idx, client_mod)
     else
         self.detailwarning:SetString("")
     end
-    
+
     self.modlinkbutton:Unselect()
     if not modname then
         self.modlinkbutton:ClearHoverText()
@@ -1349,7 +1369,7 @@ function ModsTab:ReloadModInfoPrefabs()
             Asset("IMAGE", info.iconpath),
         }
         local prefab = Prefab("MODSCREEN_"..modname, nil, modinfoassets, nil)
-        RegisterPrefabs(prefab)
+        RegisterSinglePrefab(prefab)
         table.insert(prefabs_to_load, prefab.name)
         self.infoprefabs[modname] = info
     end
@@ -1489,45 +1509,34 @@ function ModsTab:CleanAllButton()
     TheFrontEnd:PushScreen( mod_warning )
 end
 
+local function DoUpdateAll(self)
+    if self.modnames_client ~= nil then
+        for _,name_version in pairs(self.modnames_client) do
+            if IsWorkshopMod(name_version.modname) and name_version.version ~= "" and name_version.version ~= KnownModIndex:GetModInfo(name_version.modname).version then
+                TheSim:UpdateWorkshopMod(name_version.modname)
+            end
+        end
+    end
+    if self.modnames_server ~= nil then
+        for _,name_version in pairs(self.modnames_server) do
+            if IsWorkshopMod(name_version.modname) and name_version.version ~= "" and name_version.version ~= KnownModIndex:GetModInfo(name_version.modname).version then
+                TheSim:UpdateWorkshopMod(name_version.modname)
+            end
+        end
+    end
+    self:UpdateForWorkshop()
+    self:UpdateModsOrder()
+end
+
 function ModsTab:UpdateAllButton(force)
     if force then
-        if self.modnames_client ~= nil then
-            for _,name_version in pairs(self.modnames_client) do
-                if IsWorkshopMod(name_version.modname) and name_version.version ~= "" and name_version.version ~= KnownModIndex:GetModInfo(name_version.modname).version then
-                    TheSim:UpdateWorkshopMod(name_version.modname)
-                end
-            end
-        end
-        if self.modnames_server ~= nil then
-            for _,name_version in pairs(self.modnames_server) do
-                if IsWorkshopMod(name_version.modname) and name_version.version ~= "" and name_version.version ~= KnownModIndex:GetModInfo(name_version.modname).version then
-                    TheSim:UpdateWorkshopMod(name_version.modname)
-                end
-            end
-        end
-        self:UpdateForWorkshop()
-        self:UpdateModsOrder()
+        DoUpdateAll(self)
     elseif self.updateallenabled then
         local mod_warning = PopupDialogScreen(STRINGS.UI.MODSSCREEN.UPDATEALL_TITLE, STRINGS.UI.MODSSCREEN.UPDATEALL_BODY,
             {
                 {text=STRINGS.UI.SERVERLISTINGSCREEN.OK,
                     cb = function()
-                        if self.modnames_client ~= nil then
-                            for _,name_version in pairs(self.modnames_client) do
-                                if IsWorkshopMod(name_version.modname) and name_version.version ~= "" and name_version.version ~= KnownModIndex:GetModInfo(name_version.modname).version then
-                                    TheSim:UpdateWorkshopMod(name_version.modname)
-                                end
-                            end
-                        end
-                        if self.modnames_server ~= nil then
-                            for _,name_version in pairs(self.modnames_server) do
-                                if IsWorkshopMod(name_version.modname) and name_version.version ~= "" and name_version.version ~= KnownModIndex:GetModInfo(name_version.modname).version then
-                                    TheSim:UpdateWorkshopMod(name_version.modname)
-                                end
-                            end
-                        end
-                        self:UpdateForWorkshop()
-                        self:UpdateModsOrder()
+                        DoUpdateAll(self)
 
                         TheFrontEnd:PopScreen()
                     end

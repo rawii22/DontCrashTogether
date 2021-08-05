@@ -39,28 +39,30 @@ local CookbookPageCrockPot = Class(Widget, function(self, parent_screen, categor
 end)
 
 function CookbookPageCrockPot:_DoFocusHookups()
-	for i, v in ipairs(self.spinners) do
-		v:ClearFocusDirs()
+	if self.spinners then
+		for i, v in ipairs(self.spinners) do
+			v:ClearFocusDirs()
 
-		if i > 1 then
-			v:SetFocusChangeDir(MOVE_UP, self.spinners[i-1])
+			if i > 1 then
+				v:SetFocusChangeDir(MOVE_UP, self.spinners[i-1])
+			end
+			if i < #self.spinners then
+				v:SetFocusChangeDir(MOVE_DOWN, self.spinners[i+1])
+			end
 		end
-		if i < #self.spinners then
-			v:SetFocusChangeDir(MOVE_DOWN, self.spinners[i+1])
-		end
-	end
-	
-    local reset_default_focus = self.parent_default_focus ~= nil and self.parent_screen ~= nil and self.parent_screen.default_focus == self.parent_default_focus
 
-	if self.recipe_grid.items ~= nil and #self.recipe_grid.items > 0 then
-		self.spinners[#self.spinners]:SetFocusChangeDir(MOVE_DOWN, self.recipe_grid)
-		self.recipe_grid:SetFocusChangeDir(MOVE_UP, self.spinners[#self.spinners])
-	
-		self.parent_default_focus = self.recipe_grid
-	    self.focus_forward = self.recipe_grid
-	else
-		self.parent_default_focus = self.spinners[1]
-	    self.focus_forward = self.spinners[1]
+		local reset_default_focus = self.parent_default_focus ~= nil and self.parent_screen ~= nil and self.parent_screen.default_focus == self.parent_default_focus
+
+		if self.recipe_grid.items ~= nil and #self.recipe_grid.items > 0 then
+			self.spinners[#self.spinners]:SetFocusChangeDir(MOVE_DOWN, self.recipe_grid)
+			self.recipe_grid:SetFocusChangeDir(MOVE_UP, self.spinners[#self.spinners])
+
+			self.parent_default_focus = self.recipe_grid
+			self.focus_forward = self.recipe_grid
+		else
+			self.parent_default_focus = self.spinners[1]
+			self.focus_forward = self.spinners[1]
+		end
 	end
 end
 
@@ -82,7 +84,7 @@ function CookbookPageCrockPot:CreateRecipeBook()
 	grid_boarder = self.gridroot:AddChild(Image("images/quagmire_recipebook.xml", "quagmire_recipe_line.tex"))
 	grid_boarder:SetScale(boarder_scale, -boarder_scale)
     grid_boarder:SetPosition(-3, -grid_h/2)
-    
+
 	-----------
 	local details_decor_root = panel_root:AddChild(Widget("details_root"))
 	details_decor_root:SetPosition(grid_w/2 + 30, 0)
@@ -109,18 +111,18 @@ function CookbookPageCrockPot:CreateRecipeBook()
 	-----------
 	local dis_x = -310
 	local dis_y = 238
-	dis_y = dis_y - 18/2 
+	dis_y = dis_y - 18/2
     local completed = panel_root:AddChild(Text(HEADERFONT, 18, STRINGS.UI.COOKBOOK.DISCOVERED_RECIPES, UICOLOURS.BROWN_DARK))
 	completed:SetHAlign(ANCHOR_RIGHT)
 	completed:SetPosition(dis_x, dis_y)
-	dis_y = dis_y - 18/2 
+	dis_y = dis_y - 18/2
 	MakeDetailsLine(panel_root, dis_x, dis_y-4, .5, "quagmire_recipe_line_short.tex")
 	dis_y = dis_y - 10
-	dis_y = dis_y - 18/2 
+	dis_y = dis_y - 18/2
     completed = panel_root:AddChild(Text(HEADERFONT, 18, subfmt(STRINGS.UI.XPUTILS.XPPROGRESS, {num=self.num_recipes_discovered, max=#self.all_recipes}), UICOLOURS.BROWN_DARK))
 	completed:SetHAlign(ANCHOR_RIGHT)
 	completed:SetPosition(dis_x, dis_y)
-	dis_y = dis_y - 18/2 
+	dis_y = dis_y - 18/2
 
 	self.details_root:AddChild(self:PopulateRecipeDetailPanel(self.all_recipes[ (TheCookbook.selected ~= nil and TheCookbook.selected[self.category] or 1) ]))
 
@@ -146,7 +148,7 @@ function CookbookPageCrockPot:_SetupRecipeIngredientDetails(recipes, parent, y)
 	if #recipes <= 3 then
 		for b = 1, #recipes do
 			local items = recipes[index]
-			local x = -((#items + 1)*ingredient_size + (#items-1)*x_spacing) / 2 
+			local x = -((#items + 1)*ingredient_size + (#items-1)*x_spacing) / 2
 			for i = 1, #items do
 				local backing = inv_backing_root:AddChild(Image("images/quagmire_recipebook.xml", "ingredient_slot.tex"))
 				backing:ScaleToSize(ingredient_size, ingredient_size)
@@ -394,13 +396,13 @@ function CookbookPageCrockPot:BuildRecipeBook()
     local row_h = cell_size;
     local reward_width = 80
     local row_spacing = 5
-    
+
 	local food_size = cell_size + 20
 	local icon_size = 20 / (cell_size/base_size)
 
     local function ScrollWidgetsCtor(context, index)
         local w = Widget("recipe-cell-".. index)
-                
+
 		----------------
 		w.cell_root = w:AddChild(ImageButton("images/quagmire_recipebook.xml", "cookbook_unknown.tex", "cookbook_unknown_selected.tex"))
 		w.cell_root:SetFocusScale(cell_size/base_size + .05, cell_size/base_size + .05)
@@ -492,7 +494,7 @@ function CookbookPageCrockPot:BuildRecipeBook()
 	for prefab, recipe_def in pairs(cookbook_recipes) do
 		--print("recipe: ", self.category, recipe_def.cookbook_category, prefab)
 		local data = {
-			prefab = prefab, 
+			prefab = prefab,
 			name = STRINGS.NAMES[string.upper(prefab)] or subfmt(STRINGS.UI.COOKBOOK.UNKNOWN_FOOD_NAME, {food = prefab or "SDF"}),
 			recipe_def = recipe_def,
 			defaultsortkey = hash(prefab),
@@ -545,7 +547,7 @@ function CookbookPageCrockPot:BuildRecipeBook()
             scrollbar_offset = 20,
             scrollbar_height_offset = -60
         })
-	
+
 	grid.up_button:SetTextures("images/quagmire_recipebook.xml", "quagmire_recipe_scroll_arrow_hover.tex")
     grid.up_button:SetScale(0.5)
 
@@ -589,7 +591,7 @@ end
 
 function CookbookPageCrockPot:ApplySort()
 	local sortby = TheCookbook:GetFilter("sort")
-	table.sort(self.filtered_recipes, 
+	table.sort(self.filtered_recipes,
 			sortby == "alphabetical"	and function(a, b) return a.unlocked and not b.unlocked or (a.unlocked and b.unlocked and a.name < b.name) end
 		or	sortby == "health"			and function(a, b) return (a.unlocked and not b.unlocked) or (a.has_eaten and not b.has_eaten) or (a.has_eaten and ((a.recipe_def.health > b.recipe_def.health) or (a.recipe_def.health == b.recipe_def.health and a.name < b.name))) end
 		or	sortby == "hunger"			and function(a, b) return (a.unlocked and not b.unlocked) or (a.has_eaten and not b.has_eaten) or (a.has_eaten and ((a.recipe_def.hunger > b.recipe_def.hunger) or (a.recipe_def.hunger == b.recipe_def.hunger and a.name < b.name))) end
@@ -626,7 +628,7 @@ end
 
 function CookbookPageCrockPot:BuildSpinners()
 	local root = Widget("spinner_root")
-	
+
 	local top = 50
 	local left = 0 -- -width/2 + 5
 
@@ -690,7 +692,7 @@ function CookbookPageCrockPot:BuildSpinners()
 	local items = {}
 	table.insert(items, MakeSpinner(STRINGS.UI.COOKBOOK.SORT_SPINNERLABEL, sort_options, on_sort_fn, TheCookbook:GetFilter("sort")))
 	table.insert(items, MakeSpinner(STRINGS.UI.COOKBOOK.FILTER_SPINNERLABEL, filter_options, on_filter_fn, TheCookbook:GetFilter("filter")))
-    
+
 	self.spinners = {}
 	for i, v in ipairs(items) do
 		local w = root:AddChild(v)
@@ -698,7 +700,7 @@ function CookbookPageCrockPot:BuildSpinners()
 		table.insert(self.spinners, w.spinner)
 	end
 
-	
+
 	return root
 end
 

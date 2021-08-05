@@ -21,15 +21,15 @@ local events =
 
     EventHandler("spray_cloud", function(inst, data)
         if (inst.components.sleeper == nil or not inst.components.sleeper:IsAsleep())
-                and (inst.components.health ~= nil and not inst.components.health:IsDead()) 
-                and not inst.sg:HasStateTag("busy") 
+                and (inst.components.health ~= nil and not inst.components.health:IsDead())
+                and not inst.sg:HasStateTag("busy")
                 and not inst.sg:HasStateTag("spraying") then
             inst.sg:GoToState("cloud")
         end
     end),
 
     EventHandler("barnacle_grown", function(inst)
-        if (inst.components.health ~= nil and not inst.components.health:IsDead()) 
+        if (inst.components.health ~= nil and not inst.components.health:IsDead())
                 and not inst.sg:HasStateTag("busy") then
             inst.sg:GoToState("barnacle_grow")
         end
@@ -120,7 +120,8 @@ local states =
                 local pos = inst:GetPosition()
                 if inst.components.harvestable ~= nil and inst.components.harvestable.produce > 0 then
                     for p = 1, inst.components.harvestable.produce do
-                        inst.components.lootdropper:SpawnLootPrefab("barnacle", pos)
+                        local product = (inst.components.burnable:IsBurning() and "barnacle_cooked") or "barnacle"
+                        inst.components.lootdropper:SpawnLootPrefab(product, pos)
                     end
                 end
                 inst.components.lootdropper:SpawnLootPrefab("waterplant_planter", pos)

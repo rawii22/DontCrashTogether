@@ -43,7 +43,7 @@ local Combat = Class(function(self, inst)
     --
 
 	-- these are a temporary aggro system for the sling shot that may be replaced in the future. Modders: This variable may be removed one day
-	-- self.temp_disable_aggro 
+	-- self.temp_disable_aggro
 	self.lastwasattackedbytargettime = 0
 
 	self.externaldamagemultipliers = SourceModifierList(self.inst) -- damage dealt to others multiplier
@@ -274,8 +274,8 @@ function Combat:OnUpdate(dt)
 
             if not self.target:IsValid() or
                 self.target:IsInLimbo() or
-                not self.keeptargetfn(self.inst, self.target) or not 
-                (self.target and self.target.components.combat and self.target.components.combat:CanBeAttacked(self.inst)) then                    
+                not self.keeptargetfn(self.inst, self.target) or not
+                (self.target and self.target.components.combat and self.target.components.combat:CanBeAttacked(self.inst)) then
                 self.inst:PushEvent("losttarget")
                 self:DropTarget()
             end
@@ -293,8 +293,8 @@ end
 
 function Combat:StartTrackingTarget(target)
     if target then
-        self.losetargetcallback = function() 
-            TargetDisappeared(self, target) 
+        self.losetargetcallback = function()
+            TargetDisappeared(self, target)
         end
         self.inst:ListenForEvent("enterlimbo", self.losetargetcallback, target)
         self.inst:ListenForEvent("onremove", self.losetargetcallback, target)
@@ -431,6 +431,9 @@ function Combat:SetHurtSound(sound)
 end
 
 function Combat:GetAttacked(attacker, damage, weapon, stimuli)
+    if self.inst.components.health and self.inst.components.health:IsDead() then
+        return true
+    end
     self.lastwasattackedtime = GetTime()
 
     --print ("ATTACKED", self.inst, attacker, damage)
@@ -451,7 +454,7 @@ function Combat:GetAttacked(attacker, damage, weapon, stimuli)
         if damage > 0 and not self.inst.components.health:IsInvincible() then
             --Bonus damage only applies after unabsorbed damage gets through your armor
             if attacker ~= nil and attacker.components.combat ~= nil and attacker.components.combat.bonusdamagefn ~= nil then
-                damage = damage + attacker.components.combat.bonusdamagefn(attacker, self.inst, damage, weapon) or 0
+                damage = (damage + attacker.components.combat.bonusdamagefn(attacker, self.inst, damage, weapon)) or 0
             end
 
             local cause = attacker == self.inst and weapon or attacker
@@ -652,7 +655,7 @@ function Combat:LocomotorCanAttack(reached_dest, target)
 end
 
 function Combat:TryAttack(target)
-    local target = target or self.target 
+    local target = target or self.target
 
     local is_attacking = self.inst.sg:HasStateTag("attack")
     if is_attacking then
@@ -807,7 +810,7 @@ end
 
 function Combat:CanExtinguishTarget(target, weapon)
 	local burnable = target.components.burnable
-    return burnable ~= nil 
+    return burnable ~= nil
         and (burnable:IsSmoldering() or burnable:IsBurning())
         and (weapon ~= nil and weapon:HasTag("extinguisher") or self.inst:HasTag("extinguisher"))
 end
@@ -980,27 +983,12 @@ function Combat:IsAlly(guy)
     return self.inst.replica.combat:IsAlly(guy)
 end
 
+function Combat:TargetHasFriendlyLeader(target)
+    return self.inst.replica.combat:TargetHasFriendlyLeader(target)
+end
+
 function Combat:CanBeAttacked(attacker)
     return self.inst.replica.combat:CanBeAttacked(attacker)
-end
-
-function Combat:OnSave()
-    if self.target ~= nil and
-        self.target:IsValid() and --This is possible because invalid targets may be released by brain polling rather than events
-        self.target.persists and --Pets and such don't save normally, so references would not work on them
-        not (self.inst:HasTag("player") or
-            self.target:HasTag("player")) then
-        return { target = self.target.GUID }, { self.target.GUID }
-    end
-end
-
-function Combat:LoadPostPass(newents, data)
-    if data.target ~= nil then
-        local target = newents[data.target]
-        if target ~= nil then
-            self:SetTarget(target.entity)
-        end
-    end
 end
 
 function Combat:OnRemoveFromEntity()

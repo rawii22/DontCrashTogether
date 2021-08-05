@@ -4,8 +4,6 @@ local INSPIRATION_BATTLESONG_DEFS = require("prefabs/battlesongdefs")
 
 local fns = {} -- a table to store local functions in so that we don't hit the 60 upvalues limit
 
-local fns = {} -- a table to store local functions in so that we don't hit the 60 upvalues limit
-
 --------------------------------------------------------------------------
 --Server interface
 --------------------------------------------------------------------------
@@ -59,7 +57,9 @@ local function OnHungerDelta(parent, data)
 end
 
 local function UpdateAnimOverrideSanity(parent)
-    parent.AnimState:SetClientSideBuildOverrideFlag("insane", parent.replica.sanity:IsInsanityMode() and (parent.replica.sanity:GetPercentNetworked() <= (parent:HasTag("dappereffects") and TUNING.DAPPER_BEARDLING_SANITY or TUNING.BEARDLING_SANITY)))
+    local isinsane = parent.replica.sanity:IsInsanityMode() and (parent.replica.sanity:GetPercentNetworked() <= (parent:HasTag("dappereffects") and TUNING.DAPPER_BEARDLING_SANITY or TUNING.BEARDLING_SANITY))
+    parent.AnimState:SetClientSideBuildOverrideFlag("insane", isinsane)
+    parent:SetClientSideInventoryImageOverrideFlag("insane", isinsane)
 end
 
 local function OnSanityDelta(parent, data)
@@ -150,6 +150,14 @@ end
 
 local function OnHoundWarning(parent, houndwarningtype)
     SetDirty(parent.player_classified.houndwarningevent, houndwarningtype)
+end
+
+fns.OnPlayThemeMusic = function(parent, data)
+	if data ~= nil then
+		if data.theme == "farming" then
+			parent.player_classified.start_farming_music:push()
+		end
+	end
 end
 
 local function OnMakeFriend(parent)
@@ -542,9 +550,9 @@ end
 --Common interface
 --------------------------------------------------------------------------
 
-local function OnSandstormLevelDirty(inst)
+local function OnStormLevelDirty(inst)
     if inst._parent ~= nil then
-        inst._parent:PushEvent("sandstormlevel", { level = inst.sandstormlevel:value() / 7 })
+        inst._parent:PushEvent("stormlevel", { level = inst.stormlevel:value() / 7, stormtype = inst.stormtype:value() }) --
     end
 end
 
@@ -663,64 +671,15 @@ local function OnPlayerCameraDirty(inst)
     end
 end
 
-local function OnIsWardrobePopUpVisibleDirty(inst)
+fns.OnYotbSkinDirty = function(inst)
     if inst._parent ~= nil and inst._parent.HUD ~= nil then
-        if not inst.iswardrobepopupvisible:value() then
-            inst._parent.HUD:CloseWardrobeScreen()
-        elseif not inst._parent.HUD:OpenWardrobeScreen(inst.wardrobetarget:value()) then
-            if not TheWorld.ismastersim then
-                SendRPCToServer(RPC.CloseWardrobe)
-            else
-                inst._parent:PushEvent("ms_closewardrobe")
-            end
+        if inst.hasyotbskin:value() then
+            TheFocalPoint.SoundEmitter:PlaySound("dontstarve/HUD/get_gold")
         end
+        inst._parent:PushEvent("yotbskinupdate", {
+            active = inst.hasyotbskin:value() or false,
+        })
     end
-end
-
-local function OnIsGiftItemPopUpVisibleDirty(inst)
-    if inst._parent ~= nil and inst._parent.HUD ~= nil then
-        if not inst.isgiftitempopupvisible:value() then
-            inst._parent.HUD:CloseItemManagerScreen()
-        elseif not inst._parent.HUD:OpenItemManagerScreen() then
-            if not TheWorld.ismastersim then
-                SendRPCToServer(RPC.DoneOpenGift)
-            elseif inst._parent.components.giftreceiver ~= nil then
-                inst._parent.components.giftreceiver:OnStopOpenGift()
-            end
-        end
-    end
-end
-
-fns.OnIsCookbookPopUpVisibleDirty = function(inst)
-    if inst._parent ~= nil and inst._parent.HUD ~= nil then
-        if not inst.iscookbookpopupvisible:value() then
-            inst._parent.HUD:CloseCookbookScreen()
-        elseif not inst._parent.HUD:OpenCookbookScreen() then
-            if not TheWorld.ismastersim then
-				SendRPCToServer(RPC.CloseCookbookScreen)
-            else
-                inst._parent:PushEvent("ms_closecookbookscreen")
-            end
-        end
-    end
-end
-
-fns.OnIsCookbookProductDirty = function(inst)
-	local cookbookupdater = inst._parent.components.cookbookupdater
-	if cookbookupdater then
-		local data = string.split(inst.cookbook_product:value(), ":")
-		local product = data[1]
-		local ingredients = data[2] ~= nil and string.split(data[2], ",") or nil
-		dumptable(ingredients)
-		cookbookupdater:LearnRecipe(product, ingredients)
-	end
-end
-
-fns.OnIsCookbookLearnStatsDirty = function(inst)
-	local cookbookupdater = inst._parent.components.cookbookupdater
-	if cookbookupdater then
-		cookbookupdater:LearnFoodStats(inst.cookbook_learnstats:value())
-	end
 end
 
 local function OnGiftsDirty(inst)
@@ -783,28 +742,32 @@ end
 
 local function OnHoundWarningDirty(inst)
     if inst._parent ~= nil and inst._parent.HUD ~= nil then
-        local soundprefab = nil        
-        if inst._parent.player_classified.houndwarningevent:value() == HOUNDWARNINGTYPE.LVL1 then            
+        local soundprefab = nil
+        if inst._parent.player_classified.houndwarningevent:value() == HOUNDWARNINGTYPE.LVL1 then
             soundprefab = "houndwarning_lvl1"
-        elseif inst._parent.player_classified.houndwarningevent:value() == HOUNDWARNINGTYPE.LVL2 then            
+        elseif inst._parent.player_classified.houndwarningevent:value() == HOUNDWARNINGTYPE.LVL2 then
             soundprefab = "houndwarning_lvl2"
-        elseif inst._parent.player_classified.houndwarningevent:value() == HOUNDWARNINGTYPE.LVL3 then            
+        elseif inst._parent.player_classified.houndwarningevent:value() == HOUNDWARNINGTYPE.LVL3 then
             soundprefab = "houndwarning_lvl3"
-        elseif inst._parent.player_classified.houndwarningevent:value() == HOUNDWARNINGTYPE.LVL4 then            
+        elseif inst._parent.player_classified.houndwarningevent:value() == HOUNDWARNINGTYPE.LVL4 then
             soundprefab = "houndwarning_lvl4"
-        elseif inst._parent.player_classified.houndwarningevent:value() == HOUNDWARNINGTYPE.LVL1_WORM then            
+        elseif inst._parent.player_classified.houndwarningevent:value() == HOUNDWARNINGTYPE.LVL1_WORM then
             soundprefab = "wormwarning_lvl1"
-        elseif inst._parent.player_classified.houndwarningevent:value() == HOUNDWARNINGTYPE.LVL2_WORM then            
+        elseif inst._parent.player_classified.houndwarningevent:value() == HOUNDWARNINGTYPE.LVL2_WORM then
             soundprefab = "wormwarning_lvl2"
-        elseif inst._parent.player_classified.houndwarningevent:value() == HOUNDWARNINGTYPE.LVL3_WORM then            
+        elseif inst._parent.player_classified.houndwarningevent:value() == HOUNDWARNINGTYPE.LVL3_WORM then
             soundprefab = "wormwarning_lvl3"
-        elseif inst._parent.player_classified.houndwarningevent:value() == HOUNDWARNINGTYPE.LVL4_WORM then            
-            soundprefab = "wormwarning_lvl4"            
-        end        
-        if soundprefab then       
+        elseif inst._parent.player_classified.houndwarningevent:value() == HOUNDWARNINGTYPE.LVL4_WORM then
+            soundprefab = "wormwarning_lvl4"
+        end
+        if soundprefab then
             local sound = SpawnPrefab(soundprefab)
         end
     end
+end
+
+fns.StartFarmingMusicEvent = function(inst)
+	inst._parent:PushEvent("playfarmingmusic")
 end
 
 local function OnMakeFriendEvent(inst)
@@ -858,22 +821,6 @@ fns.EnableMapControls = function(inst, enable)
     OnPlayerHUDDirty(inst)
 end
 
-fns.ShowWardrobePopUp = function(inst, show, target)
-    inst.iswardrobepopupvisible:set(show)
-    inst.wardrobetarget:set(target)
-    OnIsWardrobePopUpVisibleDirty(inst)
-end
-
-fns.ShowGiftItemPopUp = function(inst, show)
-    inst.isgiftitempopupvisible:set(show)
-    OnIsGiftItemPopUpVisibleDirty(inst)
-end
-
-fns.ShowCookbookPopUp = function(inst, show)
-    inst.iscookbookpopupvisible:set(show)
-    fns.OnIsCookbookPopUpVisibleDirty(inst)
-end
-
 --------------------------------------------------------------------------
 
 local function RegisterNetListeners(inst)
@@ -896,7 +843,8 @@ local function RegisterNetListeners(inst)
         inst:ListenForEvent("wormholetravel", OnWormholeTravel, inst._parent)
         inst:ListenForEvent("makefriend", OnMakeFriend, inst._parent)
         inst:ListenForEvent("feedincontainer", OnFeedInContainer, inst._parent)
-        inst:ListenForEvent("houndwarning", OnHoundWarning, inst._parent)       
+        inst:ListenForEvent("houndwarning", OnHoundWarning, inst._parent)
+        inst:ListenForEvent("play_theme_music", fns.OnPlayThemeMusic, inst._parent)
     else
         inst.ishealthpulseup:set_local(false)
         inst.ishealthpulsedown:set_local(false)
@@ -932,12 +880,7 @@ local function RegisterNetListeners(inst)
         inst:ListenForEvent("playercamerashake", OnPlayerCameraShake)
         inst:ListenForEvent("playerscreenflashdirty", OnPlayerScreenFlashDirty)
         inst:ListenForEvent("attunedresurrectordirty", OnAttunedResurrectorDirty)
-        inst:ListenForEvent("iswardrobepopupvisibledirty", OnIsWardrobePopUpVisibleDirty)
-        inst:ListenForEvent("isgiftitempopupvisibledirty", OnIsGiftItemPopUpVisibleDirty)
-        inst:ListenForEvent("iscookbookpopupvisibledirty", fns.OnIsCookbookPopUpVisibleDirty)
-		inst:ListenForEvent("iscookbookproductdirty", fns.OnIsCookbookProductDirty)
-		inst:ListenForEvent("iscookbooklearnstatsdirty", fns.OnIsCookbookLearnStatsDirty)
-		
+
 
         OnIsTakingFireDamageDirty(inst)
         OnTemperatureDirty(inst)
@@ -953,7 +896,7 @@ local function RegisterNetListeners(inst)
         end
     end
 
-    inst:ListenForEvent("sandstormleveldirty", OnSandstormLevelDirty)
+    inst:ListenForEvent("stormleveldirty", OnStormLevelDirty)
     inst:ListenForEvent("hasinspirationbuffdirty", fns.OnHasInspirationBuffDirty)
     inst:ListenForEvent("builder.build", OnBuildEvent)
     inst:ListenForEvent("builder.damaged", OnBuilderDamagedEvent)
@@ -963,6 +906,7 @@ local function RegisterNetListeners(inst)
 	inst:ListenForEvent("MapSpotRevealer.revealmapspot", OnRevealMapSpotEvent)
     inst:ListenForEvent("repair.repair", OnRepairEvent)
     inst:ListenForEvent("giftsdirty", OnGiftsDirty)
+    inst:ListenForEvent("yotbskindirty", fns.OnYotbSkinDirty)
     inst:ListenForEvent("ismounthurtdirty", OnMountHurtDirty)
     inst:ListenForEvent("playercameradirty", OnPlayerCameraDirty)
     inst:ListenForEvent("playercamerasnap", OnPlayerCameraSnap)
@@ -971,16 +915,15 @@ local function RegisterNetListeners(inst)
     inst:ListenForEvent("leader.makefriend", OnMakeFriendEvent)
     inst:ListenForEvent("eater.feedincontainer", OnFeedInContainerEvent)
     inst:ListenForEvent("morguedirty", OnMorgueDirty)
-    inst:ListenForEvent("houndwarningdirty", OnHoundWarningDirty)   
-    OnSandstormLevelDirty(inst)
+    inst:ListenForEvent("houndwarningdirty", OnHoundWarningDirty)
+	inst:ListenForEvent("startfarmingmusicevent", fns.StartFarmingMusicEvent)
+    OnStormLevelDirty(inst)
     OnGiftsDirty(inst)
+    fns.OnYotbSkinDirty(inst)
     OnMountHurtDirty(inst)
     OnGhostModeDirty(inst)
     OnPlayerHUDDirty(inst)
     OnPlayerCameraDirty(inst)
-    OnIsWardrobePopUpVisibleDirty(inst)
-    OnIsGiftItemPopUpVisibleDirty(inst)
-    fns.OnIsCookbookPopUpVisibleDirty(inst)
 
     --Fade is initialized by OnPlayerActivated in gamelogic.lua
 end
@@ -1049,9 +992,9 @@ local function fn()
 		net_tinybyte(inst.GUID, "inspiration.song3", "inspirationsong3dirty"),
 	}
     inst.hasinspirationbuff = net_bool(inst.GUID, "inspiration.hasbuff", "hasinspirationbuffdirty")
-	
+
 	-- available_slots maybe?
-	
+
 
     --Temperature variables
     inst._oldtemperature = TUNING.STARTING_TEMP
@@ -1067,7 +1010,8 @@ local function fn()
     inst.maxmoisture:set(100)
 
     --StormWatcher variables
-    inst.sandstormlevel = net_tinybyte(inst.GUID, "stormwatcher.sandstormlevel", "sandstormleveldirty")
+    inst.stormlevel = net_tinybyte(inst.GUID, "stormwatcher.stormlevel", "stormleveldirty")
+    inst.stormtype = net_tinybyte(inst.GUID, "stormwatcher.stormtype")
 
     --Inked variables
     inst.inked = net_event(inst.GUID, "inked")
@@ -1104,7 +1048,11 @@ local function fn()
     inst.fadetime = net_smallbyte(inst.GUID, "frontend.fadetime", "playerfadedirty")
     inst.screenflash = net_tinybyte(inst.GUID, "frontend.screenflash", "playerscreenflashdirty")
     inst.wormholetravelevent = net_tinybyte(inst.GUID, "frontend.wormholetravel", "wormholetraveldirty")
-    inst.houndwarningevent = net_tinybyte(inst.GUID, "frontend.houndwarning", "houndwarningdirty")        
+    inst.houndwarningevent = net_tinybyte(inst.GUID, "frontend.houndwarning", "houndwarningdirty")
+
+	-- busy theme music
+    inst.start_farming_music = net_event(inst.GUID, "startfarmingmusicevent")
+
     inst.isfadein:set(true)
 
     --Builder variables
@@ -1144,19 +1092,12 @@ local function fn()
     --Repair variables
     inst.repairevent = net_event(inst.GUID, "repair.repair")
 
-    --Wardrobe variables
-    inst.iswardrobepopupvisible = net_bool(inst.GUID, "wardrobe.iswardrobepopupvisible", "iswardrobepopupvisibledirty")
-    inst.wardrobetarget = net_entity(inst.GUID, "wardrobe.wardrobetarget")
+    -- Groomer variables
+    inst.hasyotbskin = net_bool(inst.GUID, "groomer.hasyotbskin", "yotbskindirty")
 
     --GiftReceiver variables
     inst.hasgift = net_bool(inst.GUID, "giftreceiver.hasgift", "giftsdirty")
     inst.hasgiftmachine = net_bool(inst.GUID, "giftreceiver.hasgiftmachine", "giftsdirty")
-    inst.isgiftitempopupvisible = net_bool(inst.GUID, "giftreceiver.isgiftitempopupvisible", "isgiftitempopupvisibledirty")
-
-    --Coobook variables
-    inst.iscookbookpopupvisible = net_bool(inst.GUID, "cookbook.iscookbookpopupvisible", "iscookbookpopupvisibledirty")
-    inst.cookbook_product = net_string(inst.GUID, "cookbook.product", "iscookbookproductdirty")
-    inst.cookbook_learnstats = net_string(inst.GUID, "cookbook.learnstats", "iscookbooklearnstatsdirty")
 
     --Combat variables
     inst.lastcombattarget = net_entity(inst.GUID, "combat.lasttarget")
@@ -1230,9 +1171,6 @@ local function fn()
     inst.ShowActions = fns.ShowActions
     inst.ShowHUD = fns.ShowHUD
     inst.EnableMapControls = fns.EnableMapControls
-    inst.ShowWardrobePopUp = fns.ShowWardrobePopUp
-    inst.ShowGiftItemPopUp = fns.ShowGiftItemPopUp
-    inst.ShowCookbookPopUp = fns.ShowCookbookPopUp
 
     inst.persists = false
 

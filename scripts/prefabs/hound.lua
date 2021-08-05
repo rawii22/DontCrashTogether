@@ -34,7 +34,7 @@ local prefabs_clay =
     "eyeflame",
 }
 
-local gargoyles = 
+local gargoyles =
 {
     "gargoyle_houndatk",
     "gargoyle_hounddeath",
@@ -377,12 +377,12 @@ local function OnStopFollowing(inst)
 end
 
 local function CanMutateFromCorpse(inst)
+    if not TUNING.SPAWN_MUTATED_HOUNDS then return false end
 	if (inst.components.amphibiouscreature == nil or not inst.components.amphibiouscreature.in_water)
-		and math.random() <= TUNING.MUTATEDHOUND_SPAWN_CHANCE 
-		and TheWorld.Map:IsVisualGroundAtPoint(inst.Transform:GetWorldPosition()) then
+		and math.random() <= TUNING.MUTATEDHOUND_SPAWN_CHANCE then
 
-		local node = TheWorld.Map:FindNodeAtPoint(inst.Transform:GetWorldPosition())
-		return node ~= nil and node.tags ~= nil and table.contains(node.tags, "lunacyarea")
+		local x, y, z = inst.Transform:GetWorldPosition()
+		return TheWorld.Map:IsInLunacyArea(x, y, z)
 	end
 	return false
 end
@@ -455,11 +455,11 @@ local function fncommon(bank, build, morphlist, custombrain, tag, data)
                 inst.components.locomotor.runspeed = TUNING.HOUND_SWIM_SPEED
                 inst.hop_distance = inst.components.locomotor.hop_distance
                 inst.components.locomotor.hop_distance = 4
-            end)            
+            end)
         inst.components.amphibiouscreature:SetExitWaterFn(
             function(inst)
                 if inst.landspeed then
-                    inst.components.locomotor.runspeed = inst.landspeed 
+                    inst.components.locomotor.runspeed = inst.landspeed
                 end
                 if inst.hop_distance then
                     inst.components.locomotor.hop_distance = inst.hop_distance
@@ -469,7 +469,7 @@ local function fncommon(bank, build, morphlist, custombrain, tag, data)
 		inst.components.locomotor.pathcaps = { allowocean = true }
 	end
 
-    
+
 
     inst:SetBrain(custombrain or brain)
 
@@ -504,7 +504,7 @@ local function fncommon(bank, build, morphlist, custombrain, tag, data)
         inst:AddComponent("eater")
         inst.components.eater:SetDiet({ FOODTYPE.MEAT }, { FOODTYPE.MEAT })
         inst.components.eater:SetCanEatHorrible()
-        inst.components.eater.strongstomach = true -- can eat monster meat!
+        inst.components.eater:SetStrongStomach(true) -- can eat monster meat!
 
         inst:AddComponent("sleeper")
         inst.components.sleeper:SetResistance(3)

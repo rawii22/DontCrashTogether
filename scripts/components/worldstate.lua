@@ -94,6 +94,12 @@ local function OnMoonPhaseChanged2(src, data)
     OnCaveMoonPhaseChanged2(src, data)
 end
 
+local function OnAlterAwake(src, data)
+	if data ~= nil and data.stormtype == STORM_TYPES.MOONSTORM then
+	    SetVariable("isalterawake", data.setting)
+	end
+end
+
 local function OnNightmareClockTick(src, data)
     SetVariable("nightmaretime", data.time)
     SetVariable("nightmaretimeinphase", data.timeinphase)
@@ -182,6 +188,7 @@ self.data.moonphase = "new"
 self.data.iswaxingmoon = true
 self.data.isfullmoon = false
 self.data.isnewmoon = false
+self.data.isalterawake = false
 
 --Cave clock
 self.data.cavephase = "day"
@@ -197,6 +204,8 @@ inst:ListenForEvent("clocktick", OnClockTick)
 inst:ListenForEvent("cycleschanged", OnCyclesChanged)
 inst:ListenForEvent("phasechanged", _iscave and OnCavePhaseChanged or OnPhaseChanged)
 inst:ListenForEvent("moonphasechanged2", _iscave and OnCaveMoonPhaseChanged2 or OnMoonPhaseChanged2)
+
+inst:ListenForEvent("ms_stormchanged", OnAlterAwake)
 
 --Nightmareclock
 self.data.nightmarephase = "none" -- note, this phase doesn't "exist", but if there is no nightmare clock, this is what you'll see.
@@ -217,6 +226,7 @@ self.data.issummer = false
 self.data.isautumn = true
 self.data.iswinter = false
 self.data.elapseddaysinseason = 0
+self.data.seasonprogress = 0
 self.data.remainingdaysinseason = math.ceil(TUNING.AUTUMN_LENGTH * .5)
 self.data.autumnlength = TUNING.AUTUMN_LENGTH
 self.data.winterlength = TUNING.WINTER_LENGTH

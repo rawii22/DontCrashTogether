@@ -20,11 +20,19 @@ function VecUtil_Length(p1_x, p1_z)
     return sqrt(p1_x * p1_x + p1_z * p1_z)
 end
 
+function VecUtil_DistSq(p1_x, p1_z, p2_x, p2_z)
+    return (p1_x - p2_x) * (p1_x - p2_x) + (p1_z - p2_z) * (p1_z - p2_z)
+end
+
+function VecUtil_Dist(p1_x, p1_z, p2_x, p2_z)
+    return sqrt((p1_x - p2_x) * (p1_x - p2_x) + (p1_z - p2_z) * (p1_z - p2_z))
+end
+
 function VecUtil_Dot(p1_x, p1_z, p2_x, p2_z)
 	return p1_x * p2_x + p1_z * p2_z
 end
 
-function VecUtil_Lerp(p1_x, p1_z, p2_x, p2_z, percent)	
+function VecUtil_Lerp(p1_x, p1_z, p2_x, p2_z, percent)
 	return (p2_x - p1_x) * percent + p1_x,  (p2_z - p1_z) * percent + p1_z
 end
 
@@ -70,7 +78,7 @@ function VecUtil_Slerp(p1_x, p1_z, p2_x, p2_z, percent)
 		end
 	end
 
-	local lerped_angle = Lerp(p1_angle, p2_angle, percent)	
+	local lerped_angle = Lerp(p1_angle, p2_angle, percent)
 
 	local cos_lerped_angle = math.cos(lerped_angle)
 	local sin_lerped_angle = math.sin(lerped_angle)

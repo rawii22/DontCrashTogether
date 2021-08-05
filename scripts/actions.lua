@@ -62,6 +62,30 @@ local function CheckOceanFishingCastRange(doer, dest)
 	end
 end
 
+local function CheckTileWithinRange(doer, dest)
+	local doer_pos = doer:GetPosition()
+	local target_pos = Vector3(dest:GetPoint())
+
+    local tile_x, tile_y, tile_z = TheWorld.Map:GetTileCenterPoint(target_pos.x, 0, target_pos.z)
+    local dist = TILE_SCALE * 0.5
+    if math.abs(tile_x - doer_pos.x) <= dist and math.abs(tile_z - doer_pos.z) <= dist then
+        return true
+    end
+end
+
+local function ShowPourWaterTilePlacer(right_mouse_action)
+    if right_mouse_action ~= nil then
+
+        if right_mouse_action.target ~= nil and right_mouse_action.target:HasTag("farm_plant") then
+            local x, y, z = right_mouse_action.target.Transform:GetWorldPosition()
+            return TheWorld.Map:IsFarmableSoilAtPoint(x, y, z)
+        else
+            -- If there is no target while hovering farm turf the POUR_WATER_GROUNDTILE point action will have taken priority anyway
+            return false
+        end
+    end
+end
+
 local function ExtraPickupRange(doer, dest)
 	if dest ~= nil then
 		local target_x, target_y, target_z = dest:GetPoint()
@@ -96,6 +120,25 @@ local function ExtraDropDist(doer, dest, bufferedaction)
         end
     end
     return 0
+end
+
+local function ExtraPourWaterDist(doer, dest, bufferedaction)
+    return 1.5
+end
+
+global("CLIENT_REQUESTED_ACTION")
+CLIENT_REQUESTED_ACTION = nil
+
+function SetClientRequestedAction(actioncode, mod_name)
+    if mod_name then
+        CLIENT_REQUESTED_ACTION = MOD_ACTIONS_BY_ACTION_CODE[mod_name] and MOD_ACTIONS_BY_ACTION_CODE[mod_name][actioncode]
+    else
+        CLIENT_REQUESTED_ACTION = ACTIONS_BY_ACTION_CODE[actioncode]
+    end
+end
+
+function ClearClientRequestedAction()
+    CLIENT_REQUESTED_ACTION = nil
 end
 
 --Positional parameters have been deprecated, pass in a table instead.
@@ -135,6 +178,10 @@ Action = Class(function(self, data, instant, rmb, distance, ghost_valid, ghost_e
     self.skip_locomotor_facing = data.skip_locomotor_facing
     self.do_not_locomote = data.do_not_locomote
     self.extra_arrive_dist = data.extra_arrive_dist
+    self.tile_placer = data.tile_placer
+    self.show_tile_placer_fn = data.show_tile_placer_fn
+	self.theme_music = data.theme_music
+	self.theme_music_fn = data.theme_music_fn -- client side function
 end)
 
 -- NOTE: High priority is intended to be a shortcut flag for actions that we expect to always dominate if they are available.
@@ -148,10 +195,10 @@ ACTIONS =
     DROP = Action({ priority=-1, mount_valid=true, encumbered_valid=true, is_relative_to_platform=true, extra_arrive_dist=ExtraDropDist }),
     TRAVEL = Action(),
     CHOP = Action(),
-    ATTACK = Action({ priority=2, canforce=true, mount_valid=true }), -- No custom range check, attack already handles that
+    ATTACK = Action({priority=2, canforce=true, mount_valid=true }), -- No custom range check, attack already handles that
     EAT = Action({ mount_valid=true }),
-    PICK = Action({ canforce=true, rangecheckfn=DefaultRangeCheck, extra_arrive_dist=ExtraPickupRange }),
-    PICKUP = Action({ priority=1, extra_arrive_dist=ExtraPickupRange }),
+    PICK = Action({ canforce=true, rangecheckfn=DefaultRangeCheck, extra_arrive_dist=ExtraPickupRange, mount_valid = true }),
+    PICKUP = Action({ priority=1, extra_arrive_dist=ExtraPickupRange, mount_valid=true }),
     MINE = Action(),
     DIG = Action({ rmb=true }),
     GIVE = Action({ mount_valid=true, canforce=true, rangecheckfn=DefaultRangeCheck }),
@@ -161,6 +208,7 @@ ACTIONS =
     DECORATEVASE = Action(),
     COOK = Action({ priority=1, mount_valid=true }),
     FILL = Action(),
+    FILL_OCEAN = Action({ is_relative_to_platform=true, extra_arrive_dist=ExtraDropDist }),
     DRY = Action(),
     ADDFUEL = Action({ mount_valid=true }),
     ADDWETFUEL = Action({ mount_valid=true }),
@@ -169,14 +217,19 @@ ACTIONS =
     LOOKAT = Action({ priority=-3, instant=true, ghost_valid=true, mount_valid=true, encumbered_valid=true }),
     TALKTO = Action({ priority=3, instant=true, mount_valid=true, encumbered_valid=true }),
     WALKTO = Action({ priority=-4, ghost_valid=true, mount_valid=true, encumbered_valid=true }),
+    INTERACT_WITH = Action({ distance=1.5, mount_valid=true }),
     BAIT = Action(),
-    CHECKTRAP = Action({ priority=2 }),
+    CHECKTRAP = Action({ priority=2, mount_valid=true }),
     BUILD = Action({ mount_valid=true }),
     PLANT = Action(),
     HARVEST = Action(),
     GOHOME = Action(),
     SLEEPIN = Action(),
     CHANGEIN = Action({ priority=-1 }),
+    HITCHUP = Action({ priority=-1 }),
+    MARK = Action({ distance=2, priority=-1 }),
+    UNHITCH = Action({ distance=2, priority=-1 }),
+    HITCH = Action({ priority=-1 }),
     EQUIP = Action({ priority=0,instant=true, mount_valid=true, encumbered_valid=true }),
     UNEQUIP = Action({ priority=-2,instant=true, mount_valid=true, encumbered_valid=true }),
     --OPEN_SHOP = Action(),
@@ -184,6 +237,7 @@ ACTIONS =
     STORE = Action(),
     RUMMAGE = Action({ priority=-1, mount_valid=true }),
     DEPLOY = Action({distance=1.1, extra_arrive_dist=ExtraDeployDist}),
+    DEPLOY_TILEARRIVE = Action({customarrivecheck=CheckTileWithinRange, theme_music = "farming"}), -- Note: If this is used for non-farming in the future, this would need to be swapped to theme_music_fn
     PLAY = Action({ mount_valid=true }),
     CREATE = Action(),
     JOIN = Action(),
@@ -199,12 +253,12 @@ ACTIONS =
     OCEAN_FISHING_CATCH = Action({priority=6, instant=true}),
     CHANGE_TACKLE = Action({priority=3, rmb=true, instant=true, mount_valid=true}), -- this is now a generic "put item into the container of the equipped hand item"
     POLLINATE = Action(),
-    FERTILIZE = Action({ mount_valid=true }),
-    SMOTHER = Action({ priority=1 }),
+    FERTILIZE = Action({priority=1, mount_valid=true }),
+    SMOTHER = Action({ priority=1, mount_valid=true }),
     MANUALEXTINGUISH = Action({ priority=1 }),
     LAYEGG = Action(),
     HAMMER = Action({ priority=3 }),
-    TERRAFORM = Action(),
+    TERRAFORM = Action({ tile_placer="gridplacer" }),
     JUMPIN = Action({ ghost_valid=true, encumbered_valid=true }),
     TELEPORT = Action({ rmb=true, distance=2 }),
     RESETMINE = Action({ priority=3 }),
@@ -220,11 +274,13 @@ ACTIONS =
     SEW = Action({ mount_valid=true }),
     STEAL = Action(),
     USEITEM = Action({ priority=1, instant=true }),
+    USEITEMON = Action({ distance=2, priority=1 }),
+    STOPUSINGITEM = Action({ priority=1 }),
     TAKEITEM = Action(),
     MAKEBALLOON = Action({ mount_valid=true }),
     CASTSPELL = Action({ priority=-1, rmb=true, distance=20, mount_valid=true }),
     BLINK = Action({ priority=HIGH_ACTION_PRIORITY, rmb=true, distance=36, mount_valid=true }),
-    COMBINESTACK = Action({ mount_valid=true }),
+    COMBINESTACK = Action({ mount_valid=true, extra_arrive_dist=ExtraPickupRange }),
     TOGGLE_DEPLOY_MODE = Action({ priority=HIGH_ACTION_PRIORITY, instant=true }),
     SUMMONGUARDIAN = Action({ rmb=false, distance=5 }),
     HAUNT = Action({ rmb=false, mindistance=2, ghost_valid=true, ghost_exclusive=true, canforce=true, rangecheckfn=DefaultRangeCheck }),
@@ -250,7 +306,7 @@ ACTIONS =
     STARTCHANNELING = Action({ distance=2.1 }),
     STOPCHANNELING = Action({ instant=true, distance=2.1 }),
 	APPLYPRESERVATIVE = Action(),
-	COMPARE_WEIGHABLE = Action(),
+    COMPARE_WEIGHABLE = Action({ encumbered_valid=true, priority=HIGH_ACTION_PRIORITY }),
 	WEIGH_ITEM = Action(),
 	START_CARRAT_RACE = Action({ rmb = true }),
     CASTSUMMON = Action({ rmb=true, mount_valid=true }),
@@ -258,7 +314,7 @@ ACTIONS =
 	COMMUNEWITHSUMMONED = Action({ rmb=true, mount_valid=true }),
     TELLSTORY = Action({ rmb=true, distance=3 }),
 
-    TOSS = Action({ rmb=true, distance=8, mount_valid=true }),
+    TOSS = Action({priority=1, rmb=true, distance=8, mount_valid=true }),
     NUZZLE = Action(),
     WRITE = Action(),
     ATTUNE = Action(),
@@ -291,8 +347,8 @@ ACTIONS =
     SING_FAIL = Action({ rmb=true, mount_valid=true }),
 
     --Quagmire
-    TILL = Action({ distance=0.5 }),
-    PLANTSOIL = Action(),
+    TILL = Action({ distance=0.5, theme_music = "farming" }),
+    PLANTSOIL = Action({ theme_music = "farming" }),
     INSTALL = Action(),
     TAPTREE = Action({priority=1, rmb=true}),
     SLAUGHTER = Action({ canforce=true, rangecheckfn=DefaultRangeCheck }),
@@ -306,16 +362,16 @@ ACTIONS =
 
     -- boats
     RAISE_SAIL = Action({ distance=1.25 }),
-    LOWER_SAIL = Action({ distance=1.25 }),    
+    LOWER_SAIL = Action({ distance=1.25 }),
     LOWER_SAIL_BOOST = Action({ distance=1.25 }),
-    LOWER_SAIL_FAIL = Action({ distance=1.25, do_not_locomote=true }),    
+    LOWER_SAIL_FAIL = Action({ distance=1.25, do_not_locomote=true }),
     RAISE_ANCHOR = Action({ distance=2.5 }),
     LOWER_ANCHOR = Action({ distance=2.5 }),
     EXTEND_PLANK = Action({ distance=2.5 }),
-    RETRACT_PLANK = Action({ distance=2.5 }),             
-    ABANDON_SHIP = Action({ distance=2.5, priority=4 }),             
-    MOUNT_PLANK = Action({ distance=0.5 }),            
-    DISMOUNT_PLANK = Action({ distance=2.5 }),            
+    RETRACT_PLANK = Action({ distance=2.5 }),
+    ABANDON_SHIP = Action({ distance=2.5, priority=4 }),
+    MOUNT_PLANK = Action({ distance=0.5 }),
+    DISMOUNT_PLANK = Action({ distance=2.5 }),
     REPAIR_LEAK = Action({ distance=2.5 }),
     STEER_BOAT = Action({ distance=0.1 }),
     SET_HEADING = Action({distance=9999, do_not_locomote=true}),
@@ -323,10 +379,35 @@ ACTIONS =
     CAST_NET = Action({ priority=HIGH_ACTION_PRIORITY, rmb=true, distance=12, mount_valid=true, disable_platform_hopping=true }),
     ROW_FAIL = Action({customarrivecheck=function() return true end, disable_platform_hopping=true, skip_locomotor_facing=true}),
     ROW = Action({priority=3, customarrivecheck=CheckRowRange, is_relative_to_platform=true, disable_platform_hopping=true}),
-    ROW_CONTROLLER = Action({priority=3, is_relative_to_platform=true, disable_platform_hopping=true, do_not_locomote=true}),    
+    ROW_CONTROLLER = Action({priority=3, is_relative_to_platform=true, disable_platform_hopping=true, do_not_locomote=true}),
     BOARDPLATFORM = Action({ customarrivecheck=CheckIsOnPlatform }),
     OCEAN_TOSS = Action({priority=3, rmb=true, customarrivecheck=CheckOceanFishingCastRange, is_relative_to_platform=true, disable_platform_hopping=true}),
     UNPATCH = Action({ distance=0.5 }),
+    POUR_WATER = Action({rmb=true, tile_placer="gridplacer", show_tile_placer_fn=ShowPourWaterTilePlacer, extra_arrive_dist=ExtraPourWaterDist }),
+    POUR_WATER_GROUNDTILE = Action({rmb=true, customarrivecheck=CheckTileWithinRange, tile_placer="gridplacer", theme_music = "farming" }),
+    PLANTREGISTRY_RESEARCH_FAIL = Action({ priority = -1 }),
+    PLANTREGISTRY_RESEARCH = Action({ priority = HIGH_ACTION_PRIORITY }),
+    ASSESSPLANTHAPPINESS = Action({ priority = 1 }),
+    ATTACKPLANT = Action(),
+    PLANTWEED = Action(),
+    ADDCOMPOSTABLE = Action(),
+    WAX = Action({ encumbered_valid = true, }),
+    APPRAISE = Action(),
+
+    CARNIVAL_HOST_SUMMON = Action(),
+
+    -- YOTB
+    YOTB_SEW = Action({ priority=1, mount_valid=true }),
+    YOTB_STARTCONTEST = Action(),
+    YOTB_UNLOCKSKIN = Action(),
+
+	CARNIVALGAME_FEED = Action({ mount_valid=true }),
+
+    -- WEBBER
+    MUTATE_SPIDER = Action({priority = 2}),
+    HERD_FOLLOWERS = Action({ mount_valid=true }),
+    REPEL = Action({ mount_valid=true }),
+    BEDAZZLE = Action(),
 }
 
 ACTIONS_BY_ACTION_CODE = {}
@@ -340,9 +421,23 @@ for k, v in orderedPairs(ACTIONS) do
     ACTIONS_BY_ACTION_CODE[v.code] = v
 end
 
+MOD_ACTIONS_BY_ACTION_CODE = {}
+
 ACTION_MOD_IDS = {} --This will be filled in when mods add actions via AddAction in modutil.lua
 
 ----set up the action functions!
+
+ACTIONS.APPRAISE.fn = function(act)
+    local obj = act.invobject
+    local target = act.target
+    local canappraise, reason = obj.components.appraisable:CanAppraise(target)
+    if canappraise then
+        obj.components.appraisable:Appraise(target)
+        return true
+    elseif reason == "NOTNOW" then
+        return false, "NOTNOW"
+    end
+end
 
 ACTIONS.EAT.fn = function(act)
     local obj = act.target or act.invobject
@@ -437,13 +532,22 @@ ACTIONS.PICKUP.fn = function(act)
 
         if act.doer.components.itemtyperestrictions ~= nil and not act.doer.components.itemtyperestrictions:IsAllowed(act.target) then
             return false, "restriction"
-        elseif act.target.components.container ~= nil and act.target.components.container:IsOpen() and not act.target.components.container:IsOpenedBy(act.doer) then
-            return false, "inuse"
+        elseif act.target.components.container ~= nil and act.target.components.container:IsOpenedByOthers(act.doer) then
+            return false, "INUSE"
         elseif (act.target.components.yotc_racecompetitor ~= nil and act.target.components.entitytracker ~= nil) then
             local trainer = act.target.components.entitytracker:GetEntity("yotc_trainer")
             if trainer ~= nil and trainer ~= act.doer then
                 return false, "NOTMINE_YOTC"
             end
+        end
+
+        if (act.target:HasTag("spider") and act.doer:HasTag("spiderwhisperer")) and 
+           (act.target.components.follower.leader ~= nil and act.target.components.follower.leader ~= act.doer) then
+            return false, "NOTMINE_SPIDER"
+        end
+
+        if act.target.components.inventory ~= nil and act.target:HasTag("drop_inventory_onpickup") then
+            act.target.components.inventory:TransferInventory(act.doer)
         end
 
         act.doer:PushEvent("onpickupitem", { item = act.target })
@@ -478,7 +582,7 @@ ACTIONS.PICKUP.fn = function(act)
 end
 
 ACTIONS.REPAIR.strfn = function(act)
-	return act.target ~= nil 
+	return act.target ~= nil
 			and (act.target:HasTag("repairable_moon_altar") and "SOCKET")
 			or nil
 end
@@ -521,14 +625,14 @@ ACTIONS.RUMMAGE.fn = function(act)
 
     if targ ~= nil and targ.components.container ~= nil then
         if targ.components.container:IsOpenedBy(act.doer) then
-            targ.components.container:Close()
+            targ.components.container:Close(act.doer)
             act.doer:PushEvent("closecontainer", { container = targ })
             return true
         elseif targ:HasTag("mastercookware") and not act.doer:HasTag("masterchef") then
             return false, "NOTMASTERCHEF"
         --elseif targ:HasTag("professionalcookware") and not act.doer:HasTag("professionalchef") then
             --return false, "NOTPROCHEF"
-        elseif targ.components.container:IsOpen() then
+        elseif not targ.components.container:IsOpenedBy(act.doer) and not targ.components.container:CanOpen() then
             return false, "INUSE"
         elseif targ.components.container.canbeopened then
             local owner = targ.components.inventoryitem ~= nil and targ.components.inventoryitem:GetGrandOwner() or nil
@@ -571,7 +675,9 @@ ACTIONS.DROP.fn = function(act)
                 not (act.invobject ~= nil and
                     act.invobject.components.stackable ~= nil and
                     act.invobject.components.stackable.forcedropsingle),
-                false,
+                (act.invobject.components.inventoryitem ~= nil
+                    and act.invobject.components.inventoryitem.droprandomdir)
+                or false,
                 act:GetActionPoint())
         or nil
 end
@@ -635,12 +741,12 @@ local function row(act)
     local oar = act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
 
     if oar == nil then return false end
-    
+
     local pos = act:GetActionPoint()
     if pos == nil then
         pos = act.target:GetPosition()
     end
-    oar.components.oar:Row(act.doer, pos)   
+    oar.components.oar:Row(act.doer, pos)
     act.doer:PushEvent("working",{}) -- it's not actually doing work, but it can fall out of your hand when wet.
     return true
 end
@@ -691,7 +797,7 @@ ACTIONS.OCEAN_FISHING_STOP.fn = function(act)
         act.doer.sg:GoToState("oceanfishing_stop")
 		rod.components.oceanfishingrod:StopFishing("reeledin")
 	end
-	
+
 	return true
 end
 
@@ -701,7 +807,7 @@ ACTIONS.OCEAN_FISHING_CATCH.fn = function(act)
         act.doer.sg:GoToState("oceanfishing_catch")
 		rod.components.oceanfishingrod:CatchFish()
 	end
-	
+
 	return true
 end
 
@@ -718,7 +824,7 @@ ACTIONS.CHANGE_TACKLE.fn = function(act)
 	if act.invobject == nil or equipped == nil or equipped.components.container == nil then
 		return false
 	end
-	
+
 	if act.invobject.components.inventoryitem:IsHeldBy(equipped) then
 		local item = equipped.components.container:RemoveItem(act.invobject, true)
 
@@ -740,7 +846,7 @@ ACTIONS.CHANGE_TACKLE.fn = function(act)
 	        local item = act.invobject.components.inventoryitem:RemoveFromOwner(equipped.components.container.acceptsstacks)
 			equipped.components.container:GiveItem(item, targetslot, nil, false)
 		else
-			if equipped.components.container.acceptsstacks and act.invobject.prefab == cur_item.prefab and act.invobject.skinname == cur_item.skinname 
+			if equipped.components.container.acceptsstacks and act.invobject.prefab == cur_item.prefab and act.invobject.skinname == cur_item.skinname
 				and (cur_item.components.stackable == nil or not cur_item.components.stackable:IsFull()) then -- if full up the stack
 
 		        local item = act.invobject.components.inventoryitem:RemoveFromOwner(equipped.components.container.acceptsstacks)
@@ -758,7 +864,7 @@ ACTIONS.CHANGE_TACKLE.fn = function(act)
 				if not equipped.components.container:GiveItem(item, targetslot, nil, false) then
 					act.doer.components.inventory:GiveItem(item, nil, equipped:GetPosition())
 				end
-				if old_item ~= nil then 
+				if old_item ~= nil then
 					act.doer.components.inventory:GiveItem(old_item, nil, equipped:GetPosition())
 				end
 				return true
@@ -769,7 +875,7 @@ ACTIONS.CHANGE_TACKLE.fn = function(act)
 	return false
 end
 
-ACTIONS.TALKTO.fn = function(act)    
+ACTIONS.TALKTO.fn = function(act)
     local targ = act.target or act.invobject
     if targ and targ.components.talkable then
         act.doer.components.locomotor:Stop()
@@ -779,6 +885,39 @@ ACTIONS.TALKTO.fn = function(act)
                 act.target:PushEvent("talkedto")
                 act.target.task = act.target:StartThread(function() act.target.components.maxwelltalker:DoTalk(act.target) end)
             end
+        end
+        return true
+    end
+end
+
+ACTIONS.INTERACT_WITH.strfn = function(act)
+    return act.target ~= nil
+        and act.target:HasTag("farm_plant") and "FARM_PLANT"
+		or nil
+end
+
+ACTIONS.INTERACT_WITH.fn = function(act)
+	if act.target ~= nil and act.target.components.farmplanttendable ~= nil then
+        if act.target.components.farmplanttendable:TendTo(act.doer) then
+            if act.doer.components.talker ~= nil then
+                act.doer.sg:AddStateTag("idle") -- allow talker state to take over
+                act.doer.components.talker:Say(GetString(act.doer, "ANNOUNCE_TALK_TO_PLANTS"))
+            end
+			return true
+		end
+	end
+end
+ACTIONS.INTERACT_WITH.theme_music_fn = function(act)
+    return act.target ~= nil
+        and act.target:HasTag("farm_plant") and "farming"
+		or nil
+end
+
+ACTIONS.ATTACKPLANT.fn = function(act)
+    if act.target ~= nil and act.target.components.farmplantstress ~= nil then
+        act.target.components.farmplantstress:SetStressed("happiness", true, act.doer)
+        if act.target.components.farmplanttendable then
+            act.target.components.farmplanttendable:SetTendable(true)
         end
         return true
     end
@@ -800,14 +939,18 @@ end
 
 ACTIONS.DEPLOY.fn = function(act)
 	local act_pos = act:GetActionPoint()
-    if act.invobject ~= nil and act.invobject.components.deployable ~= nil and act.invobject.components.deployable:CanDeploy(act_pos, nil, act.doer) then
-        local container = act.doer.components.inventory or act.doer.components.container
-        local obj = container ~= nil and container:RemoveItem(act.invobject) or nil
-        if obj ~= nil then
-            if obj.components.deployable:Deploy(act_pos, act.doer, act.rotation) then
-                return true
-            else
-                container:GiveItem(obj)
+    if act.invobject ~= nil and act.invobject.components.deployable ~= nil and act.invobject.components.deployable:CanDeploy(act_pos, nil, act.doer, act.rotation) then
+        if act.invobject.components.deployable.keep_in_inventory_on_deploy then
+            return act.invobject.components.deployable:Deploy(act_pos, act.doer, act.rotation)
+        else
+            local container = act.doer.components.inventory or act.doer.components.container
+            local obj = container ~= nil and container:RemoveItem(act.invobject) or nil
+            if obj ~= nil then
+                if obj.components.deployable:Deploy(act_pos, act.doer, act.rotation) then
+                    return true
+                else
+                    container:GiveItem(obj)
+                end
             end
         end
     end
@@ -823,8 +966,20 @@ ACTIONS.DEPLOY.strfn = function(act)
                 (act.invobject:HasTag("portableitem") and "PORTABLE") or
                 (act.invobject:HasTag("boatbuilder") and "WATER") or
                 (act.invobject:HasTag("deploykititem") and "TURRET") or
-                (act.invobject:HasTag("eyeturret") and "TURRET")    )
+                (act.invobject:HasTag("eyeturret") and "TURRET") or
+                (act.invobject:HasTag("fertilizer") and "FERTILIZE_GROUND")    )
         or nil
+end
+
+ACTIONS.DEPLOY.theme_music_fn = function(act)
+    return act.invobject ~= nil
+        and act.invobject:HasTag("deployedfarmplant") and "farming"
+		or nil
+end
+
+ACTIONS.DEPLOY_TILEARRIVE.fn = ACTIONS.DEPLOY.fn
+ACTIONS.DEPLOY_TILEARRIVE.stroverridefn = function(act)
+    return STRINGS.ACTIONS.DEPLOY[ACTIONS.DEPLOY.strfn(act) or "GENERIC"]
 end
 
 ACTIONS.TOGGLE_DEPLOY_MODE.strfn = ACTIONS.DEPLOY.strfn
@@ -868,6 +1023,10 @@ local function DoToolWork(act, workaction)
     return false
 end
 
+local function ValidToolWork(act, workaction)
+    return act.target.components.workable ~= nil and act.target.components.workable:CanBeWorked() and act.target.components.workable:GetWorkAction() == workaction
+end
+
 ACTIONS.CHOP.fn = function(act)
     if DoToolWork(act, ACTIONS.CHOP) and
         act.doer ~= nil and
@@ -878,9 +1037,17 @@ ACTIONS.CHOP.fn = function(act)
     return true
 end
 
+ACTIONS.CHOP.validfn = function(act)
+    return ValidToolWork(act, ACTIONS.CHOP)
+end
+
 ACTIONS.MINE.fn = function(act)
     DoToolWork(act, ACTIONS.MINE)
     return true
+end
+
+ACTIONS.MINE.validfn = function(act)
+    return ValidToolWork(act, ACTIONS.MINE)
 end
 
 ACTIONS.HAMMER.fn = function(act)
@@ -888,32 +1055,55 @@ ACTIONS.HAMMER.fn = function(act)
     return true
 end
 
+ACTIONS.HAMMER.validfn = function(act)
+    return ValidToolWork(act, ACTIONS.HAMMER)
+end
+
 ACTIONS.DIG.fn = function(act)
     DoToolWork(act, ACTIONS.DIG)
     return true
 end
 
+ACTIONS.DIG.validfn = function(act)
+    return ValidToolWork(act, ACTIONS.DIG)
+end
+
+ACTIONS.DIG.theme_music_fn = function(act)
+    return act.target ~= nil
+        and (act.target:HasTag("farm_debris") or act.target:HasTag("farm_plant")) and "farming"
+		or nil
+end
+
 ACTIONS.FERTILIZE.fn = function(act)
     if act.invobject ~= nil and act.invobject.components.fertilizer ~= nil then
-        if act.target ~= nil and not (act.doer ~= nil and act.doer.components.rider ~= nil and act.doer.components.rider:IsRiding()) then            
+		local applied = false
+        if not (act.doer ~= nil and act.doer.components.rider ~= nil and act.doer.components.rider:IsRiding()) then
+            if act.target ~= nil then
             if act.target.components.crop ~= nil and not (act.target.components.crop:IsReadyForHarvest() or act.target:HasTag("withered")) then
-                return act.target.components.crop:Fertilize(act.invobject, act.doer)
-            elseif act.target.components.grower ~= nil and act.target.components.grower:IsEmpty() then                
-                act.target.components.grower:Fertilize(act.invobject, act.doer)
-                return true
+                    applied = act.target.components.crop:Fertilize(act.invobject, act.doer)
+            elseif act.target.components.grower ~= nil and act.target.components.grower:IsEmpty() then
+                    applied = act.target.components.grower:Fertilize(act.invobject, act.doer)
             elseif act.target.components.pickable ~= nil and act.target.components.pickable:CanBeFertilized() then
-                act.target.components.pickable:Fertilize(act.invobject, act.doer)
-                TheWorld:PushEvent("CHEVO_fertilized",{target=act.target,doer=act.doer})
-                return true
+                    applied = act.target.components.pickable:Fertilize(act.invobject, act.doer)
+                    TheWorld:PushEvent("CHEVO_fertilized", {target = act.target, doer = act.doer})
             elseif act.target.components.quagmire_fertilizable ~= nil then
-                act.target.components.quagmire_fertilizable:Fertilize(act.invobject, act.doer)
-                return true
+                    applied = act.target.components.quagmire_fertilizable:Fertilize(act.invobject, act.doer)
             end
         end
-        if act.doer ~= nil and (act.target == nil or act.doer == act.target) then
-            return act.invobject.components.fertilizer:Heal(act.doer)
         end
+        if not applied and act.doer ~= nil and (act.target == nil or act.doer == act.target) then
+			if act.doer.components.fertilizable ~= nil then
+				applied = act.doer.components.fertilizable:Fertilize(act.invobject)
+				--applied = act.invobject.components.fertilizer:Heal(act.doer)
+			end
+        end
+
+		if applied then
+			act.invobject.components.fertilizer:OnApplied(act.doer, act.target)
     end
+
+		return applied
+end
 end
 
 ACTIONS.SMOTHER.fn = function(act)
@@ -985,11 +1175,26 @@ ACTIONS.REEL.strfn = function(act)
     end
 end
 
+ACTIONS.PICK.strfn = function(act)
+	return act.target ~= nil and act.target:HasTag("pickable_harvest_str") and "HARVEST"
+			or nil
+end
+
 ACTIONS.PICK.fn = function(act)
     if act.target ~= nil and act.target.components.pickable ~= nil then
         act.target.components.pickable:Pick(act.doer)
         return true
     end
+end
+
+ACTIONS.PICK.validfn = function(act)
+    return act.target and act.target.components.pickable and act.target.components.pickable:CanBePicked()
+end
+
+ACTIONS.PICK.theme_music_fn = function(act)
+    return act.target ~= nil
+        and act.target:HasTag("farm_plant") and "farming"
+		or nil
 end
 
 ACTIONS.ATTACK.fn = function(act)
@@ -1073,7 +1278,7 @@ ACTIONS.COOK.fn = function(act)
             return true
         end
         local container = act.target.components.container
-        if container ~= nil and container:IsOpen() and not container:IsOpenedBy(act.doer) then
+        if container ~= nil and container:IsOpenedByOthers(act.doer) then
             return false, "INUSE"
         elseif not act.target.components.stewer:CanCook() then
             return false
@@ -1141,11 +1346,48 @@ ACTIONS.COOK.fn = function(act)
 end
 
 ACTIONS.FILL.fn = function(act)
-    return act.target ~= nil
-        and act.invobject ~= nil
-        and act.invobject.components.fillable ~= nil
-        and act.target:HasTag("watersource")
-        and act.invobject.components.fillable:Fill()
+    local source_object, filled_object = nil, nil
+
+    if act.target == nil then
+        filled_object = act.invobject
+    else
+        if act.target:HasTag("watersource") then
+            source_object = act.target
+            filled_object = act.invobject
+        elseif act.invobject:HasTag("watersource") then
+            source_object = act.invobject
+            filled_object = act.target
+        end
+    end
+
+    if filled_object == nil then
+        return false
+    elseif source_object ~= nil
+        and filled_object.components.fillable ~= nil
+        and source_object.prefab == filled_object.components.fillable.filledprefab then
+
+        return false
+    end
+
+    local groundpt = act:GetActionPoint()
+    if groundpt ~= nil then
+        local success = filled_object.components.fillable.acceptsoceanwater and TheWorld.Map:IsOceanAtPoint(groundpt.x, 0, groundpt.z)
+        if success then
+            filled_object.components.fillable:Fill()
+            return true
+        else
+            return false, filled_object.components.fillable.oceanwatererrorreason
+        end
+    end
+
+    return source_object ~= nil
+        and source_object:HasTag("watersource")
+        and filled_object.components.fillable:Fill(source_object)
+end
+
+ACTIONS.FILL_OCEAN.fn = ACTIONS.FILL.fn
+ACTIONS.FILL_OCEAN.stroverridefn = function(act)
+    return STRINGS.ACTIONS.FILL
 end
 
 ACTIONS.DRY.fn = function(act)
@@ -1232,13 +1474,15 @@ end
 
 ACTIONS.GIVE.fn = function(act)
     if act.target ~= nil then
-		if act.target.components.ghostlyelixirable ~= nil and act.invobject.components.ghostlyelixir ~= nil then
-            return act.invobject.components.ghostlyelixir:Apply(act.doer, act.target)
+		
+        if act.target.components.ghostlyelixirable ~= nil and act.invobject.components.ghostlyelixir ~= nil then
+            return act.invobject.components.ghostlyelixir:Apply(act.doer, act.target)        
         elseif act.target.components.trader ~= nil then
             local able, reason = act.target.components.trader:AbleToAccept(act.invobject, act.doer)
             if not able then
                 return false, reason
             end
+
             act.target.components.trader:AcceptGift(act.doer, act.invobject)
             return true
         elseif act.target.components.moontrader ~= nil then
@@ -1299,6 +1543,10 @@ ACTIONS.FEEDPLAYER.fn = function(act)
         act.invobject.components.edible ~= nil and
         act.target.components.eater:CanEat(act.invobject) and
         (TheNet:GetPVPEnabled() or
+        (act.target:HasTag("strongstomach") and 
+            act.invobject:HasTag("monstermeat")) or
+        (act.invobject:HasTag("spoiled") and act.target:HasTag("ignoresspoilage") and not 
+            (act.invobject:HasTag("badfood") or act.invobject:HasTag("unsafefood"))) or
         not (act.invobject:HasTag("badfood") or
             act.invobject:HasTag("unsafefood") or
             act.invobject:HasTag("spoiled"))) then
@@ -1330,10 +1578,19 @@ ACTIONS.DECORATEVASE.fn = function(act)
     end
 end
 
+ACTIONS.CARNIVALGAME_FEED.fn = function(act)
+    if act.invobject ~= nil and act.invobject:IsValid() and act.target ~= nil and act.target:IsValid() and act.target.components.carnivalgamefeedable ~= nil then
+		if not act.target.components.carnivalgamefeedable.enabled then
+			return false, "TOO_LATE"
+		end
+        return act.target.components.carnivalgamefeedable:DoFeed(act.invobject, act.doer)
+    end
+end
+
 ACTIONS.STORE.fn = function(act)
     local target = act.target
     --V2C: For dropping items onto the object rather than construction widget
-    if target.components.container == nil and target.components.constructionsite ~= nil then        
+    if target.components.container == nil and target.components.constructionsite ~= nil then
         local builder = target.components.constructionsite.builder
         target = builder == act.doer and builder.components.constructionbuilder ~= nil and builder.components.constructionbuilder.constructioninst or nil
         if target == nil then
@@ -1346,7 +1603,7 @@ ACTIONS.STORE.fn = function(act)
             return false, "NOTMASTERCHEF"
         --elseif target:HasTag("professionalcookware") and not act.doer:HasTag("professionalchef") then
             --return false, "NOTPROCHEF"
-        elseif target.components.container:IsOpen() and not target.components.container:IsOpenedBy(act.doer) then
+        elseif not target.components.container:IsOpenedBy(act.doer) and not target.components.container:CanOpen() then
             return false, "INUSE"
         end
 
@@ -1511,6 +1768,90 @@ ACTIONS.SLEEPIN.fn = function(act)
     end
 end
 
+ACTIONS.HITCHUP.fn = function(act)
+    if act.doer == nil or act.target == nil then
+        return false
+    end
+
+    local bell = nil
+    if act.doer.components.inventory then
+        bell = act.doer.components.inventory:FindItem(function(item)
+            if item.GetBeefalo and item:GetBeefalo() then
+                return true
+            end
+        end)
+    end
+
+    local beefalo = bell and bell:GetBeefalo()
+    if not beefalo then
+        return false, "NEEDBEEF"
+    end
+
+    local inrange = act.target:GetDistanceSqToInst(beefalo) < 400
+    if not inrange then
+        return false, "NEEDBEEF_CLOSER"
+    end
+
+    if beefalo:GetIsInMood() then
+        return false, "INMOOD"
+    end
+
+    beefalo:PushEvent("hitchto", {doer = act.doer, target = act.target})
+
+    if act.doer.components.talker ~= nil then
+        act.doer.components.talker:Say(GetString(act.doer, "ANNOUNCE_CALL_BEEF"))
+        act.doer.comment_data = nil
+    end
+
+    return true
+end
+
+ACTIONS.UNHITCH.fn = function(act)
+    if act.doer ~= nil and
+        act.target ~= nil and
+        act.target.components.hitcher and
+        not act.target:HasTag("hitcher") then
+            act.target.components.hitcher:Unhitch()
+        return true
+    end
+end
+
+ACTIONS.HITCH.fn = function(act)
+    act.doer.hitchingspot = nil
+    if act.target:HasTag("hitcher") then
+        act.target.components.hitcher:SetHitched(act.doer)
+    end
+end
+
+ACTIONS.MARK.strfn = function(act)
+    if act.target and act.target.components.markable and act.target.components.markable:HasMarked( act.doer ) then
+        return "UNMARK"
+    end
+end
+
+ACTIONS.MARK.fn = function(act)
+    local can, fail = nil, nil
+
+    if act.target.components.markable then
+        can, fail = act.target.components.markable:Mark(act.doer)
+    end
+    if not can and act.target.components.markable_proxy then
+        can, fail = act.target.components.markable_proxy:Mark(act.doer)
+    end
+
+    if can then
+        if act.doer.yotb_post_to_mark then
+            act.doer.yotb_post_to_mark = nil
+        end
+        return true
+    else
+        if fail == "not_participant" then
+            return false, "NOT_PARTICIPANT"
+        end
+        return false, "ALREADY_MARKED"
+    end
+end
+
 ACTIONS.CHANGEIN.strfn = function(act)
     return act.target ~= nil and act.target:HasTag("dressable") and "DRESSUP" or nil
 end
@@ -1518,16 +1859,24 @@ end
 ACTIONS.CHANGEIN.fn = function(act)
     if act.doer ~= nil and
         act.target ~= nil and
-        act.target.components.wardrobe ~= nil then
+        act.target.components.wardrobe ~= nil or act.target.components.groomer ~= nil then
 
-        local success, reason = act.target.components.wardrobe:CanBeginChanging(act.doer)
+        local component = nil
+        if act.target.components.wardrobe then
+            component = act.target.components.wardrobe
+        end
+        if act.target.components.groomer then
+            component = act.target.components.groomer
+        end
+
+        local success, reason = component:CanBeginChanging(act.doer)
         if not success then
             return false, reason
         end
 
         --Silent fail for opening wardrobe in the dark
         if CanEntitySeeTarget(act.doer, act.target) then
-            act.target.components.wardrobe:BeginChanging(act.doer)
+            component:BeginChanging(act.doer)
         end
         return true
     end
@@ -1571,7 +1920,7 @@ end
 
 ACTIONS.TERRAFORM.fn = function(act)
     if act.invobject ~= nil and act.invobject.components.terraformer ~= nil then
-        return act.invobject.components.terraformer:Terraform(act:GetActionPoint(), true)
+        return act.invobject.components.terraformer:Terraform(act:GetActionPoint())
     end
 end
 
@@ -1583,7 +1932,7 @@ ACTIONS.EXTINGUISH.fn = function(act)
             act.target.components.burnable:Extinguish()
         end
         return true
-    elseif act.target.components.fueled.canbespecialextinguished and act.target.components.fueled ~= nil and not act.target.components.fueled:IsEmpty() then
+    elseif act.target.components.fueled ~= nil and act.target.components.fueled.canbespecialextinguished and not act.target.components.fueled:IsEmpty() then
         act.target.components.fueled:ChangeSection(-1)
     end
 end
@@ -1606,7 +1955,7 @@ ACTIONS.INVESTIGATE.fn = function(act)
     end
 end
 
-ACTIONS.COMMENT.fn = function(act)    
+ACTIONS.COMMENT.fn = function(act)
     if act.doer.components.talker ~= nil and act.doer.comment_data then
         act.doer.components.talker:Say(act.doer.comment_data.speech)
         act.doer.comment_data = nil
@@ -1716,10 +2065,10 @@ ACTIONS.MURDER.fn = function(act)
         murdered.Transform:SetPosition(x, y, z)
 
         if murdered.components.health ~= nil and murdered.components.health.murdersound ~= nil then
-            act.doer.SoundEmitter:PlaySound(murdered.components.health.murdersound)
+            act.doer.SoundEmitter:PlaySound(FunctionOrValue(murdered.components.health.murdersound, murdered, act.doer))
         elseif murdered.components.murderable ~= nil and murdered.components.murderable.murdersound ~= nil then
-			act.doer.SoundEmitter:PlaySound(murdered.components.murderable.murdersound)
-		end
+            act.doer.SoundEmitter:PlaySound(FunctionOrValue(murdered.components.murderable.murdersound, murdered, act.doer))
+        end
 
         local stacksize = murdered.components.stackable ~= nil and murdered.components.stackable:StackSize() or 1
         if murdered.components.lootdropper ~= nil then
@@ -1734,6 +2083,10 @@ ACTIONS.MURDER.fn = function(act)
                     end
                 end
             end
+        end
+
+        if murdered.components.inventory and murdered:HasTag("drop_inventory_onmurder") then
+            murdered.components.inventory:TransferInventory(act.doer)
         end
 
         act.doer:PushEvent("murdered", { victim = murdered, stackmult = stacksize })
@@ -1832,7 +2185,37 @@ ACTIONS.USEITEM.fn = function(act)
         act.invobject.components.useableitem:CanInteract() and
         act.doer.components.inventory ~= nil and
         act.doer.components.inventory:IsOpenedBy(act.doer) then
-        act.invobject.components.useableitem:StartUsingItem()
+        return act.invobject.components.useableitem:StartUsingItem()
+    end
+end
+
+ACTIONS.USEITEMON.strfn = function(act)
+    return (act.invobject ~= nil and string.upper(act.invobject.prefab))
+            or "GENERIC"
+end
+
+ACTIONS.USEITEMON.fn = function(act)
+    if act.invobject ~= nil and act.target ~= nil
+            and act.invobject.components.useabletargeteditem ~= nil
+            and act.invobject.components.useabletargeteditem:CanInteract() then
+        local success, reason = act.invobject.components.useabletargeteditem:StartUsingItem(act.target, act.doer)
+        if success then
+            return true
+        else
+            return success, reason
+        end
+    end
+end
+
+ACTIONS.STOPUSINGITEM.strfn = function(act)
+    return (act.invobject ~= nil and string.upper(act.invobject.prefab))
+            or "GENERIC"
+end
+
+ACTIONS.STOPUSINGITEM.fn = function(act)
+    if act.invobject ~= nil and act.invobject.components.useabletargeteditem ~= nil then
+        act.invobject.components.useabletargeteditem:StopUsingItem()
+        return true
     end
 end
 
@@ -1921,7 +2304,7 @@ ACTIONS.COMBINESTACK.fn = function(act)
     if invobj and target and invobj.prefab == target.prefab and invobj.skinname == target.skinname and target.components.stackable and not target.components.stackable:IsFull() then
         target.components.stackable:Put(invobj)
         return true
-    end 
+    end
 end
 
 ACTIONS.TRAVEL.fn = function(act)
@@ -1971,7 +2354,17 @@ ACTIONS.MOLEPEEK.fn = function(act)
 end
 
 ACTIONS.FEED.fn = function(act)
-    if act.doer ~= nil and act.target ~= nil and act.target.components.eater ~= nil and act.target.components.eater:CanEat(act.invobject) then
+    
+    if act.target.components.trader then
+        local abletoaccept, reason = act.target.components.trader:AbleToAccept(act.invobject,act.doer)
+        if abletoaccept then
+            act.target.components.trader:AcceptGift(act.doer, act.invobject, 1)
+            return true
+        else
+            return false, reason
+        end
+
+    elseif act.doer ~= nil and act.target ~= nil and act.target.components.eater ~= nil and act.target.components.eater:CanEat(act.invobject) then
         act.target.components.eater:Eat(act.invobject, act.doer)
         local murdered =
             act.target:IsValid() and
@@ -1993,8 +2386,8 @@ ACTIONS.FEED.fn = function(act)
                 murdered.components.inventoryitem:RemoveFromOwner(true)
                 murdered.Transform:SetPosition(x, y, z)
 
-                if murdered.components.health.murdersound ~= nil and grandowner.SoundEmitter ~= nil then
-                    grandowner.SoundEmitter:PlaySound(murdered.components.health.murdersound)
+                if murdered.components.health.murdersound ~= nil and grandowner.SoundEmitter then
+                    grandowner.SoundEmitter:PlaySound(FunctionOrValue(murdered.components.health.murdersound, murdered, act.doer))
                 end
 
                 if murdered.components.lootdropper ~= nil then
@@ -2029,8 +2422,8 @@ ACTIONS.FEED.fn = function(act)
         murdered.components.inventoryitem:RemoveFromOwner(true)
         murdered.Transform:SetPosition(x, y, z)
 
-        if murdered.components.health.murdersound ~= nil then
-            act.doer.SoundEmitter:PlaySound(murdered.components.health.murdersound)
+        if murdered.components.health.murdersound ~= nil and grandowner.SoundEmitter then
+            grandowner.SoundEmitter:PlaySound(FunctionOrValue(murdered.components.health.murdersound, murdered, act.doer))
         end
 
         if murdered.components.lootdropper ~= nil then
@@ -2064,13 +2457,18 @@ end
 ACTIONS.CATPLAYGROUND.fn = function(act)
     if act.doer and act.doer.prefab == "catcoon" then
         if act.target then
-            if math.random() < TUNING.CATCOON_ATTACK_CONNECT_CHANCE and act.target.components.health and act.target.components.health.maxhealth <= TUNING.PENGUIN_HEALTH -- Only bother attacking if it's a penguin or weaker
-            and act.target.components.combat and act.target.components.combat:CanBeAttacked(act.doer)
-            and not (act.doer.components.follower and act.doer.components.follower:IsLeaderSame(act.target))
-            and not act.target:HasTag("player") then
+			if act.target.components.poppable ~= nil then
+				act.target.components.poppable:Pop()
+            elseif math.random() < TUNING.CATCOON_ATTACK_CONNECT_CHANCE and act.target.components.health and act.target.components.health.maxhealth <= TUNING.PENGUIN_HEALTH -- Only bother attacking if it's a penguin or weaker
+				and act.target.components.combat and act.target.components.combat:CanBeAttacked(act.doer)
+				and not (act.doer.components.follower and act.doer.components.follower:IsLeaderSame(act.target))
+				and not act.target:HasTag("player") then
+
                 act.doer.components.combat:DoAttack(act.target, nil, nil, nil, 2) --2*25 dmg
-            elseif math.random() < TUNING.CATCOON_PICKUP_ITEM_CHANCE and act.target.components.inventoryitem and act.target.components.inventoryitem.canbepickedup then
-                act.target:Remove()
+            elseif math.random() < TUNING.CATCOON_PICKUP_ITEM_CHANCE then
+				if act.target.components.inventoryitem and act.target.components.inventoryitem.canbepickedup then
+					act.target:Remove()
+				end
             end
         end
         return true
@@ -2079,10 +2477,13 @@ end
 
 ACTIONS.CATPLAYAIR.fn = function(act)
     if act.doer and act.doer.prefab == "catcoon" then
-        if act.target and math.random() < TUNING.CATCOON_ATTACK_CONNECT_CHANCE
-        and act.target.components.health and act.target.components.health.maxhealth <= TUNING.PENGUIN_HEALTH -- Only bother attacking if it's a penguin or weaker
-        and act.target.components.combat and act.target.components.combat:CanBeAttacked(act.doer)
-        and not (act.doer.components.follower and act.doer.components.follower:IsLeaderSame(act.target)) then
+		if act.target.components.poppable ~= nil then
+			act.target.components.poppable:Pop()
+        elseif act.target and math.random() < TUNING.CATCOON_ATTACK_CONNECT_CHANCE
+			and act.target.components.health and act.target.components.health.maxhealth <= TUNING.PENGUIN_HEALTH -- Only bother attacking if it's a penguin or weaker
+			and act.target.components.combat and act.target.components.combat:CanBeAttacked(act.doer)
+			and not (act.doer.components.follower and act.doer.components.follower:IsLeaderSame(act.target)) then
+
             act.doer.components.combat:DoAttack(act.target, nil, nil, nil, 2) --2*25 dmg
         end
         act.doer.last_play_air_time = GetTime()
@@ -2118,10 +2519,17 @@ end
 ACTIONS.WATER_TOSS.fn = ACTIONS.TOSS.fn
 
 ACTIONS.UPGRADE.fn = function(act)
-    if act.invobject and act.target
-        and act.invobject.components.upgrader
-        and act.invobject.components.upgrader:CanUpgrade(act.target, act.doer) then
-        return act.target.components.upgradeable:Upgrade(act.invobject, act.doer)
+    if act.invobject and act.target and 
+        act.invobject.components.upgrader and
+        act.invobject.components.upgrader:CanUpgrade(act.target, act.doer) and
+        act.target.components.upgradeable then
+
+        local can_upgrade, reason = act.target.components.upgradeable:CanUpgrade()
+        if can_upgrade then
+            return act.target.components.upgradeable:Upgrade(act.invobject, act.doer)
+        end
+
+        return false, reason
     end
 end
 
@@ -2192,21 +2600,27 @@ ACTIONS.REVIVE_CORPSE.fn = function(act)
 end
 
 ACTIONS.MOUNT.fn = function(act)
-    if act.target.components.combat ~= nil and act.target.components.combat:HasTarget() then
+    if act.target.components.combat ~= nil and act.target.components.combat:HasTarget()
+            and (act.target.components.rideable == nil
+                or act.target.components.rideable.saddle == nil
+                or not act.target.components.rideable.saddle:HasTag("combatmount")) then
         return false, "TARGETINCOMBAT"
     elseif act.target.components.rideable == nil
         or not act.target.components.rideable.canride
         or (act.target.components.health ~= nil and
             act.target.components.health:IsDead())
         or (act.target.components.freezable and
-            act.target.components.freezable:IsFrozen()) then
+            act.target.components.freezable:IsFrozen())
+        or (act.target.components.hitchable ~= nil and
+            act.target.components.hitchable:GetHitch() ~= nil)
+        or (act.target.hitchingspot ~= nil) then
         return false
     elseif act.target.components.rideable:IsBeingRidden() then
         return false, "INUSE"
     elseif act.target:HasTag("dogrider_only") and act.doer:HasTag("dogrider") and act.target._playerlink ~= act.doer then
         return false
     end
-    
+
     act.doer.components.rider:Mount(act.target)
     return true
 end
@@ -2218,7 +2632,8 @@ ACTIONS.DISMOUNT.fn = function(act)
     end
 end
 
-ACTIONS.SADDLE.fn = function(act) if act.target.components.combat ~= nil and act.target.components.combat:HasTarget() then
+ACTIONS.SADDLE.fn = function(act)
+    if act.target.components.combat ~= nil and act.target.components.combat:HasTarget() then
         return false, "TARGETINCOMBAT"
     elseif act.target.components.rideable ~= nil then
         --V2C: currently, rideable component implies saddleable always
@@ -2494,6 +2909,10 @@ ACTIONS.DISMANTLE.fn = function(act)
             return false, "INUSE"
         end
 
+        if act.target.candismantle and not act.target:candismantle() then
+            return false
+        end
+
         act.target.components.portablestructure:Dismantle(act.doer)
         return true
     end
@@ -2552,20 +2971,29 @@ ACTIONS.APPLYPRESERVATIVE.fn = function(act)
 end
 
 ACTIONS.COMPARE_WEIGHABLE.fn = function(act)
-	if act.target ~= nil and act.invobject ~= nil and
+    local weighable = nil
+
+    local equipped = act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.BODY)
+    if equipped ~= nil and equipped:HasTag("heavy") then
+        weighable = equipped
+    else
+        weighable = act.invobject
+    end
+
+	if act.target ~= nil and weighable ~= nil and
 		act.target.components.trophyscale ~= nil and
 		act.target.components.trophyscale.accepts_items and
 		not act.target:HasTag("fire") and
 		not act.target:HasTag("burnt") then
 
-		return act.target.components.trophyscale:Compare(act.invobject, act.doer)
+		return act.target.components.trophyscale:Compare(weighable, act.doer)
 	end
 	return false
 end
 
 ACTIONS.WEIGH_ITEM.fn = function(act)
 	if act.target ~= nil and act.invobject ~= nil then
-		local weigher = act.target.components.itemweigher and act.target 
+		local weigher = act.target.components.itemweigher and act.target
 						or act.invobject.components.itemweigher and act.invobject
 						or nil
 		local weighable = weigher ~= act.target and act.target or act.invobject
@@ -2591,16 +3019,19 @@ ACTIONS.START_CARRAT_RACE.fn = function(act)
 		act.target.components.yotc_racestart:StartRace()
         if act.doer and act.target.racestartstring then
             act.doer:DoTaskInTime(2,function() if act.target:HasTag("race_on") then act.doer.components.talker:Say(GetString(act.doer, act.target.racestartstring)) end end)
-        end        
+        end
 		return true
 	end
 end
 
---Quagmire
 ACTIONS.TILL.fn = function(act)
-    if act.invobject ~= nil and act.invobject.components.quagmire_tiller ~= nil then
+    if act.invobject ~= nil then
+		if act.invobject.components.farmtiller ~= nil then
+			return act.invobject.components.farmtiller:Till(act:GetActionPoint(), act.doer)
+		elseif act.invobject.components.quagmire_tiller ~= nil then --Quagmire
         return act.invobject.components.quagmire_tiller:Till(act:GetActionPoint(), act.doer)
     end
+end
 end
 
 ACTIONS.PLANTSOIL.fn = function(act)
@@ -2609,8 +3040,14 @@ ACTIONS.PLANTSOIL.fn = function(act)
         act.target ~= nil and act.target:HasTag("soil") then
         local seed = act.doer.components.inventory:RemoveItem(act.invobject)
         if seed ~= nil then
-            if seed.components.quagmire_plantable ~= nil and seed.components.quagmire_plantable:Plant(act.target, act.doer) then
+            if seed.components.quagmire_plantable ~= nil then
+				if seed.components.quagmire_plantable:Plant(act.target, act.doer) then
                 return true
+            end
+			elseif seed.components.farmplantable ~= nil then
+				if seed.components.farmplantable:Plant(act.target, act.doer) then
+					return true
+				end
             end
             act.doer.components.inventory:GiveItem(seed)
         end
@@ -2700,11 +3137,13 @@ ACTIONS.BATHBOMB.fn = function(act)
     end
 
 ACTIONS.RAISE_SAIL.fn = function(act)     -- this name is backwards. "raising" in this case means making a full sail
-    act.target.components.mast:UnfurlSail()
-    return true
+	if act.target ~= nil and act.target.components.mast ~= nil then
+		act.target.components.mast:UnfurlSail()
+		return true
+	end
 end
 
-ACTIONS.RAISE_SAIL.stroverridefn = function(act) 
+ACTIONS.RAISE_SAIL.stroverridefn = function(act)
     return STRINGS.ACTIONS.RAISE_SAIL
 end
 
@@ -2717,14 +3156,16 @@ ACTIONS.LOWER_SAIL.stroverridefn = function(act)
 end
 
 ACTIONS.LOWER_SAIL_BOOST.fn = function(act)
-    act.target.components.mast:AddSailFurler(act.doer, 10)
-    return true
+	if act.target ~= nil and act.target.components.mast ~= nil then
+		act.target.components.mast:AddSailFurler(act.doer, 10)
+		return true
+	end
 end
 
 local function GetLowerSailStr(act)
     local doer = act.doer
 
-    local str_idx = 1 
+    local str_idx = 1
 
     if doer:HasTag("switchtoho") then
         str_idx = 2
@@ -2733,7 +3174,7 @@ local function GetLowerSailStr(act)
     return STRINGS.ACTIONS.LOWER_SAIL_BOOST[str_idx]
 end
 
-ACTIONS.LOWER_SAIL_BOOST.stroverridefn = function(act) 
+ACTIONS.LOWER_SAIL_BOOST.stroverridefn = function(act)
     return GetLowerSailStr(act)
 end
 
@@ -2741,7 +3182,7 @@ ACTIONS.LOWER_SAIL_FAIL.fn = function(act)
     return true
 end
 
-ACTIONS.LOWER_SAIL_FAIL.stroverridefn = function(act) 
+ACTIONS.LOWER_SAIL_FAIL.stroverridefn = function(act)
     return GetLowerSailStr(act)
 end
 
@@ -2777,7 +3218,7 @@ ACTIONS.RETRACT_PLANK.fn = function(act)
     return true
 end
 
-ACTIONS.REPAIR_LEAK.fn = function(act)    
+ACTIONS.REPAIR_LEAK.fn = function(act)
     if act.invobject ~= nil and act.target ~= nil and act.target.components.boatleak ~= nil and act.target:HasTag("boat_leak") then
 	    return act.target.components.boatleak:Repair(act.doer, act.invobject)
 	end
@@ -2786,7 +3227,7 @@ end
 ACTIONS.STEER_BOAT.fn = function(act)
 	if act.target ~= nil
 		and (act.target.components.steeringwheel ~= nil and act.target.components.steeringwheel.sailor == nil)
-		and (act.target.components.burnable ~= nil and not act.target.components.burnable:IsBurning()) 
+		and (act.target.components.burnable ~= nil and not act.target.components.burnable:IsBurning())
 		and act.doer.components.steeringwheeluser ~= nil then
 
 		act.doer.components.steeringwheeluser:SetSteeringWheel(act.target)
@@ -2804,7 +3245,7 @@ end
 
 ACTIONS.STOP_STEERING_BOAT.fn = function(act)
 	if act.doer.components.steeringwheeluser ~= nil then
-	    act.doer.components.steeringwheeluser:SetSteeringWheel(nil)    
+	    act.doer.components.steeringwheeluser:SetSteeringWheel(nil)
 	end
     return true
 end
@@ -2814,9 +3255,9 @@ ACTIONS.CAST_NET.fn = function(act)
 		local act_pos = act:GetActionPoint()
         if act_pos == nil then
             local pos_x, pos_y, pos_z = act.target.Transform:GetWorldPosition()
-            act.invobject.components.fishingnet:CastNet(pos_x, pos_z, act.doer)        
+            act.invobject.components.fishingnet:CastNet(pos_x, pos_z, act.doer)
         else
-            act.invobject.components.fishingnet:CastNet(act_pos.x, act_pos.z, act.doer)        
+            act.invobject.components.fishingnet:CastNet(act_pos.x, act_pos.z, act.doer)
         end
         return true
     end
@@ -2918,7 +3359,7 @@ end
 ACTIONS.SING.fn = function(act)
     local singinginspiration = act.doer.components.singinginspiration
     if act.invobject and singinginspiration ~= nil then
-        
+
         local songdata = act.invobject.songdata
         if songdata ~= nil then
 
@@ -2941,7 +3382,7 @@ ACTIONS.SING_FAIL.fn = function(act)
     return true
 end
 
-ACTIONS.SING_FAIL.stroverridefn = function(act) 
+ACTIONS.SING_FAIL.stroverridefn = function(act)
     return STRINGS.ACTIONS.SING
 end
 
@@ -3051,7 +3492,7 @@ end
 
 ACTIONS.UNPATCH.fn = function(act)
     if act.target ~= nil and act.target.components.boatleak ~= nil then
-        
+
         if act.target.components.lootdropper then
             local build = act.target.AnimState:GetBuild()
 
@@ -3062,9 +3503,9 @@ ACTIONS.UNPATCH.fn = function(act)
             local patch = SpawnPrefab(prefab)
 
             if patch.components.repairer and patch.components.repairer.healthrepairvalue then
-                local boat = act.target:GetCurrentPlatform()                
-                if boat.components.health ~= nil then                    
-                    boat.components.health:DoDelta(-patch.components.repairer.healthrepairvalue)                    
+                local boat = act.target:GetCurrentPlatform()
+                if boat.components.health ~= nil then
+                    boat.components.health:DoDelta(-patch.components.repairer.healthrepairvalue)
                 end
             end
 
@@ -3074,4 +3515,213 @@ ACTIONS.UNPATCH.fn = function(act)
         end
         return true
     end
+end
+
+ACTIONS.POUR_WATER.fn = function(act)
+    if act.invobject ~= nil and act.invobject:IsValid() then
+        if act.invobject.components.finiteuses ~= nil and act.invobject.components.finiteuses:GetUses() <= 0 then
+			return false, (act.invobject:HasTag("wateringcan") and "OUT_OF_WATER" or nil)
+        end
+
+        if act.target ~= nil and act.target:IsValid() then
+			act.invobject.components.wateryprotection:SpreadProtection(act.target)
+        else
+			act.invobject.components.wateryprotection:SpreadProtectionAtPoint(act:GetActionPoint():Get())
+        end
+
+        return true
+    end
+end
+
+ACTIONS.POUR_WATER.strfn = function(act)
+    return (act.target:HasTag("fire") or act.target:HasTag("smolder")) and "EXTINGUISH" or nil
+end
+
+ACTIONS.POUR_WATER_GROUNDTILE.fn = ACTIONS.POUR_WATER.fn
+ACTIONS.POUR_WATER_GROUNDTILE.stroverridefn = function(act)
+    return STRINGS.ACTIONS.POUR_WATER.GENERIC
+end
+
+ACTIONS.PLANTREGISTRY_RESEARCH_FAIL.fn = function(act)
+    local targ = act.target or act.invobject
+
+    if targ and targ:HasTag("fertilizerresearchable") then
+        return false, "FERTILIZER"
+    end
+
+    return false
+end
+
+ACTIONS.PLANTREGISTRY_RESEARCH.fn = function(act)
+    local targ = act.target or act.invobject
+
+    if targ ~= nil then
+        if targ.components.plantresearchable then
+            if targ.components.plantresearchable:IsRandomSeed() then
+                if act.doer.components.talker then
+                    act.doer.components.talker:Say(GetString(act.doer, "ANNOUNCE_PLANT_RANDOMSEED"), nil, targ.components.inspectable.noanim)
+                end
+            else
+                targ.components.plantresearchable:LearnPlant(act.doer)
+
+                if act.doer.components.talker then
+                    act.doer.components.talker:Say(GetString(act.doer, "ANNOUNCE_PLANT_RESEARCHED"), nil, targ.components.inspectable.noanim)
+                end
+            end
+        elseif targ.components.fertilizerresearchable then
+            targ.components.fertilizerresearchable:LearnFertilizer(act.doer)
+
+            if act.doer.components.talker then
+                act.doer.components.talker:Say(GetString(act.doer, "ANNOUNCE_FERTILIZER_RESEARCHED"), nil, targ.components.inspectable.noanim)
+        end
+        end
+        return true
+    end
+end
+
+ACTIONS.ASSESSPLANTHAPPINESS.stroverridefn = function(act)
+    local targ = act.target or act.invobject
+    if targ then
+        local plant = targ:GetDisplayName()
+        return plant ~= nil and subfmt(STRINGS.ACTIONS.ASSESSPLANTHAPPINESS.GENERIC_FMT, { plant = plant }) or nil
+    end
+end
+
+ACTIONS.ASSESSPLANTHAPPINESS.fn = function(act)
+    local targ = act.target or act.invobject
+
+    if targ ~= nil then
+        local desc
+        if targ.components.farmplantstress then
+            desc = targ.components.farmplantstress:GetStressDescription(act.doer)
+        else
+            desc = GetString(act.doer, "DESCRIBE_PLANTHAPPY")
+        end
+        if desc and act.doer.components.talker then
+            act.doer.components.talker:Say(desc, nil, targ.components.inspectable.noanim)
+        end
+        return true
+    end
+end
+
+local WEIGHTED_SEED_TABLE = require("prefabs/weed_defs").weighted_seed_table
+ACTIONS.PLANTWEED.fn = function(act)
+    local targ = act.target or act.invobject
+
+    if targ and targ:HasTag("soil") then
+        local x, y, z = targ.Transform:GetWorldPosition()
+        local new_weed = SpawnPrefab(weighted_random_choice(WEIGHTED_SEED_TABLE))
+        new_weed.Transform:SetPosition(x, y, z)
+
+        if new_weed.SoundEmitter ~= nil then
+            new_weed.SoundEmitter:PlaySound("dontstarve/common/plant")
+        end
+
+        new_weed:PushEvent("on_planted", {in_soil = true, doer = act.doer})
+
+        targ:Remove()
+        return true
+    end
+end
+
+ACTIONS.ADDCOMPOSTABLE.fn = function(act)
+    if act.target ~= nil and act.target.components.compostingbin ~= nil then
+        return act.target.components.compostingbin:AddCompostable(act.invobject)
+    end
+end
+
+
+ACTIONS.WAX.fn = function(act)
+    if act.target.components.waxable then
+        return act.target.components.waxable:Wax(act.doer, act.invobject)
+    end
+end
+
+ACTIONS.YOTB_SEW.fn = function(act)
+    if act.target:HasTag("sewingmachine") then
+        if act.target.components.yotb_sewer:IsSewing() then
+            --Already sewing
+            return true
+        end
+
+        local container = act.target.components.container
+        if container ~= nil and container:IsOpen() and not container:IsOpenedBy(act.doer) then
+            return false, "INUSE"
+        elseif not act.target.components.yotb_sewer:CanSew() then
+            return false
+        end
+
+        act.target.components.yotb_sewer:StartSewing(act.doer)
+        return true
+    end
+end
+
+ACTIONS.YOTB_STARTCONTEST.fn = function(act)
+    if not TheWorld.components.yotb_stagemanager then
+        return false, "DOESNTWORK"
+    elseif TheWorld.components.yotb_stagemanager:IsContestActive() then
+        return false, "ALREADYACTIVE"
+    end
+
+    act.target.components.yotb_stager:StartContest(act.doer)
+    return true
+end
+
+ACTIONS.YOTB_UNLOCKSKIN.fn = function(act)
+    if act.invobject and act.invobject.components.yotb_skinunlocker and
+       act.doer and act.doer.YOTB_unlockskinset ~= nil and act.doer.YOTB_issetunlocked ~= nil then
+
+        local skin = act.invobject.components.yotb_skinunlocker:GetSkin()
+
+        if act.invobject.makedoll then
+            act.invobject:makedoll(act.invobject,act.doer)
+        end
+
+        if act.doer:YOTB_issetunlocked(skin) then
+            act.invobject:Remove()
+            return false, "ALREADYKNOWN"
+        else
+            act.doer:YOTB_unlockskinset(skin)
+            act.invobject:Remove()
+            return true
+        end
+    end 
+end
+
+ACTIONS.MUTATE_SPIDER.fn = function(act)
+    if act.invobject.components.spidermutator:CanMutate(act.target) then
+        act.invobject.components.spidermutator:Mutate(act.target, false, act.doer)
+        return true
+    else
+        return false, "SAMETYPE"
+    end
+end
+
+ACTIONS.HERD_FOLLOWERS.fn = function (act)
+    local can_herd, reason = act.invobject.components.followerherder:CanHerd(act.doer)
+    if not can_herd then
+        return false, reason
+    end
+
+    act.invobject.components.followerherder:Herd(act.doer)
+    return true
+end
+
+ACTIONS.BEDAZZLE.fn = function (act)
+    local can_bedazzle, reason = act.invobject.components.bedazzler:CanBedazzle(act.target)
+    if not can_bedazzle then
+        return false, reason
+    end
+
+    act.invobject.components.bedazzler:Bedazzle(act.target)
+    return true
+end
+
+ACTIONS.REPEL.fn = function(act)
+    if act.invobject.components.repellent then
+        act.invobject.components.repellent:Repel(act.doer)
+        return true
+    end
+
+    return false
 end

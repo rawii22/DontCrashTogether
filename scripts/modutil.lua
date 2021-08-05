@@ -42,9 +42,16 @@ function GetModConfigData(optionname, modname, get_local_config)
 		else
 			for i,v in pairs(config) do
 				if v.name == optionname then
-					if v.saved ~= nil then
-						return v.saved 
-					else 
+					if v.saved_server ~= nil and not get_local_config then
+						return v.saved_server
+
+					elseif v.saved_client ~= nil and get_local_config then
+						return v.saved_client
+
+					elseif v.saved ~= nil then
+						return v.saved
+
+					else
 						return v.default
 					end
 				end
@@ -168,13 +175,48 @@ local function AddGlobalClassPostConstruct(package, classname, postfn)
 	DoAddClassPostConstruct(classdef, postfn)
 end
 
-local function InsertPostInitFunctions(env, isworldgen)
+local function InsertPostInitFunctions(env, isworldgen, isfrontend)
 
     env.modassert = modassert
     env.moderror = moderror
 
 	env.postinitfns = {}
 	env.postinitdata = {}
+
+	if isfrontend then
+		env.ReloadFrontEndAssets = function()
+			initprint("ReloadFrontEndAssets")
+			if env.FrontEndAssets then
+				ModReloadFrontEndAssets(env.FrontEndAssets, env.modname)
+			end
+		end
+	end
+
+	local Customize = require("map/customize")
+	env.AddCustomizeGroup = function(category, name, text, desc, atlas, order)
+		initprint("AddCustomizeGroup", category, name)
+		Customize.AddCustomizeGroup(env.modname, category, name, text, desc, atlas, order)
+	end
+
+	env.RemoveCustomizeGroup = function(category, name)
+		initprint("RemoveCustomizeGroup", category, name)
+		Customize.RemoveCustomizeGroup(env.modname, category, name)
+	end
+
+	env.AddCustomizeItem = function(category, group, name, itemsettings)
+		initprint("AddCustomizeItem", category, group, name)
+		Customize.AddCustomizeItem(env.modname, category, group, name, itemsettings)
+	end
+
+	env.RemoveCustomizeItem = function(category, name)
+		initprint("RemoveCustomizeItem", category, name)
+		Customize.RemoveCustomizeItem(env.modname, category, name)
+	end
+
+	env.GetCustomizeDescription = function(description)
+		initprint("GetCustomizeDescription", description)
+		return Customize.GetDescription(description)
+	end
 
 	env.postinitfns.LevelPreInit = {}
 	env.AddLevelPreInit = function(levelid, fn)
@@ -298,7 +340,7 @@ local function InsertPostInitFunctions(env, isworldgen)
 	--env.AddTile = function( tile_name, texture_name, noise_texture, runsound, walksound, snowsound, mudsound, flashpoint_modifier )
 	--	AddTile( env.modname, tile_name, texture_name, noise_texture, runsound, walksound, snowsound, mudsound, flashpoint_modifier )
 	--end
-	
+
 	env.ReleaseID = ReleaseID.IDs
 	env.CurrentRelease = CurrentRelease
 
@@ -329,7 +371,7 @@ local function InsertPostInitFunctions(env, isworldgen)
 		end
 		action.mod_name = env.modname
 
-		assert( action.id ~= nil and type(action.id) == "string", "Must specify an ID for your custom action! Example: \"MYACTION\"")			
+		assert( action.id ~= nil and type(action.id) == "string", "Must specify an ID for your custom action! Example: \"MYACTION\"")
 
 		initprint("AddAction", action.id)
 		ACTIONS[action.id] = action
@@ -339,16 +381,48 @@ local function InsertPostInitFunctions(env, isworldgen)
 			ACTION_MOD_IDS[action.mod_name] = {}
 		end
 		table.insert(ACTION_MOD_IDS[action.mod_name], action.id)
-		ACTIONS[action.id].code = #ACTION_MOD_IDS[action.mod_name]
+		action.code = #ACTION_MOD_IDS[action.mod_name]
+		if MOD_ACTIONS_BY_ACTION_CODE[action.mod_name] == nil then
+			MOD_ACTIONS_BY_ACTION_CODE[action.mod_name] = {}
+		end
+		MOD_ACTIONS_BY_ACTION_CODE[action.mod_name][action.code] = action
 
 		STRINGS.ACTIONS[action.id] = action.str
-		
+
 		return ACTIONS[action.id]
 	end
 
 	env.AddComponentAction = function(actiontype, component, fn)
 		-- just past this along to the global function
 		AddComponentAction(actiontype, component, fn, env.modname)
+	end
+
+	env.AddPopup = function(id)
+		local popup
+		if type(id) == "table" and id.is_a and id:is_a(PopupManagerWidget) then
+			popup = id
+		else
+			popup = PopupManagerWidget()
+			popup.id = id
+		end
+		popup.mod_name = env.modname
+
+		initprint("AddPopup", popup.id)
+		POPUPS[popup.id] = popup
+
+		--put it's mapping into a different IDS table, one for each mod
+		if MOD_POPUP_IDS[popup.mod_name] == nil then
+			MOD_POPUP_IDS[popup.mod_name] = {}
+		end
+		table.insert(MOD_POPUP_IDS[popup.mod_name], popup.id)
+		popup.code = #MOD_POPUP_IDS[popup.mod_name]
+
+		if MOD_POPUPS_BY_POPUP_CODE[popup.mod_name] == nil then
+			MOD_POPUPS_BY_POPUP_CODE[popup.mod_name] = {}
+		end
+		MOD_POPUPS_BY_POPUP_CODE[popup.mod_name][popup.code] = popup
+
+		return POPUPS[popup.id]
 	end
 
 	env.postinitdata.MinimapAtlases = {}
@@ -382,6 +456,18 @@ local function InsertPostInitFunctions(env, isworldgen)
 			env.postinitdata.StategraphEvent[stategraph] = {}
 		end
 		table.insert(env.postinitdata.StategraphEvent[stategraph], event)
+	end
+
+	env.postinitfns.ModShadersInit = {}
+	env.AddModShadersInit = function( fn )
+		initprint("AddModShadersInit")
+		table.insert(env.postinitfns.ModShadersInit, fn)
+	end
+
+	env.postinitfns.ModShadersSortAndEnable = {}
+	env.AddModShadersSortAndEnable = function( fn )
+		initprint("AddModShadersSortAndEnable")
+		table.insert(env.postinitfns.ModShadersSortAndEnable, fn)
 	end
 
 	env.postinitfns.StategraphPostInit = {}
@@ -478,12 +564,12 @@ local function InsertPostInitFunctions(env, isworldgen)
 		rec:SetModRPCID()
 		return rec
 	end
-	
+
 	env.Recipe = function(...)
 		print("Warning: function Recipe in modmain is deprecated, please use AddRecipe")
 		return env.AddRecipe(...)
 	end
-	
+
     env.AddRecipeTab = function( rec_str, rec_sort, rec_atlas, rec_icon, rec_owner_tag, rec_crafting_station )
 		CUSTOM_RECIPETABS[rec_str] = { str = rec_str, sort = rec_sort, icon_atlas = rec_atlas, icon = rec_icon, owner_tag = rec_owner_tag, crafting_station = rec_crafting_station }
 		STRINGS.TABS[rec_str] = rec_str
@@ -541,17 +627,17 @@ local function InsertPostInitFunctions(env, isworldgen)
 		initprint( "GetShardModRPCHandler", namespace, name )
 		return GetShardModRPCHandler( namespace, name )
 	end
-	
+
 	env.SendModRPCToServer = function( id_table, ... )
 		initprint( "SendModRPCToServer", id_table.namespace, id_table.id )
 		SendModRPCToServer( id_table, ... )
 	end
-	
+
 	env.SendModRPCToClient = function( id_table, ... )
 		initprint( "SendModRPCToClient", id_table.namespace, id_table.id )
 		SendModRPCToClient( id_table, ... )
 	end
-	
+
 	env.SendModRPCToShard = function( id_table, ... )
 		initprint( "SendModRPCToShard", id_table.namespace, id_table.id )
 		SendModRPCToShard( id_table, ... )
@@ -590,13 +676,13 @@ local function InsertPostInitFunctions(env, isworldgen)
 
 	env.AddVoteCommand = function(command_name, init_options_fn, process_result_fn, vote_timeout )
 		initprint("AddVoteCommand", command_name, init_options_fn, process_result_fn, vote_timeout )
-		
+
 		if env.vote_commands == nil then
 	        env.vote_commands = {}
 	    end
 		env.vote_commands[command_name] = { InitOptionsFn = init_options_fn, ProcessResultFn = process_result_fn, Timeout = vote_timeout or 15 }
 	end
-	
+
 	env.ExcludeClothingSymbolForModCharacter = function(name, symbol)
         initprint("ExcludeClothingSymbolForModCharacter", name, symbol)
 
@@ -608,12 +694,12 @@ local function InsertPostInitFunctions(env, isworldgen)
 	    end
 	    table.insert( env.clothing_exclude[name], symbol )
     end
-	
+
 	env.RegisterInventoryItemAtlas = function(atlas, prefabname) -- for this to work properly (without having to spawn an item), you should be using the prefab name for the inventory image name
 		initprint("RegisterInventoryItemAtlas", atlas, prefabname)
 		RegisterInventoryItemAtlas(atlas, prefabname)
 	end
-    
+
 end
 
 return {

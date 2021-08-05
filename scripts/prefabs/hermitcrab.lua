@@ -17,7 +17,7 @@ local assets =
     Asset("ANIM", "anim/player_hermitcrab_idle.zip"),
     Asset("ANIM", "anim/player_hermitcrab_walk.zip"),
     Asset("ANIM", "anim/player_hermitcrab_look.zip"),
-    
+
     Asset("ANIM", "anim/hermitcrab_build.zip"),
 }
 
@@ -30,6 +30,8 @@ local prefabs =
     "hermit_pearl",
     "hermit_bundle_shells",
     "moon_fissure_plugged",
+	"winter_ornament_boss_hermithouse",
+	"winter_ornament_boss_pearl",
 }
 
 local SHOP_LEVELS =
@@ -67,7 +69,7 @@ local SHARE_TARGET_DIST = 30
 local MEET_PLAYERS_RANGE_SQ = 20*20
 local MEET_PLAYERS_FREQUENCY = 1.5
 
-local function displaynamefn(inst)    
+local function displaynamefn(inst)
 
     return inst:HasTag("highfriendlevel") and STRINGS.NAMES.HERMITCRAB_NAME or STRINGS.NAMES.HERMITCRAB
 end
@@ -84,15 +86,15 @@ local function dotalkingtimers(inst)
         inst.components.timer:SetTimeLeft("complain_time", time + 10)
     else
         inst.components.timer:StartTimer("complain_time",10 + (math.random()*30))
-    end  
+    end
 end
 
 local function settextcolor(inst)
-    local gfl = inst.getgeneralfriendlevel(inst) 
+    local gfl = inst.getgeneralfriendlevel(inst)
     if gfl == "HIGH" then
         inst.components.talker.colour = Vector3(194/255, 149/255, 216/255)
     elseif gfl == "MED" then
-        inst.components.talker.colour = Vector3(228/255, 163/255, 212/255)        
+        inst.components.talker.colour = Vector3(228/255, 163/255, 212/255)
     else
         inst.components.talker.colour = Vector3(241/255, 198/255, 211/255)
     end
@@ -101,16 +103,16 @@ end
 local function ontalk(inst, script)
     if inst.components.friendlevels.level > 0 then
         settextcolor(inst)
-    end    
+    end
     inst.SoundEmitter:PlaySound("hookline_2/characters/hermit/talk")
 end
 
 local function iscoat(item)
-    return item.components.insulator and 
-           item.components.insulator:GetInsulation() >= TUNING.INSULATION_SMALL and 
-           item.components.insulator:GetType() == SEASONS.WINTER and 
-           item.components.equippable and 
-           item.components.equippable.equipslot == EQUIPSLOTS.BODY                           
+    return item.components.insulator and
+           item.components.insulator:GetInsulation() >= TUNING.INSULATION_SMALL and
+           item.components.insulator:GetType() == SEASONS.WINTER and
+           item.components.equippable and
+           item.components.equippable.equipslot == EQUIPSLOTS.BODY
 end
 
 local function ShouldAcceptItem(inst, item)
@@ -122,7 +124,7 @@ local function ShouldAcceptItem(inst, item)
 
     if item:HasTag("oceanfish") or
        ( item:HasTag("umbrella") and TheWorld.state.israining and not hasumbrella ) or
-       ( iscoat(item) and TheWorld.state.issnowing and not hascoat ) or    
+       ( iscoat(item) and TheWorld.state.issnowing and not hascoat ) or
        ( item.prefab == "flowersalad" and not inst.components.timer:TimerExists("salad")) or
        item.prefab == "hermit_cracked_pearl"
         then
@@ -144,9 +146,9 @@ local function OnRefuseItem(inst, giver, item)
         local coat = inst.components.inventory:FindItem(function(testitem) return iscoat(testitem) end) or (bodyequipped and  iscoat(bodyequipped) and bodyequipped )
 
         if coat then
-            inst.components.npc_talker:Say(STRINGS.HERMITCRAB_REFUSE_COAT_HASONE[math.random(#STRINGS.HERMITCRAB_REFUSE_COAT_HASONE)])            
-        elseif not TheWorld.state.issnowing then            
-            inst.components.npc_talker:Say(STRINGS.HERMITCRAB_REFUSE_COAT[math.random(#STRINGS.HERMITCRAB_REFUSE_COAT)])            
+            inst.components.npc_talker:Say(STRINGS.HERMITCRAB_REFUSE_COAT_HASONE[math.random(#STRINGS.HERMITCRAB_REFUSE_COAT_HASONE)])
+        elseif not TheWorld.state.issnowing then
+            inst.components.npc_talker:Say(STRINGS.HERMITCRAB_REFUSE_COAT[math.random(#STRINGS.HERMITCRAB_REFUSE_COAT)])
         end
     end
 
@@ -155,46 +157,15 @@ local function OnRefuseItem(inst, giver, item)
         local umbrella = inst.components.inventory:FindItem(function(testitem) return testitem:HasTag("umbrella") end) or (handequipped and  handequipped:HasTag("umbrella") and handequipped )
 
         if umbrella then
-            inst.components.npc_talker:Say(STRINGS.HERMITCRAB_REFUSE_UMBRELLA_HASONE[math.random(#STRINGS.HERMITCRAB_REFUSE_UMBRELLA_HASONE)])            
+            inst.components.npc_talker:Say(STRINGS.HERMITCRAB_REFUSE_UMBRELLA_HASONE[math.random(#STRINGS.HERMITCRAB_REFUSE_UMBRELLA_HASONE)])
         elseif not TheWorld.state.israining then
-            inst.components.npc_talker:Say(STRINGS.HERMITCRAB_REFUSE_UMBRELLA[math.random(#STRINGS.HERMITCRAB_REFUSE_UMBRELLA)])            
+            inst.components.npc_talker:Say(STRINGS.HERMITCRAB_REFUSE_UMBRELLA[math.random(#STRINGS.HERMITCRAB_REFUSE_UMBRELLA)])
         end
-    end      
+    end
     if item.components.insulator and item.components.insulator:GetInsulation() >= TUNING.INSULATION_LARGE and item.components.insulator:GetType() == SEASONS.WINTER and item.components.equippable.equipslot == EQUIPSLOTS.BODY and not TheWorld.state.issnowing then
         inst.components.npc_talker:Say(STRINGS.HERMITCRAB_REFUSE_VEST[math.random(#STRINGS.HERMITCRAB_REFUSE_VEST)])
-    end                
+    end
     inst.sg:GoToState("refuse")
-end
-
-local RETARGET_MUST_TAGS = { "_combat" }
-local RETARGET_CANT_TAGS = { "playerghost", "INLIMBO" }
-local function NormalRetargetFn(inst)
-    return not inst:IsInLimbo()
-        and FindEntity(
-                inst,
-                TUNING.PIG_TARGET_DIST,
-                function(guy)
-                    return (guy.LightWatcher == nil or guy.LightWatcher:IsInLight())
-                        and inst.components.combat:CanTarget(guy)
-                end,
-                RETARGET_MUST_TAGS, -- see entityreplica.lua
-                RETARGET_CANT_TAGS                
-            )
-        or nil
-end
-
-local function NormalKeepTargetFn(inst, target)
-    --give up on dead guys, or guys in the dark, or werepigs
-    return inst.components.combat:CanTarget(target)
-        and (target.LightWatcher == nil or target.LightWatcher:IsInLight())
-end
-
-local FIRE_TAGS = { "campfire", "fire" }
-local function NormalShouldSleep(inst)
-    return DefaultSleepTest(inst)
-        and (inst.components.follower == nil or inst.components.follower.leader == nil
-            or (FindEntity(inst, 6, nil, FIRE_TAGS) ~= nil and
-                (inst.LightWatcher == nil or inst.LightWatcher:IsInLight())))
 end
 
 local normalbrain = require "brains/hermitcrabbrain"
@@ -210,7 +181,7 @@ local function EnableShop(inst, shop_level)
         inst.components.prototyper.onactivate = OnActivatePrototyper
     end
 
-    inst._shop_level = shop_level or inst._shop_level or 1
+    inst._shop_level = math.min(shop_level or inst._shop_level or 1, 5)
     inst.components.prototyper.trees = TUNING.PROTOTYPER_TREES[SHOP_LEVELS[inst._shop_level]]
 end
 
@@ -260,9 +231,18 @@ local function OnLoad(inst, data)
 end
 
 local function OnLoadPostPass(inst, new_ents, data)
+	-- This is only done for retrofitting, it is not normally needed, do not copy/paste this
+
 	if inst._shop_level ~= nil and inst._shop_level >= 5 then
-		-- This is only done for retrofitting, it is not normally needed, do not copy/paste this
 		inst.components.craftingstation:LearnItem("supertacklecontainer", "hermitshop_supertacklecontainer")
+	end
+
+	if inst.pearlgiven then
+		inst.components.craftingstation:LearnItem("winter_ornament_boss_pearl", "hermitshop_winter_ornament_boss_pearl")
+	end
+
+    if inst.components.friendlevels.friendlytasks[TASKS.FIX_HOUSE_3].complete then
+		inst.components.craftingstation:LearnItem("winter_ornament_boss_hermithouse", "hermitshop_winter_ornament_boss_hermithouse")
 	end
 end
 
@@ -283,7 +263,7 @@ local function getgeneralfriendlevel(inst)
 end
 
 -- FRIENDLEVELS content
-local function complain(inst)    
+local function complain(inst)
     local problems = inst.components.friendlevels.friendlytasks
     local list = {}
     for i, problem in ipairs(problems) do
@@ -304,7 +284,7 @@ local function complain(inst)
         inst.components.npc_talker:Say(list[random][gfl][math.random(#list[random][gfl])])
 
         if inst.components.timer:TimerExists("speak_time") then
-            inst.components.timer:StopTimer("speak_time")        
+            inst.components.timer:StopTimer("speak_time")
         end
         inst.components.timer:StartTimer("speak_time",TUNING.HERMITCRAB.SPEAKTIME)
     end
@@ -345,7 +325,7 @@ local function rewardcheck(inst)
             str = problems[task].completestrings[gfl][math.random(1,#problems[task].completestrings[gfl])]
         else
             str = STRINGS.HERMITCRAB_DEFAULT_REWARD[gfl][math.random(1,#STRINGS.HERMITCRAB_DEFAULT_REWARD[gfl])]
-        end                
+        end
         local gifts = inst.components.friendlevels:DoRewards()
 
         if #gifts > 0 then
@@ -367,7 +347,7 @@ local function rewardcheck(inst)
 
         inst.comment_data = nil  -- overrides the hermit making a comment on a task that's been partially done to reward the player for one that is done
         return str
-    end    
+    end
 end
 
 local STOP_RUN_DIST = 8
@@ -375,8 +355,8 @@ local STOP_RUN_DIST = 8
 local function onTaskComplete(inst, defaulttask)
     if not inst.giverewardstask then
 
-        inst.giverewardstask = inst:DoPeriodicTask(0.5, function() 
-            if not inst.sg:HasStateTag("ishome") then      
+        inst.giverewardstask = inst:DoPeriodicTask(0.5, function()
+            if not inst.sg:HasStateTag("ishome") then
                 local player = FindClosestPlayerToInst(inst, STOP_RUN_DIST, true)
                 if player then -- not inst.components.timer:TimerExists("speak_time") and
                     local str = rewardcheck(inst)
@@ -416,11 +396,11 @@ end
 
 local function storelevelunlocked(inst)
     if not inst.storelevelunlocktask then
-        inst.storelevelunlocktask = inst:DoPeriodicTask(0.5, function() 
-            if not inst.sg:HasStateTag("ishome") and not inst.giverewardstask and not inst.components.timer:TimerExists("speak_time") then      
+        inst.storelevelunlocktask = inst:DoPeriodicTask(0.5, function()
+            if not inst.sg:HasStateTag("ishome") and not inst.giverewardstask and not inst.components.timer:TimerExists("speak_time") then
                 local player = FindClosestPlayerToInst(inst, STOP_RUN_DIST, true)
                 if player then
-                    
+
                     local str = STRINGS["HERMITCRAB_STORE_UNLOCK_"..inst._shop_level][ math.random(1,#STRINGS["HERMITCRAB_STORE_UNLOCK_"..inst._shop_level]) ]
 
                     inst.components.timer:StartTimer("speak_time",TUNING.HERMITCRAB.SPEAKTIME)
@@ -429,9 +409,9 @@ local function storelevelunlocked(inst)
                         inst.components.timer:SetTimeLeft("complain_time", time + 10)
                     else
                         inst.components.timer:StartTimer("complain_time",10 + (math.random()*30))
-                    end                
+                    end
                     inst.components.npc_talker:Say(str)
-   
+
                     if inst.storelevelunlocktask then
                         inst.storelevelunlocktask:Cancel()
                         inst.storelevelunlocktask = nil
@@ -460,7 +440,7 @@ local function createbundle(inst,gifts)
         for _, p in ipairs(gifts) do
             table.insert(prize_items, SpawnPrefab(p))
         end
-        pouch.components.unwrappable:WrapItems(prize_items) 
+        pouch.components.unwrappable:WrapItems(prize_items)
 		for i, v in ipairs(prize_items) do
 			v:Remove()
 		end
@@ -501,101 +481,125 @@ local seasonal_lure =
     oceanfishinglure_hermit_heavy = 1,
 }
 
-local function honeycheck(inst,gifts)
+local function addhoneyrewards(inst,gifts)
     if inst.components.friendlevels.friendlytasks[TASKS.PLANT_FLOWERS].complete then
-        table.insert(gifts,"honey")        
+        table.insert(gifts,"honey")
     end
-    return gifts
 end
 
-local function defaultfriendrewards(inst,winner)
-    local gifts = {}
-    for i=1,3 do
-        table.insert(gifts, weighted_random_choice(hermit_bundle_shell_loots))
-    end
-    gifts = honeycheck(inst,gifts)
-    return createbundle(inst,gifts)
+local function addtaskrewards(inst, gifts, task_id)
+	if IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) then
+		if task_id == TASKS.FIX_HOUSE_3 then
+			table.insert(gifts, "winter_ornament_boss_hermithouse")
+		end
+	end
 end
 
-local function friendlevel_1_reward(inst,winner)
+local function defaultfriendrewards(inst, target, task_id)
+	local gifts = {}
+	for i=1,3 do
+		table.insert(gifts, weighted_random_choice(hermit_bundle_shell_loots))
+	end
+	addhoneyrewards(inst, gifts)
+	return createbundle(inst, gifts)
+end
+
+local function friendlevel_1_reward(inst, target, task_id)
     EnableShop(inst, 1)
     storelevelunlocked(inst)
-    return createbundle(inst,{})
-end
 
-local function friendlevel_2_reward(inst,winner)
     local gifts = {}
-
-    table.insert(gifts, weighted_random_choice(seasonal_lure))
-
-    gifts = honeycheck(inst,gifts)
-    return createbundle(inst,gifts)
+	addtaskrewards(inst, gifts, task_id)
+    return createbundle(inst, gifts)
 end
 
-local function friendlevel_3_reward(inst,winner)
+local function friendlevel_2_reward(inst, target, task_id)
+    local gifts = {}
+    table.insert(gifts, weighted_random_choice(seasonal_lure))
+    addhoneyrewards(inst, gifts)
+	addtaskrewards(inst, gifts, task_id)
+    return createbundle(inst, gifts)
+end
+
+local function friendlevel_3_reward(inst, target, task_id)
     EnableShop(inst, 2)
     storelevelunlocked(inst)
-    return createbundle(inst,{})
+
+    local gifts = {}
+	addtaskrewards(inst, gifts, task_id)
+    return createbundle(inst, gifts)
 end
 
-local function friendlevel_4_reward(inst,winner)
+local function friendlevel_4_reward(inst, target, task_id)
     local gifts = {}
     for i=1,3 do
         table.insert(gifts, weighted_random_choice(hermit_bundle_shell_loots))
-    end   
+    end
     table.insert(gifts, weighted_random_choice(seasonal_lure))
-
-    gifts = honeycheck(inst,gifts)
-
-    return createbundle(inst,gifts)
+    addhoneyrewards(inst, gifts)
+	addtaskrewards(inst, gifts, task_id)
+    return createbundle(inst, gifts)
 end
 
-local function friendlevel_5_reward(inst,winner)
+local function friendlevel_5_reward(inst, target, task_id)
     local gifts = {}
     for i=1,3 do
         table.insert(gifts, weighted_random_choice(hermit_bundle_shell_loots))
-    end   
+    end
     table.insert(gifts, weighted_random_choice(seasonal_lure))
-
-    gifts = honeycheck(inst,gifts)
-    return createbundle(inst,gifts)
+    addhoneyrewards(inst, gifts)
+	addtaskrewards(inst, gifts, task_id)
+    return createbundle(inst, gifts)
 end
 
-local function friendlevel_6_reward(inst,winner)
+local function friendlevel_6_reward(inst, target, task_id)
     EnableShop(inst,3)
     storelevelunlocked(inst)
-    return createbundle(inst,{})
+
+    local gifts = {}
+	addtaskrewards(inst, gifts, task_id)
+    return createbundle(inst, gifts)
 end
 
-local function friendlevel_7_reward(inst,winner)
+local function friendlevel_7_reward(inst, target, task_id)
     local gifts = {}
     for i=1,3 do
         table.insert(gifts, weighted_random_choice(hermit_bundle_shell_loots))
-    end   
+    end
     table.insert(gifts, weighted_random_choice(seasonal_lure))
-
-    gifts = honeycheck(inst,gifts)
-    return createbundle(inst,gifts)
+    addhoneyrewards(inst, gifts)
+	addtaskrewards(inst, gifts, task_id)
+    return createbundle(inst, gifts)
 end
 
-local function friendlevel_8_reward(inst,winner)
+local function friendlevel_8_reward(inst, target, task_id)
     EnableShop(inst,4)
     storelevelunlocked(inst)
-    return createbundle(inst,{})
+
+    local gifts = {}
+	addtaskrewards(inst, gifts, task_id)
+    return createbundle(inst, gifts)
 end
 
-local function friendlevel_9_reward(inst,winner)
+local function friendlevel_9_reward(inst, target, task_id)
 	inst.components.craftingstation:LearnItem("supertacklecontainer", "hermitshop_supertacklecontainer")
     inst._shop_level = 5
     storelevelunlocked(inst)
-    return createbundle(inst,{})
+
+    local gifts = {}
+	addtaskrewards(inst, gifts, task_id)
+    return createbundle(inst, gifts)
 end
 
-local function friendlevel_10_reward(inst,winner)
-    local gifts = {}
-    gifts = createbundle(inst,gifts)
+local function friendlevel_10_reward(inst, target, task_id)
+	inst.components.craftingstation:LearnItem("winter_ornament_boss_pearl", "hermitshop_winter_ornament_boss_pearl")
 
-    return gifts
+    local gifts = {}
+	if IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) then
+		table.insert(gifts, "winter_ornament_boss_pearl")
+	end
+	addtaskrewards(inst, gifts, task_id)
+    return createbundle(inst, gifts)
 end
 
 local ISLAND_RADIUS = 32
@@ -638,8 +642,8 @@ local function plantflowerscomplainfn(inst)
         local ents = TheSim:FindEntities(pos.x,pos.y,pos.z, ISLAND_RADIUS, FIND_FLOWER_TAGS)
         if #ents < 10 then
             return true
-        end           
-    end 
+        end
+    end
 end
 
 local function berriescomplainfn(inst)
@@ -705,13 +709,13 @@ end
 local function fishsummerfn(inst)
     if TheWorld.state.issummer then
         return true
-    end    
+    end
 end
 
 local function fishwinterfn(inst)
     if TheWorld.state.iswinter then
         return true
-    end    
+    end
 end
 
 local friendlytasks ={
@@ -737,18 +741,19 @@ local friendlytasks ={
 
 local function initfriendlevellisteners(inst)
     -- FIX_HOUSE_1, FIX_HOUSE_2, FIX_HOUSE_3
-    inst:ListenForEvent("home_upgraded", function(inst,data) 
+    inst:ListenForEvent("home_upgraded", function(inst,data)
         if data.house.prefab == "hermithouse_construction2" then
-            inst.components.friendlevels:CompleteTask(TASKS.FIX_HOUSE_1, data.doer) 
+            inst.components.friendlevels:CompleteTask(TASKS.FIX_HOUSE_1, data.doer)
         elseif data.house.prefab == "hermithouse_construction3" then
-            inst.components.friendlevels:CompleteTask(TASKS.FIX_HOUSE_2, data.doer) 
+            inst.components.friendlevels:CompleteTask(TASKS.FIX_HOUSE_2, data.doer)
         else
-            inst.components.friendlevels:CompleteTask(TASKS.FIX_HOUSE_3, data.doer) 
+            inst.components.friendlevels:CompleteTask(TASKS.FIX_HOUSE_3, data.doer)
+			inst.components.craftingstation:LearnItem("winter_ornament_boss_hermithouse", "hermitshop_winter_ornament_boss_hermithouse")
         end
     end)
 
     --PLANT_FLOWERS
-    inst:ListenForEvent("CHEVO_growfrombutterfly", function(world,data) 
+    inst:ListenForEvent("CHEVO_growfrombutterfly", function(world,data)
         local source = inst.CHEVO_marker
         if source and data.target:GetDistanceSqToInst(source) < ISLAND_RADIUS * ISLAND_RADIUS then
             local pos = Vector3(source.Transform:GetWorldPosition())
@@ -765,13 +770,13 @@ local function initfriendlevellisteners(inst)
 
             if #ents >= 10 then
                 inst.components.friendlevels:CompleteTask(TASKS.PLANT_FLOWERS, data.doer)
-            end            
+            end
 
         end
-    end, TheWorld) 
+    end, TheWorld)
 
     --FILL_MEATRACKS
-    inst:ListenForEvent("CHEVO_starteddrying", function(world,data) 
+    inst:ListenForEvent("CHEVO_starteddrying", function(world,data)
         local source = inst.CHEVO_marker
         if source and data.target:GetDistanceSqToInst(source) < ISLAND_RADIUS * ISLAND_RADIUS then
             local pos = Vector3(source.Transform:GetWorldPosition())
@@ -781,7 +786,7 @@ local function initfriendlevellisteners(inst)
                     table.remove(ents,i)
                 end
             end
-            
+
             -- INVESTIGATE
             local gfl = inst.getgeneralfriendlevel(inst)
             if not inst.comment_data then
@@ -793,13 +798,13 @@ local function initfriendlevellisteners(inst)
 
             if #ents >= 6 and not inst.driedthings then
                 inst.driedthings = 0
-                inst.components.friendlevels:CompleteTask(TASKS.FILL_MEATRACKS, data.doer)         
-            end 
+                inst.components.friendlevels:CompleteTask(TASKS.FILL_MEATRACKS, data.doer)
+            end
         end
-    end, TheWorld)     
+    end, TheWorld)
 
     --PLANT_BERRIES
-    inst:ListenForEvent("CHEVO_fertilized", function(world,data) 
+    inst:ListenForEvent("CHEVO_fertilized", function(world,data)
         local source = inst.CHEVO_marker
         if source and data.target:GetDistanceSqToInst(source) < ISLAND_RADIUS * ISLAND_RADIUS then
             local pos = Vector3(source.Transform:GetWorldPosition())
@@ -815,15 +820,15 @@ local function initfriendlevellisteners(inst)
             if not inst.comment_data then
                 inst.comment_data= {
                     pos = Vector3(data.target.Transform:GetWorldPosition()),
-                    speech = STRINGS.HERMITCRAB_INVESTIGATE.PLANT_BERRIES[gfl][math.random(1,#STRINGS.HERMITCRAB_INVESTIGATE.PLANT_BERRIES[gfl])],                
+                    speech = STRINGS.HERMITCRAB_INVESTIGATE.PLANT_BERRIES[gfl][math.random(1,#STRINGS.HERMITCRAB_INVESTIGATE.PLANT_BERRIES[gfl])],
                 }
             end
 
             if #ents >= 8 then
-                inst.components.friendlevels:CompleteTask(TASKS.PLANT_BERRIES, data.doer)     
-            end                        
+                inst.components.friendlevels:CompleteTask(TASKS.PLANT_BERRIES, data.doer)
+            end
         end
-    end, TheWorld) 
+    end, TheWorld)
 
     --REMOVE_JUNK
     local function checkforclearwaters(inst,data)
@@ -837,19 +842,19 @@ local function initfriendlevellisteners(inst)
                 if TheWorld.Map:IsVisualGroundAtPoint(testpos.x,testpos.y,testpos.z) or TheWorld.Map:GetPlatformAtPoint(testpos.x,testpos.z) then
                     table.remove(ents,i)
                 end
-            end            
-            for i=#ents,1,-1 do
-                local pos = Vector3(ents[i].Transform:GetWorldPosition())               
             end
-            if #ents <= 0 then                
-                inst.components.friendlevels:CompleteTask(TASKS.REMOVE_JUNK, data.doer) 
-            end            
+            for i=#ents,1,-1 do
+                local pos = Vector3(ents[i].Transform:GetWorldPosition())
+            end
+            if #ents <= 0 then
+                inst.components.friendlevels:CompleteTask(TASKS.REMOVE_JUNK, data.doer)
+            end
         end
     end
 
-    inst:ListenForEvent("CHEVO_heavyobject_winched", function(world,data) 
+    inst:ListenForEvent("CHEVO_heavyobject_winched", function(world,data)
         checkforclearwaters(inst,data)
-    end, TheWorld) 
+    end, TheWorld)
 
     --REMOVE_LUREPLANT
     local function checklureplant(inst,data)
@@ -857,12 +862,12 @@ local function initfriendlevellisteners(inst)
         local range = ISLAND_RADIUS +10
         if source and source:GetDistanceSqToPoint(data.pt) < range * range then
             local pos = Vector3(source.Transform:GetWorldPosition())
-            local ents = TheSim:FindEntities(pos.x,pos.y,pos.z, range, FIND_LUREPLANT_TAGS) 
+            local ents = TheSim:FindEntities(pos.x,pos.y,pos.z, range, FIND_LUREPLANT_TAGS)
             for i=#ents,1,-1 do
                 if ents[i].components.health:IsDead() then
                     table.remove(ents,i)
                 end
-            end       
+            end
 
             -- INVESTIGATE
             local gfl = inst.getgeneralfriendlevel(inst)
@@ -873,12 +878,12 @@ local function initfriendlevellisteners(inst)
                 }
             end
 
-            if #ents <= 0 then                
-                inst.components.friendlevels:CompleteTask(TASKS.REMOVE_LUREPLANT) 
-            end            
+            if #ents <= 0 then
+                inst.components.friendlevels:CompleteTask(TASKS.REMOVE_LUREPLANT)
+            end
         end
-    end    
-    inst:ListenForEvent("CHEVO_lureplantdied", function(world,data) 
+    end
+    inst:ListenForEvent("CHEVO_lureplantdied", function(world,data)
         if data.target and data.target:HasTag("planted") then
             -- INVESTIGATE
             local gfl = inst.getgeneralfriendlevel(inst)
@@ -891,10 +896,10 @@ local function initfriendlevellisteners(inst)
         else
             checklureplant(inst,data)
         end
-    end, TheWorld)  
+    end, TheWorld)
 
     -- ITEMS
-    inst:ListenForEvent("itemget", function(world,data) 
+    inst:ListenForEvent("itemget", function(world,data)
 
         if data.item:HasTag("oceanfish") then
 
@@ -902,7 +907,7 @@ local function initfriendlevellisteners(inst)
             local completetask = nil
             local keepitem = false
              -- IN CASE OF PREVIOUS ERROR
-            
+
             if inst.itemstotoss then
                 for i,gift in ipairs(inst.itemstotoss)do
                     inst.components.inventory:DropItem(gift)
@@ -920,7 +925,7 @@ local function initfriendlevellisteners(inst)
                     completetask = task
                     if not inst.extrareward then
                         inst.extrareward = {}
-                    end 
+                    end
                     table.insert(inst.extrareward,tacklesketch)
                     --local sketch=SpawnPrefab(tacklesketch)
                     --inst.components.inventory:GiveItem(sketch)
@@ -939,7 +944,7 @@ local function initfriendlevellisteners(inst)
 
                 if not is_special_fish then
                     if not inst.heavyfish then
-                        inst.heavyfish = 0 
+                        inst.heavyfish = 0
                     end
                     inst.heavyfish = inst.heavyfish + 1
                     if inst.heavyfish == 5 then
@@ -967,11 +972,11 @@ local function initfriendlevellisteners(inst)
 
             if not keepitem then
                 data.item:Remove()
-            end            
+            end
         elseif data.item:HasTag("umbrella") and TheWorld.state.israining then
             inst.components.inventory:Equip(data.item)
             inst.components.friendlevels:CompleteTask(TASKS.GIVE_UMBRELLA)
-            
+
         elseif iscoat(data.item) and TheWorld.state.issnowing then
             inst.components.inventory:Equip(data.item)
             inst.components.friendlevels:CompleteTask(TASKS.GIVE_PUFFY_VEST)
@@ -983,9 +988,9 @@ local function initfriendlevellisteners(inst)
         elseif data.item.prefab == "hermit_cracked_pearl" then
             inst.components.npc_talker:Say(STRINGS.HERMITCRAB_GOT_PEARL)
             data.item:RemoveTag("irreplaceable")
-            data.item:Remove()            
-        elseif data.item.components.edible then            
-            if inst.driedthings then                
+            data.item:Remove()
+        elseif data.item.components.edible then
+            if inst.driedthings then
                 inst.driedthings = inst.driedthings + 1
                 if inst.driedthings == 6 then
                     inst.driedthings = nil
@@ -994,59 +999,59 @@ local function initfriendlevellisteners(inst)
             inst:PushEvent("eat_food")
             data.item:Remove()
         end
-    end)    
+    end)
 end
 -- END FRIEND LEVELS
 local function restocklures(inst)
-    local equipped = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)   
+    local equipped = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
     local fishingrod = inst.components.inventory:FindItem(function(item) return item.prefab == "oceanfishingrod" end) or (equipped and  equipped.prefab == "oceanfishingrod" and equipped )
 
     if fishingrod and not fishingrod.components.container:GetItemInSlot(1) then
         fishingrod.components.container:GiveItem(SpawnPrefab("oceanfishingbobber_ball"),1)
     end
- 
+
     if fishingrod and not fishingrod.components.container:GetItemInSlot(2) then
         if math.random() < 0.5 then
             fishingrod.components.container:GiveItem(SpawnPrefab("oceanfishinglure_hermit_drowsy"),2)
         else
             fishingrod.components.container:GiveItem(SpawnPrefab("oceanfishinglure_hermit_heavy"),2)
         end
-    end    
+    end
 end
 
 
 local function startfishing(inst)
-    local equipped = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)   
+    local equipped = inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
     local fishingrod = inst.components.inventory:FindItem(function(item) return item.prefab == "oceanfishingrod" end) or (equipped and  equipped.prefab == "oceanfishingrod" and equipped )
     if not fishingrod then
         fishingrod = SpawnPrefab("oceanfishingrod")
-        inst.components.inventory:GiveItem(fishingrod)        
+        inst.components.inventory:GiveItem(fishingrod)
     end
 
     if not fishingrod.components.equippable.isequipped then
         inst.components.inventory:Equip(fishingrod)
     end
 
-    if inst.putawayrod then 
+    if inst.putawayrod then
         inst.putawayrod:Cancel()
         inst.putawayrod = nil
     end
-    inst._fishingtimer = function(inst, data) 
+    inst._fishingtimer = function(inst, data)
         if data.name == "fishingtime" then
             inst.sg:GoToState("oceanfishing_stop")
-            inst.stopfishing(inst)            
+            inst.stopfishing(inst)
         end
     end
     inst:ListenForEvent("timerdone", inst._fishingtimer)
 
-    inst:ListenForEvent("newfishingtarget", function(inst, data)         
+    inst:ListenForEvent("newfishingtarget", function(inst, data)
         if data.target:HasTag("oceanfish") then
             inst.hookfish = true
-        end        
+        end
     end)
 end
 
-local function stopfishing(inst)    
+local function stopfishing(inst)
     inst.hookfish = nil
 	if inst._fishingtimer ~= nil then
 		inst:RemoveEventCallback("timerdone", inst._fishingtimer)
@@ -1076,7 +1081,7 @@ local function onmoonvent(inst,doer)
     local source = inst.CHEVO_marker
         if source and not inst.comment_data and source:GetDistanceSqToInst(doer) < ISLAND_RADIUS * ISLAND_RADIUS then
             local gfl = inst.getgeneralfriendlevel(inst)
-        
+
             inst.comment_data= {
                 pos = Vector3(doer.Transform:GetWorldPosition()),
                 speech = STRINGS.HERMITCRAB_MOON_FISSURE_VENT[gfl][math.random(1,#STRINGS.HERMITCRAB_MOON_FISSURE_VENT[gfl])],
@@ -1086,7 +1091,7 @@ local function onmoonvent(inst,doer)
 end
 
 local function OnSpringChange(inst)
-    -- if task not complete, spawn lure plant at location. 
+    -- if task not complete, spawn lure plant at location.
     if not inst.components.friendlevels.friendlytasks[TASKS.REMOVE_LUREPLANT].complete then
         --look for lureplant?
         local source = inst.CHEVO_marker
@@ -1110,7 +1115,7 @@ end
 local function MeetPlayers(inst)
     if TheWorld.components.messagebottlemanager ~= nil then
         local x, y, z = inst.Transform:GetWorldPosition()
-        
+
         for i, v in ipairs(FindPlayersInRangeSq(x, y, z, MEET_PLAYERS_RANGE_SQ, true)) do
             TheWorld.components.messagebottlemanager:SetPlayerHasFoundHermit(v)
         end
@@ -1141,6 +1146,7 @@ local function retrofitconstuctiontasks(inst, house_prefab)
         inst.components.friendlevels.friendlytasks[TASKS.FIX_HOUSE_1].complete = true
         inst.components.friendlevels.friendlytasks[TASKS.FIX_HOUSE_2].complete = true
         inst.components.friendlevels.friendlytasks[TASKS.FIX_HOUSE_3].complete = true
+
 		print("Retrofitting for Return Of Them: Turn of Tides - completed hermit house 1, 2, 3 friendship tasks.")
     end
 end
@@ -1157,7 +1163,7 @@ local function teleport_override_fn(inst)
 		pt = pt + offset
     end
 
-	return pt 
+	return pt
 end
 
 local HERMITCRAB_MARKER_TAG = {"hermitcrab_marker"}
@@ -1169,7 +1175,6 @@ local function fn()
     inst.entity:AddAnimState()
     inst.entity:AddSoundEmitter()
     inst.entity:AddDynamicShadow()
-    inst.entity:AddLightWatcher()
     inst.entity:AddNetwork()
 
     MakeCharacterPhysics(inst, 50, .5)
@@ -1196,7 +1201,7 @@ local function fn()
     inst.AnimState:OverrideSymbol("snap_fx", "player_actions_fishing_ocean_new", "snap_fx")
 
     --Additional effects symbols for hit_darkness animation
-    
+
     inst.AnimState:AddOverrideBuild("player_wrap_bundle")
     inst.AnimState:AddOverrideBuild("player_actions_fishing_ocean_new")
 
@@ -1205,7 +1210,7 @@ local function fn()
     --trader (from trader component) added to pristine state for optimization
     inst:AddTag("trader")
 
-    inst:AddComponent("talker")        
+    inst:AddComponent("talker")
     inst.components.talker.colour = Vector3(252/255, 226/255, 219/255)
     inst.components.talker.offset = Vector3(0, -400, 0)
     inst.components.talker:MakeChatter()
@@ -1241,7 +1246,7 @@ local function fn()
     inst.components.eater:SetDiet({ FOODGROUP.OMNI }, { FOODGROUP.OMNI })
     inst.components.eater:SetCanEatHorrible()
     inst.components.eater:SetCanEatRaw()
-    inst.components.eater.strongstomach = true -- can eat monster meat!
+    inst.components.eater:SetStrongStomach(true) -- can eat monster meat!
 
     ------------------------------------------
    -- inst:AddComponent("health")
@@ -1267,13 +1272,13 @@ local function fn()
 
     inst:AddComponent("friendlevels")
     inst.components.friendlevels:SetDefaultRewards(defaultfriendrewards)
-    inst.components.friendlevels:SetLeveltRewards(friendlevelrewards)
+    inst.components.friendlevels:SetLevelRewards(friendlevelrewards)
     inst.components.friendlevels:SetFriendlyTasks(friendlytasks)
     initfriendlevellisteners(inst)
     inst.complain = complain
     inst.rewardcheck = rewardcheck
     inst.getgeneralfriendlevel = getgeneralfriendlevel
-    inst.storelevelunlocked = storelevelunlocked    
+    inst.storelevelunlocked = storelevelunlocked
 
     inst:ListenForEvent("friend_task_complete", onTaskComplete)
 
@@ -1294,7 +1299,7 @@ local function fn()
 
     inst:AddComponent("entitytracker")
 
-    ------------------------------------------    
+    ------------------------------------------
 
     inst:AddComponent("timer")
 
@@ -1309,7 +1314,7 @@ local function fn()
     ------------------------------------------
 
     inst:AddComponent("craftingstation")
-    
+
     ------------------------------------------
 
     inst:SetStateGraph("SGhermitcrab")
@@ -1322,7 +1327,7 @@ local function fn()
     inst.stopfishing = stopfishing
     inst.restocklures = restocklures
     inst.island_radius = ISLAND_RADIUS
-    inst.dotalkingtimers = dotalkingtimers    
+    inst.dotalkingtimers = dotalkingtimers
     inst.iscoat = iscoat
     inst.OnSave = OnSave
     inst.OnLoad = OnLoad
@@ -1330,10 +1335,10 @@ local function fn()
 
     inst:WatchWorldState("isspring", OnSpringChange)
 
-    inst:ListenForEvent("enterlimbo",  function() 
+    inst:ListenForEvent("enterlimbo",  function()
         inst.components.timer:StopTimer("complain_time")
     end)
-    inst:ListenForEvent("exitlimbo",  function() 
+    inst:ListenForEvent("exitlimbo",  function()
         if inst.entity:IsAwake() then
             inst.components.timer:StartTimer("complain_time",10 + (math.random()*30))
             inst.components.npc_talker:resetqueue()
@@ -1358,16 +1363,16 @@ local function fn()
     inst:ListenForEvent("moonfissurevent",  function(world,data) onmoonvent(inst,data) end, TheWorld)
     inst:DoTaskInTime(0,function()
         inst.CHEVO_marker = FindEntity(inst, ISLAND_RADIUS, nil, HERMITCRAB_MARKER_TAG)
-        if inst.CHEVO_marker then        
+        if inst.CHEVO_marker then
             inst:ListenForEvent("onremove",  function() inst.CHEVO_marker = nil end, inst.CHEVO_marker)
         end
-    end)    
+    end)
 
     inst:ListenForEvent("clocksegschanged", function(world, data)
         inst.segs = data
     end, TheWorld)
-    
-    inst:DoTaskInTime(0, RegisterToBottleManager) 
+
+	RegisterToBottleManager(inst)
 
 	inst.retrofitconstuctiontasks = retrofitconstuctiontasks
 
@@ -1379,8 +1384,8 @@ local function markerfn()
     inst.entity:AddTransform()
     inst.entity:AddNetwork()
 
-    inst:AddTag("NOBLOCK")   
-    inst:AddTag("NOCLICK")   
+    inst:AddTag("NOBLOCK")
+    inst:AddTag("NOCLICK")
     inst:AddTag("hermitcrab_marker")
 
     return inst
@@ -1391,8 +1396,8 @@ local function markerfishingfn()
     inst.entity:AddTransform()
     inst.entity:AddNetwork()
 
-    inst:AddTag("NOBLOCK")   
-    inst:AddTag("NOCLICK")   
+    inst:AddTag("NOBLOCK")
+    inst:AddTag("NOCLICK")
     inst:AddTag("hermitcrab_marker_fishing")
 
     return inst

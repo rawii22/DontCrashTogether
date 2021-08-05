@@ -7,11 +7,13 @@ local assets =
     Asset("ANIM", "anim/pig_build.zip"),
     Asset("ANIM", "anim/pigspotted_build.zip"),
     Asset("ANIM", "anim/pig_guard_build.zip"),
+    Asset("ANIM", "anim/pigman_yotb.zip"),
     Asset("ANIM", "anim/werepig_build.zip"),
     Asset("ANIM", "anim/werepig_basic.zip"),
     Asset("ANIM", "anim/werepig_actions.zip"),
     Asset("ANIM", "anim/pig_token.zip"),
     Asset("SOUND", "sound/pig.fsb"),
+    Asset("ANIM", "anim/merm_actions.zip"),
 }
 
 local PIG_TOKEN_PREFAB = "pig_token"
@@ -173,7 +175,7 @@ local function OnAttacked(inst, data)
     inst:ClearBufferedAction()
 
 	if attacker ~= nil then
-		if attacker.prefab == "deciduous_root" and attacker.owner ~= nil then 
+		if attacker.prefab == "deciduous_root" and attacker.owner ~= nil then
 			OnAttackedByDecidRoot(inst, attacker.owner)
 		elseif attacker.prefab ~= "deciduous_root" and not attacker:HasTag("pigelite") then
 			inst.components.combat:SetTarget(attacker)
@@ -200,7 +202,11 @@ local guardbuilds = { "pig_guard_build" }
 local RETARGET_MUST_TAGS = { "_combat" }
 
 local function NormalRetargetFn(inst)
-	local exclude_tags = { "playerghost", "INLIMBO" }
+    if inst:HasTag("NPC_contestant") then
+        return nil
+    end
+
+	local exclude_tags = { "playerghost", "INLIMBO" , "NPC_contestant" }
 	if inst.components.follower.leader ~= nil then
 		table.insert(exclude_tags, "abigail")
 	end
@@ -218,8 +224,7 @@ local function NormalRetargetFn(inst)
                 inst,
                 TUNING.PIG_TARGET_DIST,
                 function(guy)
-                    return (guy.LightWatcher == nil or guy.LightWatcher:IsInLight())
-                        and inst.components.combat:CanTarget(guy)
+                    return guy:IsInLight() and inst.components.combat:CanTarget(guy)
                 end,
                 RETARGET_MUST_TAGS, -- see entityreplica.lua
                 exclude_tags,
@@ -230,8 +235,7 @@ end
 
 local function NormalKeepTargetFn(inst, target)
     --give up on dead guys, or guys in the dark, or werepigs
-    return inst.components.combat:CanTarget(target)
-        and (target.LightWatcher == nil or target.LightWatcher:IsInLight())
+    return inst.components.combat:CanTarget(target) and target:IsInLight()
         and not (target.sg ~= nil and target.sg:HasStateTag("transform"))
 end
 
@@ -239,14 +243,14 @@ local CAMPFIRE_TAGS = { "campfire", "fire" }
 local function NormalShouldSleep(inst)
     return DefaultSleepTest(inst)
         and (inst.components.follower == nil or inst.components.follower.leader == nil
-            or (FindEntity(inst, 6, nil, CAMPFIRE_TAGS) ~= nil and
-                (inst.LightWatcher == nil or inst.LightWatcher:IsInLight())))
+            or (FindEntity(inst, 6, nil, CAMPFIRE_TAGS) ~= nil and inst:IsInLight()))
 end
 
 local normalbrain = require "brains/pigbrain"
 
 local function SuggestTreeTarget(inst, data)
-    if data ~= nil and data.tree ~= nil and inst:GetBufferedAction() ~= ACTIONS.CHOP then
+    local ba = inst:GetBufferedAction()
+    if data ~= nil and data.tree ~= nil and (ba == nil or ba.action ~= ACTIONS.CHOP) then
         inst.tree_target = data.tree
     end
 end
@@ -347,7 +351,7 @@ local function GuardRetargetFn(inst)
                 home,
                 home.components.burnable:GetLargestLightRadius(),
                 function(guy)
-                    return guy.LightWatcher:IsInLight()
+                    return guy:IsInLight()
                         and not (defenseTarget.components.trader ~= nil and defenseTarget.components.trader:IsTryingToTradeWithMe(guy))
                         and not (inst.components.trader ~= nil and inst.components.trader:IsTryingToTradeWithMe(guy))
                 end,
@@ -498,8 +502,8 @@ local function SetWerePig(inst)
 
     inst.components.combat:SetDefaultDamage(TUNING.WEREPIG_DAMAGE)
     inst.components.combat:SetAttackPeriod(TUNING.WEREPIG_ATTACK_PERIOD)
-    inst.components.locomotor.runspeed = TUNING.WEREPIG_RUN_SPEED 
-    inst.components.locomotor.walkspeed = TUNING.WEREPIG_WALK_SPEED 
+    inst.components.locomotor.runspeed = TUNING.WEREPIG_RUN_SPEED
+    inst.components.locomotor.walkspeed = TUNING.WEREPIG_WALK_SPEED
 
     inst.components.sleeper:SetSleepTest(WerepigSleepTest)
     inst.components.sleeper:SetWakeTest(WerepigWakeTest)
@@ -559,7 +563,6 @@ local function common(moonbeast)
     inst.entity:AddAnimState()
     inst.entity:AddSoundEmitter()
     inst.entity:AddDynamicShadow()
-    inst.entity:AddLightWatcher()
     inst.entity:AddNetwork()
 
     MakeCharacterPhysics(inst, 50, .5)
@@ -573,6 +576,10 @@ local function common(moonbeast)
     inst.AnimState:SetBank("pigman")
     inst.AnimState:PlayAnimation("idle_loop", true)
     inst.AnimState:Hide("hat")
+
+    if IsSpecialEventActive(SPECIAL_EVENTS.YOTB) then
+        inst.AnimState:AddOverrideBuild("pigman_yotb")
+    end
 
     --Sneak these into pristine state for optimization
     inst:AddTag("_named")
@@ -629,7 +636,7 @@ local function common(moonbeast)
     inst.components.eater:SetDiet({ FOODGROUP.OMNI }, { FOODGROUP.OMNI })
     inst.components.eater:SetCanEatHorrible()
     inst.components.eater:SetCanEatRaw()
-    inst.components.eater.strongstomach = true -- can eat monster meat!
+    inst.components.eater:SetStrongStomach(true) -- can eat monster meat!
     inst.components.eater:SetOnEatFn(OnEat)
     ------------------------------------------
     inst:AddComponent("health")
@@ -677,7 +684,7 @@ local function common(moonbeast)
         inst.components.trader.onrefuse = OnRefuseItem
         inst.components.trader.deleteitemonaccept = false
     end
-    
+
     ------------------------------------------
 
     inst:AddComponent("sanityaura")
@@ -686,6 +693,7 @@ local function common(moonbeast)
     ------------------------------------------
 
     inst:AddComponent("sleeper")
+    inst.components.sleeper.watchlight = true
 
     ------------------------------------------
     MakeMediumFreezableCharacter(inst, "pig_torso")
@@ -799,8 +807,8 @@ local function moon()
 
     inst.components.combat:SetDefaultDamage(TUNING.WEREPIG_DAMAGE)
     inst.components.combat:SetAttackPeriod(TUNING.WEREPIG_ATTACK_PERIOD)
-    inst.components.locomotor.runspeed = TUNING.WEREPIG_RUN_SPEED 
-    inst.components.locomotor.walkspeed = TUNING.WEREPIG_WALK_SPEED 
+    inst.components.locomotor.runspeed = TUNING.WEREPIG_RUN_SPEED
+    inst.components.locomotor.walkspeed = TUNING.WEREPIG_WALK_SPEED
 
     inst.components.sleeper:SetSleepTest(WerepigSleepTest)
     inst.components.sleeper:SetWakeTest(WerepigWakeTest)

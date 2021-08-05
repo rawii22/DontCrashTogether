@@ -22,7 +22,6 @@ local prefabs =
 }
 
 local beardlordloot = { "beardhair", "beardhair", "monstermeat" }
-local regularloot = { "carrot", "carrot" }
 
 local brain = require("brains/bunnymanbrain")
 
@@ -194,9 +193,9 @@ local function LootSetupFunction(lootdropper)
         lootdropper:SetLoot(beardlordloot)
     else
         -- regular loot
-        lootdropper:SetLoot(regularloot)
+        lootdropper:AddRandomLoot("carrot", 3)
         lootdropper:AddRandomLoot("meat", 3)
-        lootdropper:AddRandomLoot("manrabbit_tail", 1)
+        lootdropper:AddRandomLoot("manrabbit_tail", 2)
         lootdropper.numrandomloot = 1
     end
 end
@@ -208,7 +207,6 @@ local function fn()
     inst.entity:AddAnimState()
     inst.entity:AddSoundEmitter()
     inst.entity:AddDynamicShadow()
-    inst.entity:AddLightWatcher()
     inst.entity:AddNetwork()
 
     inst.AnimState:SetBuild("manrabbit_build")
@@ -321,6 +319,7 @@ local function fn()
     ------------------------------------------
 
     inst:AddComponent("sleeper")
+    inst.components.sleeper.watchlight = true
 
     ------------------------------------------
     MakeMediumFreezableCharacter(inst, "pig_torso")
@@ -331,7 +330,7 @@ local function fn()
     inst.components.inspectable.getstatus = GetStatus
     ------------------------------------------
 
-    inst:ListenForEvent("attacked", OnAttacked)    
+    inst:ListenForEvent("attacked", OnAttacked)
     inst:ListenForEvent("newcombattarget", OnNewTarget)
 
     inst.components.sleeper:SetResistance(2)

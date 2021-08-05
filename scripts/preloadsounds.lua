@@ -79,8 +79,14 @@ local MainSounds =
     "yotc_2020.fev",
     "yotc_2020.fsb",
 
+    "yotb_2021.fev",
+    "yotb_2021.fsb",
+
     "hookline_2.fev",
     "hookline_2.fsb",
+
+    "farming.fev",
+    "farming.fsb",
 
     "dangerous_sea.fev",
     "dangerous_sea.fsb",
@@ -88,6 +94,9 @@ local MainSounds =
     "grotto.fev",
     "grotto_sfx.fsb",
     "grotto_amb.fsb",
+
+    "moonstorm.fev",
+    "moonstorm.fsb",
 
     "warly.fsb",
 	"wendy.fsb",
@@ -107,8 +116,21 @@ local MainSounds =
 	"wurt.fsb",
 	"walter.fsb",
 
+	"wes.fev",
+    "wes.fsb",
+
 	"wintersfeast2019.fev",
 	"wintersfeast2019.fsb",
+
+	"summerevent.fev",
+	"summerevent.fsb",
+	"summerevent_music.fsb",
+
+	"webber2.fev",
+    "webber2.fsb",
+
+    "webber1.fev",
+    "webber1.fsb",
 }
 
 function PreloadSoundList(list)

@@ -85,8 +85,7 @@ function Weapon:SetAttackCallback(fn)
 end
 
 function Weapon:GetDamage(attacker, target)
-    return (type(self.damage) == "function" and self.damage(self.inst, attacker, target))
-            or self.damage
+    return FunctionOrValue(self.damage, self.inst, attacker, target)
 end
 
 function Weapon:OnAttack(attacker, target, projectile)
@@ -95,7 +94,12 @@ function Weapon:OnAttack(attacker, target, projectile)
     end
 
     if self.inst.components.finiteuses ~= nil then
-        self.inst.components.finiteuses:Use((self.attackwear or 1) * self.attackwearmultipliers:Get())
+		local uses = (self.attackwear or 1) * self.attackwearmultipliers:Get()
+		if attacker ~= nil and attacker:IsValid() and attacker.components.efficientuser ~= nil then
+			uses = uses * (attacker.components.efficientuser:GetMultiplier(ACTIONS.ATTACK) or 1)
+		end
+
+		self.inst.components.finiteuses:Use(uses)
     end
 end
 

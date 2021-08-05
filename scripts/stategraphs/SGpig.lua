@@ -11,6 +11,7 @@ local actionhandlers =
     ActionHandler(ACTIONS.TAKEITEM, "pickup"),
     ActionHandler(ACTIONS.UNPIN, "pickup"),
     ActionHandler(ACTIONS.DROP, "dropitem"),
+    ActionHandler(ACTIONS.MARK, "dropitem"),
 }
 
 local events =
@@ -32,6 +33,16 @@ local events =
     EventHandler("doaction", function(inst, data)
         if data.action == ACTIONS.CHOP and not (inst.sg:HasStateTag("busy") or inst.components.health:IsDead()) then
             inst.sg:GoToState("chop", data.target)
+        end
+    end),
+    EventHandler("cheer", function(inst, data)
+        if not (inst.sg:HasStateTag("busy") or inst.components.health:IsDead()) then
+            inst.sg:GoToState("cheer")
+        end
+    end),
+    EventHandler("win_yotb", function(inst, data)
+        if not (inst.sg:HasStateTag("busy") or inst.components.health:IsDead()) then
+            inst.sg:GoToState("win_yotb")
         end
     end),
 }
@@ -251,6 +262,40 @@ local states =
                 inst:PerformBufferedAction()
             end),
         },
+
+        events =
+        {
+            EventHandler("animover", function(inst)
+                inst.sg:GoToState("idle")
+            end),
+        },
+    },
+
+    State{
+        name = "cheer",
+        tags = { "busy" },
+
+        onenter = function(inst)
+            inst.Physics:Stop()
+            inst.AnimState:PlayAnimation("buff")
+        end,
+
+        events =
+        {
+            EventHandler("animover", function(inst)
+                inst.sg:GoToState("idle")
+            end),
+        },
+    },
+
+    State{
+        name = "win_yotb",
+        tags = { "busy" },
+
+        onenter = function(inst)
+            inst.Physics:Stop()
+            inst.AnimState:PlayAnimation("win")
+        end,
 
         events =
         {

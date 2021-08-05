@@ -115,7 +115,7 @@ local function OnSleep(inst)
 end
 
 local RETARGET_MUST_TAGS = { "_combat", "_health" }
-local RETARGET_CANT_TAGS = { "insect", "INLIMBO" }
+local RETARGET_CANT_TAGS = { "insect", "INLIMBO", "plantkin" }
 local RETARGET_ONEOF_TAGS = { "character", "animal", "monster" }
 local function KillerRetarget(inst)
     return FindEntity(inst, SpringCombatMod(8),
@@ -145,7 +145,6 @@ local function commonfn(build, tags)
     inst.entity:AddTransform()
     inst.entity:AddAnimState()
     inst.entity:AddSoundEmitter()
-    inst.entity:AddLightWatcher()
     inst.entity:AddDynamicShadow()
     inst.entity:AddNetwork()
 
@@ -197,7 +196,7 @@ local function commonfn(build, tags)
 
     inst:AddComponent("lootdropper")
     inst.components.lootdropper:AddRandomLoot("honey", 1)
-    inst.components.lootdropper:AddRandomLoot("stinger", 5)   
+    inst.components.lootdropper:AddRandomLoot("stinger", 5)
     inst.components.lootdropper.numrandomloot = 1
 
     ------------------
@@ -221,6 +220,7 @@ local function commonfn(build, tags)
     ------------------
 
     inst:AddComponent("sleeper")
+    inst.components.sleeper.watchlight = true
     ------------------
 
     inst:AddComponent("knownlocations")
@@ -311,7 +311,7 @@ local function killerbee()
     inst:ListenForEvent("spawnedfromhaunt", OnSpawnedFromHaunt)
 
     return inst
-end 
+end
 
 return Prefab("bee", workerbee, assets, prefabs),
         Prefab("killerbee", killerbee, assets, prefabs)

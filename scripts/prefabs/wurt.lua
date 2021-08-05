@@ -41,12 +41,12 @@ local function UpdateStats(inst, maxhealth, maxhunger, maxsanity)
 end
 
 local function RoyalUpgrade(inst, silent)
-    
+
     UpdateStats(inst, TUNING.WURT_HEALTH_KINGBONUS, TUNING.WURT_HUNGER_KINGBONUS, TUNING.WURT_SANITY_KINGBONUS)
 
     if not silent and not inst.royal then
     	inst.royal = true
-    	inst.components.talker:Say(GetString(inst, "ANNOUNCE_KINGCREATED"))        
+    	inst.components.talker:Say(GetString(inst, "ANNOUNCE_KINGCREATED"))
         inst.sg:PushEvent("powerup_wurt")
         inst.SoundEmitter:PlaySound("dontstarve/characters/wurt/transform_to")
     end
@@ -114,7 +114,7 @@ local function DisableTentacleWarning(inst)
 		inst.tentacle_warning_task:Cancel()
 		inst.tentacle_warning_task = nil
 	end
-			
+
 	for t, w in pairs(inst._active_warnings) do
 		if w:IsValid() then
 			w:Remove()
@@ -164,6 +164,14 @@ end
 local function peruse_gardening(inst)
     inst.components.sanity:DoDelta(-TUNING.SANITY_LARGE)
 end
+local function peruse_horticulture(inst)
+    inst.components.sanity:DoDelta(-TUNING.SANITY_LARGE)
+end
+local function peruse_silviculture(inst)
+    inst.components.sanity:DoDelta(-TUNING.SANITY_LARGE)
+end
+
+
 
 local function OnSave(inst, data)
     data.health_percent = inst.health_percent or inst.components.health:GetPercent()
@@ -195,6 +203,11 @@ local function OnRespawn(inst)
     end
 end
 
+local function CLIENT_Wurt_HostileTest(inst, target)
+    return (target:HasTag("hostile") or target:HasTag("pig"))
+        and not target:HasTag("merm") and not target:HasTag("manrabbit")
+end
+
 local function common_postinit(inst)
     inst:AddTag("playermerm")
     inst:AddTag("merm")
@@ -219,12 +232,16 @@ local function common_postinit(inst)
 			inst:ListenForEvent("playeractivated", EnableTentacleWarning)
 		end
 	end
+
+    inst.HostileTest = CLIENT_Wurt_HostileTest
 end
 
 local function master_postinit(inst)
     inst.starting_inventory = start_inv[TheNet:GetServerGameMode()] or start_inv.default
 
     inst:AddComponent("reader")
+
+	inst.components.sanity.no_moisture_penalty = true
 
     inst.components.foodaffinity:AddFoodtypeAffinity(FOODTYPE.VEGGIE, 1.33)
     inst.components.foodaffinity:AddPrefabAffinity  ("kelp",          1.33) -- prevents the negative stats, otherwise foodtypeaffinity would have suffice
@@ -257,6 +274,8 @@ local function master_postinit(inst)
     inst.peruse_tentacles = peruse_tentacles
     inst.peruse_sleep = peruse_sleep
     inst.peruse_gardening = peruse_gardening
+	inst.peruse_horticulture = peruse_horticulture
+	inst.peruse_silviculture = peruse_silviculture
 
     inst.OnSave = OnSave
     inst.OnPreLoad = OnPreLoad

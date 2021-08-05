@@ -7,6 +7,8 @@ local EventServerFiles = {}
 
 StopUpdatingComponents = {}
 
+local ClientSideInventoryImageFlags = {}
+
 local function EntityWatchWorldState(self, var, fn)
     if self.worldstatewatching == nil then
         self.worldstatewatching = {}
@@ -183,18 +185,18 @@ function Entity:AddNetwork()
 
         modactioncomponents = {}
     }
-    
+
     for _,modname in pairs(ModManager:GetServerModsNames()) do
         inst.actionreplica.modactioncomponents[modname] = net_smallbytearray(guid, "modactioncomponents"..modname, "modactioncomponentsdirty"..modname)
     end
-        
-        
+
+
     if not TheWorld.ismastersim then
         inst:ListenForEvent("actioncomponentsdirty", OnActionComponentsDirty)
         inst:ListenForEvent("inherentactionsdirty", DeserializeInherentActions)
         inst:ListenForEvent("inherentsceneactiondirty", OnInherentSceneActionDirty)
         inst:ListenForEvent("inherentscenealtactiondirty", OnInherentSceneAltActionDirty)
-        
+
         for _,modname in pairs(ModManager:GetServerModsNames()) do
             inst:ListenForEvent("modactioncomponentsdirty"..modname, function(inst) OnModActionComponentsDirty(inst,modname) end)
         end
@@ -222,7 +224,7 @@ EntityScript = Class(function(self, entity)
     self.persists = true
     self.inlimbo = false
     self.name = nil
-    
+
     self.data = nil
     self.listeners = nil
     self.updatecomponents = nil
@@ -248,19 +250,19 @@ function EntityScript:GetSaveRecord()
             prefab = self.prefab,
             --id = self.GUID,
             age = self.Network:GetPlayerAge()
-        } 
+        }
     else
         record = {
             prefab = self.prefab,
             --id = self.GUID,
-        }   
+        }
     end
 
-    
-    
+
+
     if self.Transform then
         local x, y, z = self.Transform:GetWorldPosition()
-        
+
         --Qnan hunting
         x = x ~= x and 0 or x
         y = y ~= y and 0 or y
@@ -273,7 +275,7 @@ function EntityScript:GetSaveRecord()
             record.y = y and math.floor(y*1000)/1000 or 0
         end
     end
-    
+
     if self.skinname then 
     	record.skinname = self.skinname
     end
@@ -286,7 +288,7 @@ function EntityScript:GetSaveRecord()
 
     local references = nil
     record.data, references = self:GetPersistData()
-    
+
 
 
     return record, references
@@ -306,14 +308,19 @@ function EntityScript:IsInLimbo()
     return self.inlimbo
 end
 
+function EntityScript:ForceOutOfLimbo(state)
+    self.forcedoutoflimbo = state or nil
+    self.entity:SetInLimbo(self:IsInLimbo() and not self.forcedoutoflimbo or false)
+end
+
 function EntityScript:RemoveFromScene()
     self.entity:AddTag("INLIMBO")
-    self.entity:SetInLimbo(true)
+    self.entity:SetInLimbo(not self.forcedoutoflimbo)
     self.inlimbo = true
     self.entity:Hide()
-    
+
     self:StopBrain()
-    
+
     if self.sg then
         self.sg:Stop()
     end
@@ -356,9 +363,9 @@ function EntityScript:ReturnToScene()
     if self.MiniMapEntity then
         self.MiniMapEntity:SetEnabled(true)
     end
-    
+
     self:RestartBrain()
-    
+
     if self.sg then
         self.sg:Start()
     end
@@ -395,17 +402,17 @@ function EntityScript:StartUpdatingComponent(cmp)
     if not self:IsValid() then
         return
     end
-    
+
     if not self.updatecomponents then
         self.updatecomponents = {}
         NewUpdatingEnts[self.GUID] = self
         num_updating_ents = num_updating_ents + 1
     end
-    
+
     if StopUpdatingComponents[cmp] == self then
         StopUpdatingComponents[cmp] = nil
     end
-    
+
     local cmpname = nil
     for k,v in pairs(self.components) do
         if v == cmp then
@@ -431,7 +438,7 @@ function EntityScript:StopUpdatingComponent_Deferred(cmp)
             num = num + 1
             break
         end
-        
+
         if num == 0 then
             self.updatecomponents = nil
             UpdatingEnts[self.GUID] = nil
@@ -445,7 +452,7 @@ function EntityScript:StartWallUpdatingComponent(cmp)
     if not self:IsValid() then
         return
     end
-    
+
     if not self.wallupdatecomponents then
         self.wallupdatecomponents = {}
         NewWallUpdatingEnts[self.GUID] = self
@@ -465,7 +472,7 @@ end
 
 
 function EntityScript:StopWallUpdatingComponent(cmp)
-    
+
     if self.wallupdatecomponents then
         self.wallupdatecomponents[cmp] = nil
 
@@ -474,7 +481,7 @@ function EntityScript:StopWallUpdatingComponent(cmp)
             num = num + 1
             break
         end
-        
+
         if num == 0 then
             self.wallupdatecomponents = nil
             WallUpdatingEnts[self.GUID] = nil
@@ -704,7 +711,7 @@ function EntityScript:SpawnChild(name)
         self:AddChild(inst)
         return inst
     end
-    
+
 end
 
 function EntityScript:RemoveChild(child)
@@ -724,21 +731,21 @@ function EntityScript:AddChild(child)
     if not self.children then
         self.children = {}
     end
-    
+
     self.children[child] = true
     child.entity:SetParent(self.entity)
-    
+
 end
 
 function EntityScript:GetBrainString()
     local str = {}
-    
+
     if self.brain then
         table.insert(str, "BRAIN:\n")
         table.insert(str, tostring(self.brain))
         table.insert(str, "--------\n")
     end
-    
+
     return table.concat(str, "")
 end
 
@@ -798,7 +805,7 @@ function EntityScript:GetDebugString()
         table.insert(str, "Listening for Events:\n")
         for event, sources in pairs(self.event_listening) do
             table.insert(str, string.format("\t%s%s: ", event, GetTableSize(sources) > 1 and string.format("(%u)", GetTableSize(sources)) or "") )
-            
+
             local max_list = 5 -- this can be a very long list
             local n = 0
             for source, fns in pairs(sources) do
@@ -909,13 +916,13 @@ local function AddListener(t, event, inst, fn)
         listeners = {}
         t[event] = listeners
     end
-    
+
     local listener_fns = listeners[inst]
     if not listener_fns then
         listener_fns = {}
         listeners[inst] = listener_fns
     end
-    
+
     --source.event_listeners[event][self][1]
 
     table.insert(listener_fns, fn)
@@ -924,7 +931,7 @@ end
 function EntityScript:ListenForEvent(event, fn, source)
     --print ("Listen for event", self, event, source)
     source = source or self
-    
+
     if not source.event_listeners then
         source.event_listeners = {}
     end
@@ -935,7 +942,7 @@ function EntityScript:ListenForEvent(event, fn, source)
     if not self.event_listening then
         self.event_listening = {}
     end
-    
+
     AddListener(self.event_listening, event, source, fn)
 
 end
@@ -970,7 +977,7 @@ function EntityScript:RemoveEventCallback(event, fn, source)
 end
 
 function EntityScript:RemoveAllEventCallbacks()
-    
+
     --self.event_listening[event][source][1]
 
     --tell others that we are no longer listening for them
@@ -987,7 +994,7 @@ function EntityScript:RemoveAllEventCallbacks()
         end
         self.event_listening = nil
     end    
-    
+
     --tell others who are listening to us to stop
     if self.event_listeners then
         for event, listeners in pairs(self.event_listeners) do
@@ -1176,7 +1183,7 @@ function EntityScript:DoPeriodicTask(time, fn, initialdelay, ...)
     if not self.pendingtasks then
         self.pendingtasks = {}
     end
-    
+
     self.pendingtasks[per] = true
     per.onfinish = task_finish --function() if self.pendingtasks then self.pendingtasks[per] = nil end end
     return per
@@ -1187,7 +1194,7 @@ function EntityScript:DoTaskInTime(time, fn, ...)
     if not self.pendingtasks then
         self.pendingtasks = {}
     end
-    
+
     local per = scheduler:ExecuteInTime(time, fn, self.GUID, self, ...)
     self.pendingtasks[per] = true
     per.onfinish = task_finish -- function() if self and self.pendingtasks then self.pendingtasks[per] = nil end end
@@ -1310,6 +1317,11 @@ function EntityScript:PerformBufferedAction()
 
         self:PushEvent("performaction", { action = self.bufferedaction })
 
+		local action_theme_music = self:HasTag("player") and (self.bufferedaction.action.theme_music or (self.bufferedaction.action.theme_music_fn ~= nil and self.bufferedaction.action.theme_music_fn(self.bufferedaction)))
+		if action_theme_music then
+			self:PushEvent("play_theme_music", {theme = action_theme_music})
+		end
+
         local success, reason = self.bufferedaction:Do()
         if success then
             self.bufferedaction = nil
@@ -1407,10 +1419,10 @@ function EntityScript:CanInteractWith(inst)
     return true
 end
 
-function EntityScript:OnUsedAsItem(action)
+function EntityScript:OnUsedAsItem(action, doer, target)
     for k,v in pairs(self.components) do
         if v.OnUsedAsItem then
-            v:OnUsedAsItem(action)
+            v:OnUsedAsItem(action, doer, target)
         end
     end
 end
@@ -1501,7 +1513,7 @@ end
 function EntityScript:PutBackOnGround()
 	local x, y, z = self.Transform:GetWorldPosition()
     if not TheWorld.Map:IsPassableAtPoint(x, y, z, true) then
-        local dest = FindNearbyLand(self:GetPosition(), 8)
+        local dest = FindNearbyLand(self:GetPosition(), 8) or FindNearbyOcean(self:GetPosition(), 8)
         if dest ~= nil then
             if self.Physics ~= nil then
                 self.Physics:Teleport(dest:Get())
@@ -1532,7 +1544,7 @@ function EntityScript:GetPersistData()
                     references = {}
                 end
                 for k,v in pairs(refs) do
-                    
+
                     table.insert(references, v)
                 end
             end
@@ -1551,11 +1563,11 @@ function EntityScript:GetPersistData()
                 references = {}
             end
             for k,v in pairs(refs) do
-                
+
                 table.insert(references, v)
             end
         end
-        
+
     end
 
     if (data and next(data)) or references then
@@ -1598,7 +1610,9 @@ function EntityScript:SetPersistData(data, newents)
 end
 
 function EntityScript:GetAdjective()
-	if self:HasTag("critter") then
+	if self.displayadjectivefn ~= nil then
+		return self:displayadjectivefn(self)
+	elseif self:HasTag("critter") then
 		for k,_ in pairs(TUNING.CRITTER_TRAITS) do
 			if self:HasTag("trait_"..k) then
 				return STRINGS.UI.HUD.CRITTER_TRAITS[k]
@@ -1639,5 +1653,66 @@ function EntityScript:LongUpdate(dt)
         if v.LongUpdate ~= nil then
             v:LongUpdate(dt)
         end
+    end
+end
+
+function EntityScript:SetClientSideInventoryImageOverride(flagname, srcinventoryimage, destinventoryimage, destatlas)
+    --destatlas is optional
+    self.inventoryimageremapping = self.inventoryimageremapping or {}
+    self.inventoryimageremapping[flagname] = self.inventoryimageremapping[flagname] or {}
+    self.inventoryimageremapping[flagname][hash(srcinventoryimage)] = {image = destinventoryimage, atlas = destatlas}
+    if ClientSideInventoryImageFlags[flagname] and ThePlayer then
+        ThePlayer:PushEvent("clientsideinventoryflagschanged")
+    end
+end
+
+function EntityScript:HasClientSideInventoryImageOverrides()
+    return self.inventoryimageremapping ~= nil
+end
+
+--do not call this if you have no client side inventory image overrides
+function EntityScript:GetClientSideInventoryImageOverride(imagenamehash)
+    for flag, remaps in pairs(self.inventoryimageremapping) do
+        if ClientSideInventoryImageFlags[flag] and remaps[imagenamehash] then
+            return remaps[imagenamehash]
+        end
+    end
+end
+
+function EntityScript:SetClientSideInventoryImageOverrideFlag(name, value)
+    value = (not value) ~= true or nil
+    local updated = ClientSideInventoryImageFlags[name] ~= value
+    ClientSideInventoryImageFlags[name] = value
+    if updated and ThePlayer then
+        ThePlayer:PushEvent("clientsideinventoryflagschanged")
+    end
+end
+
+function EntityScript:IsInLight()
+    if self.LightWatcher then
+        return self.LightWatcher:IsInLight()
+    else
+        local lightThresh = self.lightThresh or 0.1
+        local darkThresh = self.darkThresh or 0.05
+
+        local x, y, z = self.Transform:GetWorldPosition()
+        local light = TheSim:GetLightAtPoint(x, y, z, lightThresh)
+
+        local move_to_light = self.inLight == false and light >= lightThresh
+
+        if move_to_light or (self.inLight ~= false and light <= darkThresh) then
+            self.inLight = move_to_light
+        end
+
+        return self.inLight ~= false
+    end
+end
+
+function EntityScript:IsLightGreaterThan(lightThresh)
+    if self.LightWatcher then
+        return self.LightWatcher:GetLightValue() >= lightThresh
+    else
+        local x, y, z = self.Transform:GetWorldPosition()
+        return TheSim:GetLightAtPoint(x, y, z, lightThresh) >= lightThresh
     end
 end

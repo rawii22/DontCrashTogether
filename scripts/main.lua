@@ -1,5 +1,7 @@
 -- Override the package.path in luaconf.h because it is impossible to find
 package.path = "scripts\\?.lua;scriptlibs\\?.lua"
+package.assetpath = {}
+table.insert(package.assetpath, {path = ""})
 
 math.randomseed(tonumber(tostring(os.time()):reverse():sub(1,6)))
 math.random()
@@ -22,6 +24,10 @@ end
 
 function IsSteam()
 	return PLATFORM == "WIN32_STEAM" or PLATFORM == "LINUX_STEAM" or PLATFORM == "OSX_STEAM"
+end
+
+function IsWin32()
+	return PLATFORM == "WIN32_STEAM" or PLATFORM == "WIN32_RAIL"
 end
 
 function IsLinux()
@@ -89,32 +95,42 @@ if PLATFORM == "NACL" then
 	end
 end
 
-package.path = package.path .. ";scripts/?.lua"
-
 --used for A/B testing and preview features. Gets serialized into and out of save games
-GameplayOptions = 
+GameplayOptions =
 {
 }
 
 RequiredFilesForReload = {}
 
 --install our crazy loader!
+--ManifestManager:AddFileToModManifest(manifest_name, filename)
+--manifest_name should be the foldername that your mod resides in IE workshop-xxxxxxxxx if your mod is a workshop mod, or the foldername of the mod if its a local mod.
+--given the path ../mods/workshop-xxxxxxxxx/somefolder/somefile.lua manifest_name should be workshop-xxxxxxxxx and filename should be somefolder/somefile.lua
+--you shouldn't ever need this unless your writing lua files to your mod directory, which isn't usually done.
+local manifest_paths = {}
 local loadfn = function(modulename)
-	--print (modulename, package.path)
     local errmsg = ""
-    local modulepath = string.gsub(modulename, "%.", "/")
+    local modulepath = string.gsub(modulename, "[%.\\]", "/")
     for path in string.gmatch(package.path, "([^;]+)") do
-        local filename = string.gsub(path, "%?", modulepath)
-        filename = string.gsub(filename, "\\", "/")
-        local result = kleiloadlua(filename)
-        if result then
-			local filetime = TheSim:GetFileModificationTime(filename)			
+		local pathdata = manifest_paths[path]
+		if not pathdata then
+			pathdata = {}
+			local manifest, matches = string.gsub(path, MODS_ROOT.."([^\\]+)\\scripts\\%?%.lua", "%1", 1)
+			if matches == 1 then
+				pathdata.manifest = manifest
+			end
+			manifest_paths[path] = pathdata
+		end
+        local filename = string.gsub(string.gsub(path, "%?", modulepath), "\\", "/")
+		local result = kleiloadlua(filename, pathdata.manifest, "scripts/"..modulepath..".lua")
+		if result then
+			local filetime = TheSim:GetFileModificationTime(filename)
 			RequiredFilesForReload[filename] = filetime
-            return result
-        end
+			return result
+		end
         errmsg = errmsg.."\n\tno file '"..filename.."' (checked with custom loader)"
     end
-  return errmsg    
+  	return errmsg
 end
 table.insert(package.loaders, 2, loadfn)
 
@@ -134,7 +150,7 @@ end
 --if not TheNet:GetIsClient() then
 --	require("mobdebug").start()
 --end
-	
+
 require("strict")
 require("debugprint")
 -- add our print loggers
@@ -202,11 +218,13 @@ require("reload")
 require("saveindex") -- Added by Altgames for Android focus lost handling
 require("shardsaveindex")
 require("shardindex")
+require("custompresets")
 require("worldtiledefs")
 require("gamemodes")
 require("skinsutils")
 require("wxputils")
 require("klump")
+require("popupmanager")
 
 if TheConfig:IsEnabled("force_netbookmode") then
 	TheSim:SetNetbookMode(true)
@@ -247,7 +265,7 @@ NewWallUpdatingEnts = {}
 num_updating_ents = 0
 NumEnts = 0
 
-prefabs = nil -- this is here so mods dont crash because one of our prefab scripts missed the local and a number of mods were erroneously abusing it 
+prefabs = nil -- this is here so mods dont crash because one of our prefab scripts missed the local and a number of mods were erroneously abusing it
 
 TheGlobalInstance = nil
 
@@ -286,6 +304,8 @@ global("TheRecipeBook")
 TheRecipeBook = nil
 global("TheCookbook")
 TheCookbook = nil
+global("ThePlantRegistry")
+ThePlantRegistry = nil
 global("Lavaarena_CommunityProgression")
 Lavaarena_CommunityProgression = nil
 global("SaveGameIndex")
@@ -294,6 +314,8 @@ global("ShardGameIndex")
 ShardGameIndex = nil
 global("ShardSaveGameIndex")
 ShardSaveGameIndex = nil
+global("CustomPresetManager")
+CustomPresetManager = nil
 require("globalvariableoverrides")
 
 --world setup
@@ -312,7 +334,7 @@ local function ModSafeStartup()
 
 	--Ensure we have a fresh filesystem
 	TheSim:ClearFileSystemAliases()
-	
+
 	---PREFABS AND ENTITY INSTANTIATION
 
 	ModManager:LoadMods()
@@ -336,6 +358,9 @@ local function ModSafeStartup()
 	TheRecipeBook:Load()
 	TheCookbook = require("cookbookdata")()
 	TheCookbook:Load()
+	ThePlantRegistry = require("plantregistrydata")()
+	ThePlantRegistry:Load()
+	ThePlantRegistry.save_enabled = true
 	Lavaarena_CommunityProgression = require("lavaarena_communityprogression")()
 	Lavaarena_CommunityProgression:Load()
 
@@ -360,10 +385,18 @@ local function ModSafeStartup()
 	EnvelopeManager = TheGlobalInstance.entity:AddEnvelopeManager()
 
 	PostProcessor = TheGlobalInstance.entity:AddPostProcessor()
-	local IDENTITY_COLOURCUBE = "images/colour_cubes/identity_colourcube.tex"
-	PostProcessor:SetColourCubeData( 0, IDENTITY_COLOURCUBE, IDENTITY_COLOURCUBE )
-	PostProcessor:SetColourCubeData( 1, IDENTITY_COLOURCUBE, IDENTITY_COLOURCUBE )
-	PostProcessor:SetColourCubeData( 2, IDENTITY_COLOURCUBE, IDENTITY_COLOURCUBE )
+	require("postprocesseffects")
+	if not TheNet:IsDedicated() then
+		BuildColourCubeShader()
+		BuildZoomBlurShader()
+		BuildBloomShader()
+		BuildDistortShader()
+		BuildLunacyShader()
+		BuildMoonPulseShader()
+		BuildMoonPulseGradingShader()
+		BuildModShaders()
+		SortAndEnableShaders()
+	end
 
 	FontManager = TheGlobalInstance.entity:AddFontManager()
 	MapLayerManager = TheGlobalInstance.entity:AddMapLayerManager()
@@ -374,13 +407,27 @@ local function ModSafeStartup()
 			Stats.RecordGameStartStats()
 		end
 	end
-
 end
 
 SetInstanceParameters(json_settings)
 
+if Settings.reset_action == RESET_ACTION.JOIN_SERVER then
+	Settings.current_asset_set = Settings.last_asset_set
+end
+
+local load_frontend_reset_action = Settings.reset_action == nil or Settings.reset_action == RESET_ACTION.LOAD_FRONTEND
+
+if Settings.memoizedFilePaths ~= nil then
+	if not load_frontend_reset_action then
+		SetMemoizedFilePaths(Settings.memoizedFilePaths)
+	end
+	Settings.memoizedFilePaths = nil
+end
+
 if Settings.loaded_mods ~= nil then
-    ModManager:UnloadPrefabsFromData(Settings.loaded_mods)
+	if load_frontend_reset_action then
+    	ModManager:UnloadPrefabsFromData(Settings.loaded_mods)
+	end
     Settings.loaded_mods = nil
 end
 
@@ -389,7 +436,7 @@ if not MODS_ENABLED then
 	-- so they break because Main returns before ModSafeStartup has run.
 	ModSafeStartup()
 else
-	KnownModIndex:Load(function() 
+	KnownModIndex:Load(function()
 		KnownModIndex:BeginStartupSequence(function()
 			ModSafeStartup()
 		end)

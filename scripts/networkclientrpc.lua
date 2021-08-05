@@ -41,7 +41,7 @@ local function IsPointInRange(player, x, z)
     return distsq(x, z, px, pz) <= 4096
 end
 
-local function ConvertPlatformRelativePositionToAbsolutePosition(relative_x, relative_z, platform, platform_relative)    
+local function ConvertPlatformRelativePositionToAbsolutePosition(relative_x, relative_z, platform, platform_relative)
     if platform_relative then
 		if platform ~= nil and platform.Transform ~= nil then
 			local platform_x, platform_y, platform_z = platform.Transform:GetWorldPosition()
@@ -373,7 +373,7 @@ local RPC_HANDLERS =
 
         playercontroller:OnRemoteStartHop(x, z, platform)
 
-    end,    
+    end,
 
     SteerBoat = function(player, dir_x, dir_z)
         if not (checknumber(dir_x) and
@@ -385,7 +385,7 @@ local RPC_HANDLERS =
         if steering_wheel_user ~= nil then
             steering_wheel_user:SteerInDir(dir_x, dir_z)
         end
-    end,    
+    end,
 
 
     StopWalking = function(player)
@@ -395,24 +395,20 @@ local RPC_HANDLERS =
         end
     end,
 
+    --"action" and "mod_name" are deprecated, but keep them for mod compatibility
     DoWidgetButtonAction = function(player, action, target, mod_name)
-        if not (checknumber(action) and
-                optentity(target) and
-                optstring(mod_name)) then
+        if not optentity(target) then
             printinvalid("DoWidgetButtonAction", player)
             return
         end
         local playercontroller = player.components.playercontroller
         if playercontroller ~= nil and playercontroller:IsEnabled() and not player.sg:HasStateTag("busy") then
-            if mod_name ~= nil then
-                action = ACTION_MOD_IDS[mod_name] ~= nil and ACTION_MOD_IDS[mod_name][action] ~= nil and ACTIONS[ACTION_MOD_IDS[mod_name][action]] or nil
-            else
-                action = ACTION_IDS[action] ~= nil and ACTIONS[ACTION_IDS[action]] or nil
-            end
-            if action ~= nil then
-                local container = target ~= nil and target.components.container or nil
-                if container ~= nil and container.opener == player then
-                    BufferedAction(player, target, action):Do()
+            local container = target ~= nil and target.components.container or nil
+            if container ~= nil and container:IsOpenedBy(player) then
+                local widget = container:GetWidget()
+                local buttoninfo = widget ~= nil and widget.buttoninfo or nil
+                if buttoninfo ~= nil and (buttoninfo.validfn == nil or buttoninfo.validfn(target)) and buttoninfo.fn ~= nil then
+                    buttoninfo.fn(target, player)
                 end
             end
         end
@@ -438,7 +434,7 @@ local RPC_HANDLERS =
             else
                 container = container.components.container
                 if container ~= nil and container:IsOpenedBy(player) then
-                    container:PutOneOfActiveItemInSlot(slot)
+                    container:PutOneOfActiveItemInSlot(slot, player)
                 end
             end
         end
@@ -457,7 +453,7 @@ local RPC_HANDLERS =
             else
                 container = container.components.container
                 if container ~= nil and container:IsOpenedBy(player) then
-                    container:PutAllOfActiveItemInSlot(slot)
+                    container:PutAllOfActiveItemInSlot(slot, player)
                 end
             end
         end
@@ -476,7 +472,7 @@ local RPC_HANDLERS =
             else
                 container = container.components.container
                 if container ~= nil and container:IsOpenedBy(player) then
-                    container:TakeActiveItemFromHalfOfSlot(slot)
+                    container:TakeActiveItemFromHalfOfSlot(slot, player, player)
                 end
             end
         end
@@ -495,7 +491,7 @@ local RPC_HANDLERS =
             else
                 container = container.components.container
                 if container ~= nil and container:IsOpenedBy(player) then
-                    container:TakeActiveItemFromAllOfSlot(slot)
+                    container:TakeActiveItemFromAllOfSlot(slot, player)
                 end
             end
         end
@@ -514,7 +510,7 @@ local RPC_HANDLERS =
             else
                 container = container.components.container
                 if container ~= nil and container:IsOpenedBy(player) then
-                    container:AddOneOfActiveItemToSlot(slot)
+                    container:AddOneOfActiveItemToSlot(slot, player)
                 end
             end
         end
@@ -533,7 +529,7 @@ local RPC_HANDLERS =
             else
                 container = container.components.container
                 if container ~= nil and container:IsOpenedBy(player) then
-                    container:AddAllOfActiveItemToSlot(slot)
+                    container:AddAllOfActiveItemToSlot(slot, player)
                 end
             end
         end
@@ -552,7 +548,7 @@ local RPC_HANDLERS =
             else
                 container = container.components.container
                 if container ~= nil and container:IsOpenedBy(player) then
-                    container:SwapActiveItemWithSlot(slot)
+                    container:SwapActiveItemWithSlot(slot, player)
                 end
             end
         end
@@ -571,7 +567,7 @@ local RPC_HANDLERS =
             else
                 container = container.components.container
                 if container ~= nil and container:IsOpenedBy(player) then
-                    container:SwapOneOfActiveItemWithSlot(slot)
+                    container:SwapOneOfActiveItemWithSlot(slot, player)
                 end
             end
         end
@@ -733,7 +729,7 @@ local RPC_HANDLERS =
         end
         local container = srccontainer.components.container
         if container ~= nil and container:IsOpenedBy(player) then
-            container:MoveItemFromAllOfSlot(slot, destcontainer or player)
+            container:MoveItemFromAllOfSlot(slot, destcontainer or player, player)
         end
     end,
 
@@ -746,7 +742,7 @@ local RPC_HANDLERS =
         end
         local container = srccontainer.components.container
         if container ~= nil and container:IsOpenedBy(player) then
-            container:MoveItemFromHalfOfSlot(slot, destcontainer or player)
+            container:MoveItemFromHalfOfSlot(slot, destcontainer or player, player)
         end
     end,
 
@@ -769,20 +765,20 @@ local RPC_HANDLERS =
 
     MovementPredictionEnabled = function(player)
         player.components.locomotor:SetAllowPlatformHopping(false)
-    end,    
+    end,
 
     MovementPredictionDisabled = function(player)
         player.components.locomotor:SetAllowPlatformHopping(true)
-    end,    
+    end,
 
     Hop = function(player, hopper, hop_x, hop_z, other_platform)
         --print("HOP: ", hop_x, hop_z, other_platform ~= nil and other_platform.name)
-    end,       
+    end,
 
     StopHopping = function(player, hopper)
         --local playercontroller = hopper.components.playercontroller
         --playercontroller:OnRemoteStopHopping()
-    end, 
+    end,
 
     MakeRecipeAtPoint = function(player, recipe, x, z, rot, skin_index, platform, platform_relative)
         if not (checknumber(recipe) and
@@ -871,37 +867,32 @@ local RPC_HANDLERS =
         end
     end,
 
-    DoneOpenGift = function(player, usewardrobe)
-        if not optbool(usewardrobe) then
-            printinvalid("DoneOpenGift", player)
+    ClosePopup = function(player, popupcode, mod_name, ...)
+        if not (checkuint(popupcode) and
+                optstring(mod_name) and
+                GetPopupFromPopupCode(popupcode, mod_name)) then
+            printinvalid("ClosePopup", player)
             return
         end
-        local giftreceiver = player.components.giftreceiver
-        if giftreceiver ~= nil then
-            giftreceiver:OnStopOpenGift(usewardrobe)
+        local popup = GetPopupFromPopupCode(popupcode, mod_name)
+        if not popup.validaterpcfn(...) then
+            printinvalid("ClosePopup"..tostring(popup.id), player)
+        end
+        popup:Close(player, ...)
+    end,
+
+    RepeatHeldAction = function(player)
+        local playercontroller = player.components.playercontroller
+        if playercontroller then
+            playercontroller:RepeatHeldAction()
         end
     end,
 
-    CloseWardrobe = function(player, base_skin, body_skin, hand_skin, legs_skin, feet_skin)
-        if not (optstring(base_skin) and
-                optstring(body_skin) and
-                optstring(hand_skin) and
-                optstring(legs_skin) and
-                optstring(feet_skin)) then
-            printinvalid("CloseWardrobe", player)
-            return
+    ClearActionHold = function(player)
+        local playercontroller = player.components.playercontroller
+        if playercontroller then
+            playercontroller:ClearActionHold()
         end
-        player:PushEvent("ms_closewardrobe", {
-            base = base_skin,
-            body = body_skin,
-            hand = hand_skin,
-            legs = legs_skin,
-            feet = feet_skin,
-        })
-    end,
-
-    CloseCookbookScreen = function(player)
-        player:PushEvent("ms_closecookbookscreen")
     end,
 }
 
@@ -923,6 +914,49 @@ end
 
 local CLIENT_RPC_HANDLERS =
 {
+    ShowPopup = function(popupcode, mod_name, show, ...)
+        local popup = GetPopupFromPopupCode(popupcode, mod_name)
+
+        if popup then
+            popup.fn(ThePlayer, show, ...)
+        end
+    end,
+
+    LearnRecipe = function(product, ...)
+        local cookbookupdater = ThePlayer.components.cookbookupdater
+        local ingredients = {...}
+        if cookbookupdater and product and not IsTableEmpty(ingredients) then
+            cookbookupdater:LearnRecipe(product, ingredients)
+        end
+    end,
+
+    LearnFoodStats = function(product)
+        local cookbookupdater = ThePlayer.components.cookbookupdater
+        if cookbookupdater and product then
+            cookbookupdater:LearnFoodStats(product)
+        end
+    end,
+
+    LearnPlantStage = function(plant, stage)
+        local plantregistryupdater = ThePlayer.components.plantregistryupdater
+        if plantregistryupdater and plant and stage then
+            plantregistryupdater:LearnPlantStage(plant, stage)
+        end
+    end,
+
+    LearnFertilizerStage = function(fertilizer)
+        local plantregistryupdater = ThePlayer.components.plantregistryupdater
+        if plantregistryupdater and fertilizer then
+            plantregistryupdater:LearnFertilizer(fertilizer)
+        end
+    end,
+
+    TakeOversizedPicture = function(plant, weight, beardskin, beardlength)
+        local plantregistryupdater = ThePlayer.components.plantregistryupdater
+        if plantregistryupdater and plant and weight then
+            plantregistryupdater:TakeOversizedPicture(plant, weight, beardskin, beardlength)
+        end
+    end,
 }
 
 CLIENT_RPC = {}
@@ -1006,6 +1040,7 @@ function HandleRPC(sender, tick, code, data)
 end
 
 function HandleClientRPC(tick, code, data)
+    if not ThePlayer then return end --ThePlayer being nil means all rpc's are invalid.
     local fn = CLIENT_RPC_HANDLERS[code]
     if fn ~= nil then
         table.insert(RPC_Client_Queue, { fn, data, tick })

@@ -12,9 +12,12 @@ local HeatOver = require "widgets/heatover"
 local FumeOver = require "widgets/fumeover"
 local SandOver = require "widgets/sandover"
 local SandDustOver = require "widgets/sanddustover"
+local MoonstormOver = require "widgets/moonstormover"
+local MoonstormOver_Lightning = require "widgets/moonstormover_lightning"
 local MindControlOver = require "widgets/mindcontrolover"
 local InkOver = require "widgets/inkover"
 local GogglesOver = require "widgets/gogglesover"
+local NutrientsOver = require "widgets/nutrientsover"
 local BatOver = require "widgets/batover"
 local FlareOver = require "widgets/flareover"
 local EndOfMatchPopup = require "widgets/redux/endofmatchpopup"
@@ -26,12 +29,14 @@ local ChatInputScreen = require "screens/chatinputscreen"
 local PlayerStatusScreen = require "screens/playerstatusscreen"
 local InputDialogScreen = require "screens/inputdialog"
 local CookbookPopupScreen = require "screens/cookbookpopupscreen"
+local PlantRegistryPopupScreen = require "screens/plantregistrypopupscreen"
 
 local TargetIndicator = require "widgets/targetindicator"
 
 local EventAnnouncer = require "widgets/eventannouncer"
 local GiftItemPopUp = require "screens/giftitempopup"
 local GridWardrobePopupScreen = require "screens/redux/wardrobepopupgridloadout"
+local GridGroomerPopupScreen = require "screens/redux/groomerpopupgridloadout"
 local ScarecrowClothingPopupScreen = require "screens/scarecrowclothingpopup"
 local PlayerAvatarPopup = require "widgets/playeravatarpopup"
 local DressupAvatarPopup = require "widgets/dressupavatarpopup"
@@ -49,6 +54,7 @@ local PlayerHud = Class(Screen, function(self)
     self.playerstatusscreen = nil
     self.giftitempopup = nil
     self.wardrobepopup = nil
+    self.groomerpopup = nil
     self.playeravatarpopup = nil
     self.recentgifts = nil
     self.recentgiftstask = nil
@@ -58,7 +64,7 @@ local PlayerHud = Class(Screen, function(self)
 
     if not TheWorld.ismastersim then
         self.inst:ListenForEvent("deactivateworld", function()
-            --Essential cleanup when client is notified of 
+            --Essential cleanup when client is notified of
             --pending server c_reset or c_regenerateworld.
             if self.playeravatarpopup ~= nil then
                 if self.playeravatarpopup.started and self.playeravatarpopup.inst:IsValid() then
@@ -103,9 +109,9 @@ function PlayerHud:CreateOverlays(owner)
 
     self.drops_vig:SetClickable(false)
     self.drops_vig:Hide()
-    self.drops_alpha= 0 
+    self.drops_alpha= 0
 
-    self.inst:ListenForEvent("moisturedelta", function(inst, data)         
+    self.inst:ListenForEvent("moisturedelta", function(inst, data)
             if data.new > data.old then
                 self.dropsplash = true
                 if self.droptask then
@@ -120,13 +126,28 @@ function PlayerHud:CreateOverlays(owner)
     self.storm_overlays = self.storm_root:AddChild(Widget("storm_overlays"))
     self.sanddustover = self.storm_overlays:AddChild(SandDustOver(owner))
 
+    self.moonstormdust = self.storm_overlays:AddChild(Image("images/overlays_moonstorm.xml", "moonstorm.tex"))
+    self.moonstormdust:SetEffect( "shaders/moonstorm.ksh" )
+    self.moonstormdust:EnableEffectParams2(true)
+    self.moonstormdust:SetHAnchor(ANCHOR_MIDDLE)
+    self.moonstormdust:SetVAnchor(ANCHOR_MIDDLE)
+    self.moonstormdust:SetScaleMode(SCALEMODE_FILLSCREEN)
+    self.moonstormdust:SetBlendMode(1)
+    self.moonstormdust:SetUVMode(WRAP_MODE.WRAP)
+    self.moonstormdust:Hide()
+    self.moonstormdust:SetClickable(false)
+    self.moonstormover_lightning = self.storm_overlays:AddChild(MoonstormOver_Lightning(owner))
+
     self.mindcontrolover = self.over_root:AddChild(MindControlOver(owner))
 
     if IsSpecialEventActive(SPECIAL_EVENTS.HALLOWED_NIGHTS) then
         self.batover = self.overlayroot:AddChild(BatOver(owner))
     end
     self.sandover = self.overlayroot:AddChild(SandOver(owner, self.sanddustover))
+    self.moonstormover = self.overlayroot:AddChild(MoonstormOver(owner, self.moonstormdust))
+
     self.gogglesover = self.overlayroot:AddChild(GogglesOver(owner, self.storm_overlays))
+    self.nutrientsover = self.overlayroot:AddChild(NutrientsOver(owner))
     self.bloodover = self.overlayroot:AddChild(BloodOver(owner))
     self.beefbloodover = self.overlayroot:AddChild(BeefBloodOver(owner))
     self.iceover = self.overlayroot:AddChild(IceOver(owner))
@@ -186,7 +207,7 @@ function PlayerHud:OnLoseFocus()
     if self.controls ~= nil then
         self.controls.hover:Hide()
         self.controls.item_notification:ToggleHUDFocus(false)
-        
+
         local resurrectbutton = self.controls.status:GetResurrectButton()
         if resurrectbutton ~= nil then
             resurrectbutton:ToggleHUDFocus(false)
@@ -224,11 +245,21 @@ function PlayerHud:OnGainFocus()
     end
 end
 
-function PlayerHud:Toggle()
+function PlayerHud:Toggle(targetindicators)
     if self.shown then
         self:Hide()
+        if targetindicators and self.targetindicators then
+            for i, target in pairs(self.targetindicators) do
+                target:Hide()
+            end
+        end
     else
         self:Show()
+        if self.targetindicators then
+            for i, target in pairs(self.targetindicators) do
+                target:Show()
+            end
+        end
     end
 end
 
@@ -282,7 +313,7 @@ local function OpenContainerWidget(self, container, side)
     --self.controls[side and "containerroot_side" or "containerroot"]:AddChild(containerwidget)
     --self.controls.bottom_root:AddChild(containerwidget)
     --self.controls.inv.hand_inv:AddChild(containerwidget)
-	
+
 	containerwidget:MoveToBack()
     containerwidget:Open(container, self.owner)
     self.controls.containers[container] = containerwidget
@@ -325,7 +356,7 @@ function PlayerHud:TogglePlayerAvatarPopup(player_name, data, show_net_profile, 
     )
 end
 
---ThePlayer.HUD:ShowEndOfMatchPopup({victory=true}) 
+--ThePlayer.HUD:ShowEndOfMatchPopup({victory=true})
 function PlayerHud:ShowEndOfMatchPopup(data)
     self.inst:DoTaskInTime(data.victory and 2.5 or 0, function()
         if self.endofmatchpopup == nil then
@@ -426,7 +457,7 @@ function PlayerHud:CloseWardrobeScreen()
     local activescreen = TheFrontEnd:GetActiveScreen()
 
     if activescreen == nil then return end
-    
+
     if activescreen.name ~= "ItemServerContactPopup" then
         --Hack for holding offset when transitioning from giftitempopup to wardrobepopup
         TheCamera:PopScreenHOffset(self)
@@ -445,7 +476,64 @@ function PlayerHud:CloseWardrobeScreen()
     end
 end
 
+
+function PlayerHud:OpenGroomerScreen(target,filter)
+    --Hack for holding offset when transitioning from giftitempopup to groomerpopup
+    TheCamera:PopScreenHOffset(self)
+
+    if self.groomerpopup ~= nil and self.groomerpopup.inst:IsValid() then
+        TheFrontEnd:PopScreen(self.groomerpopup)
+    end
+
+    assert(target, "No Target for skinning")
+   -- assert(target.components.skinner_beefalo, "TARGET IS NOT SKINABLE BEEFALO")
+    self.groomerpopup =
+        GridGroomerPopupScreen(
+            target,
+            self.owner,
+            Profile,
+            nil,
+            nil,
+            filter
+        )
+
+    if not TheWorld.ismastersim then
+        local map = TheFrontEnd:GetOpenScreenOfType("MapScreen")
+        if map ~= nil and self.controls ~= nil then
+            self.controls:HideMap()
+        end
+    end
+
+    self:ClearRecentGifts()
+    self:OpenScreenUnderPause(self.groomerpopup)
+    return true
+end
+
+function PlayerHud:CloseGroomerScreen()
+    local activescreen = TheFrontEnd:GetActiveScreen()
+
+    if activescreen == nil then return end
+
+    if activescreen.name ~= "ItemServerContactPopup" then
+        --Hack for holding offset when transitioning from giftitempopup to groomerpopup
+        TheCamera:PopScreenHOffset(self)
+        self:ClearRecentGifts()
+
+        if self.groomerpopup ~= nil then
+            if self.groomerpopup.inst:IsValid() then
+                TheFrontEnd:PopScreen(self.groomerpopup)
+            end
+            self.groomerpopup = nil
+        end
+    else
+        self.inst:DoTaskInTime(.2, function()
+            self:CloseGroomerScreen()
+        end)
+    end
+end
+
 function PlayerHud:OpenCookbookScreen()
+    self:CloseCookbookScreen()
     self.cookbookscreen = CookbookPopupScreen(self.owner)
     self:OpenScreenUnderPause(self.cookbookscreen)
     return true
@@ -457,6 +545,22 @@ function PlayerHud:CloseCookbookScreen()
             TheFrontEnd:PopScreen(self.cookbookscreen)
 		end
         self.cookbookscreen = nil
+    end
+end
+
+function PlayerHud:OpenPlantRegistryScreen()
+    self:ClosePlantRegistryScreen()
+    self.plantregistryscreen = PlantRegistryPopupScreen(self.owner)
+    self:OpenScreenUnderPause(self.plantregistryscreen)
+    return true
+end
+
+function PlayerHud:ClosePlantRegistryScreen()
+    if self.plantregistryscreen ~= nil then
+        if self.plantregistryscreen.inst:IsValid() then
+            TheFrontEnd:PopScreen(self.plantregistryscreen)
+		end
+        self.plantregistryscreen = nil
     end
 end
 
@@ -611,6 +715,7 @@ function PlayerHud:OpenControllerInventory()
     self:HideControllerCrafting()
     self.controls.inv:OpenControllerInventory()
     self.controls.item_notification:ToggleController(true)
+    self.controls.yotb_notification:ToggleController(true)
     self.controls:ShowStatusNumbers()
 
     self.owner.components.playercontroller:OnUpdate(0)
@@ -624,6 +729,7 @@ function PlayerHud:CloseControllerInventory()
     self:ShowControllerCrafting()
     self.controls.inv:CloseControllerInventory()
     self.controls.item_notification:ToggleController(false)
+    self.controls.yotb_notification:ToggleController(false)
 end
 
 function PlayerHud:HasInputFocus()
@@ -711,6 +817,11 @@ function PlayerHud:IsWardrobeScreenOpen()
     return active_screen ~= nil and (active_screen.name == "WardrobePopupScreen" or active_screen.name == "ScarecrowClothingPopupScreen")
 end
 
+function PlayerHud:IsGroomerScreenOpen()
+    local active_screen = TheFrontEnd:GetActiveScreen()
+    return active_screen ~= nil and (active_screen.name == "GroomerPopupScreen")
+end
+
 function PlayerHud:IsPlayerAvatarPopUpOpen()
     return self.playeravatarpopup ~= nil
         and self.playeravatarpopup.started
@@ -725,6 +836,7 @@ function PlayerHud:OpenControllerCrafting()
         self.controls.inv:Disable()
         self.controls.crafttabs:OpenControllerCrafting()
         self.controls.item_notification:ToggleController(true)
+        self.controls.yotb_notification:ToggleController(true)
     end
 end
 
@@ -735,12 +847,15 @@ function PlayerHud:CloseControllerCrafting()
     self.controls.crafttabs:CloseControllerCrafting()
     self.controls.inv:Enable()
     self.controls.item_notification:ToggleController(false)
+    self.controls.yotb_notification:ToggleController(false)
 end
 
-function PlayerHud:ShowPlayerStatusScreen()
+function PlayerHud:ShowPlayerStatusScreen(click_to_close, onclosefn)
     if self.playerstatusscreen == nil then
         self.playerstatusscreen = PlayerStatusScreen(self.owner)
     end
+	self.playerstatusscreen.onclosefn = onclosefn
+	self.playerstatusscreen.click_to_close = click_to_close
     TheFrontEnd:PushScreen(self.playerstatusscreen)
     self.playerstatusscreen:MoveToFront()
     self.playerstatusscreen:Show()
@@ -882,7 +997,7 @@ end
 local DROPS_ALPHA_INCREASE_RATE = 0.01
 local DROPS_ALPHA_DECREASE_RATE = 0.05
 function PlayerHud:UpdateDrops(camera)
-  
+
     if self.dropsplash  then
         if self.drops_alpha >= 1 then
             return

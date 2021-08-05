@@ -10,6 +10,7 @@ local Text = require "widgets/text"
 local TextEdit = require "widgets/textedit"
 local TrueScrollList = require "widgets/truescrolllist"
 local UIAnim = require "widgets/uianim"
+local Button = require "widgets/button"
 local Widget = require "widgets/widget"
 
 require("constants")
@@ -85,12 +86,12 @@ end
 
 function TEMPLATES.LeftSideBarBackground()
 	local bg = ReduxBackground("dark_right")
-	
+
 	local sidebar_root = bg:AddChild(Widget("sidebar_root"))
     sidebar_root:SetScaleMode(SCALEMODE_PROPORTIONAL)
     sidebar_root:SetVAnchor(ANCHOR_MIDDLE)
     sidebar_root:SetHAnchor(ANCHOR_MIDDLE)
-	
+
 	local sidebar = sidebar_root:AddChild(Image("images/bg_redux_dark_sidebar.xml", "dark_sidebar.tex"))
     sidebar:SetCanFadeAlpha(false)
     sidebar:SetVRegPoint(ANCHOR_MIDDLE)
@@ -115,7 +116,7 @@ function TEMPLATES._CreateBackgroundPlate(image)
     plate:SetScale(RESOLUTION_X / w)
 
 	root.image = image
-	
+
     return root
 end
 
@@ -280,7 +281,7 @@ function TEMPLATES.MenuButton(text, onclick, tooltip_text, tooltip_widget, style
 			text_offset_x = 25
 		end
 	end
-		
+
     local btn = ImageButton(
         "images/global_redux.xml",
         "blank.tex", -- never used, hidden
@@ -341,29 +342,29 @@ function TEMPLATES.TwoLineMenuButton(text, onclick, tooltip_text, tooltip_widget
         "menu_wardrobe_selection.tex",
         {0.6},
         {-10,1})
-    
+
     btn:UseFocusOverlay("menu_wardrobe_focus.tex")
     btn:SetTextSize(22)
     btn.text:SetPosition(20,10)
     btn.text:SetRegionSize(205,24)
     -- We're messing with the shadow and not maintaining it, so kill it.
     btn.text_shadow:Kill()
-    
+
     btn.secondary_text = btn:AddChild( Text(NEWFONT, 20) )
     btn.secondary_text:SetHAlign(ANCHOR_LEFT)
     btn.secondary_text:SetRegionSize(205,24)
     btn.secondary_text:SetPosition(20,-10)
-    
+
     btn.onselect = function()
         btn.secondary_text:Show()
         btn.text:SetPosition(20,10)
     end
-    
+
     btn.onunselect = function()
         btn.secondary_text:Hide()
         btn.text:SetPosition(20,0)
     end
-    
+
     btn.SetSecondaryText = function(self, second_text)
         self.secondary_text:SetString(second_text or "")
     end
@@ -474,7 +475,7 @@ function TEMPLATES.BackButton(onclick, txt, shadow_offset, scale)
 
 		local w,h = btn.text:GetRegionSize()
 		btn.bg:ScaleToSize(w+50, h+15)
-		
+
 		local function ConfigureText(text_widget, x, offset)
 			-- Make text region large and fixed position so it aligns against image.
 			-- Offset to align region to image.
@@ -799,7 +800,7 @@ function TEMPLATES.ModListItem(onclick_btn, onclick_checkbox, onclick_setfavorit
             opt.status:SetString(STRINGS.UI.MODSSCREEN.STATUS.DISABLED_MANUAL)
         else
             -- We should probably never hit this line.
-            opt.status:SetString(modname)
+            --opt.status:SetString(modname)
         end
     end
 
@@ -916,7 +917,7 @@ function TEMPLATES.DoodadCounter(number_of_doodads)
     doodad._CountFn = function(self)
         if self.num_display_doodads ~= self.num_doodads then
             local step = (self.num_doodads - self.num_display_doodads)/24
-            
+
             if self.num_doodads > self.num_display_doodads then
                 step = math.ceil(step)
             else
@@ -925,7 +926,7 @@ function TEMPLATES.DoodadCounter(number_of_doodads)
 
             self.num_display_doodads = self.num_display_doodads + step
 
-            self.inst:DoTaskInTime(FRAMES, function() 
+            self.inst:DoTaskInTime(FRAMES, function()
                 self:_CountFn()
             end)
         end
@@ -953,6 +954,38 @@ function TEMPLATES.DoodadCounter(number_of_doodads)
     return doodad
 end
 
+function TEMPLATES.KleiPointsCounter(number_of_points)
+    local points = Button("KleiPointsCounter")
+    points.image = points:AddChild(UIAnim())
+    points.image:GetAnimState():SetBank("kleipoints")
+    points.image:GetAnimState():SetBuild("kleipoints")
+    points.image:GetAnimState():PlayAnimation("idle", true)
+
+	points.points_count = points:AddChild(Text(CHATFONT_OUTLINE, 35, nil, UICOLOURS.WHITE))
+    points.points_count:SetPosition(0, -60)
+    points.points_count:SetRegionSize(120, 43)
+    points.points_count:SetHAlign(ANCHOR_MIDDLE)
+
+    points.SetCount = function(self, new_count)
+        self.points_count:SetString("x"..new_count)
+        if new_count == 0 then
+            self:Hide()
+        else
+            self:Show()
+        end
+    end
+
+    points:SetCount(number_of_points)
+
+    points:SetOnClick(
+        function()
+            TheFrontEnd:GetAccountManager():VisitAccountPage("rewards")
+        end
+    )
+
+    return points
+end
+
 function TEMPLATES.BoltCounter(number_of_bolts)
     local bolt = Widget("BoltCounter")
     bolt.image = bolt:AddChild(UIAnim())
@@ -969,7 +1002,7 @@ function TEMPLATES.BoltCounter(number_of_bolts)
     bolt._CountFn = function(self)
         if self.num_display_bolts ~= self.num_bolts then
             local step = (self.num_bolts - self.num_display_bolts)/24
-            
+
             if self.num_bolts > self.num_display_bolts then
                 step = math.ceil(step)
             else
@@ -978,7 +1011,7 @@ function TEMPLATES.BoltCounter(number_of_bolts)
 
             self.num_display_bolts = self.num_display_bolts + step
 
-            self.inst:DoTaskInTime(FRAMES, function() 
+            self.inst:DoTaskInTime(FRAMES, function()
                 self:_CountFn()
             end)
         end
@@ -1037,7 +1070,7 @@ function TEMPLATES.StandardSingleLineTextEntry(fieldtext, width_field, height, f
         local controller_id = TheInput:GetControllerID()
         local t = {}
         if not self.textbox.editing and not self.textbox.focus then
-            table.insert(t, TheInput:GetLocalizedControl(controller_id, CONTROL_ACCEPT, false, false ) .. " " .. STRINGS.UI.HELP.CHANGE_TEXT)   
+            table.insert(t, TheInput:GetLocalizedControl(controller_id, CONTROL_ACCEPT, false, false ) .. " " .. STRINGS.UI.HELP.CHANGE_TEXT)
         end
         return table.concat(t, "  ")
     end
@@ -1250,7 +1283,7 @@ function TEMPLATES.ChatFlairBadge()
     flair.flair_img = flair:AddChild(Image(GetProfileFlairAtlasAndTex()))
     flair.flair_img:SetScale(.55)
     flair.flair_img:SetPosition(0, 31)
-    
+
     flair.SetFestivalBackground = function(self, festival_key)
         festival_key = festival_key or "none"
         self.bg:SetTexture("images/profileflair.xml", "playericon_bg_".. festival_key ..".tex", "playericon_bg_none.tex")
@@ -1289,7 +1322,7 @@ function TEMPLATES.ChatFlairBadge()
             self:Hide()
         end
     end
-    
+
     flair:SetScale(0.5)
 
     return flair
@@ -1318,7 +1351,7 @@ function TEMPLATES.RankBadge()
         if not IsAnyFestivalEventActive() then
             rank_value = nil
         end
-        
+
         if not hide_hover_text and IsItemId(profileflair) then
             rank.flair:SetHoverText( GetSkinName(profileflair), { font = UIFONT, offset_x = 0, offset_y = 40, colour = GetColorForItem(profileflair) } )
         else
@@ -1370,7 +1403,7 @@ function TEMPLATES.UserProgress(onclick)
     progress.bar:GetAnimState():SetPercent("fill_progress", 0)
     progress.bar:SetPosition(30, -45)
     --progress.bar:SetScale(0.8)
-	
+
     progress.rank = progress:AddChild(TEMPLATES.RankBadge())
     progress.rank:SetPosition(135,-45)
 
@@ -1402,7 +1435,7 @@ function TEMPLATES.LargeScissorProgressBar(name)
 
     local frame = bar:AddChild(Image("images/global_redux.xml", "progressbar_wxplarge_frame.tex"))
     frame:SetPosition(-2, 0)
-   
+
     local fill = bar:AddChild(Image("images/global_redux.xml", "progressbar_wxplarge_fill.tex"))
 	local width, hieght = fill:GetSize()
     fill:SetScissor(-width*.5,-hieght*.5, math.max(0, width), math.max(0, hieght))
@@ -1410,7 +1443,7 @@ function TEMPLATES.LargeScissorProgressBar(name)
 	    fill:SetScissor(-width*.5,-hieght*.5, math.max(0, width * percent), math.max(0, hieght))
 	end
 
-	return bar	
+	return bar
 end
 
 function TEMPLATES.WxpBar()
@@ -1425,10 +1458,10 @@ function TEMPLATES.WxpBar()
     wxpbar.nextrank:SetPosition(345, -15)
     wxpbar.nextrank:SetScale(1)
     wxpbar.nextrank.num:SetSize(30)
-    
+
     local bar = wxpbar:AddChild(TEMPLATES.LargeScissorProgressBar())
     bar:SetPosition(0, 0)
-    
+
     local font_size = 25
 
 	local xp_cur_title = wxpbar:AddChild(Text(HEADERFONT, 16, STRINGS.UI.WXPLOBBYPANEL.WXP_CURRENT_XP, UICOLOURS.HIGHLIGHT_GOLD))
@@ -1469,9 +1502,9 @@ function TEMPLATES.WxpBar()
     wxpbar.SetRank = function(w_self, rank, next_level_xp, profileflair)
         w_self.rank:SetRank(profileflair, rank)
         w_self.nextrank:SetRank(rank + 1)
-        w_self.nextlevelxp_text:SetString(next_level_xp) 
+        w_self.nextlevelxp_text:SetString(next_level_xp)
     end
-    
+
     return wxpbar
 end
 
@@ -1561,7 +1594,7 @@ function TEMPLATES.CurlyWindow(sizeX, sizeY, title_text, bottom_buttons, button_
 
         -- Does text need to be smaller than 30 for JapaneseOnPS4()?
         w.actions = bottom:AddChild(Menu(bottom_buttons, button_spacing, true, style, nil, 30))
-        w.actions:SetPosition(-(button_spacing*(#bottom_buttons-1))/2, button_height) 
+        w.actions:SetPosition(-(button_spacing*(#bottom_buttons-1))/2, button_height)
 
         w.focus_forward = w.actions
     end
@@ -1630,7 +1663,7 @@ function TEMPLATES.RectangleWindow(sizeX, sizeY, title_text, bottom_buttons, but
 
         -- Does text need to be smaller than 30 for JapaneseOnPS4()?
         w.actions = w.bottom:AddChild(Menu(bottom_buttons, button_spacing, true, style, nil, 30))
-        w.actions:SetPosition(-(button_spacing*(#bottom_buttons-1))/2, button_height) 
+        w.actions:SetPosition(-(button_spacing*(#bottom_buttons-1))/2, button_height)
 
         w.focus_forward = w.actions
     end
@@ -1718,7 +1751,7 @@ function TEMPLATES.ControllerFunctionsFromButtons(buttons)
             return false
         -- Hitting Esc fires both Pause and Cancel, so we can only handle pause
         -- when coming from gamepads.
-        elseif control ~= CONTROL_PAUSE or TheInput:ControllerAttached() then 
+        elseif control ~= CONTROL_PAUSE or TheInput:ControllerAttached() then
             for i,v in ipairs(buttons) do
                 if control == v.controller_control then
                     TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
@@ -1746,7 +1779,7 @@ function TEMPLATES.ControllerFunctionsFromButtons(buttons)
 end
 
 function TEMPLATES.ScrollingGrid(items, opts)
-    local peek_height = opts.widget_height * 0.25 -- how much of row to see at the bottom.
+    local peek_height = opts.peek_height or (opts.widget_height * 0.25) -- how much of row to see at the bottom.
     if opts.peek_percent then
         -- Caller can force a peek height if they will add items to the list or
         -- have hidden empty widgets.
@@ -1788,7 +1821,7 @@ function TEMPLATES.ScrollingGrid(items, opts)
         -- percent of a row height. 1 ensures that scrolling to the bottom puts
         -- a fully-displayed widget at the top. 0.75 prevents the next (empty)
         -- row from being visible.
-        local end_offset = 0.75
+        local end_offset = opts.end_offset or 0.75
         if opts.allow_bottom_empty_row then
             end_offset = 1
         end
@@ -1858,7 +1891,7 @@ end
 function TEMPLATES.MakeUIStatusBadge(status_name, c)
 	local status = Widget(status_name.."_status")
 	status._status_name = status_name
-	
+
 	status.status_icon = status:AddChild(Image("images/global_redux.xml", "status_"..status_name..".tex"))
 	status.status_icon:SetScale(.55)
 
@@ -1867,7 +1900,7 @@ function TEMPLATES.MakeUIStatusBadge(status_name, c)
 	status.status_image:SetPosition(0, -33)
 
 	status.status_value = status:AddChild(Text(HEADERFONT, 20, "", UICOLOURS.BLACK))
-	status.status_value:SetPosition(0, -34) 
+	status.status_value:SetPosition(0, -34)
 
 	status.ChangeCharacter = function(self, character)
 		local v = tostring(TUNING[string.upper(character.."_"..status_name)] or STRINGS.CHARACTER_DETAILS.STAT_UNKNOW)

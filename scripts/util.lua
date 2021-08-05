@@ -112,7 +112,7 @@ end
 function string.rfind(s, pattern, init, plain)
     local matches = s:findall(pattern, init, plain)
     if #matches > 0 then
-        return table.unpack(matches[#matches])
+        return unpack(matches[#matches])
     end
     return nil
 end
@@ -133,7 +133,7 @@ end
 
 function table.contains(table, element)
     if table == nil then return false end
-    
+
     for _, value in pairs(table) do
         if value == element then
           return true
@@ -167,11 +167,11 @@ end
 function table.reverse(tab)
     local size = #tab
     local newTable = {}
- 
+
     for i,v in ipairs(tab) do
         newTable[size-i+1] = v
     end
- 
+
     return newTable
 end
 
@@ -186,8 +186,7 @@ end
 function table.removearrayvalue(t, lookup_value)
     for i, v in ipairs(t) do
         if v == lookup_value then
-            table.remove(t, i)
-            return v
+            return table.remove(t, i)
         end
     end
 end
@@ -282,7 +281,7 @@ end
 -- This is actually GetRandomItemWithKey
 function GetRandomItemWithIndex(choices)
     local choice = math.random(GetTableSize(choices)) -1
-    
+
     local idx = nil
     local item = nil
 
@@ -316,7 +315,7 @@ function PickSomeWithDups(num, choices)
     local ret = {}
     for i=1,num do
         local choice = math.random(#l_choices)
-        table.insert(ret, l_choices[choice])       
+        table.insert(ret, l_choices[choice])
     end
     return ret
 end
@@ -509,7 +508,7 @@ end
 
 function GetRandomKey(choices)
  	local choice = math.random(GetTableSize(choices)) -1
- 	
+
  	local picked = nil
  	for k,v in pairs(choices) do
  		picked = k
@@ -536,7 +535,7 @@ function distsq(v1, v2, v3, v4)
 
     assert(v1, "Something is wrong: v1 is nil stale component reference?")
     assert(v2, "Something is wrong: v2 is nil stale component reference?")
-    
+
     --special case for 2dvects passed in as numbers
     if v4 and v3 and v2 and v1 then
         local dx = v1-v3
@@ -552,48 +551,80 @@ end
 
 local memoizedFilePaths = {}
 
--- look in package loaders to find the file from the root directories
--- this will look first in the mods and then in the data directory
-function resolvefilepath( filepath, force_path_search )
-    if memoizedFilePaths[filepath] then
-        return memoizedFilePaths[filepath]
-    end
-    local resolved = softresolvefilepath(filepath, force_path_search)
-    assert(resolved ~= nil, "Could not find an asset matching "..filepath.." in any of the search paths.")
-    memoizedFilePaths[filepath] = resolved
-   return resolved
+function GetMemoizedFilePaths()
+    return ZipAndEncodeSaveData(memoizedFilePaths)
+end
+function SetMemoizedFilePaths(memoized_file_paths)
+    memoizedFilePaths = DecodeAndUnzipSaveData(memoized_file_paths)
 end
 
-function softresolvefilepath(filepath, force_path_search)
+-- look in package loaders to find the file from the root directories
+-- this will look first in the mods and then in the data directory
+local function softresolvefilepath_internal(filepath, force_path_search, search_first_path)
     force_path_search = force_path_search or false
 
 	if IsConsole() and not force_path_search then
 		return filepath -- it's already absolute, so just send it back
 	end
 
-	-- on PC platforms, search all the possible paths
+	--on PC platforms, search all the possible paths
 
-	-- mod folders don't have "data" in them, so we strip that off if necessary. It will
-	-- be added back on as one of the search paths.
-	local filepath = string.gsub(filepath, "^/", "")
+	--mod folders don't have "data" in them, so we strip that off if necessary. It will
+	--be added back on as one of the search paths.
+	filepath = string.gsub(filepath, "^/", "")
 
-	local searchpaths = package.path
-    for path in string.gmatch(searchpaths, "([^;]+)") do
-        local filename = string.gsub(path, "scripts\\%?%.lua", filepath) -- why is this not string.gsub(path, "%?", modulepath) like in worldgen_main.lua?!?
-        filename = string.gsub(filename, "\\", "/")
-		--print("looking for: "..filename.." ("..filepath..")")
-		if not kleifileexists or kleifileexists(filename) then
-			--print("found it! "..filename)
+    --sometimes from context we can know the most likely path for an asset, this can result in less time spent searching the tons of mod search paths.
+    if search_first_path then
+        local filename = search_first_path..filepath
+        if kleifileexists(filename) then
             return filename
         end
     end
-	-- as a last resort see if the file is an already correct path (incase this asset has already been processed)
-	if not kleifileexists or kleifileexists(filepath) then
-		--print("found it in it's actual path! "..filepath)
+
+	local searchpaths = package.assetpath
+    for i, pathdata in ipairs_reverse(searchpaths) do
+        local filename = string.gsub(pathdata.path..filepath, "\\", "/")
+        if kleifileexists(filename, pathdata.manifest, filepath) then
+            return filename
+        end
+    end
+
+	--as a last resort see if the file is an already correct path (incase this asset has already been processed)
+	if kleifileexists(filepath) then
 		return filepath
 	end
 
 	return nil
+end
+
+local function resolvefilepath_internal(filepath, force_path_search, search_first_path)
+    local resolved = softresolvefilepath_internal(filepath, force_path_search, search_first_path)
+    memoizedFilePaths[filepath] = resolved
+    return resolved
+end
+
+--like resolvefilepath, but without the crash if it fails.
+function resolvefilepath_soft(filepath, force_path_search, search_first_path)
+    if memoizedFilePaths[filepath] then
+        return memoizedFilePaths[filepath]
+    end
+    return resolvefilepath_internal(filepath, force_path_search, search_first_path)
+end
+
+function resolvefilepath(filepath, force_path_search, search_first_path)
+    if memoizedFilePaths[filepath] then
+        return memoizedFilePaths[filepath]
+    end
+    local resolved = resolvefilepath_internal(filepath, force_path_search, search_first_path)
+    assert(resolved ~= nil, "Could not find an asset matching "..filepath.." in any of the search paths.")
+    return resolved
+end
+
+function softresolvefilepath(filepath, force_path_search, search_first_path)
+    if memoizedFilePaths[filepath] then
+        return memoizedFilePaths[filepath]
+    end
+    return softresolvefilepath_internal(filepath, force_path_search, search_first_path)
 end
 
 -------------------------MEMREPORT
@@ -636,7 +667,7 @@ local function count_all(f)
 end
 
 function isnan(x) return x ~= x end
-math.inf = 1/0 
+math.inf = 1/0
 function isinf(x) return x == math.inf or x == -math.inf end
 function isbadnumber(x) return isinf(x) or isnan(x) end
 
@@ -649,11 +680,11 @@ local function type_count()
 	count_all(enumerate)
 	return counts
 end
-   
+
 function mem_report()
     local tmp = {}
-    
-    for k,v in pairs(type_count()) do 
+
+    for k,v in pairs(type_count()) do
         table.insert(tmp, {num=v, name=k})
     end
     table.sort(tmp, function(a,b) return a.num > b.num end)
@@ -661,7 +692,7 @@ function mem_report()
     for k,v in ipairs(tmp) do
         table.insert(tmp2, tostring(v.num).."\t"..tostring(v.name))
     end
-    
+
     print (table.concat(tmp2,"\n"))
 end
 
@@ -680,22 +711,22 @@ function weighted_random_choice(choices)
     end
 
     local threshold = math.random() * weighted_total(choices)
-    
+
     local last_choice
     for choice, weight in pairs(choices) do
         threshold = threshold - weight
         if threshold <= 0 then return choice end
         last_choice = choice
     end
-    
+
     return last_choice
 end
- 
 
- 
+
+
  function PrintTable(tab)
     local str = {}
-    
+
     local function internal(tab, str, indent)
         for k,v in pairs(tab) do
             if type(v) == "table" then
@@ -706,7 +737,7 @@ end
             end
         end
     end
-    
+
     internal(tab, str, '')
     return table.concat(str, '')
 end
@@ -716,7 +747,7 @@ end
 local env = {  -- add functions you know are safe here
     loadstring=loadstring -- functions can get serialized to text, this is required to turn them back into functions
  }
- 
+
 
 function RunInEnvironment(fn, fnenv)
 	setfenv(fn, fnenv)
@@ -748,7 +779,7 @@ function RunInSandboxSafe(untrusted_code, error_handler)
 	return xpcall(untrusted_function, error_handler or function() end)
 end
 
-function GetTickForTime(target_time) 
+function GetTickForTime(target_time)
 	return math.floor( target_time/GetTickTime() )
 end
 
@@ -797,15 +828,15 @@ end
 
 function TrackedAssert(tracking_data, function_ptr, function_data)
 	--print("TrackedAssert", tracking_data, function_ptr, function_data)
-	_G['tracked_assert'] = function(pass, reason)		
-							--print("Tracked:Assert", tracking_data, pass, reason)	 								
+	_G['tracked_assert'] = function(pass, reason)
+							--print("Tracked:Assert", tracking_data, pass, reason)
 			 				assert(pass, tracking_data.." --> "..reason)
 			 			end
-			 							
+
 	local result = function_ptr( function_data )
-					
+
 	_G['tracked_assert'] = _G.assert
-	
+
 	return result
 end
 
@@ -856,7 +887,7 @@ function fastdump(value)
 
 	local function printtable(in_table)
 		table.insert(items, "{")
-		
+
 		for k,v in pairs(in_table) do
 			local t = type(v)
 			local comma = true
@@ -893,7 +924,7 @@ function fastdump(value)
 				table.insert(items, ",")
 			end
 		end
-		
+
 		table.insert(items, "}")
 		collectgarbage("step")
 	end
@@ -959,7 +990,7 @@ function RingBuffer:Get(index)
         return nil
     end
 
-    local pos = (self.pos-self.entries) + index 
+    local pos = (self.pos-self.entries) + index
     if pos < 1 then
         pos = pos + self.entries
     end
@@ -996,7 +1027,7 @@ end
 -- pt is in world space, walkable_platform is optional, if nil, the constructor will search for a platform at pt.
 -- GetPosition() will return nil if a platform was being tracked but no longer exists.
 DynamicPosition = Class(function(self, pt, walkable_platform)
-	if pt ~= nil then		
+	if pt ~= nil then
 		self.walkable_platform = walkable_platform or TheWorld.Map:GetPlatformAtPoint(pt.x, pt.z)
 		if self.walkable_platform ~= nil then
 			self.local_pt = pt - self.walkable_platform:GetPosition()
@@ -1012,7 +1043,7 @@ end
 
 function DynamicPosition:__tostring()
 	local pt = self:GetPosition()
-    return pt ~= nil 
+    return pt ~= nil
 		and string.format("%2.2f, %2.2f on %s", pt.x, pt.z, tostring(self.walkable_platform))
         or "nil"
 end
@@ -1275,7 +1306,15 @@ function DumpMem()
 end
 
 function checkbit(x, b)
-    return x % (b + b) >= b
+    return bit.band(x, b) > 0
+end
+
+function setbit(x, b)
+    return bit.bor(x, b)
+end
+
+function clearbit(x, b)
+    return bit.bxor(bit.bor(x, b), b)
 end
 
 -- Width is the total width of the region we are interested in, in radians.
@@ -1292,9 +1331,9 @@ function IsWithinAngle(position, forward, width, testPos)
 	local testAngle = math.acos(testVec:Dot(forward))
 
 	-- Return true if testAngle is <= +/- .5*width
-	if math.abs(testAngle) <= .5*math.abs(width) then 
+	if math.abs(testAngle) <= .5*math.abs(width) then
 		return true
-	else 
+	else
 		return false
 	end
 end
@@ -1374,13 +1413,13 @@ function CalcDiminishingReturns(current, basedelta)
     return current + dcharge
 end
 
-function Dist2dSq(p1, p2) 
+function Dist2dSq(p1, p2)
 	local dx = p1.x - p2.x
 	local dy = p1.y - p2.y
 	return dx*dx + dy*dy
 end
 
-function DistPointToSegmentXYSq(p, v1, v2) 
+function DistPointToSegmentXYSq(p, v1, v2)
 	local l2 = Dist2dSq(v1, v2)
 	if (l2 == 0) then
 		return Dist2dSq(p, v1)
@@ -1461,48 +1500,34 @@ function metaipairs(t, ...)
     return i(t, ...)
 end
 
-function MetaClass(entries, ctor, classtable)
-    local classtable = classtable or {}
-    classtable._ = entries or {}
-    local defaulttableops = {
-        _ctor = function(self)
-            if ctor then
-                ctor(classtable._)
-            end
-        end,
-        --replaces index behavior obj[key] or obj.key
-        __index = function(t, k)
-            return classtable._[k] or classtable[k]
-        end,
-        --replaces setting behavior obj[key] = value
-        __newindex = function(t, k, v)
-            classtable._[k] = v
-        end,
-        --replaces #obj behavior (length of table)
-        __len = function(t)
-            return #classtable._
-        end,
-        --replaces next
-        __next = function(t, k)
-            return next(classtable._, k)
-        end,
-        --replaces pairs
-        __pairs = function(t)
-            return pairs(classtable._)
-        end,
-        --replaces ipairs
-        __ipairs = function(t)
-            return ipairs(classtable._)
-        end,
-    }
-    --newproxy is the only way to use the __len and __gc(garbage collection) meta methods
-    local mtclass = newproxy(true)
-    debug.setmetatable(mtclass, classtable)
-    for k, v in pairs(defaulttableops) do
-        if not classtable[k] then
-            classtable[k] = v
+function metarawset(t, k, v)
+    local mt = getmetatable(t)
+    mt._[k] = v
+end
+
+function metarawget(t, k)
+    local mt = getmetatable(t)
+    return mt._[k] or mt.c[k]
+end
+
+function ZipAndEncodeSaveData(data)
+	return {str = TheSim:ZipAndEncodeString(DataDumper(data, nil, true))}
+end
+
+function DecodeAndUnzipSaveData(data)
+    if data and data.str and type(data.str) == "string" then
+        local success, savedata = RunInSandbox(TheSim:DecodeAndUnzipString(data.str))
+        if success then
+            return savedata
+        else
+            return {}
         end
     end
-    mtclass:_ctor()
-    return mtclass
+end
+
+function FunctionOrValue(func_or_val, ...)
+    if type(func_or_val) == "function" then
+        return func_or_val(...)
+    end
+    return func_or_val
 end

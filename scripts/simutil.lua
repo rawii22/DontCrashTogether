@@ -130,7 +130,7 @@ function FindSafeSpawnLocation(x, y, z)
         -- we still don't have an enity, find a spawnpoint. That must be in a safe location
         return TheWorld.components.playerspawner:GetAnySpawnPoint()
     else
-        -- if everything failed, return origin  
+        -- if everything failed, return origin
         return 0, 0, 0
     end
 end
@@ -212,7 +212,7 @@ function ShakeAllCamerasOnPlatform(mode, duration, speed, scale, platform)
 	if platform == nil then
 		return nil
 	end
-	
+
 	for i, v in ipairs(AllPlayers) do
 		local x, y, z = v.Transform:GetWorldPosition()
 		if TheWorld.Map:GetPlatformAtPoint(x, z) == platform then
@@ -324,11 +324,11 @@ function CanEntitySeeInStorm(inst)
     return inst ~= nil and inst:IsValid() and _CanEntitySeeInStorm(inst)
 end
 
-local function _GetEntitySandstormLevel(inst)
-    --NOTE: GetSandstormLevel is available on players on server
+local function _GetEntityStormLevel(inst)
+    --NOTE: GetStormLevel is available on players on server
     --      and clients, but only accurate for local players.
     --      stormwatcher is a server-side component.
-    return (inst.GetSandstormLevel ~= nil and inst:GetSandstormLevel())
+    return (inst.GetStormLevel ~= nil and inst:GetStormLevel())
         or (inst.components.stormwatcher ~= nil and inst.components.stormwatcher.sandstormlevel)
         or 0
 end
@@ -336,10 +336,10 @@ end
 function CanEntitySeePoint(inst, x, y, z)
     return inst ~= nil
         and inst:IsValid()
-        and (not inst.components.inkable or not inst.components.inkable.inked) 
+        and (not inst.components.inkable or not inst.components.inkable.inked)
         and (TheSim:GetLightAtPoint(x, y, z) > TUNING.DARK_CUTOFF or
             _CanEntitySeeInDark(inst))
-        and (_GetEntitySandstormLevel(inst) < TUNING.SANDSTORM_FULL_LEVEL or
+        and (_GetEntityStormLevel(inst) < TUNING.SANDSTORM_FULL_LEVEL or
             _CanEntitySeeInStorm(inst) or
             inst:GetDistanceSqToPoint(x, y, z) < TUNING.SANDSTORM_VISION_RANGE_SQ)
 end
@@ -424,7 +424,7 @@ function GetInventoryItemAtlas(imagename, no_fallback)
 	end
 	local base_atlas = "images/inventoryimages1.xml"
 	local alt_atlas = "images/inventoryimages2.xml"
-	atlas = TheSim:AtlasContains(base_atlas, imagename) and base_atlas 
+	atlas = TheSim:AtlasContains(base_atlas, imagename) and base_atlas
 			or (not no_fallback or TheSim:AtlasContains(alt_atlas, imagename)) and alt_atlas
 			or nil
 	if atlas ~= nil then

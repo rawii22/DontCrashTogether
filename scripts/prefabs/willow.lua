@@ -28,7 +28,7 @@ end
 local FIRE_TAGS = { "fire" }
 local function sanityfn(inst)--, dt)
     local delta = inst.components.temperature:IsFreezing() and -TUNING.SANITYAURA_LARGE or 0
-    local x, y, z = inst.Transform:GetWorldPosition() 
+    local x, y, z = inst.Transform:GetWorldPosition()
     local max_rad = 10
     local ents = TheSim:FindEntities(x, y, z, max_rad, FIRE_TAGS)
     for i, v in ipairs(ents) do
@@ -44,7 +44,9 @@ local function sanityfn(inst)--, dt)
 end
 
 local function GetFuelMasterBonus(inst, item, target)
-    return (target:HasTag("campfire") or target.prefab == "nightlight") and TUNING.WILLOW_CAMPFIRE_FUEL_MULT or 1
+
+    -- The TAG "firefuellight" is used for items that are not campfires in that they won't incubate something but Willow should benefit from fueling it.
+    return (target:HasTag("firefuellight") or target:HasTag("campfire") or target.prefab == "nightlight") and TUNING.WILLOW_CAMPFIRE_FUEL_MULT or 1
 end
 
 local function OnRespawnedFromGhost(inst)

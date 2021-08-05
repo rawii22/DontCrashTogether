@@ -38,10 +38,10 @@ local RETARGET_CANT_TAGS = { "spiderwhisperer", "spiderdisguise", "INLIMBO" }
 local function Retarget(inst)
     if not inst.components.health:IsDead() and not inst.components.sleeper:IsAsleep() then
         local oldtarget = inst.components.combat.target
-        local newtarget = FindEntity(inst, 10, 
-            function(guy) 
+        local newtarget = FindEntity(inst, 10,
+            function(guy)
                 return (not guy:HasTag("monster") or guy:HasTag("player"))
-                    and inst.components.combat:CanTarget(guy) 
+                    and inst.components.combat:CanTarget(guy)
             end,
             RETARGET_MUST_TAGS,
             RETARGET_CANT_TAGS
@@ -73,13 +73,18 @@ local function BabyCount(inst)
 end
 
 local function MakeBaby(inst)
-    local angle = inst.Transform:GetRotation() / DEGREES
-    local prefab = inst.components.combat:HasTarget() and math.random() < .333 and "spider_warrior" or "spider"
+    local angle = (inst.Transform:GetRotation() + 180) * DEGREES
+    
+    local prefab = "spider"
+    if inst.components.combat:HasTarget() and math.random() < 0.45 then
+        prefab = math.random() > 0.5 and "spider_warrior" or "spider_healer"
+    end
+
     local spider = inst.components.lootdropper:SpawnLootPrefab(prefab)
     if spider ~= nil then
         local rad = spider:GetPhysicsRadius(0) + inst:GetPhysicsRadius(0) + .25
         local x, y, z = inst.Transform:GetWorldPosition()
-        spider.Transform:SetPosition(x + rad * math.cos(angle), 0, z + rad * math.sin(angle))
+        spider.Transform:SetPosition(x + rad * math.cos(angle), 0, z - rad * math.sin(angle))
         spider.sg:GoToState("taunt")
         inst.components.leader:AddFollower(spider)
         if inst.components.combat.target ~= nil then
@@ -113,7 +118,6 @@ local function fn()
     inst.entity:AddTransform()
     inst.entity:AddAnimState()
     inst.entity:AddSoundEmitter()
-    inst.entity:AddLightWatcher()
     inst.entity:AddDynamicShadow()
     inst.entity:AddNetwork()
 
@@ -170,6 +174,7 @@ local function fn()
     ------------------
 
     inst:AddComponent("sleeper")
+    inst.components.sleeper.watchlight = true
     inst.components.sleeper:SetResistance(4)
     ------------------
 
@@ -184,7 +189,7 @@ local function fn()
     inst:AddComponent("eater")
     inst.components.eater:SetDiet({ FOODTYPE.MEAT }, { FOODTYPE.MEAT })
     inst.components.eater:SetCanEatHorrible()
-    inst.components.eater.strongstomach = true -- can eat monster meat!
+    inst.components.eater:SetStrongStomach(true) -- can eat monster meat!
 
     ------------------
 

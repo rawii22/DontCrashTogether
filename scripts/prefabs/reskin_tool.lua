@@ -21,7 +21,7 @@ local function onignite(inst)
     inst.SoundEmitter:PlaySound("dontstarve/creatures/leif/livinglog_burn")
 end
 
-local reskin_fx_info = 
+local reskin_fx_info =
 {
 	abigail = { offset = 1.3, scale = 1.3 },
 	arrowsign_post = { offset = 0.9, scale = 1.2 },
@@ -32,7 +32,7 @@ local reskin_fx_info =
 	campfire = { scale = 1.2 },
 	cane = { offset = 0.4 },
 	coldfirepit = { scale = 1.2 },
-	cookpot = { offset = 0.5, scale = 1.4 }, 
+	cookpot = { offset = 0.5, scale = 1.4 },
 	critter_dragonling = { offset = 0.8 },
 	critter_glomling = { offset = 0.8 },
 	dragonflyfurnace = { offset = 0.6, scale = 1.8 },
@@ -60,11 +60,11 @@ local reskin_fx_info =
 	orangestaff = { offset = 0.4 },
 	pighouse = { offset = 1.5, scale = 2.2 },
 	rabbithouse = { offset = 1.5, scale = 2.2 },
-	rainometer = { offset = 0.9, scale = 1.6 }, 
-	researchlab2 = { offset = 0.5, scale = 1.4 }, 
-	researchlab3 = { offset = 0.5, scale = 1.4 }, 
-	researchlab4 = { offset = 0.5, scale = 1.4 }, 
-	ruins_bat = { offset = 0.4, scale = 1.2 }, 
+	rainometer = { offset = 0.9, scale = 1.6 },
+	researchlab2 = { offset = 0.5, scale = 1.4 },
+	researchlab3 = { offset = 0.5, scale = 1.4 },
+	researchlab4 = { offset = 0.5, scale = 1.4 },
+	ruins_bat = { offset = 0.4, scale = 1.2 },
 	saltbox = { offset = 0.3, scale = 1.3 },
 	shovel = { offset = 0.2 },
 	spear = { offset = 0.4 },
@@ -72,7 +72,7 @@ local reskin_fx_info =
 	tent = { offset = 0.4, scale = 2.0 },
 	treasurechest = { offset = 0.1, scale = 1.1 },
 	umbrella = { offset = 0.4 },
-	wardrobe = { offset = 0.5, scale = 1.4 }, 
+	wardrobe = { offset = 0.5, scale = 1.4 },
 	winterometer = { offset = 0.8, scale = 1.3 },
 	yellowstaff = { offset = 0.4 },
 }
@@ -80,7 +80,7 @@ local reskin_fx_info =
 local function spellCB(tool, target, pos)
 
     local fx = SpawnPrefab("explode_reskin")
-    
+
     target = target or tool.components.inventoryitem.owner --if no target, then get the owner of the tool. Self target for beards
 
     local fx_info = reskin_fx_info[target.prefab] or {}
@@ -93,7 +93,7 @@ local function spellCB(tool, target, pos)
     fx.Transform:SetPosition(fx_pos_x, fx_pos_y, fx_pos_z)
 
     tool:DoTaskInTime(0, function()
-        
+
         local prefab_to_skin = target.prefab
         local is_beard = false
         if target.components.beard ~= nil and target.components.beard.is_skinnable then
@@ -103,9 +103,9 @@ local function spellCB(tool, target, pos)
 
         if target:IsValid() and tool:IsValid() then
             local curr_skin = is_beard and target.components.beard.skinname or target.skinname
-            if curr_skin == tool._cached_reskinname[prefab_to_skin] then
+            local search_for_skin = tool._cached_reskinname[prefab_to_skin] ~= nil --also check if it's owned
+            if curr_skin == tool._cached_reskinname[prefab_to_skin] or (search_for_skin and not TheInventory:CheckClientOwnership(tool.parent.userid, tool._cached_reskinname[prefab_to_skin])) then
                 local new_reskinname = nil
-                local search_for_skin = tool._cached_reskinname[prefab_to_skin] ~= nil
 
                 if PREFAB_SKINS[prefab_to_skin] ~= nil then
                     for _,item_type in pairs(PREFAB_SKINS[prefab_to_skin]) do
@@ -123,18 +123,26 @@ local function spellCB(tool, target, pos)
                 end
                 tool._cached_reskinname[prefab_to_skin] = new_reskinname
             end
-            
+
             if is_beard then
                 target.components.beard:SetSkin( tool._cached_reskinname[prefab_to_skin] )
             else
                 TheSim:ReskinEntity( target.GUID, target.skinname, tool._cached_reskinname[prefab_to_skin], nil, tool.parent.userid )
+
+				--Todo(Peter): make this better one day if we do more skins applied to multiple prefabs in the future
+                if target.prefab == "wormhole" then
+                    local other = target.components.teleporter.targetTeleporter
+                    if other ~= nil then
+                        TheSim:ReskinEntity( other.GUID, other.skinname, tool._cached_reskinname[prefab_to_skin], nil, tool.parent.userid )
+                    end
+                end
             end
         end
     end )
 end
 
 local function can_cast_fn(doer, target, pos)
-    
+
     local prefab_to_skin = target.prefab
     local is_beard = false
 

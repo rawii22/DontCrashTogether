@@ -74,7 +74,15 @@ local fx =
         anim = "splash",
         sound = "turnoftides/common/together/water/splash/bird",
         fn = FinalOffset1,
-    },    
+    },
+    {
+        name = "bile_splash",
+        bank = "bird_bileshoot",
+        build = "bird_bileshoot",
+        anim = "splash",
+        sound = "moonstorm/creatures/mutated_robin/bile_shoot_splash",
+        fn = FinalOffset1,
+    },
     {
         name = "frogsplash",
         bank = "splash",
@@ -89,6 +97,20 @@ local fx =
         build = "waterballoon",
         anim = "used",
         sound = "dontstarve/creatures/pengull/splash",
+    },
+    {
+        name = "balloon_pop_body",
+        bank = "balloon_pop",
+        build = "balloon_pop",
+        anim = "pop_low",
+        fn = FinalOffset1,
+    },
+    {
+        name = "balloon_pop_head",
+        bank = "balloon_pop",
+        build = "balloon_pop",
+        anim = "pop_high",
+        fn = FinalOffset1,
     },
     {
         name = "spat_splat_fx",
@@ -115,9 +137,9 @@ local fx =
         anim = "low",
     },
     {
-        name = "spat_splash_fx_melted", 
-        bank = "spat_splash", 
-        build = "spat_splash", 
+        name = "spat_splash_fx_melted",
+        bank = "spat_splash",
+        build = "spat_splash",
         anim = "melted",
     },
     {
@@ -145,9 +167,9 @@ local fx =
         anim = "low",
     },
     {
-        name = "icing_splash_fx_melted", 
-        bank = "warg_gingerbread_splash", 
-        build = "warg_gingerbread_splash", 
+        name = "icing_splash_fx_melted",
+        bank = "warg_gingerbread_splash",
+        build = "warg_gingerbread_splash",
         anim = "melted",
     },
     {
@@ -223,6 +245,13 @@ local fx =
         fn = function(inst)
             inst.AnimState:Hide("front")
         end,
+    },
+    {
+        name = "dirt_puff",
+        bank = "small_puff",
+        build = "smoke_puff_small",
+        anim = "puff",
+        --sound = "dontstarve/common/deathpoof",
     },
     {
         name = "splash_ocean", -- this is for the old ocean
@@ -1001,7 +1030,7 @@ local fx =
         build = "ghostflower",
         anim = "fx1",
         sound = "dontstarve/characters/wendy/small_ghost/wisp",
-        
+
     },
     {
         name = "ghostlyelixir_slowregen_fx",
@@ -1198,19 +1227,31 @@ local fx =
         bank = "redpouch",
         build = "redpouch",
         anim = "unwrap",
-    },    
+    },
+    {
+        name = "redpouch_yotb_unwrap",
+        bank = "redpouch",
+        build = "redpouch",
+        anim = "unwrap",
+    },
     {
         name = "yotc_seedpacket_unwrap",
         bank = "bundle",
         build = "bundle",
         anim = "unwrap",
-    },    
+    },
     {
         name = "yotc_seedpacket_rare_unwrap",
         bank = "bundle",
         build = "bundle",
         anim = "unwrap",
-    },    
+    },
+    {
+        name = "carnival_seedpacket_unwrap",
+        bank = "bundle",
+        build = "bundle",
+        anim = "unwrap",
+    },
     {
         name = "wetpouch_unwrap",
         bank = "wetpouch",
@@ -1228,7 +1269,7 @@ local fx =
         bank = "hermit_bundle",
         build = "hermit_bundle",
         anim = "unwrap",
-    },        
+    },
     {
         name = "quagmire_seedpacket_unwrap",
         bank = "quagmire_seedpacket",
@@ -1238,7 +1279,7 @@ local fx =
     {
         name = "quagmire_crate_unwrap",
         bank = "quagmire_crate",
-        build = "quagmire_crate", 
+        build = "quagmire_crate",
         anim = "unwrap",
     },
     {
@@ -1569,16 +1610,16 @@ local fx =
 		bank = "cookiecutter_fx",
 		build = "cookiecutter_fx",
 		anim = "wood_splinter_drill",
-	}, 
+	},
 
     {
         name = "splash_green_small",
         bank = "pond_splash_fx",
         build = "pond_splash_fx",
-        anim = "pond_splash",        
+        anim = "pond_splash",
         sound = "turnoftides/common/together/water/splash/small",
         fn = FinalOffset1,
-    }, 
+    },
     {
         name = "splash_green",
         bank = "pond_splash_fx",
@@ -1586,7 +1627,7 @@ local fx =
         anim = "pond_splash",
         sound = "turnoftides/common/together/water/splash/medium",
         fn = function(inst) inst.Transform:SetScale(2,2,2) inst.AnimState:SetFinalOffset(1) end,
-    },   
+    },
     {
         name = "splash_green_large",
         bank = "pond_splash_fx",
@@ -1594,20 +1635,20 @@ local fx =
         anim = "pond_splash",
         sound = "turnoftides/common/together/water/splash/large",
         fn = function(inst) inst.Transform:SetScale(4,4,4) inst.AnimState:SetFinalOffset(1) end,
-    },   
+    },
 --[[  There is art for these. They are just not used anywhere
     {
         name = "splash_teal",
         bank = "pond_splash_fx",
         build = "pond_splash_fx",
         anim = "cave_splash",
-    },      
+    },
     {
         name = "splash_black",
         bank = "pond_splash_fx",
         build = "pond_splash_fx",
         anim = "swamp_splash",
-    }, 
+    },
     ]]
     {
         name = "merm_king_splash",
@@ -1643,7 +1684,23 @@ local fx =
         build = "squid_puddle",
         anim = "puddle_wet",
         fn = GroundOrientation,
-    },        
+    },
+
+    {
+        name = "bile_puddle_land",
+        bank = "squid_puddle",
+        build = "bird_puddle",
+        anim = "puddle_dry",
+        fn = GroundOrientation,
+    },
+    {
+        name = "bile_puddle_water",
+        bank = "squid_puddle",
+        build = "bird_puddle",
+        anim = "puddle_wet",
+        fn = GroundOrientation,
+    },
+
     {
         name = "flotsam_puddle",
         bank = "flotsam",
@@ -1698,84 +1755,84 @@ local fx =
         name = "crab_king_bubble1",
         bank = "Bubble_fx",
         build ="crab_king_bubble_fx",
-        anim = "bubbles_1",        
+        anim = "bubbles_1",
         fn = FinalOffset1,
-    },     
+    },
     {
         name = "crab_king_bubble2",
         bank = "Bubble_fx",
         build ="crab_king_bubble_fx",
-        anim = "bubbles_2",        
+        anim = "bubbles_2",
         fn = FinalOffset1,
-    },     
+    },
     {
         name = "crab_king_bubble3",
         bank = "Bubble_fx",
         build ="crab_king_bubble_fx",
-        anim = "bubbles_3",        
+        anim = "bubbles_3",
         fn = FinalOffset1,
     },
     {
         name = "crab_king_waterspout",
         bank = "Bubble_fx",
         build ="crab_king_bubble_fx",
-        anim = "waterspout",        
+        anim = "waterspout",
         sound = "hookline_2/creatures/boss/crabking/waterspout",
         fn = FinalOffset1,
-    },  
+    },
     {
         name = "crab_king_shine",
         bank = "crab_king_shine",
         build ="crab_king_shine",
-        anim = "shine",        
+        anim = "shine",
         fn = Bloom,
-    }, 
+    },
     {
         name = "crab_king_icefx",
         bank = "deer_ice_flakes",
         build ="deer_ice_flakes",
-        anim = "idle",        
+        anim = "idle",
         fn = Bloom,
-    }, 
+    },
     {
         name = "crabking_ring_fx",
         bank = "crabking_ring_fx",
         build ="crabking_ring_fx",
-        anim = "idle",        
+        anim = "idle",
         fn = GroundOrientation,
-    },           
+    },
     {
         name = "mushroomsprout_glow",
         bank = "mushroomsprout_glow",
         build ="mushroomsprout_glow",
-        anim = "mushroomsprout_glow",        
+        anim = "mushroomsprout_glow",
         fn = FinalOffset1,
-    },    
+    },
     {
         name = "messagebottle_break_fx",
         bank = "bottle",
         build ="bottle",
-        anim = "break",  
-        sound = "dontstarve/creatures/monkey/poopsplat",      
-    }, 
+        anim = "break",
+        sound = "dontstarve/creatures/monkey/poopsplat",
+    },
     {
         name = "messagebottle_bob_fx",
         bank = "bottle",
         build ="bottle",
-        anim = "bob",    
+        anim = "bob",
     },
     {
         name = "singingshell_creature_rockfx",
         bank = "singingshell_creature_rockfx",
         build ="singingshell_creature_rockfx",
-        anim = "idle",    
-    }, 
+        anim = "idle",
+    },
     {
         name = "singingshell_creature_woodfx",
         bank = "singingshell_creature_woodfx",
         build ="singingshell_creature_woodfx",
-        anim = "idle",    
-    },  
+        anim = "idle",
+    },
     {
         name = "shadowhand_fx",
         bank = "shadowhand_fx",
@@ -1815,15 +1872,15 @@ local fx =
         bank = "shadow_teleport",
         build = "shadow_teleport",
         anim = "portal_in",
-        fn = GroundOrientation,        
+        fn = GroundOrientation,
     },
     {
         name = "shadow_teleport_out",
         bank = "shadow_teleport",
         build = "shadow_teleport",
         anim = "portal_out",
-        fn = GroundOrientation,        
-    }, 
+        fn = GroundOrientation,
+    },
     {
         name = "spore_moon_coughout",
         bank = "spore_moon",
@@ -1850,6 +1907,182 @@ local fx =
                 inst.AnimState:PlayAnimation("fx3")
             end
         end
+    },
+    {
+        name = "farm_plant_happy",
+        bank = "farm_plant_happiness",
+        build = "farm_plant_happiness",
+        anim = "happy",
+        fn = FinalOffset1,
+    },
+    {
+        name = "farm_plant_unhappy",
+        bank = "farm_plant_happiness",
+        build = "farm_plant_happiness",
+        anim = "unhappy",
+        fn = FinalOffset1,
+    },
+    {
+        name = "yotb_confetti",
+        bank = "beefalo_fx",
+        build = "beefalo_fx",
+        anim = "transform",
+    },
+    {
+        name = "carnival_confetti_fx",
+        bank = "carnival_confetti",
+        build = "carnival_confetti",
+        anim = "win",
+        fn = FinalOffset1,
+        sound = "summerevent/cannon/fire1",
+    },
+    {
+        name = "carnival_sparkle_fx",
+        bank = "carnival_sparkle",
+        build = "carnival_sparkle",
+        anim = "sparkle",
+        fn = FinalOffset1,
+        sound = "summerevent/cannon/fire2",
+    },
+    {
+        name = "carnival_streamer_fx",
+        bank = "carnival_streamer",
+        build = "carnival_streamer",
+        anim = "streamer",
+        fn = FinalOffset1,
+        sound = "summerevent/cannon/fire3",
+    },
+    {
+        name = "carnival_unwrap_fx",
+        bank = "carnival_unwrap",
+        build = "carnival_unwrap",
+        anim = "unwrap",
+        fn = FinalOffset1,
+    },
+    {
+        name = "alterguardian_spike_breakfx",
+        bank = "alterguardian_spike",
+        build = "alterguardian_spike",
+        anim = "spike_pst",
+    },
+    {
+        name = "alterguardian_spintrail_fx",
+        bank = "alterguardian_sinkhole",
+        build = "alterguardian_sinkhole",
+        anim = "pre",
+        animqueue = true,
+        fn = function(inst)
+            GroundOrientation(inst)
+            inst.Transform:SetEightFaced()
+
+            inst.AnimState:PushAnimation("idle", true)
+            inst:DoTaskInTime(60*FRAMES, function(i)
+                ErodeAway(i, 60*FRAMES)
+            end)
+        end,
+    },
+    {
+        name = "moon_device_break_stage2",
+        bank = "moon_device_break",
+        build = "moon_device_break",
+        anim = "stage2_break",
+        fn = function(inst)
+            inst.Transform:SetEightFaced()
+        end,
+    },
+    {
+        name = "moon_device_break_stage3",
+        bank = "moon_device_break",
+        build = "moon_device_break",
+        anim = "stage3_break",
+    },
+    {
+        name = "moonstorm_glass_ground_fx",
+        bank = "moonglass_charged",
+        build = "moonglass_charged_tile",
+        anim = "explosion",
+        fn = GroundOrientation,
+    },
+    {
+        name = "moonstorm_glass_fx",
+        bank = "moonglass_charged",
+        build = "moonglass_charged_tile",
+        anim = "crack_fx",
+    },
+    {
+        name = "moonstorm_spark_shock_fx",
+        bank = "shock_fx",
+        build = "shock_fx",
+        anim = "weremoose_shock",
+        sound = "moonstorm/common/moonstorm/spark_attack",
+        eightfaced = true,
+        autorotate = true,
+        fn = FinalOffset1,
+    },
+    {
+        name = "alterguardian_phase1fallfx",
+        bank = "alterguardian_spawn_death",
+        build = "alterguardian_spawn_death",
+        anim = "fall_pre",
+    },
+    {
+        name = "moon_geyser_explode",
+        bank = "moon_altar_geyser",
+        build = "moon_geyser",
+        anim = "explode",
+    },
+    {
+        name = "moonpulse_fx",
+        bank = "moon_altar_geyser",
+        build = "moon_geyser",
+        anim = "moonpulse",
+        fn = function(inst)
+            inst.AnimState:SetBloomEffectHandle("shaders/anim.ksh")
+        end,
+    },
+    {
+        name = "moonpulse2_fx",
+        bank = "moon_altar_geyser",
+        build = "moon_geyser",
+        anim = "moonpulse2",
+        fn = function(inst)
+            inst.AnimState:SetBloomEffectHandle("shaders/anim.ksh")
+        end,
+    },
+    {
+        name = "alterguardian_phase3trappst",
+        bank = "alterguardian_meteor",
+        build = "alterguardian_meteor",
+        anim = "meteor_pst",
+        sound = "turnoftides/common/together/moon_glass/mine",
+    },
+    {
+        name = "spider_mutate_fx",
+        bank = "mutate_fx",
+        build = "mutate_fx",
+        anim = "mutate",
+    },
+
+    {
+        name = "spider_heal_fx",
+        bank = "heal_fx",
+        build = "spider_heal_fx",
+        anim = "heal",
+    },
+
+    {
+        name = "spider_heal_target_fx",
+        bank = "heal_fx",
+        build = "spider_heal_fx",
+        anim = "heal_buff",
+    },
+
+    {
+        name = "spider_heal_ground_fx",
+        bank = "heal_fx",
+        build = "spider_heal_fx",
+        anim = "heal_aoe",
+        fn = GroundOrientation,
     },
 }
 

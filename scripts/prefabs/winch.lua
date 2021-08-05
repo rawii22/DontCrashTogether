@@ -84,7 +84,7 @@ local function raise_claw(inst, delay)
 		if GetHeldItem(inst) == nil and FindEntity(inst, CLAW_CATCHING_RADIUS + CLAW_CATCHING_ALMOST_SUCCESS_THRESHOLD, nil, CLAW_TARGET_MUST_TAGS) ~= nil then
 			if inst._most_recent_interacting_player ~= nil and inst._most_recent_interacting_player:IsValid() and inst._most_recent_interacting_player.components.talker ~= nil and
 				TheWorld.Map:GetPlatformAtPoint(inst._most_recent_interacting_player.Transform:GetWorldPosition()) == TheWorld.Map:GetPlatformAtPoint(inst.Transform:GetWorldPosition()) then
-				
+
 				inst._most_recent_interacting_player.components.talker:Say(GetString(inst._most_recent_interacting_player, "ANNOUNCE_WINCH_CLAW_MISS"))
 			end
 		end
@@ -142,12 +142,10 @@ local function OnFullyLowered(inst)
 					turn_on_boat_drag(inst, boat, TUNING.BOAT_WINCH.BOAT_DRAG_DURATION)
 				end
 
-				if salvageable.components.winchtarget.destroy_on_salvage then
-					salvageable:Remove()
-				end
+				salvageable:Remove()
 			end
 		end
-		
+
 		if salvaged_item ~= nil then
 			raise_claw(inst, RAISE_CLAW_DELAY_SUCCESS)
 		else
@@ -181,9 +179,7 @@ local function OnLoweringUpdate(inst)
 				salvaged_item:PushEvent("on_salvaged")
 			end
 
-			if salvageable.components.winchtarget.destroy_on_salvage then
-				salvageable:Remove()
-			end
+			salvageable:Remove()
 
 			local boat = TheWorld.Map:GetPlatformAtPoint(inst.Transform:GetWorldPosition())
 			if boat ~= nil then
@@ -199,7 +195,7 @@ local function OnFullyRaised(inst)
 	if GetHeldItem(inst) ~= nil then
 		inst.components.winch.winch_ready = false
 		inst.components.shelf.cantakeitem = true
-		
+
 		inst.components.activatable.inactive = false
 	else
 		inst.components.winch.winch_ready = true
@@ -233,7 +229,7 @@ local function GetCurrentWinchDepth(inst)
 	return 0
 end
 
-local function OnTakeItem(inst, taker, item)
+local function MakeEmpty(inst)
 	inst.components.shelf.cantakeitem = false
 
 	if inst.components.winch ~= nil then
@@ -256,7 +252,7 @@ local function OnActivate(inst, doer)
 	end
 
 	inst._most_recent_interacting_player = doer
-	
+
 	return true
 end
 
@@ -265,13 +261,18 @@ local function CanActivate(inst, doer)
 end
 
 local function onitemget(inst, data)
-	inst.components.shelf:PutItemOnShelf(data.item)
+	local item = data.item
+	inst.components.shelf:PutItemOnShelf(item)
 
-	if data.item.components.symbolswapdata ~= nil then
-		inst.AnimState:OverrideSymbol("swap_body", data.item.components.symbolswapdata.build, data.item.components.symbolswapdata.symbol)
+	if item.components.symbolswapdata ~= nil then
+		inst.AnimState:OverrideSymbol("swap_body", item.components.symbolswapdata.build, item.components.symbolswapdata.symbol)
 	end
 
 	TheWorld:PushEvent("CHEVO_heavyobject_winched",{target=inst,doer=nil})
+end
+
+local function onitemlose(inst, data)
+	MakeEmpty(inst)
 end
 
 local function onburnt(inst)
@@ -364,14 +365,14 @@ local function OnLoadPostPass(inst)
 end
 
 local function fn()
-    
+
     local inst = CreateEntity()
 
     inst.entity:AddTransform()
     inst.entity:AddAnimState()
     inst.entity:AddSoundEmitter()
 	inst.entity:AddNetwork()
-	
+
     inst.AnimState:SetBank("boat_winch")
 	inst.AnimState:SetBuild("boat_winch")
 	inst.AnimState:PlayAnimation("idle", true)
@@ -383,7 +384,7 @@ local function fn()
     if not TheWorld.ismastersim then
         return inst
 	end
-	
+
 	-- inst._most_recent_interacting_player = nil
 	-- inst._boat_drag_task = nil
 	-- inst._winch_update_task = nil
@@ -392,7 +393,7 @@ local function fn()
 
     inst:AddComponent("inspectable")
     inst.components.inspectable.getstatus = getstatus
-	
+
 	inst:AddComponent("winch")
 	inst.components.winch:SetRaisingSpeedMultiplier(TUNING.BOAT_WINCH.RAISING_SPEED_FAST)
 	inst.components.winch:SetLoweringSpeedMultiplier(TUNING.BOAT_WINCH.LOWERING_SPEED)
@@ -412,7 +413,7 @@ local function fn()
 	inst.components.boatdrag.max_velocity_mod = TUNING.BOAT.ANCHOR.BASIC.MAX_VELOCITY_MOD
 
 	inst:SetStateGraph("SGwinch")
-	
+
     inst:AddComponent("lootdropper")
     inst:AddComponent("workable")
     inst.components.workable:SetWorkAction(ACTIONS.HAMMER)
@@ -423,15 +424,14 @@ local function fn()
 	inst:AddComponent("inventory")
 	inst.components.inventory.ignorescangoincontainer = true
 	inst.components.inventory.maxslots = 1
-	
+
 	inst:AddComponent("shelf")
-	inst.components.shelf:SetOnTakeItem(OnTakeItem)
 	inst.components.shelf.cantakeitem = false
 
 	inst:AddComponent("hauntable")
 	inst.components.hauntable:SetOnHauntFn(OnHaunt)
 	inst.components.hauntable:SetHauntValue(TUNING.HAUNT_TINY)
-	
+
 	MakeLargeBurnable(inst, nil, nil, true)
 	MakeMediumPropagator(inst)
 	inst:ListenForEvent("onburnt", onburnt)
@@ -440,6 +440,7 @@ local function fn()
 	inst:ListenForEvent("ondeconstructstructure", dropitems)
 	inst:ListenForEvent("onremove", dropitems)
 	inst:ListenForEvent("itemget", onitemget)
+	inst:ListenForEvent("itemlose", onitemlose)
 
 	inst.OnSave = OnSave
 	inst.OnLoad = OnLoad

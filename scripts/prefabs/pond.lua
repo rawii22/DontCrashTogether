@@ -1,3 +1,5 @@
+require("worldsettingsutil")
+
 local assets =
 {
     Asset("ANIM", "anim/marsh_tile.zip"),
@@ -81,7 +83,7 @@ local function OnSnowLevel(inst, snowlevel)
 
             DespawnPlants(inst)
 
-            inst:RemoveTag("watersource")
+            inst.components.watersource.available = false
         end
     elseif inst.frozen then
         inst.frozen = false
@@ -97,7 +99,7 @@ local function OnSnowLevel(inst, snowlevel)
 
         SpawnPlants(inst)
 
-        inst:AddTag("watersource")
+        inst.components.watersource.available = true
     elseif inst.frozen == nil then
         inst.frozen = false
         SpawnPlants(inst)
@@ -112,6 +114,14 @@ local function OnLoad(inst, data)
     if data ~= nil and data.plants ~= nil and inst.plants == nil and inst.task ~= nil then
         inst.plants = data.plants
     end
+end
+
+local function OnPreLoadMosquito(inst, data)
+    WorldSettings_ChildSpawner_PreLoad(inst, data, TUNING.MOSQUITO_POND_SPAWN_TIME, TUNING.MOSQUITO_POND_REGEN_TIME)
+end
+
+local function OnPreLoadFrog(inst, data)
+    WorldSettings_ChildSpawner_PreLoad(inst, data, TUNING.FROG_POND_SPAWN_TIME, TUNING.FROG_POND_REGEN_TIME)
 end
 
 local function commonfn(pondtype)
@@ -134,6 +144,7 @@ local function commonfn(pondtype)
 
     inst.MiniMapEntity:SetIcon("pond"..pondtype..".png")
 
+    -- From watersource component
     inst:AddTag("watersource")
     inst:AddTag("antlion_sinkhole_blocker")
     inst:AddTag("birdblocker")
@@ -151,10 +162,6 @@ local function commonfn(pondtype)
     inst.pondtype = pondtype
 
     inst:AddComponent("childspawner")
-    inst.components.childspawner:SetRegenPeriod(TUNING.POND_REGEN_TIME)
-    inst.components.childspawner:SetSpawnPeriod(TUNING.POND_SPAWN_TIME)
-    inst.components.childspawner:SetMaxChildren(math.random(3, 4))
-    inst.components.childspawner:StartRegen()
 
     inst.frozen = nil
     inst.plants = nil
@@ -168,6 +175,8 @@ local function commonfn(pondtype)
 
     inst:AddComponent("hauntable")
     inst.components.hauntable:SetHauntValue(TUNING.HAUNT_TINY)
+
+    inst:AddComponent("watersource")
 
     inst.OnSave = OnSave
     inst.OnLoad = OnLoad
@@ -208,6 +217,21 @@ local function pondmos()
         return inst
     end
 
+    inst.components.childspawner:SetSpawnPeriod(TUNING.MOSQUITO_POND_SPAWN_TIME)
+    inst.components.childspawner:SetRegenPeriod(TUNING.MOSQUITO_POND_REGEN_TIME)
+    if TUNING.MOSQUITO_POND_CHILDREN.max == 0 then
+        inst.components.childspawner:SetMaxChildren(0)
+    else
+        inst.components.childspawner:SetMaxChildren(math.random(TUNING.MOSQUITO_POND_CHILDREN.min, TUNING.MOSQUITO_POND_CHILDREN.max))
+    end
+
+    WorldSettings_ChildSpawner_SpawnPeriod(inst, TUNING.MOSQUITO_POND_SPAWN_TIME, TUNING.MOSQUITO_POND_ENABLED)
+    WorldSettings_ChildSpawner_RegenPeriod(inst, TUNING.MOSQUITO_POND_REGEN_TIME, TUNING.MOSQUITO_POND_ENABLED)
+    if not TUNING.MOSQUITO_POND_ENABLED then
+        inst.components.childspawner.childreninside = 0
+    end
+
+    inst.components.childspawner:StartRegen()
     inst.components.childspawner.childname = "mosquito"
     inst.components.fishable:AddFish("pondfish")
 
@@ -215,8 +239,10 @@ local function pondmos()
     inst.dayspawn = false
     inst.task = inst:DoTaskInTime(0, OnInit)
 
+    inst.OnPreLoad = OnPreLoadMosquito
+
     return inst
-end 
+end
 
 local function pondfrog()
     local inst = commonfn("")
@@ -225,12 +251,29 @@ local function pondfrog()
         return inst
     end
 
+    inst.components.childspawner:SetSpawnPeriod(TUNING.FROG_POND_SPAWN_TIME)
+    inst.components.childspawner:SetRegenPeriod(TUNING.FROG_POND_REGEN_TIME)
+    if TUNING.FROG_POND_CHILDREN.max == 0 then
+        inst.components.childspawner:SetMaxChildren(0)
+    else
+        inst.components.childspawner:SetMaxChildren(math.random(TUNING.FROG_POND_CHILDREN.min, TUNING.FROG_POND_CHILDREN.max))
+    end
+
+    WorldSettings_ChildSpawner_SpawnPeriod(inst, TUNING.FROG_POND_SPAWN_TIME, TUNING.FROG_POND_ENABLED)
+    WorldSettings_ChildSpawner_RegenPeriod(inst, TUNING.FROG_POND_REGEN_TIME, TUNING.FROG_POND_ENABLED)
+    if not TUNING.FROG_POND_ENABLED then
+        inst.components.childspawner.childreninside = 0
+    end
+
+    inst.components.childspawner:StartRegen()
     inst.components.childspawner.childname = "frog"
     inst.components.fishable:AddFish("pondfish")
 
     inst.planttype = "marsh_plant"
     inst.dayspawn = true
     inst.task = inst:DoTaskInTime(0, OnInit)
+
+    inst.OnPreLoad = OnPreLoadFrog
 
     return inst
 end

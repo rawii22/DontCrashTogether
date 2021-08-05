@@ -46,6 +46,7 @@ local ModIndex = Class(function(self)
 		known_api_version = 0,
 		disable_special_event_warning = false,
 	}
+	self.forceddirs = {}
 	self.mod_dependencies =
 	{
 		server_dependency_list = {},
@@ -95,7 +96,7 @@ end
 
 function ModIndex:BeginStartupSequence(callback)
 	self.startingup = true
-	
+
 	if TheNet:IsDedicated() then
 		print("ModIndex: Beginning normal load sequence for dedicated server.\n")
 		self:DisableAllMods() --We assume the mods will be re-enabled by the modoverrides.lua file
@@ -184,7 +185,7 @@ function ModIndex:Save(callback)
     if IsConsole() then
         return
     end
-    
+
 	local newdata = { known_mods = {} }
 	newdata.known_api_version = MOD_API_VERSION
 	newdata.disable_special_event_warning = self.savedata.disable_special_event_warning
@@ -210,15 +211,87 @@ function ModIndex:Save(callback)
     local insz, outsz = SavePersistentString(self:GetModIndexName(), data, ENCODE_SAVES, callback)
 end
 
+local workshop_prefix = "workshop-"
+--This function only works if the modindex has been updated
+function ResolveModname(modname)
+	--try to convert from Workshop id to modname
+	if KnownModIndex:DoesModExistAnyVersion(modname) then
+		return modname
+	else
+		--modname wasn't found, try it as a workshop mod
+		local workshop_modname = workshop_prefix..modname
+		if KnownModIndex:DoesModExistAnyVersion(workshop_modname) then
+			return workshop_modname
+		end
+	end
+	return nil
+end
+
+function IsWorkshopMod(modname)
+	if modname == nil then
+		return false
+	end
+	return modname:sub( 1, workshop_prefix:len() ) == workshop_prefix
+end
+
+function GetWorkshopIdNumber(modname)
+	return string.sub(modname, workshop_prefix:len() + 1)
+end
+
+function ModIndex:GetTempEnabledMods()
+	local moddirs = {}
+	for name, data in pairs(self.savedata.known_mods) do
+		if data.temp_enabled then
+			table.insert(moddirs, name)
+		end
+	end
+	return moddirs
+end
+
+function ModIndex:GetForceEnabledMods()
+	local moddirs = {}
+	for name in pairs(self.modsettings.forceenable) do
+		if (IsWorkshopMod(name)) then
+			table.insert(moddirs, name)
+		else
+			if tonumber(name) then
+				table.insert(moddirs, "workshop-"..name)
+			else
+				table.insert(moddirs, name)
+			end
+		end
+	end
+	return moddirs
+end
+
 function ModIndex:GetModsToLoad(usecached)
 	local cached = usecached or false
 
 	local ret = {}
 	if not cached then
 		local moddirs = TheSim:GetModDirectoryNames()
+		local mods_to_load = {}
 		for i,moddir in ipairs(moddirs) do
-			if (self:IsModEnabled(moddir) or self:IsModForceEnabled(moddir) or self:IsModTempEnabled(moddir) ) and not self:IsModTempDisabled(moddir) then
+			if ((self:IsModEnabled(moddir) or self:IsModForceEnabled(moddir) or self:IsModTempEnabled(moddir) ) and not self:IsModTempDisabled(moddir)) and not mods_to_load[moddir] then
 				print("ModIndex:GetModsToLoad inserting moddir, ", moddir)
+				mods_to_load[moddir] = true
+				table.insert(ret, moddir)
+			end
+		end
+		for i, moddir in ipairs(self:GetTempEnabledMods()) do
+			if not table.contains(moddirs, moddir) then
+				self.forceddirs[moddir] = true
+			end
+		end
+		for i, moddir in ipairs(self:GetForceEnabledMods()) do
+			if not table.contains(moddirs, moddir) then
+				self.forceddirs[moddir] = true
+			end
+		end
+		for moddir in pairs(self.forceddirs) do
+			if ((self:IsModEnabled(moddir) or self:IsModForceEnabled(moddir) or self:IsModTempEnabled(moddir) ) and not self:IsModTempDisabled(moddir)) and not mods_to_load[moddir] then
+				print("ModIndex:GetModsToLoad inserting forcedmoddir, ", moddir)
+				mods_to_load[moddir] = true
 				table.insert(ret, moddir)
 			end
 		end
@@ -256,8 +329,15 @@ function ModIndex:UpdateModInfo()
 	local modnames = TheSim:GetModDirectoryNames()
 
 	for modname,moddata in pairs(self.savedata.known_mods) do
-		if not table.contains(modnames, modname) then
-			self.savedata.known_mods[modname] = nil
+		if not table.contains(modnames, modname) and not self.forceddirs[modname] then
+			if moddata.temp_enabled then
+				if not self.savedata.known_mods[modname] then
+					self.savedata.known_mods[modname] = {}
+				end
+				self.savedata.known_mods[modname].modinfo = self:LoadModInfo(modname, self.savedata.known_mods[modname].modinfo)
+			else
+				self.savedata.known_mods[modname] = nil
+			end
 		end
 	end
 
@@ -265,7 +345,14 @@ function ModIndex:UpdateModInfo()
 		if not self.savedata.known_mods[modname] then
 			self.savedata.known_mods[modname] = {}
 		end
-		self.savedata.known_mods[modname].modinfo = self:LoadModInfo(modname)
+		self.savedata.known_mods[modname].modinfo = self:LoadModInfo(modname, self.savedata.known_mods[modname].modinfo)
+	end
+
+	for modname in pairs(self.forceddirs) do
+		if not self.savedata.known_mods[modname] then
+			self.savedata.known_mods[modname] = {}
+		end
+		self.savedata.known_mods[modname].modinfo = self:LoadModInfo(modname, self.savedata.known_mods[modname].modinfo)
 	end
 end
 
@@ -273,14 +360,14 @@ function ModIndex:UpdateSingleModInfo(modname)
 	if not self.savedata.known_mods[modname] then
 		self.savedata.known_mods[modname] = {}
 	end
-	self.savedata.known_mods[modname].modinfo = self:LoadModInfo(modname)
+	self.savedata.known_mods[modname].modinfo = self:LoadModInfo(modname, self.savedata.known_mods[modname].modinfo)
 end
 
 function ModIndex:LoadModOverides(shardGameIndex)
 	if TheNet:GetIsClient() then
 		return {}
 	end
-	
+
     local overrides = {}
     local filename = "../modoverrides.lua"
 
@@ -318,37 +405,21 @@ function ModIndex:LoadModOverides(shardGameIndex)
     return overrides
 end
 
-local workshop_prefix = "workshop-"
---This function only works if the modindex has been updated
-function ResolveModname(modname)
-	--try to convert from Workshop id to modname
-	if KnownModIndex:DoesModExistAnyVersion(modname) then
-		return modname
-	else
-		--modname wasn't found, try it as a workshop mod
-		local workshop_modname = workshop_prefix..modname
-		if KnownModIndex:DoesModExistAnyVersion(workshop_modname) then
-			return workshop_modname
-		end
-	end
-	return nil
-end
 
-function IsWorkshopMod(modname)
-	if modname == nil then
-		return false
+function ModIndex:TryLoadMod(modname)
+	if self.savedata.known_mods[modname] then return true end
+	if kleifileexists(MODS_ROOT..modname.."/modinfo.lua") then
+		self.forceddirs[modname] = true
+		self:UpdateSingleModInfo(modname)
+		return true
 	end
-	return modname:sub( 1, workshop_prefix:len() ) == workshop_prefix
-end
-
-function GetWorkshopIdNumber(modname)
-	return string.sub(modname, workshop_prefix:len() + 1)
+	return false
 end
 
 function ModIndex:ApplyEnabledOverrides(mod_overrides) --Note(Peter): This function is now coupled with the format written by ShardSaveIndex:SetSlotEnabledServerMods
 	if mod_overrides == nil then
 		print("Warning: modoverrides.lua is empty, or is failing to return a table.")
-	else	
+	else
 		--Enable mods that are being forced on in the modoverrides.lua file
 		--print("ModIndex:ApplyEnabledOverrides for mods" )
 		for modname,env in pairs(mod_overrides) do
@@ -356,6 +427,9 @@ function ModIndex:ApplyEnabledOverrides(mod_overrides) --Note(Peter): This funct
 				self:DisableClientMods( env ) --env is a bool in this case
 			else
 				if env.enabled ~= nil then
+					if not self:TryLoadMod(modname) then
+						self:TryLoadMod(workshop_prefix..modname)
+					end
 					local actual_modname = ResolveModname(modname)
 					if actual_modname ~= nil then
 						if env.enabled then
@@ -381,7 +455,7 @@ function ModIndex:ApplyConfigOptionOverrides(mod_overrides)
 				local actual_modname = ResolveModname(modname)
 				if actual_modname ~= nil then
 					print( "applying configuration_options from modoverrides.lua to mod " .. actual_modname )
-					
+
 					local force_local_options = true
 					local config_options = self:GetModConfigurationOptions_Internal(actual_modname,force_local_options)
 
@@ -434,7 +508,7 @@ local function BuildModPriorityList(self, v, is_workshop)
 end
 
 local print_atlas_warning = true
-function ModIndex:LoadModInfo(modname)
+function ModIndex:LoadModInfo(modname, prev_info)
 	modprint(string.format("Updating mod info for '%s'", modname))
 
 	local info = self:InitializeModInfo(modname)
@@ -450,13 +524,15 @@ function ModIndex:LoadModInfo(modname)
 	for i,v in pairs(self.savedata.known_mods[modname].modinfo) do
 		-- print(i,v)
 	end
-	
+
 	info.version = TrimString(info.version or "")
 	info.version = string.lower(info.version)
 	info.version_compatible = type(info.version_compatible) == "string" and info.version_compatible or info.version
 	info.version_compatible = TrimString( info.version_compatible )
 	info.version_compatible = string.lower(info.version_compatible)
-	
+
+	if prev_info ~= nil and prev_info.version == info.version then return prev_info end
+
 	if info.icon_atlas ~= nil and info.icon ~= nil and info.icon_atlas ~= "" and info.icon ~= "" then
 		local atlaspath = MODS_ROOT..modname.."/"..info.icon_atlas
 		local iconpath = string.gsub(atlaspath, "/[^/]*$", "") .. "/"..info.icon
@@ -478,7 +554,7 @@ function ModIndex:LoadModInfo(modname)
 		info.iconpath = nil
 		info.icon = nil
 	end
-	
+
 	--Add game modes
 	if info.game_modes then
 		for _,mode in pairs(info.game_modes) do
@@ -510,7 +586,7 @@ function ModIndex:LoadModInfo(modname)
             end
         end
 	end
-	
+
 	return info
 end
 
@@ -598,7 +674,7 @@ function ModIndex:InitializeModInfo(modname)
 		env.dst_compatible = true
 		env.dst_compatibility_specified = false
 	end
-	
+
 	if env.client_only_mod and env.all_clients_require_mod then
 		print("WARNING loading modinfo.lua: "..modname.." specifies client_only_mod and all_clients_require_mod. These flags are mutually exclusive.")
 	end
@@ -640,8 +716,8 @@ function ModIndex:Load(callback)
 					--print("\n\n---LOADING MOD INDEX---\n\n")
 					--dumptable(self.savedata)
 					--print("\n\n---END LOADING MOD INDEX---\n\n")
-					
-		
+
+
 					--print("\n\n---LOADING MOD INFOS---\n\n")
 					self:UpdateModInfo()
 					--dumptable(self.savedata)
@@ -676,11 +752,17 @@ function ModIndex:HasModConfigurationOptions(modname)
 	return false
 end
 
-function ModIndex:UpdateConfigurationOptions(config_options, savedata)
+function ModIndex:UpdateConfigurationOptions(config_options, savedata, client_config)
 	for i,v in pairs(savedata) do
 		for j,k in pairs(config_options) do
 			if v.name == k.name and v.saved ~= nil then
-				k.saved = v.saved
+				if client_config then
+					k.saved_client = v.saved
+				else
+					k.saved_server = v.saved
+				end
+
+				k.saved = v.saved -- don't know if this is still needed, but keeping it.
 			end
 		end
 	end
@@ -719,7 +801,7 @@ function ModIndex:LoadModConfigurationOptions(modname, client_config)
 		print("Error: mod isn't known", modname )
 		return nil
 	end
-	
+
 	-- Try to find saved config settings first
 	local filename = self:GetModConfigurationPath(modname, client_config)
 	TheSim:GetPersistentString(filename,
@@ -729,7 +811,7 @@ function ModIndex:LoadModConfigurationOptions(modname, client_config)
 				if success and string.len(str) > 0 then
 					-- Carry over saved data from old versions when possible
 					if self:HasModConfigurationOptions(modname) then
-						self:UpdateConfigurationOptions(known_mod.modinfo.configuration_options, savedata)
+						self:UpdateConfigurationOptions(known_mod.modinfo.configuration_options, savedata, client_config)
 					else
 						if known_mod.modinfo ~= nil then
 							known_mod.modinfo.configuration_options = savedata
@@ -871,18 +953,18 @@ function ModIndex:ClearTempModFlags(modname)
 	self.savedata.known_mods[modname].temp_enabled = false
 	self.savedata.known_mods[modname].temp_disabled = false
 	self.savedata.known_mods[modname].temp_config_options = nil
-	
+
 end
 
 function ModIndex:ClearAllTempModFlags()
 	--print( "ModIndex:ClearAllTempModFlags" )
-	
+
 	local function internal_clear_all_temp_mod_flags()
 		for k,v in pairs(self.savedata.known_mods) do
 			self:ClearTempModFlags(k)
 		end
 		self:Save(nil)
-	end 
+	end
 	if self.savedata == nil then
 		self:Load( internal_clear_all_temp_mod_flags )
 	else
@@ -926,7 +1008,7 @@ function ModIndex:Enable(modname)
 	if not self.savedata.known_mods[modname].enabled then
 		self.savedata.disable_special_event_warning = false
 	end
-	
+
 	self.savedata.known_mods[modname].enabled = true
 	self.savedata.known_mods[modname].disabled_bad = false
 	self.savedata.known_mods[modname].disabled_incompatible_with_mode = false
@@ -997,7 +1079,7 @@ function ModIndex:RestoreCachedSaveData(ext_data)
 		self.modsettings = self.cached_data.modsettings
 	end
 end
-	
+
 function ModIndex:UpdateModSettings()
 
 	self.modsettings = {
@@ -1022,7 +1104,7 @@ function ModIndex:UpdateModSettings()
 	local function DisableLocalModWarning()
 		self.modsettings.localmodwarning = false
 	end
-	
+
 	local env = {
 		ForceEnableMod = ForceEnableMod,
 		EnableModDebugPrint = EnableModDebugPrint,
@@ -1104,7 +1186,7 @@ function ModIndex:GetModDependents(modname, recursive, rec_deps)
 			self:GetModDependents(_modname, recursive, deps)
 		end
 	end
-	
+
 	--rec_deps will be nil when called externally
 	if not rec_deps then
 		deps[modname] = nil
@@ -1171,6 +1253,7 @@ function ModIndex:DoModsExistAnyVersion(modlist)
 end
 
 function ModIndex:DoesModExist( modname, server_version, server_version_compatible )
+	self:UpdateSingleModInfo(modname)
 	if server_version_compatible == nil then
 		--no compatible flag, so we want to do an exact version check
 		local modinfo = self:GetModInfo(modname)
@@ -1207,7 +1290,7 @@ function ModIndex:GetEnabledModTags()
 			end
 		end
 	end
-	return tags	
+	return tags
 end
 
 

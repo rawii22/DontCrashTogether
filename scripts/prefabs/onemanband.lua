@@ -21,7 +21,7 @@ local function CalcDapperness(inst, owner)
 end
 
 local banddt = 1
-local FOLLOWER_ONEOF_TAGS = {"pig", "merm"}
+local FOLLOWER_ONEOF_TAGS = {"pig", "merm", "farm_plant"}
 local FOLLOWER_CANT_TAGS = {"werepig", "player"}
 local HAUNTEDFOLLOWER_MUST_TAGS = {"pig"}
 
@@ -31,7 +31,7 @@ local function band_update( inst )
         local x,y,z = owner.Transform:GetWorldPosition()
         local ents = TheSim:FindEntities(x,y,z, TUNING.ONEMANBAND_RANGE, nil, FOLLOWER_CANT_TAGS, FOLLOWER_ONEOF_TAGS)
         for k,v in pairs(ents) do
-            if v.components.follower and not v.components.follower.leader  and not owner.components.leader:IsFollower(v) and owner.components.leader.numfollowers < 10 then
+            if v.components.follower and not v.components.follower.leader and not owner.components.leader:IsFollower(v) and owner.components.leader.numfollowers < 10 then
                 if v:HasTag("merm") then
                     if v:HasTag("mermguard") then
                         if owner:HasTag("merm") and not owner:HasTag("mermdisguise") then
@@ -45,7 +45,9 @@ local function band_update( inst )
                 else
                     owner.components.leader:AddFollower(v)
                 end
-            end
+			elseif v.components.farmplanttendable ~= nil then
+				v.components.farmplanttendable:TendTo(owner)
+			end
         end
 
         for k,v in pairs(owner.components.leader.followers) do
@@ -93,7 +95,7 @@ local function band_perish(inst)
     inst:Remove()
 end
 
-local function onequip(inst, owner) 
+local function onequip(inst, owner)
     if owner then
         owner.AnimState:OverrideSymbol("swap_body_tall", "swap_one_man_band", "swap_body_tall")
         inst.components.fueled:StartConsuming()
@@ -102,9 +104,9 @@ local function onequip(inst, owner)
     band_enable(inst)
 end
 
-local function onunequip(inst, owner) 
+local function onunequip(inst, owner)
     if owner then
-        owner.AnimState:ClearOverrideSymbol("swap_body_tall") 
+        owner.AnimState:ClearOverrideSymbol("swap_body_tall")
         inst.components.fueled:StopConsuming()
     end
 

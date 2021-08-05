@@ -6,7 +6,7 @@ local assets =
     Asset("ANIM", "anim/moon_fissure_fx.zip"),
 }
 
-local assets_plugged = 
+local assets_plugged =
 {
     Asset("ANIM", "anim/plugged_fissure.zip"),
 }
@@ -19,7 +19,7 @@ local prefabs =
     "moon_altar_cosmic"
 }
 
-local prefabs_plugged = 
+local prefabs_plugged =
 {}
 
 local lightstate_data =
@@ -162,22 +162,21 @@ local function fn()
     inst.entity:AddSoundEmitter()
     inst.entity:AddNetwork()
 
-    MakeObstaclePhysics(inst, .4)
+    inst:SetPhysicsRadiusOverride(0.4)
 
     inst._lighttask = inst:DoPeriodicTask(0, OnUpdateLight)
-
 
     inst.AnimState:SetBank("moon_fissure")
     inst.AnimState:SetBuild("moon_fissure")
     inst.AnimState:PlayAnimation("crack_idle", true)
-    inst.AnimState:SetFinalOffset(-1)
+    inst.AnimState:SetFinalOffset(3)
 
     inst._level = net_tinybyte(inst.GUID, "moonfissure.level", "leveldirty")
     inst._level:set(MOON_STATES[TheWorld.state.moonphase])
 
-	OnUpdateLight(inst)
+    OnUpdateLight(inst)
 
-	inst:AddTag("antlion_sinkhole_blocker")
+    inst:AddTag("antlion_sinkhole_blocker")
     inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
@@ -210,7 +209,7 @@ local function fn()
 
     inst:WatchWorldState("moonphase", onmoonphasechagned)
     UpdateState(inst)
-	
+
 
     return inst
 end
@@ -247,15 +246,14 @@ local function plugged_fn()
     inst.entity:AddAnimState()
     inst.entity:AddNetwork() -- this is networked coz we trigger animations on it
     inst.entity:AddSoundEmitter()
-    
+
     inst.AnimState:SetBank("plugged_fissure")
     inst.AnimState:SetBuild("plugged_fissure")
     inst.AnimState:PlayAnimation("idle", true)
 
-	inst:AddTag("antlion_sinkhole_blocker")
+    inst:AddTag("antlion_sinkhole_blocker")
 
     inst.entity:SetPristine()
-
     if not TheWorld.ismastersim then
         return inst
     end
@@ -265,8 +263,8 @@ local function plugged_fn()
     inst:AddComponent("timer")
     inst.components.timer:StartTimer("toot",(math.random()*10)* TUNING.SEG_TIME )
 
-    inst:ListenForEvent("timerdone", function(inst, data) 
-        if data.name == "toot" then            
+    inst:ListenForEvent("timerdone", function(inst, data)
+        if data.name == "toot" then
             inst.AnimState:PlayAnimation("toot_pre")
         end
     end)
@@ -278,7 +276,7 @@ local function plugged_fn()
             inst.AnimState:PushAnimation("toot_pst",false)
             inst.AnimState:PushAnimation("idle",true)
             inst.components.timer:StartTimer("toot",(6 + (math.random()*4)) * TUNING.SEG_TIME )
-            TheWorld:PushEvent("moonfissurevent",inst)            
+            TheWorld:PushEvent("moonfissurevent",inst)
         end
     end)
 

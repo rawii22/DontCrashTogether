@@ -72,7 +72,7 @@ local function ecounter_widget_constructor(context, i)
 
 	local w = Widget("control-encounter")
 	w.root = w:AddChild(Widget("encounter-hideable_root"))
-	
+
 	local bg = w.root:AddChild(TEMPLATES.ListItemBackground(row_width, row_height))
 	bg:SetOnGainFocus(function() context.screen.encounters_scroll_list:OnWidgetFocus(w) end)
 
@@ -80,7 +80,7 @@ local function ecounter_widget_constructor(context, i)
 	w.widgets:SetPosition(-row_width/2, 0)
 
 	local spacing = 15
-	local x = spacing 
+	local x = spacing
 
     w.widgets.character = w.widgets:AddChild(BuildCharacterPortrait("character"))
 	x = x + row_height/2
@@ -130,16 +130,16 @@ local function ecounter_widget_constructor(context, i)
 		bg:UseFocusOverlay("serverlist_listitem_hover.tex")
 
 		-- hide the buttons since we're not mousing'
-		w.widgets.delete_btn:Hide()		
+		w.widgets.delete_btn:Hide()
 		w.widgets.playerinfo_btn:Hide()
-		
+
 		-- add help text for controller button commands
 		w.GetHelpText = function()
 			local controller_id = TheInput:GetControllerID()
 			local t = {}
 			if TheInput:ControllerAttached() then
-				if context.screen.can_view_profile and w.widgets.playerinfo_btn._netid ~= nil then		
-					table.insert(t, TheInput:GetLocalizedControl(controller_id, CONTROL_MAP) .. " " .. STRINGS.UI.PLAYERSTATUSSCREEN.VIEWPROFILE)		
+				if context.screen.can_view_profile and w.widgets.playerinfo_btn._netid ~= nil then
+					table.insert(t, TheInput:GetLocalizedControl(controller_id, CONTROL_MAP) .. " " .. STRINGS.UI.PLAYERSTATUSSCREEN.VIEWPROFILE)
 				end
 
                 if w.widgets.delete_btn._userid ~= nil then
@@ -149,7 +149,7 @@ local function ecounter_widget_constructor(context, i)
 
 			return table.concat(t, "  ")
 		end
-	
+
 		-- add controller button handlers
 		w.OnControl = function(self, control, down)
 			if context.screen._base.OnControl(self, control, down) then return true end
@@ -170,7 +170,7 @@ local function ecounter_widget_constructor(context, i)
 				end
 			end
 		end
-		
+
 		button_x = button_x + 20
 	else
 		if context.screen.can_view_profile then
@@ -181,7 +181,7 @@ local function ecounter_widget_constructor(context, i)
 
 			w.widgets.delete_btn:SetFocusChangeDir(MOVE_LEFT, bg)
 			w.widgets.delete_btn:SetFocusChangeDir(MOVE_UP, w.widgets.playerinfo_btn)
-		else	
+		else
 			bg:SetFocusChangeDir(MOVE_RIGHT, w.widgets.playerinfo_btn)
 			w.widgets.delete_btn:SetFocusChangeDir(MOVE_LEFT, bg)
 
@@ -221,7 +221,7 @@ local function SetTruncatedRightJustifiedString(txt, str)
 	txt:SetPosition(txt._position.x - width/2, txt._position.y)
 end
 
-local function encounter_widget_update(context, w, data, index)   
+local function encounter_widget_update(context, w, data, index)
     if w == nil then
         return
     elseif data == nil then
@@ -235,7 +235,11 @@ local function encounter_widget_update(context, w, data, index)
 		SetTruncatedLeftJustifiedString(w.widgets.playername, data.name or "")
 
 		local data_str = data.last_seen_date ~= nil and str_date(data.last_seen_date) or STRINGS.UI.MORGUESCREEN.UNKNOWN_DAYS -- todo: make this localization friendly
-		SetTruncatedLeftJustifiedString(w.widgets.desc, subfmt(STRINGS.UI.MORGUESCREEN.ENCOUNTERS.DESC, {date = data_str, server_name = ServerPreferences:IsNameAndDescriptionHidden(data.server_name) and STRINGS.UI.SERVERLISTINGSCREEN.HIDDEN_NAME or data.server_name or STRINGS.UI.MORGUESCREEN.UNKNOWN_DAYS}))
+		local filtered_text = data.server_name
+		if TheSim:IsSteamChinaClient() then
+			filtered_text = TheSim:ApplyLocalWordFilter(filtered_text, TEXT_FILTER_CTX_UNKNOWN)
+		end
+		SetTruncatedLeftJustifiedString(w.widgets.desc, subfmt(STRINGS.UI.MORGUESCREEN.ENCOUNTERS.DESC, {date = data_str, server_name = ServerPreferences:IsNameAndDescriptionHidden(data.server_name) and STRINGS.UI.SERVERLISTINGSCREEN.HIDDEN_NAME or filtered_text or STRINGS.UI.MORGUESCREEN.UNKNOWN_DAYS}))
 
 		if data.time_played_with > 0 then
 			w.widgets.playtime_label:Show()

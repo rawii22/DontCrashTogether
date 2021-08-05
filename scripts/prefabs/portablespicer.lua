@@ -6,8 +6,6 @@ local assets =
 {
     Asset("ANIM", "anim/portable_spicer.zip"),
     Asset("ANIM", "anim/cook_pot_food.zip"),
-    Asset("ANIM", "anim/cook_pot_food2.zip"),
-    Asset("ANIM", "anim/cook_pot_food3.zip"),
     Asset("ANIM", "anim/plate_food.zip"),
     Asset("ANIM", "anim/spices.zip"),
     Asset("ANIM", "anim/ui_cookpot_1x2.zip"),
@@ -26,6 +24,10 @@ local prefabs =
 }
 for k, v in pairs(cooking.recipes.portablespicer) do
     table.insert(prefabs, v.name)
+
+	if v.overridebuild then
+        table.insert(assets, Asset("ANIM", "anim/"..v.overridebuild..".zip"))
+	end
 end
 
 local prefabs_item =
@@ -111,7 +113,7 @@ local function onopen(inst)
 end
 
 local function onclose(inst)
-    if not inst:HasTag("burnt") then 
+    if not inst:HasTag("burnt") then
         if not inst.components.stewer:IsCooking() then
             inst.AnimState:PlayAnimation("close")
             inst.SoundEmitter:KillSound("snd")
@@ -165,14 +167,14 @@ local function donecookfn(inst)
 end
 
 local function continuedonefn(inst)
-    if not inst:HasTag("burnt") then 
+    if not inst:HasTag("burnt") then
         inst.AnimState:PlayAnimation("idle_full")
         ShowProduct(inst)
     end
 end
 
 local function continuecookfn(inst)
-    if not inst:HasTag("burnt") then 
+    if not inst:HasTag("burnt") then
         inst.AnimState:PlayAnimation("cooking_loop", true)
         inst.SoundEmitter:KillSound("snd")
         inst.SoundEmitter:PlaySound("dontstarve/common/together/portable/spicer/cooking_LP", "snd")
@@ -298,7 +300,7 @@ local function fn()
     inst.components.burnable:SetFXLevel(2)
     inst.components.burnable:SetOnBurntFn(OnBurnt)
 
-    inst.OnSave = onsave 
+    inst.OnSave = onsave
     inst.OnLoad = onload
 
     return inst
