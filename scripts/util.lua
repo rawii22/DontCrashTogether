@@ -20,9 +20,9 @@ end
 function DebugSpawn(prefab)
     if TheSim ~= nil and TheInput ~= nil then
         TheSim:LoadPrefabs({ prefab })
-        if Prefabs[prefab] ~= nil and not Prefabs[prefab].is_skin then
+        if Prefabs[prefab] ~= nil and not Prefabs[prefab].is_skin and Prefabs[prefab].fn then
 			local inst = SpawnPrefab(prefab)
-			if inst ~= nil then
+			if inst ~= nil and inst.Transform then
 				inst.Transform:SetPosition(ConsoleWorldPosition():Get())
 				return inst
 			end
@@ -779,6 +779,26 @@ function RunInSandboxSafe(untrusted_code, error_handler)
 	return xpcall(untrusted_function, error_handler or function() end)
 end
 
+--same as above, but catches infinite loops
+function RunInSandboxSafeCatchInfiniteLoops(untrusted_code, error_handler)
+	if untrusted_code:byte(1) == 27 then return nil, "binary bytecode prohibited" end
+	local untrusted_function, message = loadstring(untrusted_code)
+	if not untrusted_function then return nil, message end
+	setfenv(untrusted_function, {print = print} )
+
+    local co = coroutine.create(function()
+        coroutine.yield(xpcall(untrusted_function, error_handler or function() end))
+    end)
+    debug.sethook(co, function() error("infinite loop detected") end, "", 20000)
+    --clear out all entries to the metatable of string, since that can be accessed even by doing local string = "" string.whatever()
+    local string_backup = deepcopy(string)
+    cleartable(string)
+    local result = {coroutine.resume(co)}
+    shallowcopy(string_backup, string)
+    debug.sethook(co)
+    return unpack(result, 2)
+end
+
 function GetTickForTime(target_time)
 	return math.floor( target_time/GetTickTime() )
 end
@@ -787,6 +807,7 @@ function GetTimeForTick(target_tick)
 	return target_tick*GetTickTime()
 end
 
+--only works for tasks created from scheduler, not from staticScheduler
 function GetTaskRemaining(task)
     return (task == nil and -1)
         or (task:NextTime() == nil and -1)
@@ -870,6 +891,14 @@ function shallowcopy(orig, dest)
         copy = orig
     end
     return copy
+end
+
+function cleartable(object)
+    if type(object) == "table" then
+        for k, v in pairs(object) do
+            object[k] = nil
+        end
+    end
 end
 
 -- if next(table) == nil, then the table is empty
@@ -1179,6 +1208,15 @@ function LinkedList:Iterator()
     }
 end
 
+function table.count( t, value )
+    local count = 0
+    for k,v in pairs(t) do
+        if value == nil or v == value then
+            count = count + 1
+        end
+    end
+    return count
+end
 
 function table.setfield(Table,Name,Value)
 
@@ -1243,6 +1281,27 @@ function table.getfield(Table,Name)
         end
     end
     return Table
+end
+
+function table.typecheckedgetfield(Table, Type, ...)
+    if type(Table) ~= "table" then return end
+
+    local Names = {...}
+    local Names_Count = #Names
+    for i, Name in ipairs(Names) do
+        if i == Names_Count then
+            if Type == nil or type(Table[Name]) == Type then
+                return Table[Name]
+            end
+            return
+        else
+            if type(Table[Name]) == "table" then
+                Table = Table[Name]
+            else
+                return
+            end
+        end
+    end
 end
 
 function table.findfield(Table,Name)
@@ -1510,13 +1569,17 @@ function metarawget(t, k)
     return mt._[k] or mt.c[k]
 end
 
-function ZipAndEncodeSaveData(data)
-	return {str = TheSim:ZipAndEncodeString(DataDumper(data, nil, true))}
+function ZipAndEncodeString(data)
+	return TheSim:ZipAndEncodeString(DataDumper(data, nil, true))
 end
 
-function DecodeAndUnzipSaveData(data)
-    if data and data.str and type(data.str) == "string" then
-        local success, savedata = RunInSandbox(TheSim:DecodeAndUnzipString(data.str))
+function ZipAndEncodeSaveData(data)
+	return {str = ZipAndEncodeString(data)}
+end
+
+function DecodeAndUnzipString(str)
+    if type(str) == "string" then
+        local success, savedata = RunInSandbox(TheSim:DecodeAndUnzipString(str))
         if success then
             return savedata
         else
@@ -1525,9 +1588,72 @@ function DecodeAndUnzipSaveData(data)
     end
 end
 
+function DecodeAndUnzipSaveData(data)
+    return DecodeAndUnzipString(data and data.str or nil)
+end
+
 function FunctionOrValue(func_or_val, ...)
     if type(func_or_val) == "function" then
         return func_or_val(...)
     end
     return func_or_val
 end
+
+function ApplyLocalWordFilter(text, text_filter_context, net_id)
+	if text_filter_context == TEXT_FILTER_CTX_CHAT											-- we are only filtering chat at the moment
+		and Profile:GetProfanityFilterChatEnabled() 
+		then
+
+		text = TheSim:ApplyLocalWordFilter(text, text_filter_context, net_id) or text
+	end
+
+	return text
+end
+
+--jcheng taken from griftlands
+--START--
+function rawstring( t )
+    if type(t) == "table" then
+        local mt = getmetatable( t )
+        if mt then
+            -- Seriously, is there any better way to bypass the tostring metamethod?
+            setmetatable( t, nil )
+            local s = tostring( t )
+            setmetatable( t, mt )
+            return s
+        end
+    end
+
+    return tostring(t)
+end
+
+local function StringSort( a, b )
+    if type(a) == "number" and type(b) == "number" then
+        return a < b
+    else
+        return tostring(a) < tostring(b)
+    end
+end
+
+local function SortedKeysIter( state, i )
+    i = next( state.sorted_keys, i )
+    if i then
+        local key = state.sorted_keys[ i ]
+        return i, key, state.t[ key ]
+    end
+end
+
+function sorted_pairs( t, fn )
+    local sorted_keys = {}
+    for k, v in pairs(t) do
+        table.insert( sorted_keys, k )
+    end
+    table.sort( sorted_keys, fn or StringSort )
+    return SortedKeysIter, { sorted_keys = sorted_keys, t = t }
+end
+
+function generic_error( err )
+    return tostring(err).."\n"..debugstack()
+end
+
+--END--

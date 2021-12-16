@@ -58,7 +58,7 @@ Recipe("fence_item", {Ingredient("twigs", 3), Ingredient("rope", 1) }, RECIPETAB
 Recipe("wall_hay_item", {Ingredient("cutgrass", 4), Ingredient("twigs", 2) }, RECIPETABS.TOWN, TECH.SCIENCE_ONE,nil,nil,nil,4)
 Recipe("wall_wood_item", {Ingredient("boards", 2),Ingredient("rope", 1)}, RECIPETABS.TOWN,  TECH.SCIENCE_ONE,nil,nil,nil,8)
 Recipe("wall_stone_item", {Ingredient("cutstone", 2)}, RECIPETABS.TOWN, TECH.SCIENCE_TWO,nil,nil,nil,6)
-Recipe("wall_moonrock_item", {Ingredient("moonrocknugget", 12)}, RECIPETABS.TOWN, TECH.SCIENCE_TWO,nil,nil,nil,4)
+Recipe("wall_moonrock_item", {Ingredient("moonrocknugget", 4)}, RECIPETABS.TOWN, TECH.SCIENCE_TWO,nil,nil,nil,4)
 
 Recipe("wardrobe", {Ingredient("boards", 4), Ingredient("cutgrass", 3)}, RECIPETABS.TOWN, TECH.SCIENCE_TWO, "wardrobe_placer")
 Recipe("beefalo_groomer", {Ingredient("boards", 4), Ingredient("beefalowool", 2)}, RECIPETABS.TOWN, TECH.SCIENCE_TWO, "beefalo_groomer_item_placer")
@@ -96,13 +96,15 @@ Recipe("archive_resonator_item", {Ingredient("moonrocknugget", 1), Ingredient("t
 --FOOD (FARM)
 Recipe("cookpot", {Ingredient("cutstone", 3), Ingredient("charcoal", 6), Ingredient("twigs", 6)}, RECIPETABS.FARM, TECH.SCIENCE_ONE, "cookpot_placer")
 Recipe("cookbook", {Ingredient("papyrus", 1), Ingredient("carrot", 1)}, RECIPETABS.FARM, TECH.SCIENCE_ONE)
+
 Recipe("icebox", {Ingredient("goldnugget", 2), Ingredient("gears", 1), Ingredient("cutstone", 1)}, RECIPETABS.FARM,  TECH.SCIENCE_TWO, "icebox_placer", 1.5)
 Recipe("saltbox", {Ingredient("saltrock", 10), Ingredient("bluegem", 1), Ingredient("cutstone", 1)}, RECIPETABS.FARM,  TECH.SCIENCE_TWO, "saltbox_placer", 1.5)
 
 Recipe("farm_plow_item", {Ingredient("boards", 3), Ingredient("rope", 2), Ingredient("flint", 2)}, RECIPETABS.FARM,  TECH.SCIENCE_ONE)
 Recipe("fertilizer", {Ingredient("poop", 3), Ingredient("boneshard", 2), Ingredient("log", 4)}, RECIPETABS.FARM, TECH.SCIENCE_TWO)
-Recipe("soil_amender", {Ingredient("messagebottleempty", 1), Ingredient("kelp", 1), Ingredient("ash", 1)}, RECIPETABS.FARM, TECH.SCIENCE_ONE)
-Recipe("compostingbin", {Ingredient("boards", 3), Ingredient("spoiled_food", 1), Ingredient("cutgrass", 1)}, RECIPETABS.FARM, TECH.SCIENCE_ONE, "compostingbin_placer")
+Recipe("soil_amender", {Ingredient("messagebottleempty", 1), Ingredient("kelp", 1), Ingredient("ash", 1)}, RECIPETABS.FARM, TECH.SCIENCE_TWO)
+Recipe("treegrowthsolution", {Ingredient("fig", 2), Ingredient("glommerfuel", 1)}, RECIPETABS.FARM, TECH.SCIENCE_TWO)
+Recipe("compostingbin", {Ingredient("boards", 3), Ingredient("spoiled_food", 1), Ingredient("cutgrass", 1)}, RECIPETABS.FARM, TECH.SCIENCE_TWO, "compostingbin_placer")
 Recipe("plantregistryhat", {Ingredient("fertilizer", 1), Ingredient("seeds", 3), Ingredient("transistor", 1)}, RECIPETABS.FARM, TECH.SCIENCE_ONE)
 
 Recipe("mushroom_farm", {Ingredient("spoiled_food", 8),Ingredient("poop", 5),Ingredient("livinglog", 2)}, RECIPETABS.FARM, TECH.SCIENCE_ONE, "mushroom_farm_placer", 2.5)
@@ -335,7 +337,7 @@ Recipe("yellowstaff", {Ingredient("nightmarefuel", 4), Ingredient("livinglog", 2
 Recipe("greenstaff",  {Ingredient("nightmarefuel", 4), Ingredient("livinglog", 2), Ingredient("greengem", 2)},  RECIPETABS.ANCIENT, TECH.ANCIENT_TWO,  nil, nil, true)
 
 Recipe("multitool_axe_pickaxe", {Ingredient("goldenaxe", 1),Ingredient("goldenpickaxe", 1), Ingredient("thulecite", 2)}, RECIPETABS.ANCIENT, TECH.ANCIENT_FOUR, nil, nil, true)
-Recipe("nutrientsgoggleshat", {Ingredient("plantregistryhat", 1), Ingredient("thulecite", 4), Ingredient("purplegem", 1)}, RECIPETABS.ANCIENT, TECH.ANCIENT_TWO, nil, nil, true)
+Recipe("nutrientsgoggleshat", {Ingredient("plantregistryhat", 1), Ingredient("thulecite_pieces", 4), Ingredient("purplegem", 1)}, RECIPETABS.ANCIENT, TECH.ANCIENT_TWO, nil, nil, true)
 
 Recipe("ruinshat", 		 {Ingredient("thulecite", 4), 		  Ingredient("nightmarefuel", 4)}, RECIPETABS.ANCIENT, TECH.ANCIENT_FOUR, nil, nil, true)
 Recipe("armorruins", 	 {Ingredient("thulecite", 6), 		  Ingredient("nightmarefuel", 4)}, RECIPETABS.ANCIENT, TECH.ANCIENT_FOUR, nil, nil, true)
@@ -409,6 +411,7 @@ Recipe("mutator_hider",	  		{ Ingredient("monstermeat", 1), Ingredient("silk", 2
 Recipe("mutator_spitter", 		{ Ingredient("monstermeat", 1), Ingredient("silk", 2), Ingredient("nitre", 4) 	  	   }, CUSTOM_RECIPETABS.SPIDERCRAFT, TECH.SPIDERCRAFT_ONE, nil, nil, nil, nil, "spiderwhisperer")
 Recipe("mutator_moon",	  		{ Ingredient("monstermeat", 2), Ingredient("silk", 3), Ingredient("moonglass", 2) 	   }, CUSTOM_RECIPETABS.SPIDERCRAFT, TECH.SPIDERCRAFT_ONE, nil, nil, nil, nil, "spiderwhisperer")
 Recipe("mutator_healer",  		{ Ingredient("monstermeat", 2), Ingredient("silk", 2), Ingredient("honey", 2) 	  	   }, CUSTOM_RECIPETABS.SPIDERCRAFT, TECH.SPIDERCRAFT_ONE, nil, nil, nil, nil, "spiderwhisperer")
+Recipe("mutator_water",  		{ Ingredient("monstermeat", 2), Ingredient("silk", 2), Ingredient("fig", 2) 	  	   }, CUSTOM_RECIPETABS.SPIDERCRAFT, TECH.SPIDERCRAFT_ONE, nil, nil, nil, nil, "spiderwhisperer")
 
 ----NATURE----
 Recipe("livinglog", 	{Ingredient(CHARACTER_INGREDIENT.HEALTH, 20)}, CUSTOM_RECIPETABS.NATURE, TECH.NONE, nil, nil, nil, nil, "plantkin")
@@ -425,6 +428,20 @@ Recipe("slingshotammo_freeze",	  {Ingredient("moonrocknugget", 1), Ingredient("b
 Recipe("slingshotammo_slow",	  {Ingredient("moonrocknugget", 1), Ingredient("purplegem", 1)},	   CUSTOM_RECIPETABS.SLINGSHOTAMMO, TECH.MAGIC_THREE, {no_deconstruction = true}, nil, nil, 10, "pebblemaker")
 Recipe("slingshotammo_thulecite", {Ingredient("thulecite_pieces", 1), Ingredient("nightmarefuel", 1)}, CUSTOM_RECIPETABS.SLINGSHOTAMMO, TECH.ANCIENT_TWO, {no_deconstruction = true}, nil, true, 10, "pebblemaker")
 
+-- CLOCKMAKER --
+local function pocketwatch_no_deconstruction_fn(inst) return not inst:HasTag("pocketwatch_inactive") end
+
+Recipe("pocketwatch_dismantler",	{Ingredient("goldnugget", 1), Ingredient("flint", 1), Ingredient("twigs", 3)},						CUSTOM_RECIPETABS.CLOCKMAKER, TECH.NONE,		{no_deconstruction = pocketwatch_no_deconstruction_fn}, nil, nil, nil, "clockmaker")
+Recipe("pocketwatch_parts",			{Ingredient("pocketwatch_dismantler", 0), Ingredient("thulecite_pieces", 8), Ingredient("nightmarefuel", 2)},				CUSTOM_RECIPETABS.CLOCKMAKER, TECH.NONE,		nil, nil, nil, nil, "clockmaker")
+Recipe("pocketwatch_heal",			{Ingredient("pocketwatch_parts", 1), Ingredient("marble", 2), Ingredient("redgem", 1)},				CUSTOM_RECIPETABS.CLOCKMAKER, TECH.NONE,		{no_deconstruction = pocketwatch_no_deconstruction_fn}, nil, nil, nil, "clockmaker")
+Recipe("pocketwatch_revive",		{Ingredient("pocketwatch_parts", 1), Ingredient("livinglog", 2), Ingredient("boneshard", 4)},		CUSTOM_RECIPETABS.CLOCKMAKER, TECH.NONE,		{no_deconstruction = pocketwatch_no_deconstruction_fn}, nil, nil, nil, "clockmaker")
+Recipe("pocketwatch_warp",			{Ingredient("pocketwatch_parts", 1), Ingredient("goldnugget", 2)},									CUSTOM_RECIPETABS.CLOCKMAKER, TECH.NONE,		{no_deconstruction = pocketwatch_no_deconstruction_fn}, nil, nil, nil, "clockmaker")
+Recipe("pocketwatch_recall",		{Ingredient("pocketwatch_parts", 2), Ingredient("goldnugget", 2), Ingredient("walrus_tusk", 1)},	CUSTOM_RECIPETABS.CLOCKMAKER, TECH.MAGIC_TWO,	{no_deconstruction = pocketwatch_no_deconstruction_fn}, nil, nil, nil, "clockmaker")
+Recipe("pocketwatch_portal",		{Ingredient("pocketwatch_recall", 1, nil, true), Ingredient("purplegem", 1)},						CUSTOM_RECIPETABS.CLOCKMAKER, TECH.MAGIC_TWO,	{no_deconstruction = pocketwatch_no_deconstruction_fn, actionstr = "SOCKET"}, nil, nil, nil, "clockmaker")
+Recipe("pocketwatch_weapon",		{Ingredient("pocketwatch_parts", 3), Ingredient("marble", 4), Ingredient("nightmarefuel", 8)},		CUSTOM_RECIPETABS.CLOCKMAKER, TECH.MAGIC_THREE, nil, nil, nil, nil, "clockmaker")
+
+
+
 ----CARTOGRAPHY----
 Recipe("mapscroll", {Ingredient("featherpencil", 1), Ingredient("papyrus", 1)}, RECIPETABS.CARTOGRAPHY, TECH.CARTOGRAPHY_TWO, nil, nil, true, nil, nil, nil, function() return TheWorld.worldprefab == "forest" and "mapscroll.tex" or ("mapscroll_"..TheWorld.worldprefab..".tex") end)
 
@@ -439,7 +456,7 @@ Recipe("mast_malbatross_item", {Ingredient("driftwood_log", 3), Ingredient("rope
 Recipe("steeringwheel_item",   {Ingredient("boards", 2), 		Ingredient("rope", 1)}, RECIPETABS.SEAFARING, TECH.SEAFARING_TWO)
 Recipe("fish_box",			   {Ingredient("cutstone", 1), 		Ingredient("rope", 3)}, RECIPETABS.SEAFARING, TECH.SEAFARING_TWO, "fish_box_placer", 1.5, nil, nil, nil, nil, nil,
     function(pt)
-       return TheWorld.Map:GetPlatformAtPoint(pt.x, 0, pt.z, - 0.5) ~= nil
+       return TheWorld.Map:GetPlatformAtPoint(pt.x, 0, pt.z, -0.5) ~= nil
     end)
 Recipe("winch",				   {Ingredient("boards", 2), Ingredient("cutstone", 1), Ingredient("rope", 2)}, RECIPETABS.SEAFARING, TECH.LOST, "winch_placer", 1.5)
 Recipe("mastupgrade_lamp_item", {Ingredient("boards", 1), Ingredient("rope", 2), Ingredient("flint", 4)}, RECIPETABS.SEAFARING, TECH.SEAFARING_TWO)
@@ -450,34 +467,36 @@ Recipe("waterpump",            {Ingredient("boards", 2),Ingredient("oceanfish_sm
 Recipe("chesspiece_anchor_sketch", {Ingredient("papyrus", 1)}, RECIPETABS.SEAFARING, TECH.SEAFARING_TWO)
 
 ----SCULPTING----
-Recipe("chesspiece_hornucopia_builder", {Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.SCULPTING_ONE, nil, nil, true, nil, nil, nil, "chesspiece_hornucopia.tex")
-Recipe("chesspiece_pipe_builder", 		{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.SCULPTING_ONE, nil, nil, true, nil, nil, nil, "chesspiece_pipe.tex")
-Recipe("chesspiece_anchor_builder",     {Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_anchor.tex")
-Recipe("chesspiece_pawn_builder", 		{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_pawn.tex")
-Recipe("chesspiece_rook_builder", 		{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_rook.tex")
-Recipe("chesspiece_knight_builder", 	{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_knight.tex")
-Recipe("chesspiece_bishop_builder", 	{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_bishop.tex")
-Recipe("chesspiece_muse_builder", 		{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_muse.tex")
-Recipe("chesspiece_formal_builder", 	{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_formal.tex")
-Recipe("chesspiece_deerclops_builder",  {Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_deerclops.tex")
-Recipe("chesspiece_bearger_builder", 	{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)},	RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_bearger.tex")
-Recipe("chesspiece_moosegoose_builder", {Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_moosegoose.tex")
-Recipe("chesspiece_dragonfly_builder", 	{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_dragonfly.tex")
-Recipe("chesspiece_minotaur_builder",   {Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_minotaur.tex")
-Recipe("chesspiece_toadstool_builder",	{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_toadstool.tex")
-Recipe("chesspiece_beequeen_builder",	{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_beequeen.tex")
-Recipe("chesspiece_klaus_builder",		{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_klaus.tex")
-Recipe("chesspiece_antlion_builder",	{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_antlion.tex")
-Recipe("chesspiece_stalker_builder",	{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_stalker.tex")
-Recipe("chesspiece_malbatross_builder", {Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_malbatross.tex")
-Recipe("chesspiece_crabking_builder",   {Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_crabking.tex")
-Recipe("chesspiece_butterfly_builder", 	{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_butterfly.tex")
-Recipe("chesspiece_moon_builder", 	    {Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_moon.tex")
-Recipe("chesspiece_clayhound_builder", 	{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_clayhound.tex")
-Recipe("chesspiece_claywarg_builder", 	{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_claywarg.tex")
-Recipe("chesspiece_carrat_builder",     {Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_carrat.tex")
-Recipe("chesspiece_beefalo_builder",    {Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_beefalo.tex")
-Recipe("chesspiece_guardianphase3_builder",    {Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_guardianphase3.tex")
+Recipe("chesspiece_hornucopia_builder",			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.SCULPTING_ONE, nil, nil, true, nil, nil, nil, "chesspiece_hornucopia.tex")
+Recipe("chesspiece_pipe_builder", 				{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.SCULPTING_ONE, nil, nil, true, nil, nil, nil, "chesspiece_pipe.tex")
+Recipe("chesspiece_anchor_builder",				{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_anchor.tex")
+Recipe("chesspiece_pawn_builder", 				{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_pawn.tex")
+Recipe("chesspiece_rook_builder", 				{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_rook.tex")
+Recipe("chesspiece_knight_builder", 			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_knight.tex")
+Recipe("chesspiece_bishop_builder", 			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_bishop.tex")
+Recipe("chesspiece_muse_builder", 				{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_muse.tex")
+Recipe("chesspiece_formal_builder", 			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_formal.tex")
+Recipe("chesspiece_deerclops_builder",			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_deerclops.tex")
+Recipe("chesspiece_bearger_builder", 			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)},	RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_bearger.tex")
+Recipe("chesspiece_moosegoose_builder",			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_moosegoose.tex")
+Recipe("chesspiece_dragonfly_builder", 			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_dragonfly.tex")
+Recipe("chesspiece_minotaur_builder",			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_minotaur.tex")
+Recipe("chesspiece_toadstool_builder",			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_toadstool.tex")
+Recipe("chesspiece_beequeen_builder",			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_beequeen.tex")
+Recipe("chesspiece_klaus_builder",				{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_klaus.tex")
+Recipe("chesspiece_antlion_builder",			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_antlion.tex")
+Recipe("chesspiece_stalker_builder",			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_stalker.tex")
+Recipe("chesspiece_malbatross_builder",			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_malbatross.tex")
+Recipe("chesspiece_crabking_builder",			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_crabking.tex")
+Recipe("chesspiece_butterfly_builder", 			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_butterfly.tex")
+Recipe("chesspiece_moon_builder", 				{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_moon.tex")
+Recipe("chesspiece_clayhound_builder", 			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_clayhound.tex")
+Recipe("chesspiece_claywarg_builder", 			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_claywarg.tex")
+Recipe("chesspiece_carrat_builder",				{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_carrat.tex")
+Recipe("chesspiece_beefalo_builder",			{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_beefalo.tex")
+Recipe("chesspiece_guardianphase3_builder",		{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_guardianphase3.tex")
+Recipe("chesspiece_eyeofterror_builder",		{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_eyeofterror.tex")
+Recipe("chesspiece_twinsofterror_builder",		{Ingredient(TECH_INGREDIENT.SCULPTING, 2), Ingredient("rocks", 2)}, RECIPETABS.SCULPTING, TECH.LOST, nil, nil, true, nil, nil, nil, "chesspiece_twinsofterror.tex")
 
 ----CRITTERS----
 Recipe("critter_kitten_builder", 		{Ingredient("coontail", 1),      Ingredient("fishsticks", 1)}, 	   RECIPETABS.ORPHANAGE, TECH.ORPHANAGE_ONE, nil, nil, true)
@@ -487,6 +506,7 @@ Recipe("critter_perdling_builder", 		{Ingredient("featherhat", 1),    Ingredient
 Recipe("critter_dragonling_builder", 	{Ingredient("lavae_cocoon", 1),  Ingredient("hotchili", 1)}, 	   RECIPETABS.ORPHANAGE, TECH.ORPHANAGE_ONE, nil, nil, true)
 Recipe("critter_glomling_builder",   	{Ingredient("glommerfuel", 1),   Ingredient("taffy", 1)}, 		   RECIPETABS.ORPHANAGE, TECH.ORPHANAGE_ONE, nil, nil, true)
 Recipe("critter_lunarmothling_builder", {Ingredient("moonbutterfly", 1), Ingredient("flowersalad", 1)},    RECIPETABS.ORPHANAGE, TECH.ORPHANAGE_ONE, nil, nil, true)
+Recipe("critter_eyeofterror_builder",   {Ingredient("milkywhites", 1),   Ingredient("baconeggs", 1)},      RECIPETABS.ORPHANAGE, TECH.ORPHANAGE_ONE, nil, nil, true)
 
 ----PERDSHRINE-----
 Recipe("yotb_stage_item",           {Ingredient("boards", 4), Ingredient("beefalowool", 2), Ingredient("goldnugget", 2)},   RECIPETABS.PERDOFFERING, TECH.BEEFOFFERING_THREE, nil, nil, true)
@@ -720,6 +740,14 @@ Recipe("wall_ruins_2_item",             {Ingredient("thulecite", 1)},       nil,
 Recipe("wall_stone_2_item",             {Ingredient("cutstone", 2)},        nil, TECH.LOST, nil, nil, true)
 Recipe("archive_resonator",             {Ingredient("moonrocknugget", 1), Ingredient("thulecite", 1)},      nil, TECH.LOST, nil, nil, true)
 Recipe("alterguardianhat",              {Ingredient("alterguardianhatshard", 5)},                           nil, TECH.LOST, nil, nil, true)
+Recipe("hivehat",						{Ingredient("honeycomb", 4), Ingredient("honey", 3), Ingredient("royal_jelly", 2), Ingredient("bee", 4)}, nil, TECH.LOST, nil, nil, true)
+Recipe("spiderhat",						{Ingredient("silk", 4), Ingredient("spidergland", 2), Ingredient("monstermeat", 1)}, nil, TECH.LOST, nil, nil, true)
+Recipe("armorskeleton",					{Ingredient("boneshard", 10), Ingredient("nightmarefuel", 6)}, nil, TECH.LOST, nil, nil, true)
+Recipe("skeletonhat",					{Ingredient("boneshard", 10), Ingredient("nightmarefuel", 4)}, nil, TECH.LOST, nil, nil, true)
+Recipe("thurible",						{Ingredient("cutstone", 2), Ingredient("nightmarefuel", 6), Ingredient("ash", 1)}, nil, TECH.LOST, nil, nil, true)
+Recipe("terrariumchest",				{Ingredient("boards", 3)}, nil, TECH.LOST, nil, nil, true)
+Recipe("eyemaskhat",                    {Ingredient("milkywhites", 3), Ingredient("monstermeat", 2)}, nil, TECH.LOST, nil, nil, true)
+Recipe("shieldofterror",                {Ingredient("gears", 2), Ingredient("nightmarefuel", 3)}, nil, TECH.LOST, nil, nil, true)
 
 -- old deprecated structures
 Recipe("slow_farmplot",		{Ingredient("cutgrass", 8), Ingredient("poop", 4), Ingredient("log", 4)},	nil, TECH.LOST, nil, nil, true)

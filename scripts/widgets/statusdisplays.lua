@@ -41,12 +41,15 @@ local function OnSetPlayerMode(inst, self)
         local my_platform = self.owner:GetCurrentPlatform()
         if my_platform ~= nil and my_platform.components.healthsyncer ~= nil then
             self.boatmeter:Enable(my_platform)
+        else
+            self.boatmeter:Disable(self.instantboatmeterclose)
         end
+        self.instantboatmeterclose = nil
 
         self.ongotonplatform = function(owner, platform) if platform.components.healthsyncer ~= nil then self.boatmeter:Enable(platform) end end
         self.inst:ListenForEvent("got_on_platform", self.ongotonplatform, self.owner)
 
-        self.ongotoffplatform = function(owner, platform) self.boatmeter:Disable(platform) end
+        self.ongotoffplatform = function(owner, platform) self.boatmeter:Disable() end
         self.inst:ListenForEvent("got_off_platform", self.ongotoffplatform, self.owner)
     end
 
@@ -162,6 +165,7 @@ end
 
 local StatusDisplays = Class(Widget, function(self, owner)
     Widget._ctor(self, "Status")
+    self:UpdateWhilePaused(false)
     self.owner = owner
 
     self.wereness = nil
@@ -170,15 +174,15 @@ local StatusDisplays = Class(Widget, function(self, owner)
 	self.inspirationbadge = nil
 	self.oninspirationdelta = nil
 
-    self.brain = self:AddChild(SanityBadge(owner))
+    self.brain = self:AddChild(owner.CreateSanityBadge ~= nil and owner.CreateSanityBadge(owner) or SanityBadge(owner))
     self.brain:SetPosition(0, -40, 0)
     self.onsanitydelta = nil
 
-    self.stomach = self:AddChild(HungerBadge(owner))
+    self.stomach = self:AddChild(owner.CreateHungerBadge ~= nil and owner.CreateHungerBadge(owner) or HungerBadge(owner))
     self.stomach:SetPosition(-40, 20, 0)
     self.onhungerdelta = nil
 
-    self.heart = self:AddChild(HealthBadge(owner))
+    self.heart = self:AddChild(owner.CreateHealthBadge ~= nil and owner.CreateHealthBadge(owner) or HealthBadge(owner))
     self.heart:SetPosition(40, 20, 0)
     self.heart.effigybreaksound = "dontstarve/creatures/together/lavae/egg_deathcrack"
     self.onhealthdelta = nil
@@ -201,6 +205,7 @@ local StatusDisplays = Class(Widget, function(self, owner)
     self.resurrectbuttonfx:SetScale(.75, .75, .75)
     self.resurrectbuttonfx:GetAnimState():SetBank("effigy_break")
     self.resurrectbuttonfx:GetAnimState():SetBuild("effigy_button")
+    self.resurrectbuttonfx:GetAnimState():AnimateWhilePaused(false)
     self.resurrectbuttonfx:Hide()
     self.resurrectbuttonfx.inst:ListenForEvent("animover", function(inst) inst.widget:Hide() end)
 
@@ -236,6 +241,7 @@ local StatusDisplays = Class(Widget, function(self, owner)
     self.rezbuttontask = nil
     self.modetask = nil
     self.isghostmode = true --force the initial SetGhostMode call to be dirty
+    self.instantboatmeterclose = true
     self:SetGhostMode(false)
 
     if owner:HasTag("wereness") then
@@ -383,7 +389,6 @@ function StatusDisplays:SetGhostMode(ghostmode)
         if self.inspirationbadge ~= nil then
             self.inspirationbadge:Hide()
         end
-
     else
         self.isghostmode = nil
 
@@ -415,7 +420,7 @@ function StatusDisplays:SetGhostMode(ghostmode)
     if self.modetask ~= nil then
         self.modetask:Cancel()
     end
-    self.modetask = self.inst:DoTaskInTime(0, ghostmode and OnSetGhostMode or OnSetPlayerMode, self)
+    self.modetask = self.inst:DoStaticTaskInTime(0, ghostmode and OnSetGhostMode or OnSetPlayerMode, self)
 end
 
 function StatusDisplays:SetHealthPercent(pct)
@@ -423,7 +428,7 @@ function StatusDisplays:SetHealthPercent(pct)
     self.healthpenalty = health:GetPenaltyPercent()
     self.heart:SetPercent(pct, health:Max(), self.healthpenalty)
 
-    if pct <= .33 then
+    if pct <= (self.heart.warning_precent or .33) then
         self.heart:StartWarning()
     else
         self.heart:StopWarning()
@@ -434,21 +439,25 @@ function StatusDisplays:HealthDelta(data)
     local oldpenalty = self.healthpenalty
     self:SetHealthPercent(data.newpercent)
 
-    --health penalty pulse takes priority
-    if oldpenalty > self.healthpenalty then
-        self.heart:PulseGreen()
-        TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/health_up")
-    elseif oldpenalty < self.healthpenalty then
-        self.heart:PulseRed()
-        TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/health_down")
-    elseif data.overtime then
-        --ignore pulse for healthdelta overtime
-    elseif data.newpercent > data.oldpercent then
-        self.heart:PulseGreen()
-        TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/health_up")
-    elseif data.newpercent < data.oldpercent then
-        self.heart:PulseRed()
-        TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/health_down")
+    if self.heart ~= nil and self.heart.HealthDelta ~= nil then
+        self.heart:HealthDelta(data)
+    else
+        --health penalty pulse takes priority
+        if oldpenalty > self.healthpenalty then
+            self.heart:PulseGreen()
+            TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/health_up")
+        elseif oldpenalty < self.healthpenalty then
+            self.heart:PulseRed()
+            TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/health_down")
+        elseif data.overtime then
+            --ignore pulse for healthdelta overtime
+        elseif data.newpercent > data.oldpercent then
+            self.heart:PulseGreen()
+            TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/health_up")
+        elseif data.newpercent < data.oldpercent then
+            self.heart:PulseRed()
+            TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/health_down")
+        end
     end
 end
 
@@ -464,14 +473,17 @@ end
 
 function StatusDisplays:HungerDelta(data)
     self:SetHungerPercent(data.newpercent)
-
-    if not data.overtime then
-        if data.newpercent > data.oldpercent then
-            self.stomach:PulseGreen()
-            TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/hunger_up")
-        elseif data.newpercent < data.oldpercent then
-            TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/hunger_down")
-            self.stomach:PulseRed()
+    if self.stomach ~= nil and self.stomach.HungerDelta then
+        self.stomach:HungerDelta(data)
+    else
+        if not data.overtime then
+            if data.newpercent > data.oldpercent then
+                self.stomach:PulseGreen()
+                TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/hunger_up")
+            elseif data.newpercent < data.oldpercent then
+                TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/hunger_down")
+                self.stomach:PulseRed()
+            end
         end
     end
 end
@@ -489,13 +501,17 @@ end
 function StatusDisplays:SanityDelta(data)
     self:SetSanityPercent(data.newpercent)
 
-    if not data.overtime then
-        if data.newpercent > data.oldpercent then
-            self.brain:PulseGreen()
-            TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/sanity_up")
-        elseif data.newpercent < data.oldpercent then
-            self.brain:PulseRed()
-            TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/sanity_down")
+    if self.brain ~= nil and self.brain.SanityDelta then
+        self.brain:SanityDelta(data)
+    else
+        if not data.overtime then
+            if data.newpercent > data.oldpercent then
+                self.brain:PulseGreen()
+                TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/sanity_up")
+            elseif data.newpercent < data.oldpercent then
+                self.brain:PulseRed()
+                TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/sanity_down")
+            end
         end
     end
 end

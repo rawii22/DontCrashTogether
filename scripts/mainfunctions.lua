@@ -441,6 +441,10 @@ function OnRemoveEntity(entityguid)
             num_updating_ents = num_updating_ents - 1
         end
 
+        if StaticUpdatingEnts[entityguid] then
+            StaticUpdatingEnts[entityguid] = nil
+        end
+
         if WallUpdatingEnts[entityguid] then
             WallUpdatingEnts[entityguid] = nil
         end
@@ -477,8 +481,16 @@ function GetTime()
     return TheSim:GetTick()*ticktime
 end
 
+function GetStaticTime()
+    return TheSim:GetStaticTick()*ticktime
+end
+
 function GetTick()
     return TheSim:GetTick()
+end
+
+function GetStaticTick()
+    return TheSim:GetStaticTick()
 end
 
 function GetTimeReal()
@@ -526,6 +538,10 @@ function GetExtendedDebugString()
     elseif WORLDSTATEDEBUG_ENABLED then
         return TheWorld and TheWorld.components.worldstate and TheWorld.components.worldstate:Dump()
     end
+
+    if TheFrontEnd and TheFrontEnd:GetActiveScreen() then
+        return "Current screen:" .. TheFrontEnd:GetActiveScreen().name
+    end
     return ""
 end
 
@@ -561,6 +577,7 @@ end
 function OnEntitySleep(guid)
     local inst = Ents[guid]
     if inst then
+        inst:PushEvent("entitysleep")
 
         if inst.OnEntitySleep then
             inst:OnEntitySleep()
@@ -589,6 +606,7 @@ end
 function OnEntityWake(guid)
     local inst = Ents[guid]
     if inst then
+        inst:PushEvent("entitywake")
 
         if inst.OnEntityWake then
             inst:OnEntityWake()
@@ -614,6 +632,85 @@ function OnEntityWake(guid)
                 v:OnEntityWake()
             end
         end
+    end
+end
+
+function OnPhysicsWake(guid)
+    local inst = Ents[guid]
+    if inst then
+        if inst.OnPhysicsWake then
+            inst:OnPhysicsWake()
+        end
+
+        for k, v in pairs(inst.components) do
+            if v.OnPhysicsWake then
+                v:OnPhysicsWake()
+            end
+        end
+    end
+end
+
+function OnPhysicsSleep(guid)
+    local inst = Ents[guid]
+    if inst then
+        if inst.OnPhysicsSleep then
+            inst:OnPhysicsSleep()
+        end
+
+        for k,v in pairs(inst.components) do
+            if v.OnPhysicsSleep then
+                v:OnPhysicsSleep()
+            end
+        end
+    end
+end
+
+local Paused = false
+local Autopaused = false
+local GameAutopaused = false
+
+function OnServerPauseDirty(pause, autopause, gameautopause, source)
+    --autopause means we are paused but we don't act like it,
+    --this would be for stuff like autpausing from the map being open.
+
+    --gameautopause means we are paused, but we really don't act like it, like not even acknowledge it at all.
+    --this only occurs when a non dedicated server has all players in the lobby.
+    --gameautopause has no information text, at the top of the screen, and doesn't push the sound mix that deafens the game.
+
+    local WasPaused = Paused or Autopaused or GameAutopaused
+    local IsPaused = pause or autopause or gameautopause
+
+    local WasNormalPaused = (Paused or Autopaused) and not GameAutopaused
+    local IsNormalPaused = (pause or autopause) and not gameautopause
+
+    if WasPaused and not IsPaused then
+        print("Server Unpaused")
+    elseif not Paused and pause then
+        print("Server Paused")
+    elseif (autopause or gameautopause) and not pause then
+        print("Server Autopaused")
+    end
+
+    Paused = pause
+    Autopaused = autopause
+    GameAutopaused = gameautopause
+
+    if not WasNormalPaused and IsNormalPaused then
+        TheMixer:PushMix("serverpause")
+    elseif not IsNormalPaused then
+        TheMixer:DeleteMix("serverpause")
+    end
+
+    if ThePlayer and ThePlayer.HUD then
+        ThePlayer.HUD:SetServerPaused(pause)
+    end
+
+    if TheFrontEnd then
+        TheFrontEnd:SetServerPauseText(pause and source or autopause and "autopause" or nil)
+    end
+
+    if TheWorld then
+        TheWorld:PushEvent("serverpauseddirty", {pause = pause, autopause = autopause, gameautopause = gameautopause, source = source})
     end
 end
 
@@ -662,6 +759,35 @@ end
 --V2C: We don't use this in DST
 function SetSimPause(val)
     simpaused = val
+end
+
+function SetServerPaused(pause)
+    if pause == nil then pause = not TheNet:IsServerPaused(true) end
+    TheNet:SetServerPaused(pause)
+end
+
+local autopausecount = 0
+function SetAutopaused(autopause)
+    autopausecount = autopausecount + (autopause and 1 or -1)
+	if DEBUG_MODE and autopausecount < 0 or autopausecount > 5 then
+		print("ERROR: autopausecount is invalid:", autopausecount)
+		assert(false)
+	end
+    DoAutopause()
+end
+
+local consoleautopausecount = 0
+function SetConsoleAutopaused(autopause)
+    consoleautopausecount = consoleautopausecount + (autopause and 1 or -1)
+    DoAutopause()
+end
+
+function DoAutopause()
+    TheNet:SetAutopaused(
+        ((autopausecount > 0 and Profile:GetAutopauseEnabled()) or
+        (consoleautopausecount > 0 and Profile:GetConsoleAutopauseEnabled()))
+        and not TheFrontEnd:IsControlsDisabled()
+    )
 end
 
 ---------------------------------------------------------------------
@@ -819,7 +945,7 @@ function SaveGame(isshutdown, cb)
     end
 
     local save = {}
-    save.ents = {}
+	local savedata_entities = {}
 
     --print("Saving...")
     --save the entities
@@ -828,7 +954,6 @@ function SaveGame(isshutdown, cb)
     local references = {}
     for k, v in pairs(Ents) do
         if v.persists and v.prefab ~= nil and v.Transform ~= nil and v.entity:GetParent() == nil and v:IsValid() then
-            local x, y, z = v.Transform:GetWorldPosition()
             local record, new_references = v:GetSaveRecord()
             record.prefab = nil
 
@@ -841,11 +966,10 @@ function SaveGame(isshutdown, cb)
 
             saved_ents[v.GUID] = record
 
-            if save.ents[v.prefab] == nil then
-                save.ents[v.prefab] = {}
+            if savedata_entities[v.prefab] == nil then
+                savedata_entities[v.prefab] = {}
             end
-            table.insert(save.ents[v.prefab], record)
-            record.prefab = nil
+            table.insert(savedata_entities[v.prefab], record)
             nument = nument + 1
         end
     end
@@ -924,11 +1048,10 @@ function SaveGame(isshutdown, cb)
     assert(save.map.width, "Map width missing from savedata on save")
     assert(save.map.height, "Map height missing from savedata on save")
     --assert(save.map.topology, "Map topology missing from savedata on save")
-    assert(save.ents, "Entities missing from savedata on save")
+    --assert(save.ents, "Entities missing from savedata on save")
     assert(save.mods, "Mod records missing from savedata on save")
 
     local PRETTY_PRINT = BRANCH == "dev"
-    local data = DataDumper(save, nil, not PRETTY_PRINT)
 
     local patterns
     if BRANCH == "dev" then
@@ -936,13 +1059,36 @@ function SaveGame(isshutdown, cb)
     else
         patterns = {"=-1#.IND", "=1.#QNAN", "=1.#INF", "=-1.#INF"}
     end
-    for i, corrupt_pattern in ipairs(patterns) do
-        local found = string.find(data, corrupt_pattern, 1, true)
-        if found ~= nil then
-            print(string.sub(data, found - 100, found + 50))
-            error("Error saving game, corruption detected.")
-        end
+
+    local data = {}
+    for key,value in pairs(save) do
+        data[key] = DataDumper(value, nil, not PRETTY_PRINT)
+		
+		for i, corrupt_pattern in ipairs(patterns) do
+			local found = string.find(data[key], corrupt_pattern, 1, true)
+			if found ~= nil then
+				local bad_data = string.sub(data[key], found - 100, found + 50)
+				print(bad_data)
+				error("Error saving game, corruption detected.")
+			end
+		end
     end
+
+	-- special handling for the entities table; contents are dumped per entity rather than 
+	-- dumping the whole entities table at once as is done for the other parts of the save data
+	data.ents = {}
+	for key, value in pairs(savedata_entities) do
+		data.ents[key] = DataDumper(value, nil, not PRETTY_PRINT)
+
+		for i, corrupt_pattern in ipairs(patterns) do
+			local found = string.find(data.ents[key], corrupt_pattern, 1, true)
+			if found ~= nil then
+				local bad_data = string.sub(data.ents[key], found - 100, found + 50)
+				print(bad_data)
+				error("Error saving game, entity table corruption detected.")
+			end
+		end
+	end
 
 
     local function callback()
@@ -1228,6 +1374,7 @@ function SimReset(instanceparameters)
     instanceparameters.loaded_mods = ModManager:GetUnloadPrefabsData()
     if Settings.current_asset_set == "BACKEND" then
         instanceparameters.memoizedFilePaths = GetMemoizedFilePaths()
+        instanceparameters.chatHistory = ChatHistory:GetChatHistory()
     end
 
     local params = json.encode(instanceparameters)
@@ -1614,7 +1761,26 @@ end
 local function OnUserPickedCharacter(char, skin_base, clothing_body, clothing_hand, clothing_legs, clothing_feet)
     local function doSpawn()
         TheFrontEnd:PopScreen()
-        TheNet:SendSpawnRequestToServer(char, skin_base, clothing_body, clothing_hand, clothing_legs, clothing_feet)
+
+        local starting_skins = {}
+        --get the starting inventory skins and send those along to the spawn request
+        local inv_item_list = (TUNING.GAMEMODE_STARTING_ITEMS[TheNet:GetServerGameMode()] or TUNING.GAMEMODE_STARTING_ITEMS.DEFAULT)[string.upper(char)] or {}
+        
+        local inv_items, item_count = {}, {}
+        for _, v in ipairs(inv_item_list) do
+            if item_count[v] == nil then
+                item_count[v] = 1
+                table.insert(inv_items, v)
+            end
+        end
+        for _, item in ipairs(inv_items) do
+            if PREFAB_SKINS[item] then
+                local skin_name = Profile:GetLastUsedSkinForItem(item)
+                starting_skins[item] = skin_name
+            end
+        end
+
+        TheNet:SendSpawnRequestToServer(char, skin_base, clothing_body, clothing_hand, clothing_legs, clothing_feet, starting_skins)
     end
 
     TheFrontEnd:Fade(FADE_OUT, 1, doSpawn, nil, nil, "white")
@@ -1651,7 +1817,7 @@ function ResumeExistingUserSession(data, guid)
             player:SetPersistData( data.data or {} )
 
             -- Spawn the player to last known location
-            TheWorld.components.playerspawner:SpawnAtLocation(TheWorld, player, data.x or 0, data.y or 0, data.z or 0, true)
+            TheWorld.components.playerspawner:SpawnAtLocation(TheWorld, player, data.x or 0, data.y or 0, data.z or 0, true, data.puid, data.rx or 0, data.ry or 0, data.rz or 0)
 
             return player.player_classified ~= nil and player.player_classified.entity or nil
         end
@@ -1671,6 +1837,18 @@ function RestoreSnapshotUserSession(sessionid, userid)
                         player.userid = userid
                         player:SetPersistData(playerdata.data or {})
                         player.Physics:Teleport(playerdata.x or 0, playerdata.y or 0, playerdata.z or 0)
+                        if playerdata.puid then
+                            local walkableplatformmanager = TheWorld.components.walkableplatformmanager
+                            if walkableplatformmanager then
+                                local platform = walkableplatformmanager:GetPlatformWithUID(playerdata.puid)
+                                if platform then
+                                    local px, py, pz = platform.Transform:GetWorldPosition()
+                                    local x, y, z = px + (playerdata.rx or 0), py + (playerdata.ry or 0), pz + (playerdata.rz or 0)
+                                    player.Physics:Teleport(x, y, z)
+                                    player.components.walkableplatformplayer:TestForPlatform()
+                                end
+                            end
+                        end
                         return player.player_classified ~= nil and player.player_classified.entity or nil
                     end
                 end

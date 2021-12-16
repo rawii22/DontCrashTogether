@@ -10,6 +10,11 @@ local function FinalOffset3(inst)
     inst.AnimState:SetFinalOffset(3)
 end
 
+local function FinalOffsetNegative1(inst)
+    inst.AnimState:SetFinalOffset(-1)
+end
+
+
 local function GroundOrientation(inst)
     inst.AnimState:SetOrientation(ANIM_ORIENTATION.OnGround)
     inst.AnimState:SetLayer(LAYER_BACKGROUND)
@@ -25,6 +30,11 @@ local function BloomOrange(inst)
 --    inst.AnimState:SetMultColour(204/255,131/255,57/255,1)
     inst.AnimState:SetMultColour(219/255,168/255,117/255,1)
     inst.AnimState:SetFinalOffset(1)
+end
+
+local function OceanTreeLeafFxFallUpdate(inst)
+    local x, y, z = inst.Transform:GetWorldPosition()
+    inst.Transform:SetPosition(x, y - inst.fall_speed * FRAMES, z)
 end
 
 
@@ -216,6 +226,17 @@ local fx =
         sound = "dontstarve/common/deathpoof",
         tint = Vector3(0, 0, 0),
         tintalpha = .5,
+        fn = function(inst)
+            inst.AnimState:SetFinalOffset(2)
+        end,
+    },
+    {
+        name = "shadow_puff_solid",
+        bank = "sand_puff",
+        build = "sand_puff",
+        anim = "forage_out",
+        sound = "dontstarve/common/deathpoof",
+        tint = Vector3(0, 0, 0),
         fn = function(inst)
             inst.AnimState:SetFinalOffset(2)
         end,
@@ -533,6 +554,15 @@ local fx =
         anim = "medium",
         sound = "dontstarve/common/spawn/spawnportal_spawnplayer",
         fn = FinalOffset1,
+    },
+    {
+        name = "spawn_fx_medium_static",
+        bank = "spawn_fx",
+        build = "puff_spawning",
+        anim = "medium",
+        sound = "dontstarve/common/spawn/spawnportal_spawnplayer",
+        fn = FinalOffset1,
+        update_while_paused = true
     },
     --[[{
         name = "spawn_fx_large",
@@ -2056,11 +2086,128 @@ local fx =
         anim = "meteor_pst",
         sound = "turnoftides/common/together/moon_glass/mine",
     },
+
+    {
+        name = "oldager_become_younger_front_fx",
+        bank = "wanda_time_fx",
+        build = "wanda_time_fx",
+        anim = "younger_top",
+        nofaced = true,
+        fn = FinalOffset1,
+    },
+    {
+        name = "oldager_become_younger_back_fx",
+        bank = "wanda_time_fx",
+        build = "wanda_time_fx",
+        anim = "younger_bottom",
+        nofaced = true,
+        fn = FinalOffsetNegative1,
+    },
+    {
+        name = "oldager_become_older_fx",
+        bank = "wanda_time_fx",
+        build = "wanda_time_fx",
+        anim = "older",
+        nofaced = true,
+        fn = FinalOffset1,
+    },
+
+    {
+        name = "oldager_become_younger_front_fx_mount",
+        bank = "wanda_time_fx_mount",
+        build = "wanda_time_fx_mount",
+        anim = "younger_top",
+        nofaced = true,
+        fn = FinalOffset1,
+    },
+    {
+        name = "oldager_become_younger_back_fx_mount",
+        bank = "wanda_time_fx_mount",
+        build = "wanda_time_fx_mount",
+        anim = "younger_bottom",
+        nofaced = true,
+        fn = FinalOffsetNegative1,
+    },
+    {
+        name = "oldager_become_older_fx_mount",
+        bank = "wanda_time_fx_mount",
+        build = "wanda_time_fx_mount",
+        anim = "older",
+        nofaced = true,
+        fn = FinalOffset1,
+    },
+
+    {
+        name = "wanda_attack_pocketwatch_old_fx",
+        bank = "pocketwatch_weapon_fx",
+        build = "pocketwatch_weapon_fx",
+        anim = function() return "idle_big_"..math.random(3) end,
+        sound = "wanda2/characters/wanda/watch/weapon/shadow_hit_old",
+        fn = FinalOffset1,
+    },
+    {
+        name = "wanda_attack_pocketwatch_normal_fx",
+        bank = "pocketwatch_weapon_fx",
+        build = "pocketwatch_weapon_fx",
+        anim = function() return "idle_med_"..math.random(3) end,
+        sound = "wanda2/characters/wanda/watch/weapon/nightmare_FX",
+        fn = FinalOffset1,
+    },
+    {
+        name = "wanda_attack_shadowweapon_old_fx",
+        bank = "pocketwatch_weapon_fx",
+        build = "pocketwatch_weapon_fx",
+        anim = function() return "idle_big_"..math.random(3) end,
+        sound = "wanda2/characters/wanda/watch/weapon/shadow_hit",
+        fn = function(inst)
+			inst.AnimState:Hide("white")
+			inst.AnimState:SetFinalOffset(1)
+		end,
+    },
+    {
+        name = "wanda_attack_shadowweapon_normal_fx",
+        bank = "pocketwatch_weapon_fx",
+        build = "pocketwatch_weapon_fx",
+        anim = function() return "idle_med_"..math.random(3) end,
+        sound = "wanda2/characters/wanda/watch/weapon/nightmare_FX",
+        fn = FinalOffset1,
+    },
+
+	{
+        name = "pocketwatch_heal_fx",
+        bank = "pocketwatch_cast_fx",
+        build = "pocketwatch_casting_fx",
+        anim = "pocketwatch_heal_fx", --NOTE: 16 blank frames at the start for audio syncing
+        --sound = "dontstarve/common/lava_arena/portal_player",
+        fn = FinalOffset1,
+        bloom = true,
+    },
+	{
+        name = "pocketwatch_heal_fx_mount",
+        bank = "pocketwatch_casting_fx_mount",
+        build = "pocketwatch_casting_fx_mount",
+        anim = "pocketwatch_heal_fx", --NOTE: 16 blank frames at the start for audio syncing
+        --sound = "dontstarve/common/lava_arena/portal_player",
+        fn = FinalOffset1,
+        bloom = true,
+    },
+
+	{
+        name = "pocketwatch_ground_fx",
+        bank = "pocketwatch_cast_fx",
+        build = "pocketwatch_casting_fx",
+        anim = "pocketwatch_ground", --NOTE: 16 blank frames at the start for audio syncing
+        --sound = "dontstarve/common/lava_arena/portal_player",
+        fn = GroundOrientation,
+        bloom = true,
+    },
+
     {
         name = "spider_mutate_fx",
         bank = "mutate_fx",
         build = "mutate_fx",
         anim = "mutate",
+        nofaced = true,
     },
 
     {
@@ -2083,6 +2230,43 @@ local fx =
         build = "spider_heal_fx",
         anim = "heal_aoe",
         fn = GroundOrientation,
+    },
+
+    {
+        name = "treegrowthsolution_use_fx",
+        bank = "treegrowthsolution",
+        build = "treegrowthsolution",
+        anim = "use",
+        sound = "waterlogged1/common/use_figjam",
+    },
+    {
+        name = "oceantree_leaf_fx_fall",
+        bank = "oceantree_leaf_fx",
+        build = "oceantree_leaf_fx",
+        anim = "fall",
+        fn = function(inst)
+            local scale = 1 + 0.3 * math.random()
+            inst.Transform:SetScale(scale, scale, scale)
+            inst.fall_speed = 2.75 + 3.5 * math.random()
+            inst:DoPeriodicTask(FRAMES, OceanTreeLeafFxFallUpdate)
+        end,
+    },
+    {
+        name = "oceantree_leaf_fx_chop",
+        bank = "oceantree_leaf_fx",
+        build = "oceantree_leaf_fx",
+        anim = "chop",
+    },
+    {
+        name = "boss_ripple_fx",
+        bank = "malbatross_ripple",
+        build = "malbatross_ripple",
+        anim = "idle",
+        fn = function(inst)
+            inst.AnimState:SetLayer(LAYER_BELOW_GROUND)
+            inst.AnimState:SetSortOrder(ANIM_SORT_ORDER_BELOW_GROUND.BOAT_TRAIL)
+            inst.AnimState:SetOceanBlendParams(TUNING.OCEAN_SHADER.EFFECT_TINT_AMOUNT)
+        end,
     },
 }
 

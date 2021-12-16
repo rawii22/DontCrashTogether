@@ -404,6 +404,19 @@ local prefabs =
     "moonstorm_spark",
     "bird_mutant",
     "bird_mutant_spitter",
+
+    "oceantree",
+    "oceanvine",
+    "oceanvine_deco",
+    "oceanvine_cocoon",
+    "watertree_pillar",
+    "watertree_root",
+    "lightrays_canopy",
+    "grassgator",
+
+    -- Terraria
+    "eyeofterror",
+    "terrarium",
 }
 
 local FISH_DATA = require("prefabs/oceanfishdef")

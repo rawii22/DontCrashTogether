@@ -170,6 +170,7 @@ end
 local function OnDespawn(inst)
     if inst.woby ~= nil then
 		inst.woby:OnPlayerLinkDespawn()
+        inst.woby:PushEvent("player_despawn")
     end
 end
 
@@ -198,6 +199,14 @@ local function OnLoad(inst, data)
 			inst:ListenForEvent("onremove", inst._woby_onremove, woby)
 		end
 	end
+end
+
+local function GetEquippableDapperness(owner, equippable)
+	if equippable.is_magic_dapperness then
+		return equippable:GetDapperness(owner, owner.components.sanity.no_moisture_penalty)
+	end
+
+	return 0
 end
 
 local function common_postinit(inst)
@@ -231,6 +240,7 @@ local function master_postinit(inst)
     inst.components.sanity:SetNegativeAuraImmunity(true)
     inst.components.sanity:SetPlayerGhostImmunity(true)
     inst.components.sanity:SetLightDrainImmune(true)
+	inst.components.sanity.get_equippable_dappernessfn = GetEquippableDapperness
 	inst.components.sanity.only_magic_dapperness = true
 
     inst.components.foodaffinity:AddPrefabAffinity("trailmix", TUNING.AFFINITY_15_CALORIES_SMALL)

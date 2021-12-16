@@ -113,6 +113,11 @@ local TRIGGERED_DANGER_MUSIC =
         "moonstorm/creatures/boss/alterguardian3/music_epicfight",
     },
 
+    eyeofterror =
+    {
+        "terraria1/common/music_epicfight_eot",
+    },
+
     default =
     {
         "dontstarve/music/music_epicfight_ruins",
@@ -523,7 +528,7 @@ local function StartPlayerListeners(player)
     inst:ListenForEvent("goinsane", OnInsane, player)
     inst:ListenForEvent("goenlightened", OnEnlightened, player)
     inst:ListenForEvent("triggeredevent", StartTriggeredDanger, player)
-    inst:ListenForEvent("boatspedup", StartTriggeredWater, player)
+    inst:ListenForEvent("playboatmusic", StartTriggeredWater, player)
     inst:ListenForEvent("isfeasting", StartTriggeredFeasting, player)
     inst:ListenForEvent("playracemusic", StartRacing, player)
     inst:ListenForEvent("playhermitmusic", StartHermit, player)
@@ -541,7 +546,7 @@ local function StopPlayerListeners(player)
     inst:RemoveEventCallback("goinsane", OnInsane, player)
     inst:RemoveEventCallback("goenlightened", OnEnlightened, player)
     inst:RemoveEventCallback("triggeredevent", StartTriggeredDanger, player)
-    inst:RemoveEventCallback("boatspedup", StartTriggeredWater, player)
+    inst:RemoveEventCallback("playboatmusic", StartTriggeredWater, player)
     inst:RemoveEventCallback("isfeasting", StartTriggeredFeasting, player)
     inst:RemoveEventCallback("playracemusic", StartRacing, player)
     inst:RemoveEventCallback("playhermitmusic", StartHermit, player)

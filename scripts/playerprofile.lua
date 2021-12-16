@@ -44,6 +44,11 @@ local PlayerProfile = Class(function(self)
 		self.persistdata.threaded_renderer = true
 		self.persistdata.bloom = true
 		self.persistdata.distortion = true
+		self.persistdata.dynamic_tree_shadows = true
+		self.persistdata.autopause = true
+		self.persistdata.consoleautopause = true
+		self.persistdata.hide_pause_underlay = false
+        self.persistdata.profanityfilter_chat = true
     end
 
     self.dirty = true
@@ -79,6 +84,10 @@ function PlayerProfile:Reset()
 		self.persistdata.threaded_renderer = true
 		self.persistdata.bloom = true
 		self.persistdata.distortion = true
+		self.persistdata.dynamic_tree_shadows = true
+		self.persistdata.autopause = true
+		self.persistdata.consoleautopause = true
+		self.persistdata.hide_pause_underlay = false
     end
 
     --self.persistdata.starts = 0 -- save starts?
@@ -704,6 +713,42 @@ function PlayerProfile:SetThreadedRenderEnabled(enabled)
     end
 end
 
+function PlayerProfile:SetDynamicTreeShadowsEnabled(enabled)
+    if USE_SETTINGS_FILE then
+        TheSim:SetSetting("misc", "dynamic_tree_shadows", tostring(enabled))
+    else
+        self:SetValue("dynamic_tree_shadows", enabled)
+        self.dirty = true
+    end
+end
+
+function PlayerProfile:SetAutopauseEnabled(enabled)
+    if USE_SETTINGS_FILE then
+        TheSim:SetSetting("misc", "autopause", tostring(enabled))
+    else
+        self:SetValue("autopause", enabled)
+        self.dirty = true
+    end
+end
+
+function PlayerProfile:SetConsoleAutopauseEnabled(enabled)
+    if USE_SETTINGS_FILE then
+        TheSim:SetSetting("misc", "consoleautopause", tostring(enabled))
+    else
+        self:SetValue("consoleautopause", enabled)
+        self.dirty = true
+    end
+end
+
+function PlayerProfile:SetHidePauseUnderlay(hide)
+    if USE_SETTINGS_FILE then
+        TheSim:SetSetting("misc", "hide_pause_underlay", tostring(hide))
+    else
+        self:SetValue("hide_pause_underlay", hide)
+        self.dirty = true
+    end
+end
+
 function PlayerProfile:GetMovementPredictionEnabled()
     -- an undefined movementprediction is considered to be enabled
     if USE_SETTINGS_FILE then
@@ -728,6 +773,24 @@ function PlayerProfile:GetProfanityFilterServerNamesEnabled()
         return TheSim:GetSetting("misc", "profanityfilterservernames") ~= "false"
     else
         return self:GetValue("profanityfilterservernames") ~= false
+    end
+end
+
+function PlayerProfile:SetProfanityFilterChatEanbled(enabled)
+    if USE_SETTINGS_FILE then
+        TheSim:SetSetting("misc", "profanityfilter_chat", tostring(enabled))
+    else
+        self:SetValue("profanityfilter_chat", enabled)
+        self.dirty = true
+    end
+end
+
+function PlayerProfile:GetProfanityFilterChatEnabled()
+    -- an undefined setting is considered to be enabled
+    if USE_SETTINGS_FILE then
+        return TheSim:GetSetting("misc", "profanityfilter_chat") ~= "false"
+    else
+        return self:GetValue("profanityfilter_chat") ~= false
     end
 end
 
@@ -872,6 +935,38 @@ function PlayerProfile:GetThreadedRenderEnabled()
 		return TheSim:GetSetting("misc", "use_threaded_renderer") == "true"
     else
 		return self:GetValue("threaded_renderer")
+    end
+end
+
+function PlayerProfile:GetDynamicTreeShadowsEnabled()
+    if USE_SETTINGS_FILE then
+		return TheSim:GetSetting("misc", "dynamic_tree_shadows") ~= "false"
+    else
+		return self:GetValue("dynamic_tree_shadows") ~= false
+    end
+end
+
+function PlayerProfile:GetAutopauseEnabled()
+    if USE_SETTINGS_FILE then
+		return TheSim:GetSetting("misc", "autopause") ~= "false"
+    else
+		return self:GetValue("autopause") ~= false
+    end
+end
+
+function PlayerProfile:GetConsoleAutopauseEnabled()
+    if USE_SETTINGS_FILE then
+		return TheSim:GetSetting("misc", "consoleautopause") ~= "false"
+    else
+		return self:GetValue("consoleautopause") ~= false
+    end
+end
+
+function PlayerProfile:GetHidePauseUnderlay()
+    if USE_SETTINGS_FILE then
+		return TheSim:GetSetting("misc", "hide_pause_underlay") == "true"
+    else
+		return self:GetValue("hide_pause_underlay") == true
     end
 end
 
@@ -1191,6 +1286,8 @@ function PlayerProfile:Set(str, callback, minimal_load)
 			print("bloom_enabled",bloom_enabled)
 			PostProcessor:SetBloomEnabled( bloom_enabled )
 			PostProcessor:SetDistortionEnabled( distortion_enabled )
+
+			EnableShadeRenderer( self:GetDynamicTreeShadowsEnabled() )
 		end
 
 		-- old save data will not have the controls section so create it

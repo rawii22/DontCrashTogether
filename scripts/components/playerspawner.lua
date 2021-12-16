@@ -88,6 +88,9 @@ local function PlayerRemove(player, deletesession, migrationdata, readytoremove)
                 worldid = TheShard:GetShardId(),
                 portalid = migrationdata.portalid,
                 sessionid = TheWorld.meta.session_identifier,
+				dest_x = migrationdata.x,
+				dest_y = migrationdata.y,
+				dest_z = migrationdata.z,
             } or nil
             SerializeUserSession(player)
         end
@@ -96,7 +99,7 @@ local function PlayerRemove(player, deletesession, migrationdata, readytoremove)
             TheShard:StartMigration(migrationdata.player.userid, migrationdata.worldid)
         end
     else
-        player:DoTaskInTime(0, PlayerRemove, deletesession, migrationdata, true)
+        player:DoStaticTaskInTime(0, PlayerRemove, deletesession, migrationdata, true)
     end
 end
 
@@ -131,14 +134,14 @@ local function OnPlayerDespawn(inst, player, cb)
     player.components.locomotor:Clear()
 
     --Portal FX
-    local fx = SpawnPrefab("spawn_fx_medium")
+    local fx = SpawnPrefab("spawn_fx_medium_static")
     if fx ~= nil then
         fx.Transform:SetPosition(player.Transform:GetWorldPosition())
     end
 
     --After colour tween, remove player via task, because
     --we don't want to remove during component update loop
-    player.components.colourtweener:StartTween({ 0, 0, 0, 1 }, 13 * FRAMES, cb or PlayerRemove)
+    player.components.colourtweener:StartTween({ 0, 0, 0, 1 }, 13 * FRAMES, cb or PlayerRemove, true)
 end
 
 local function OnPlayerDespawnAndDelete(inst, player)
@@ -226,7 +229,12 @@ local function GetDestinationPortalLocation(player)
             return x + offset.x, 0, z + offset.z
         end
         return x, 0, z
-    else
+    elseif player.migration.dest_x ~= nil and player.migration.dest_y ~= nil and player.migration.dest_z ~= nil then
+		local pt = Vector3(player.migration.dest_x, player.migration.dest_y, player.migration.dest_z)
+        print("Player will spawn near ".. tostring(pt))
+        pt = pt + (FindWalkableOffset(pt, math.random() * PI * 2, 2, 8, false, true, NoHoles) or Vector3(0,0,0))
+        return pt:Get()
+	else
         print("Player will spawn at default location")
         return GetNextSpawnPosition()
     end
@@ -263,7 +271,7 @@ function self:SpawnAtNextLocation(inst, player)
 end
 
 local SPAWNLIGHT_TAGS = { "spawnlight" }
-function self:SpawnAtLocation(inst, player, x, y, z, isloading)
+function self:SpawnAtLocation(inst, player, x, y, z, isloading, platform_uid, rx, ry, rz)
     -- if migrating, resolve map location
     if player.migration ~= nil then
         -- make sure we're not just back in our
@@ -286,6 +294,18 @@ function self:SpawnAtLocation(inst, player, x, y, z, isloading)
 
 	_players_spawned[player.userid] = true
 
+    if platform_uid then
+        local walkableplatformmanager = TheWorld.components.walkableplatformmanager
+        if walkableplatformmanager then
+            local platform = walkableplatformmanager:GetPlatformWithUID(platform_uid)
+            if platform then
+                local px, py, pz = platform.Transform:GetWorldPosition()
+                x, y, z = px + rx, py + ry, pz + rz
+                player.components.walkableplatformplayer:TestForPlatform()
+            end
+        end
+    end
+
     print(string.format("Spawning player at: [%s] (%2.2f, %2.2f, %2.2f)", isloading and "Load" or MODES[_mode], x, y, z))
     player.Physics:Teleport(x, y, z)
     if player.components.areaaware ~= nil then
@@ -299,9 +319,7 @@ function self:SpawnAtLocation(inst, player, x, y, z, isloading)
 
 	if self:_ShouldEnableSpawnProtection(inst, player, x, y, z, isloading) then
 		print("Enabling Spawn Protection for ", self.inst)
-		if player.components.debuffable ~= nil then
-			player.components.debuffable:AddDebuff("spawnprotectionbuff", "spawnprotectionbuff")
-		end
+        player:AddDebuff("spawnprotectionbuff", "spawnprotectionbuff")
 	end
 
     -- Portal FX, disable/give control to player if they're loading in
@@ -309,15 +327,15 @@ function self:SpawnAtLocation(inst, player, x, y, z, isloading)
         player.AnimState:SetMultColour(0,0,0,1)
         player:Hide()
         player.components.playercontroller:Enable(false)
-        local fx = SpawnPrefab("spawn_fx_medium")
+        local fx = SpawnPrefab("spawn_fx_medium_static")
         if fx ~= nil then
             fx.entity:SetParent(player.entity)
         end
-        player:DoTaskInTime(6*FRAMES, function(inst)
+        player:DoStaticTaskInTime(6*FRAMES, function(inst)
             player:Show()
             player.components.colourtweener:StartTween({1,1,1,1}, 19*FRAMES, function(player)
                 player.components.playercontroller:Enable(true)
-            end)
+            end, true)
         end)
     else
         TheWorld:PushEvent("ms_newplayercharacterspawned", { player = player, mode = isloading and "Load" or MODES[_mode] })

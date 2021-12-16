@@ -2,7 +2,6 @@ local assets =
 {
     Asset("ANIM", "anim/reskin_tool.zip"),
     Asset("ANIM", "anim/swap_reskin_tool.zip"),
-    Asset("ANIM", "anim/floating_items.zip"),
     Asset("ANIM", "anim/reskin_tool_fx.zip"),
 }
 
@@ -78,8 +77,14 @@ local reskin_fx_info =
 }
 
 local function spellCB(tool, target, pos)
+    
+    local fx_prefab = "explode_reskin"
+    local skin_fx = SKIN_FX_PREFAB[tool:GetSkinName()]
+    if skin_fx ~= nil and skin_fx[1] ~= nil then
+        fx_prefab = skin_fx[1]
+    end
 
-    local fx = SpawnPrefab("explode_reskin")
+    local fx = SpawnPrefab(fx_prefab)
 
     target = target or tool.components.inventoryitem.owner --if no target, then get the owner of the tool. Self target for beards
 
@@ -175,7 +180,13 @@ end
 
 
 local function onequip(inst, owner)
-    owner.AnimState:OverrideSymbol("swap_object", "swap_reskin_tool", "swap_reskin_tool")
+    local skin_build = inst:GetSkinBuild()
+    if skin_build ~= nil then
+        owner:PushEvent("equipskinneditem", inst:GetSkinName())
+        owner.AnimState:OverrideItemSkinSymbol("swap_object", skin_build, "swap_reskin_tool", inst.GUID, "swap_reskin_tool")
+    else
+        owner.AnimState:OverrideSymbol("swap_object", "swap_reskin_tool", "swap_reskin_tool")
+    end
     owner.AnimState:Show("ARM_carry")
     owner.AnimState:Hide("ARM_normal")
 end
@@ -183,6 +194,10 @@ end
 local function onunequip(inst, owner)
     owner.AnimState:Hide("ARM_carry")
     owner.AnimState:Show("ARM_normal")
+    local skin_build = inst:GetSkinBuild()
+    if skin_build ~= nil then
+        owner:PushEvent("unequipskinneditem", inst:GetSkinName())
+    end
 end
 
 local function tool_fn()

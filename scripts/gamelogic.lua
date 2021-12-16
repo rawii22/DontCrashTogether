@@ -466,6 +466,12 @@ local function PopulateWorld(savedata, profile)
 
         --this was spawned by the level file. kinda lame - we should just do everything from in here.
         map:SetSize(savedata.map.width, savedata.map.height)
+		if savedata.map.width > 1024 and savedata.map.height > 1024 then
+			--increase this by as little as possible!
+			--this number creates a series of small regions that is used to help cull out objects that aren't on screen.
+			--the larger this number is, the larger those regions, and the more wasted time rendering objects that are offscreen.
+			TheSim:UpdateRenderExtents(math.max(savedata.map.width, savedata.map.height) * TILE_SCALE)
+		end
 		map:SetFromString(savedata.map.tiles)
 		map:SetNodeIdTileMapFromString(savedata.map.nodeidtilemap)
         map:ResetVisited()
@@ -586,7 +592,9 @@ local function PopulateWorld(savedata, profile)
                 SpawnSaveRecord(v, newents)
             end
         end
-
+		if world.components.walkableplatformmanager then
+			world.components.walkableplatformmanager:PostUpdate(0)
+		end
         --post pass in neccessary to hook up references
         for k, v in pairs(newents) do
             v.entity:LoadPostPass(newents, v.data)
@@ -693,7 +701,7 @@ local function SendResumeRequestToServer(world, delay)
         --world reset/regen/disconnect triggered
         return
     elseif delay > 0 then
-        world:DoTaskInTime(0, SendResumeRequestToServer, delay - 1)
+        world:DoStaticTaskInTime(0, SendResumeRequestToServer, delay - 1)
     elseif not TheNet:IsDedicated() and ThePlayer == nil then
         TheNet:SendResumeRequestToServer(TheNet:GetUserID())
     else
@@ -918,8 +926,8 @@ local function DoInitGame(savedata, profile)
 
 	if TheNet:GetIsServer() then
 	    NotifyLoadingState( LoadingStates.DoneLoading )
+		ShardGameIndex:WriteTimeFile()
 	end
-    ShardGameIndex:WriteTimeFile()
 end
 
 local function UpgradeSaveFile(savedata)
@@ -1191,7 +1199,21 @@ Profile:Load( function()
 			ShardGameIndex:Load( OnFilesLoaded )
 		end)
 	end)
-end )
+end)
+
+if not TheNet:IsDedicated() and (TheNet:GetIsClient() or TheNet:GetIsServer()) and not ChatHistory:HasHistory() then
+	local user_table = TheNet:GetClientTableForUser(TheNet:GetUserID())
+
+	if user_table then
+		ChatHistory:AddJoinMessageToHistory(
+			ChatTypes.Announcement,
+			nil,
+			string.format(STRINGS.UI.NOTIFICATION.JOINEDGAME, Networking_Announcement_GetDisplayName(TheNet:GetLocalUserName())),
+			user_table.colour or WHITE,
+			"join_game"
+		)
+	end
+end
 
 require "platformpostload" --Note(Peter): The location of this require is currently only dependent on being after the built in usercommands being loaded
 

@@ -121,6 +121,8 @@ return{
 			CARNIVALGAME_INVALID_ITEM = "Oh drat, it doesn't want that.",
 			CARNIVALGAME_ALREADY_PLAYING = "Let them have their fun, then I'll show the mortals how it's done.",
             SPIDERNOHAT = "My pocket's too tight for that hat to sit right.",
+            TERRARIUM_REFUSE = "What a picky little prism!",
+            TERRARIUM_COOLDOWN = "Now wait one minute, there's nothing in it!",
         },
         GIVETOPLAYER =
         {
@@ -186,11 +188,13 @@ return{
         {
 			RESTRICTION = "I am cautious about touching it.",
 			INUSE = "Another soul has use of it.",
+--fallback to speech_wilson.lua             NOTMINE_SPIDER = "only_used_by_webber",
             NOTMINE_YOTC =
             {
                 "What's the matter? I won't bite.",
                 "This soul is already bound to someone else.",
             },
+--fallback to speech_wilson.lua 			NO_HEAVY_LIFTING = "only_used_by_wanda",
         },
         SLAUGHTER =
         {
@@ -311,13 +315,24 @@ return{
         {
 --fallback to speech_wilson.lua             BEDAZZLED = "only_used_by_webber",
         },
+		CAST_POCKETWATCH = 
+		{
+--fallback to speech_wilson.lua 			GENERIC = "only_used_by_wanda",
+--fallback to speech_wilson.lua 			REVIVE_FAILED = "only_used_by_wanda",
+--fallback to speech_wilson.lua 			WARP_NO_POINTS_LEFT = "only_used_by_wanda",
+--fallback to speech_wilson.lua 			SHARD_UNAVAILABLE = "only_used_by_wanda",
+		},
+        DISMANTLE_POCKETWATCH =
+        {
+--fallback to speech_wilson.lua             ONCOOLDOWN = "only_used_by_wanda",
+        },
     },
 
 	ACTIONFAIL_GENERIC = "No, no, no.",
 	ANNOUNCE_BOAT_LEAK = "Now this ride's getting fun!",
 	ANNOUNCE_BOAT_SINK = "Into the drink I go, hyuyu!",
-	ANNOUNCE_DIG_DISEASE_WARNING = "I've helped it!",
-	ANNOUNCE_PICK_DISEASE_WARNING = "Its soul has not left its body, yet still it stinks.",
+	ANNOUNCE_DIG_DISEASE_WARNING = "I've helped it!", --removed
+	ANNOUNCE_PICK_DISEASE_WARNING = "Its soul has not left its body, yet still it stinks.", --removed
 	ANNOUNCE_ADVENTUREFAIL = "I've had enough plane hopping.",
     ANNOUNCE_MOUNT_LOWHEALTH = "Its soul hangs by a thread.",
 
@@ -614,7 +629,6 @@ return{
 	ANNOUNCE_WEIGHT = "Weight: {weight}",
 	ANNOUNCE_WEIGHT_HEAVY  = "Weight: {weight}\nI got my wish, a hefty fish!",
 
-	-- these are just for testing for now, no need to write real strings yet
 	ANNOUNCE_WINCH_CLAW_MISS = "I thought I'd be better at this game.",
 	ANNOUNCE_WINCH_CLAW_NO_ITEM = "It's come up with nothing.",
 
@@ -672,6 +686,18 @@ return{
 --fallback to speech_wilson.lua     ANNOUNCE_BATTLESONG_INSTANT_TAUNT_BUFF = "only_used_by_wathgrithr",
 --fallback to speech_wilson.lua     ANNOUNCE_BATTLESONG_INSTANT_PANIC_BUFF = "only_used_by_wathgrithr",
 
+--fallback to speech_wilson.lua     ANNOUNCE_WANDA_YOUNGTONORMAL = "only_used_by_wanda",
+--fallback to speech_wilson.lua     ANNOUNCE_WANDA_NORMALTOOLD = "only_used_by_wanda",
+--fallback to speech_wilson.lua     ANNOUNCE_WANDA_OLDTONORMAL = "only_used_by_wanda",
+--fallback to speech_wilson.lua     ANNOUNCE_WANDA_NORMALTOYOUNG = "only_used_by_wanda",
+
+	ANNOUNCE_POCKETWATCH_PORTAL = "It's not nearly as comfortable as my kind's way of traveling...",
+
+--fallback to speech_wilson.lua 	ANNOUNCE_POCKETWATCH_MARK = "only_used_by_wanda",
+--fallback to speech_wilson.lua 	ANNOUNCE_POCKETWATCH_RECALL = "only_used_by_wanda",
+--fallback to speech_wilson.lua 	ANNOUNCE_POCKETWATCH_OPEN_PORTAL = "only_used_by_wanda",
+--fallback to speech_wilson.lua 	ANNOUNCE_POCKETWATCH_OPEN_PORTAL_DIFFERENTSHARD = "only_used_by_wanda",
+
     ANNOUNCE_ARCHIVE_NEW_KNOWLEDGE = "Oooh, now there's an interesting idea!",
     ANNOUNCE_ARCHIVE_OLD_KNOWLEDGE = "Oh drat, I already knew that.",
     ANNOUNCE_ARCHIVE_NO_POWER = "What great power could wake it from its slumber?",
@@ -705,6 +731,11 @@ return{
     ANNOUNCE_CALL_BEEF = "Over here, beefalo dear!",
     ANNOUNCE_CANTBUILDHERE_YOTB_POST = "Alas, I fear I can't build that here.",
     ANNOUNCE_YOTB_LEARN_NEW_PATTERN =  "Hyuyu! A new plan has taken shape!",
+
+    -- AE4AE
+    ANNOUNCE_EYEOFTERROR_ARRIVE = "I don't suppose this is a friendly visit? Hyuyu...",
+    ANNOUNCE_EYEOFTERROR_FLYBACK = "Hyuyu, back for more fun?",
+    ANNOUNCE_EYEOFTERROR_FLYAWAY = "The light of day keeps the eye at bay!",
 
 	BATTLECRY =
 	{
@@ -854,7 +885,7 @@ return{
             ATTACKER = "I'll stop hiding your axe, promise! Hyuyu!",
             MURDERER = "Don't kill me, hyuyuyu!",
             REVIVER = "%s is oh so helpful!",
-            GHOST = "You wouldn't even noticed if I took a bite.",
+            GHOST = "You wouldn't even notice if I took a bite.",
             BEAVER = "Hyuyu, you're so funny, %s!",
             BEAVERGHOST = "What a funny soul! I wonder what it tastes like.",
             MOOSE = "The curse is growing, your antlers are showing!",
@@ -956,11 +987,21 @@ return{
             FIRESTARTER = "Rules are meant to be broken, hyuyuyu!",
         },
 
+        WANDA =
+        {
+            GENERIC = "Have you been anytime interesting lately, %s?",
+            ATTACKER = "Hyuyuyu, I don't think she liked my last prank.",
+            MURDERER = "You wouldn't kill an imp in the prime of his life, would you?",
+            REVIVER = "Hyuyu, %s doesn't seem to be wise to soul power, thankfully.",
+            GHOST = "You're looking much tastier than usual, %s!",
+            FIRESTARTER = "Oooh, mind if I join in?",
+        },
+
 --fallback to speech_wilson.lua         MIGRATION_PORTAL =
 --fallback to speech_wilson.lua         {
---fallback to speech_wilson.lua             GENERIC = "If I had any friends, this could take me to them.",
---fallback to speech_wilson.lua             OPEN = "If I step through, will I still be me?",
---fallback to speech_wilson.lua             FULL = "It seems to be popular over there.",
+--fallback to speech_wilson.lua         --    GENERIC = "If I had any friends, this could take me to them.",
+--fallback to speech_wilson.lua         --    OPEN = "If I step through, will I still be me?",
+--fallback to speech_wilson.lua         --    FULL = "It seems to be popular over there.",
 --fallback to speech_wilson.lua         },
         GLOMMER =
         {
@@ -1273,7 +1314,7 @@ return{
             FULL = "A party rages up above!",
         },
 
-		MAXWELLPHONOGRAPH = "Ooo, music! I'm practically giddy!",
+		MAXWELLPHONOGRAPH = "Ooo, music! I'm practically giddy!",--single player
 		BOOMERANG = "What goes around comes around, they say, they say!",
 		PIGGUARD = "We don't have to fight, you know.",
 		ABIGAIL =
@@ -1319,7 +1360,7 @@ return{
 		BACKPACK = "Behold this burden on my back!",
 		BACONEGGS = "A mortal favorite.",
 		BANDAGE = "A wrap for wounds.",
-		BASALT = "Big, big rock, for sure, for sure.",
+		BASALT = "Big, big rock, for sure, for sure.", --removed
 		BEARDHAIR = "Mortal fur.",
 		BEARGER = "Do not eat me, oh please, oh please!",
 		BEARGERVEST = "Sometimes you want to wear someone else's fur.",
@@ -1385,7 +1426,7 @@ return{
         BEESWAX = "None of mine!",
 		BEEHIVE = "One swift kick and it becomes a great prank.",
 		BEEMINE = "This will be a funny prank.",
-		BEEMINE_MAXWELL = "That's not a funny prank at all!",
+		BEEMINE_MAXWELL = "That's not a funny prank at all!",--removed
 		BERRIES = "A handful of mortal treats.",
 		BERRIES_COOKED = "I hear they last longer this way.",
         BERRIES_JUICY = "Mortals eat them as a snack.",
@@ -1396,8 +1437,8 @@ return{
 			WITHERED = "Feeling down, are you?",
 			GENERIC = "Mortals say they're sweet to eat.",
 			PICKED = "Gone, all gone.",
-			DISEASED = "Now it stinks really good!",
-			DISEASING = "It's started to stink.",
+			DISEASED = "Now it stinks really good!",--removed
+			DISEASING = "It's started to stink.",--removed
 			BURNING = "Whoops-a-doodle.",
 		},
 		BERRYBUSH_JUICY =
@@ -1406,11 +1447,11 @@ return{
 			WITHERED = "Feeling down, are you?",
 			GENERIC = "The humans like them, yes indeed.",
 			PICKED = "Gone, all gone.",
-			DISEASED = "Now it stinks really good!",
-			DISEASING = "It's started to stink.",
+			DISEASED = "Now it stinks really good!",--removed
+			DISEASING = "It's started to stink.",--removed
 			BURNING = "Whoops-a-doodle.",
 		},
-		BIGFOOT = "Do not step on little old me!",
+		BIGFOOT = "Do not step on little old me!",--removed
 		BIRDCAGE =
 		{
 			GENERIC = "A place where little birds are penned.",
@@ -1554,6 +1595,8 @@ return{
         CHESSPIECE_ANTLION = "An anti Ant Lion, formerly furry. Hyuyu!",
         CHESSPIECE_BEEFALO = "This beefalo is even more hard-headed than most!",
         CHESSPIECE_GUARDIANPHASE3 = "In all its selenic splendour!",
+        CHESSPIECE_EYEOFTERROR = "He's gone, no matter how you look at it, hyuyu!",
+        CHESSPIECE_TWINSOFTERROR = "What an eye-catching statue, hyuyu!",
 
         CHESSJUNK1 = "It looks quite broke, and that's no joke!",
         CHESSJUNK2 = "It looks quite broke, and that's no joke!",
@@ -1603,7 +1646,7 @@ return{
 		CUTGRASS = "Oh, what I could weave!",
 		CUTREEDS = "One swift yank was all it took.",
 		CUTSTONE = "Brick by brick, they say, they say.",
-		DEADLYFEAST = "I desire this even less than regular food.",
+		DEADLYFEAST = "I desire this even less than regular food.", --unimplemented
 		DEER =
 		{
 			GENERIC = "Greetings, dearest!",
@@ -1625,19 +1668,19 @@ return{
 		DIRTPILE = "I could get my claws in there.",
 		DIVININGROD =
 		{
-			COLD = "The trail's gone cold, I feel cajoled.",
-			GENERIC = "It will guide me where I wish to go.",
-			HOT = "Red hot! We're near the spot!",
-			WARM = "Hey, hey, hey! We're on our way!",
-			WARMER = "I have to boast, we're getting close!",
+			COLD = "The trail's gone cold, I feel cajoled.", --singleplayer
+			GENERIC = "It will guide me where I wish to go.", --singleplayer
+			HOT = "Red hot! We're near the spot!", --singleplayer
+			WARM = "Hey, hey, hey! We're on our way!", --singleplayer
+			WARMER = "I have to boast, we're getting close!", --singleplayer
 		},
 		DIVININGRODBASE =
 		{
-			GENERIC = "How very, very curious!",
-			READY = "Let's hop, skip and jump out of here!",
-			UNLOCKED = "Ooo, my fur's standing on end in anticipation!",
+			GENERIC = "How very, very curious!", --singleplayer
+			READY = "Let's hop, skip and jump out of here!", --singleplayer
+			UNLOCKED = "Ooo, my fur's standing on end in anticipation!", --singleplayer
 		},
-		DIVININGRODSTART = "And now begins a thrilling game!",
+		DIVININGRODSTART = "And now begins a thrilling game!", --singleplayer
 		DRAGONFLY = "Fear me! I'm a scary imp!",
 		ARMORDRAGONFLY = "Ooo, I've always wanted to be scaly.",
 		DRAGON_SCALES = "I prefer fur to scales.",
@@ -1742,7 +1785,7 @@ return{
 			BURNT = "Well, that was fun.",
 			CHOPPED = "A funny tree prank.",
 			GENERIC = "A slender tree of twigs and sticks.",
-			DISEASED = "Oh jeez, oh ick, that tree looks sick!",
+			DISEASED = "Oh jeez, oh ick, that tree looks sick!", --unimplemented
 		},
 		TWIGGY_NUT_SAPLING = "It's just a tree baby.",
         TWIGGY_OLD = "This tree is long in the tooth.",
@@ -1763,7 +1806,7 @@ return{
 		FEATHER_CANARY = "A token, to remember its sweet song by.",
 		FEATHERPENCIL = "Use this quill, I will, I will.",
         COOKBOOK = "Oh what shall I cook up next? Hyuyu!",
-		FEM_PUPPET = "Greetings and salutations, ma'am.",
+		FEM_PUPPET = "Greetings and salutations, ma'am.", --single player
 		FIREFLIES =
 		{
 			GENERIC = "Some natural light to grant me sight.",
@@ -1849,13 +1892,13 @@ return{
 			BURNING = "Whoops-a-doodle.",
 			GENERIC = "Grass that grows from richest earth.",
 			PICKED = "Gone, all gone.",
-			DISEASED = "Now it stinks really good!",
-			DISEASING = "It's started to stink.",
+			DISEASED = "Now it stinks really good!", --unimplemented
+			DISEASING = "It's started to stink.", --unimplemented
 		},
 		GRASSGEKKO =
 		{
 			GENERIC = "Hello dear friend! No need to drop your tail.",
-			DISEASED = "I can see the disease creeping into your soul.",
+			DISEASED = "I can see the disease creeping into your soul.", --unimplemented
 		},
 		GREEN_CAP = "These mushrooms play all sorts of tricks.",
 		GREEN_CAP_COOKED = "That changed it somehow.",
@@ -1956,7 +1999,7 @@ return{
 		LUCY = "An axe is an axe, those are the facts.",
 		LUREPLANT = "As the spider catches the fly.",
 		LUREPLANTBULB = "There's hunger deep within that eye.",
-		MALE_PUPPET = "Greetings and salutations, sir.",
+		MALE_PUPPET = "Greetings and salutations, sir.", --single player
 
 		MANDRAKE_ACTIVE = "Stop that or I'll steal your voice.",
 		MANDRAKE_PLANTED = "It's a prank plant.",
@@ -1987,11 +2030,11 @@ return{
             CHOPPED = "Taken in its prime. Hyuyu!",
             GENERIC = "A sickly tree, so sharp and slender.",
         },
-        MAXWELL = "You have no power over me, heehee!",
-        MAXWELLHEAD = "Hyuyu, that's a good trick!",
-        MAXWELLLIGHT = "Ooohoohoo, it warms in my presence!",
-        MAXWELLLOCK = "Now let's see, where is the key?",
-        MAXWELLTHRONE = "A precarious place to rest one's rump.",
+        MAXWELL = "You have no power over me, heehee!",--single player
+        MAXWELLHEAD = "Hyuyu, that's a good trick!",--removed
+        MAXWELLLIGHT = "Ooohoohoo, it warms in my presence!",--single player
+        MAXWELLLOCK = "Now let's see, where is the key?",--single player
+        MAXWELLTHRONE = "A precarious place to rest one's rump.",--single player
         MEAT = "Ex-animal.",
         MEATBALLS = "Physical food is so hilarious.",
         MEATRACK =
@@ -2193,13 +2236,13 @@ return{
             GENERIC = "That's a bird, or so I've heard.",
             HELD = "Mind my fingers.",
         },
-        ROBOT_PUPPET = "Greetings and salutations, sweet compeer.",
+        ROBOT_PUPPET = "Greetings and salutations, sweet compeer.", --single player
         ROCK_LIGHT =
         {
-            GENERIC = "A wisecracker like myself could crack it!",
-            OUT = "A wisecracker like myself could crack it!",
-            LOW = "The pool's begun to cool!",
-            NORMAL = "How warm!",
+            GENERIC = "A wisecracker like myself could crack it!",--removed
+            OUT = "A wisecracker like myself could crack it!",--removed
+            LOW = "The pool's begun to cool!",--removed
+            NORMAL = "How warm!",--removed
         },
         CAVEIN_BOULDER =
         {
@@ -2240,8 +2283,8 @@ return{
 			WITHERED = "Feeling down, are you?",
 			GENERIC = "It has delusions of being a tree.",
 			PICKED = "Gone, all gone.",
-			DISEASED = "Now it stinks really good!",
-			DISEASING = "It's started to stink.",
+			DISEASED = "Now it stinks really good!", --removed
+			DISEASING = "It's started to stink.", --removed
 		},
    		SCARECROW =
    		{
@@ -2290,7 +2333,7 @@ return{
 		SILK = "A present from the spider's ilk.",
 		SKELETON = "The soul is long gone.",
 		SCORCHED_SKELETON = "Someone had a whoopsie.",
-		SKULLCHEST = "Let me take a peek inside!",
+		SKULLCHEST = "Let me take a peek inside!", --removed
 		SMALLBIRD =
 		{
 			GENERIC = "The apple of my eye.",
@@ -2369,15 +2412,15 @@ return{
 		},
 		TELEPORTATO_BASE =
 		{
-			ACTIVE = "Let's hop!",
-			GENERIC = "Automatic hopper.",
-			LOCKED = "Why won't you work for this nice imp?",
-			PARTIAL = "It's almost done I'd say, I'd say!",
+			ACTIVE = "Let's hop!", --single player
+			GENERIC = "Automatic hopper.", --single player
+			LOCKED = "Why won't you work for this nice imp?", --single player
+			PARTIAL = "It's almost done I'd say, I'd say!", --single player
 		},
-		TELEPORTATO_BOX = "It's a thing. For the thing!",
-		TELEPORTATO_CRANK = "It's a thing. For the thing!",
-		TELEPORTATO_POTATO = "It's a thing. For the thing!",
-		TELEPORTATO_RING = "It's a thing. For the thing!",
+		TELEPORTATO_BOX = "It's a thing. For the thing!", --single player
+		TELEPORTATO_CRANK = "It's a thing. For the thing!", --single player
+		TELEPORTATO_POTATO = "It's a thing. For the thing!", --single player
+		TELEPORTATO_RING = "It's a thing. For the thing!", --single player
 		TELESTAFF = "Hassle-free hopping.",
 		TENT =
 		{
@@ -2401,7 +2444,7 @@ return{
 		TRANSISTOR = "I do not know what this does.",
 		TRAP = "I'm a very patient imp.",
 		TRAP_TEETH = "I hope this isn't too cruel.",
-		TRAP_TEETH_MAXWELL = "What a rude thing to leave lying around.",
+		TRAP_TEETH_MAXWELL = "What a rude thing to leave lying around.", --single player
 		TREASURECHEST =
 		{
 			GENERIC = "A storage place for bits and bobs.",
@@ -2413,7 +2456,7 @@ return{
 			GENERIC = "Ooohoohoo, it's probably cursed!",
 			LOCKED = "Open up, already!",
 		},
-		TREECLUMP = "Hey! Don't bar the way!",
+		TREECLUMP = "Hey! Don't bar the way!", --removed
 
 		TRINKET_1 = "Somebody finally lost them.", --Melted Marbles
 		TRINKET_2 = "What might I do with a fake kazoo?", --Fake Kazoo
@@ -2787,7 +2830,7 @@ return{
 			OPEN = "Watch my impression of mortal food.",
 		},
 		WORMHOLE_LIMITED = "I think its throat is getting sore.",
-		ACCOMPLISHMENT_SHRINE = "I did indeed do that!",
+		ACCOMPLISHMENT_SHRINE = "I did indeed do that!", --single player
 		LIVINGTREE = "A tree as perplexing as it is vexing.",
 		ICESTAFF = "I'll freeze who I please.",
 		REVIVER = "So my friends might live to tell the tale!",
@@ -3135,8 +3178,8 @@ return{
 		BOAT_LEAK = "Things look bleak - we have a leak!",
         MAST = "A sail on the mast will move our boat fast.",
         SEASTACK = "It would be quite a shock to hit that rock.",
-        FISHINGNET = "A riddle! What might one cast that's not a spell?",
-        ANTCHOVIES = "Squirmy, wormy, fishy food.",
+        FISHINGNET = "A riddle! What might one cast that's not a spell?", --unimplemented
+        ANTCHOVIES = "Squirmy, wormy, fishy food.", --unimplemented
         STEERINGWHEEL = "A big wheel to guide a keel.",
         ANCHOR = "Drop it to stop it.",
         BOATPATCH = "Plugging a hole sounds quite droll.",
@@ -3176,8 +3219,8 @@ return{
 			WITHERED = "Feeling down, are you?",
 			GENERIC = "It's chock a block with little rocks!",
 			PICKED = "Gone, all gone.",
-			DISEASED = "Now it stinks really good!",
-            DISEASING = "It's started to stink.",
+			DISEASED = "Now it stinks really good!", --unimplemented
+            DISEASING = "It's started to stink.", --unimplemented
 			BURNING = "Burning, burning, burning down.",
 		},
         DEAD_SEA_BONES = "Bones from the sea, these look to be!",
@@ -3223,10 +3266,10 @@ return{
 
         ICEBERG =
         {
-            GENERIC = "Glistening ice, it looks quite nice.",
-            MELTED = "Teeny tiny, drippy droppy iceberg.",
+            GENERIC = "Glistening ice, it looks quite nice.", --unimplemented
+            MELTED = "Teeny tiny, drippy droppy iceberg.", --unimplemented
         },
-        ICEBERG_MELTED = "Teeny tiny, drippy droppy iceberg.",
+        ICEBERG_MELTED = "Teeny tiny, drippy droppy iceberg.", --unimplemented
 
         MINIFLARE = "Mortals get lost sometimes, hyuyu.",
 
@@ -3375,6 +3418,7 @@ return{
 		OCEANFISH_MEDIUM_6 = "I'm afraid your journey has been cut short.",
 		OCEANFISH_MEDIUM_7 = "I'm afraid your journey has been cut short.",
 		OCEANFISH_MEDIUM_8 = "What a chilly reception!",
+        OCEANFISH_MEDIUM_9 = "Purple, but not a people eater.",
 
 		PONDFISH = "You are quite fragrant.",
 		PONDEEL = "A slippery soul, that one.",
@@ -3827,6 +3871,8 @@ return{
 		SWEETTEA = "A little sip will do the trick.",
 		TILLWEED = "Till what, weed?",
 		TILLWEEDSALVE = "A welcome break from pains and aches.",
+        WEED_IVY = "It seems a little wound up.",
+        IVY_SNARE = "That seemed like an overreaction.",
 
 		TROPHYSCALE_OVERSIZEDVEGGIES =
 		{
@@ -3953,7 +3999,7 @@ return{
 		},
 		CARNIVALDECOR_FIGURE_KIT = "Hyuyu, how very mysterious!",
 
-        CARNIVAL_BALL = "It goes quite nicely with my fur!",
+        CARNIVAL_BALL = "It goes quite nicely with my fur!", --unimplemented
 		CARNIVAL_SEEDPACKET = "I'm sure they won't be offended if I dump these on the ground.",
 		CARNIVALFOOD_CORNTEA = "I think I'll go find a nice refreshing soul instead.",
 
@@ -4068,7 +4114,113 @@ return{
             GENERIC = "Hyuyuyu, I don't think they'll like that...",
             CONSTRUCTION1 = "I'll help a bit, but if it's no fun I'll quit!",
             CONSTRUCTION2 = "What mysterious machinations!",
-        }
+        },
+
+		-- Wanda
+        POCKETWATCH_HEAL = {
+			GENERIC = "Mortals keep coming up with such funny tricks!",
+			RECHARGING = "These clocks, you will find, need some time to unwind.",
+		},
+
+        POCKETWATCH_REVIVE = {
+			GENERIC = "Mortals keep coming up with such funny tricks!",
+			RECHARGING = "These clocks, you will find, need some time to unwind.",
+		},
+
+        POCKETWATCH_WARP = {
+			GENERIC = "Mortals keep coming up with such funny tricks!",
+			RECHARGING = "These clocks, you will find, need some time to unwind.",
+		},
+
+        POCKETWATCH_RECALL = {
+			GENERIC = "Mortals keep coming up with such funny tricks!",
+			RECHARGING = "These clocks, you will find, need some time to unwind.",
+--fallback to speech_wilson.lua 			UNMARKED = "only_used_by_wanda",
+--fallback to speech_wilson.lua 			MARKED_SAMESHARD = "only_used_by_wanda",
+--fallback to speech_wilson.lua 			MARKED_DIFFERENTSHARD = "only_used_by_wanda",
+		},
+
+        POCKETWATCH_PORTAL = {
+			GENERIC = "Mortals keep coming up with such funny tricks!",
+			RECHARGING = "These clocks, you will find, need some time to unwind.",
+--fallback to speech_wilson.lua 			UNMARKED = "only_used_by_wanda unmarked",
+--fallback to speech_wilson.lua 			MARKED_SAMESHARD = "only_used_by_wanda same shard",
+--fallback to speech_wilson.lua 			MARKED_DIFFERENTSHARD = "only_used_by_wanda other shard",
+		},
+
+        POCKETWATCH_WEAPON = {
+			GENERIC = "Did I hear \"one o'clock sharp\", or \"one sharp clock\"? Hyuyu!",
+--fallback to speech_wilson.lua 			DEPLETED = "only_used_by_wanda",
+		},
+
+        POCKETWATCH_PARTS = "Ooohoohoo, someone's been naughty!",
+        POCKETWATCH_DISMANTLER = "The tools of a time tinkerer.",
+
+        POCKETWATCH_PORTAL_ENTRANCE = 
+		{
+			GENERIC = "Hyuyuyu, we'll be sure to get there in a timely manner!",
+			DIFFERENTSHARD = "Hyuyuyu, we'll be sure to get there in a timely manner!",
+		},
+        POCKETWATCH_PORTAL_EXIT = "You can always count on the mortals to make things needlessly complicated.",
+
+        -- Waterlog
+        WATERTREE_PILLAR = "It seems we've found safe arbor, hyuyu!",
+        OCEANTREE = "How is ocean life treating you?",
+        OCEANTREENUT = "The sea is a nutty place to plant a tree.",
+        WATERTREE_ROOT = "Hyuyuyu! You won't trip me up with your tricky roots!",
+
+        OCEANTREE_PILLAR = "They grow up so fast!",
+        
+        OCEANVINE = "A fine enough vine.",
+        FIG = "They say the low hanging fruit is the sweetest!",
+        FIG_COOKED = "The mortals seem to prefer it this way.",
+
+        SPIDER_WATER = "They're just getting their feet wet.",
+        MUTATOR_WATER = "A tasty treat for those tiny terrors!",
+        OCEANVINE_COCOON = "Rock-a-bye spiders, in the treetop...",
+        OCEANVINE_COCOON_BURNT = "What a shame, it went up in flames.",
+
+        GRASSGATOR = "See you later, gator.",
+
+        TREEGROWTHSOLUTION = "It'll really rib to your sticks.",
+
+        FIGATONI = "I'll pass.",
+        FIGKABAB = "Food on a stick won't do the trick.",
+        KOALEFIG_TRUNK = "As mortal dishes go, that looks particularly revolting.",
+        FROGNEWTON = "How do the mortals come up with these things?",
+
+        -- The Terrorarium
+        TERRARIUM = {
+            GENERIC = "A souvenir of sorts, hyuyu!",
+            CRIMSON = "Oh dear, perhaps I've taken this prank too far...",
+            ENABLED = "Hyuyu... whoopsie...",
+			WAITING_FOR_DARK = "I can't tell if that bodes well.",
+			COOLDOWN = "Its power's gone, but not for long.",
+			SPAWN_DISABLED = "It seems nobody here likes pranks.",
+        },
+
+        TERRARIUMCHEST = 
+		{
+			GENERIC = "Extraordinarily ordinary!",
+			BURNT = "Hyuyu, someone's been playing pranks.",
+			SHIMMER = "Oh, pay it no mind!",
+		},
+
+		EYEMASKHAT = "Well, isn't this a sight for sore eyes. Hyuyuyu!",
+
+        EYEOFTERROR = "Whatever he says I did, it's a lie!",
+        EYEOFTERROR_MINI = "I feel positively terror eyes'd!",
+        EYEOFTERROR_MINI_GROUNDED = "Oh my, won't you open your eye?",
+
+        FROZENBANANADAIQUIRI = "Don't the mortals like to innovate? Hyuyu.",
+        BUNNYSTEW = "Are mortals attracted to this smell?",
+        MILKYWHITES = "This loot from our fight does not bring delight. ",
+
+        CRITTER_EYEOFTERROR = "I'm glad we could make amends, my ocular friend!",
+
+        SHIELDOFTERROR ="I stole the grin right off of him, hyuyu!",
+        TWINOFTERROR1 = "Double double, we're in trouble!",
+        TWINOFTERROR2 = "Double double, we're in trouble!",
     },
 
     DESCRIBE_GENERIC = "Ooo, a mystery!",

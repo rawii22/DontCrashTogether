@@ -254,6 +254,7 @@ local actionhandlers =
                 or (action.recipe == "livinglog" and inst:HasTag("plantkin") and "form_log")
                 or (inst:HasTag("hungrybuilder") and "dohungrybuild")
                 or (inst:HasTag("fastbuilder") and "domediumaction")
+                or (inst:HasTag("slowbuilder") and "dolongestaction")
                 or "dolongaction"
         end),
     ActionHandler(ACTIONS.SHAVE, "shave"),
@@ -350,6 +351,14 @@ local actionhandlers =
                     )
                 or "castspell"
         end),
+    ActionHandler(ACTIONS.CAST_POCKETWATCH,
+        function(inst, action)
+            return action.invobject ~= nil
+                and (   action.invobject:HasTag("recall_unmarked") and "dolongaction"
+						or action.invobject:HasTag("pocketwatch_warp_casting") and "pocketwatch_warpback_pre"
+                    )
+                or "use_inventory_item_busy"
+        end),
     ActionHandler(ACTIONS.BLINK,
         function(inst, action)
             return action.invobject == nil and inst:HasTag("soulstealer") and "portal_jumpin_pre" or "quicktele"
@@ -372,7 +381,7 @@ local actionhandlers =
     ActionHandler(ACTIONS.FEED, "dolongaction"),
     ActionHandler(ACTIONS.ATTACK,
         function(inst, action)
-            if not (inst.sg:HasStateTag("attack") and action.target == inst.sg.statemem.attacktarget or inst.replica.health:IsDead()) then
+            if not (inst.sg:HasStateTag("attack") and action.target == inst.sg.statemem.attacktarget or IsEntityDead(inst)) then
                 local equip = inst.replica.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
                 if equip == nil then
                     return "attack"
@@ -528,6 +537,11 @@ local actionhandlers =
     ActionHandler(ACTIONS.HERD_FOLLOWERS, "use_inventory_item"),
     ActionHandler(ACTIONS.REPEL, "use_inventory_item"),
     ActionHandler(ACTIONS.BEDAZZLE, "dolongaction"),
+    ActionHandler(ACTIONS.UNLOAD_WINCH, "give"),
+    ActionHandler(ACTIONS.USE_HEAVY_OBSTACLE, "dolongaction"),
+    ActionHandler(ACTIONS.ADVANCE_TREE_GROWTH, "dolongaction"),
+
+    ActionHandler(ACTIONS.DISMANTLE_POCKETWATCH, "dolongaction"),   
 }
 
 local events =
@@ -1877,6 +1891,14 @@ local states =
     },
 
     State{
+        name = "dolongestaction",
+
+        onenter = function(inst)
+            inst.sg:GoToState("dolongaction")
+        end,
+    },
+
+    State{
         name = "dolongaction",
         tags = { "doing", "busy" },
 
@@ -1934,6 +1956,17 @@ local states =
                 inst.AnimState:PlayAnimation("whip_pre")
                 inst.AnimState:PushAnimation("whip_lag", false)
                 inst.sg.statemem.iswhip = true
+			elseif equip ~= nil and equip:HasTag("pocketwatch") then
+				inst.AnimState:PlayAnimation("pocketwatch_atk_pre" )
+				inst.AnimState:PushAnimation("pocketwatch_atk_lag", false)
+				inst.sg.statemem.ispocketwatch = true
+                if equip:HasTag("shadow_item") then
+	                inst.SoundEmitter:PlaySound("wanda2/characters/wanda/watch/weapon/pre_shadow", nil, nil, true)
+					inst.AnimState:Show("pocketwatch_weapon_fx")
+                else
+	                inst.SoundEmitter:PlaySound("wanda2/characters/wanda/watch/weapon/pre", nil, nil, true)
+					inst.AnimState:Hide("pocketwatch_weapon_fx")
+                end
             elseif equip ~= nil and
                 equip.replica.inventoryitem ~= nil and
                 equip.replica.inventoryitem:IsWeapon() and
@@ -1974,12 +2007,13 @@ local states =
             end),
             TimeEvent(6 * FRAMES, function(inst)
                 if not (inst.sg.statemem.isbeaver or
-                        inst.sg.statemem.iswhip) then
+                        inst.sg.statemem.iswhip or
+						inst.sg.statemem.ispocketwatch) then
                     inst.sg:RemoveStateTag("busy")
                 end
             end),
             TimeEvent(8 * FRAMES, function(inst)
-                if inst.sg.statemem.iswhip then
+                if inst.sg.statemem.iswhip or inst.sg.statemem.ispocketwatch then
                     inst.sg:RemoveStateTag("busy")
                 end
             end),
@@ -3150,6 +3184,9 @@ local states =
                 inst.replica.combat:StartAttack()
                 cooldown = inst.replica.combat:MinAttackPeriod() + .5 * FRAMES
             end
+            if inst.sg.laststate == inst.sg.currentstate then
+                inst.sg.statemem.chained = true
+            end
             inst.components.locomotor:Stop()
             local equip = inst.replica.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
             local rider = inst.replica.rider
@@ -3190,6 +3227,13 @@ local states =
                         cooldown = math.max(cooldown, 16 * FRAMES)
                     end
                 end
+            elseif equip ~= nil and equip:HasTag("toolpunch") then
+                inst.AnimState:PlayAnimation("toolpunch")
+                inst.sg.statemem.istoolpunch = true
+                inst.SoundEmitter:PlaySound("dontstarve/wilson/attack_weapon", nil, nil, true)
+                if cooldown > 0 then
+                    cooldown = math.max(cooldown, 13 * FRAMES)
+                end
             elseif equip ~= nil and equip:HasTag("whip") then
                 inst.AnimState:PlayAnimation("whip_pre")
                 inst.AnimState:PushAnimation("whip", false)
@@ -3197,6 +3241,19 @@ local states =
                 inst.SoundEmitter:PlaySound("dontstarve/common/whip_pre", nil, nil, true)
                 if cooldown > 0 then
                     cooldown = math.max(cooldown, 17 * FRAMES)
+                end
+			elseif equip ~= nil and equip:HasTag("pocketwatch") then
+				inst.AnimState:PlayAnimation(inst.sg.statemem.chained and "pocketwatch_atk_pre_2" or "pocketwatch_atk_pre" )
+				inst.AnimState:PushAnimation("pocketwatch_atk", false)
+				inst.sg.statemem.ispocketwatch = true
+				cooldown = math.max(cooldown, 15 * FRAMES)
+                if equip:HasTag("shadow_item") then
+	                inst.SoundEmitter:PlaySound("wanda2/characters/wanda/watch/weapon/pre_shadow", nil, nil, true)
+					inst.AnimState:Show("pocketwatch_weapon_fx")
+					inst.sg.statemem.ispocketwatch_fueled = true
+                else
+	                inst.SoundEmitter:PlaySound("wanda2/characters/wanda/watch/weapon/pre", nil, nil, true)
+					inst.AnimState:Hide("pocketwatch_weapon_fx")
                 end
             elseif equip ~= nil and equip:HasTag("book") then
                 inst.AnimState:PlayAnimation("attack_book")
@@ -3332,6 +3389,7 @@ local states =
                 if not (inst.sg.statemem.isbeaver or
                         inst.sg.statemem.ismoose or
                         inst.sg.statemem.iswhip or
+						inst.sg.statemem.ispocketwatch or
                         inst.sg.statemem.isbook) and
                     inst.sg.statemem.projectiledelay == nil then
                     inst:ClearBufferedAction()
@@ -3339,9 +3397,14 @@ local states =
                 end
             end),
             TimeEvent(10 * FRAMES, function(inst)
-                if inst.sg.statemem.iswhip or inst.sg.statemem.isbook then
+                if inst.sg.statemem.iswhip or inst.sg.statemem.isbook or inst.sg.statemem.ispocketwatch then
                     inst:ClearBufferedAction()
                     inst.sg:RemoveStateTag("abouttoattack")
+                end
+            end),
+            TimeEvent(17*FRAMES, function(inst) 
+				if inst.sg.statemem.ispocketwatch then
+                    inst.SoundEmitter:PlaySound(inst.sg.statemem.ispocketwatch_fueled and "wanda2/characters/wanda/watch/weapon/pst_shadow" or "wanda2/characters/wanda/watch/weapon/pst")
                 end
             end),
         },
@@ -4247,6 +4310,65 @@ local states =
             inst.sg:GoToState("idle")
         end,
     },
+
+    State{
+        name = "use_inventory_item_busy",
+        tags = { "doing", "busy" },
+
+        onenter = function(inst)
+            inst.components.locomotor:Stop()
+            inst.AnimState:PlayAnimation("useitem_pre")
+            inst.AnimState:PushAnimation("useitem_lag", false)
+
+            inst:PerformPreviewBufferedAction()
+            inst.sg:SetTimeout(TIMEOUT)
+        end,
+
+        onupdate = function(inst)
+            if inst:HasTag("doing") then
+                if inst.entity:FlattenMovementPrediction() then
+                    inst.sg:GoToState("idle", "noanim")
+                end
+            elseif inst.bufferedaction == nil then
+                inst.sg:GoToState("idle")
+            end
+        end,
+
+        ontimeout = function(inst)
+            inst:ClearBufferedAction()
+            inst.sg:GoToState("idle")
+        end,
+    },
+
+
+    State{
+        name = "pocketwatch_warpback_pre",
+        tags = { "doing", "playing", "busy" },
+
+        onenter = function(inst)
+            inst.components.locomotor:Stop()
+            inst.AnimState:PlayAnimation("pocketwatch_warp_pre")
+            inst.AnimState:PushAnimation("pocketwatch_warp_lag", false)
+
+            inst:PerformPreviewBufferedAction()
+            inst.sg:SetTimeout(TIMEOUT)
+        end,
+
+        onupdate = function(inst)
+            if inst:HasTag("doing") then
+                if inst.entity:FlattenMovementPrediction() then
+                    inst.sg:GoToState("idle", "noanim")
+                end
+            elseif inst.bufferedaction == nil then
+                inst.sg:GoToState("idle")
+            end
+        end,
+
+        ontimeout = function(inst)
+            inst:ClearBufferedAction()
+            inst.sg:GoToState("idle")
+        end,
+    },
 }
 
 local hop_timelines =
@@ -4255,9 +4377,6 @@ local hop_timelines =
     {
         TimeEvent(0, function(inst)
             inst.components.embarker.embark_speed = math.clamp(inst.components.locomotor:RunSpeed() * inst.components.locomotor:GetSpeedMultiplier() + TUNING.WILSON_EMBARK_SPEED_BOOST, TUNING.WILSON_EMBARK_SPEED_MIN, TUNING.WILSON_EMBARK_SPEED_MAX)
-        end),
-        TimeEvent(4, function(inst)
-            inst.components.embarker:StartMoving()
         end),
     },
 }

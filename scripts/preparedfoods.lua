@@ -454,11 +454,7 @@ local foods =
         prefabs = { "healthregenbuff" },
 		oneat_desc = STRINGS.UI.COOKBOOK.FOOD_EFFECTS_HEALTH_REGEN,
         oneatenfn = function(inst, eater)
-            if eater.components.debuffable ~= nil and eater.components.debuffable:IsEnabled() and
-                not (eater.components.health ~= nil and eater.components.health:IsDead()) and
-                not eater:HasTag("playerghost") then
-                eater.components.debuffable:AddDebuff("healthregenbuff", "healthregenbuff")
-            end
+			eater:AddDebuff("healthregenbuff", "healthregenbuff")
         end,
         floater = {"small", nil, 0.85},
 	},
@@ -813,18 +809,12 @@ local foods =
         oneat_desc = STRINGS.UI.COOKBOOK.FOOD_EFFECTS_SLEEP_RESISTANCE,
         oneatenfn = function(inst, eater)
             if eater.components.grogginess ~= nil and
-                    (eater.components.debuffable ~= nil and eater.components.debuffable:IsEnabled()) and
-                    not (eater.components.health ~= nil and eater.components.health:IsDead()) and
-                    not eater:HasTag("playerghost") then
-
-                if eater.components.grogginess ~= nil then
-                    eater.components.grogginess:ResetGrogginess()
-                end
-
-                if eater.components.debuffable ~= nil and eater.components.debuffable:IsEnabled() then
-                    eater.components.debuffable:AddDebuff("shroomsleepresist", "buff_sleepresistance")
-                end
+			not (eater.components.health ~= nil and eater.components.health:IsDead()) and
+			not eater:HasTag("playerghost") then
+				eater.components.grogginess:ResetGrogginess()
             end
+
+			eater:AddDebuff("shroomsleepresist", "buff_sleepresistance")
         end,
     },
 
@@ -847,13 +837,112 @@ local foods =
 		tags = {"honeyed"},
         oneat_desc = STRINGS.UI.COOKBOOK.FOOD_EFFECTS_HOT_SANITY_REGEN,
         oneatenfn = function(inst, eater)
-            if eater.components.debuffable ~= nil and eater.components.debuffable:IsEnabled() then
-                eater.components.debuffable:AddDebuff("sweettea_buff", "sweettea_buff")
-            end
+			eater:AddDebuff("sweettea_buff", "sweettea_buff")
         end,
 	},
 
+	koalefig_trunk =
+	{
+		test = function(cooker, names, tags) return (names.trunk_summer or names.trunk_cooked or names.trunk_winter) and (names.fig or names.fig_cooked) end,
+		priority = 40,
+		overridebuild = "cook_pot_food8",
+		foodtype = FOODTYPE.MEAT,
+		health = TUNING.HEALING_HUGE,  									-- 40 + 1 = 60
+		hunger = TUNING.CALORIES_LARGE + TUNING.CALORIES_MEDSMALL,	    -- 12.5 +37.5 = 56
+		sanity = 0,										-- 0 + 0
+		perishtime = TUNING.PERISH_MED,
+		cooktime = 2,
+        potlevel = "high",
+        floater = {"med", 0.05, 0.65},
+	},
 
+	figatoni =
+	{
+		test = function(cooker, names, tags) return (names.fig or names.fig_cooked) and tags.veggie and tags.veggie >= 2  and not tags.meat end,
+		priority = 30,
+		overridebuild = "cook_pot_food8",
+		foodtype = FOODTYPE.VEGGIE,
+		health = TUNING.HEALING_MEDLARGE,
+        hunger = TUNING.CALORIES_LARGE + TUNING.CALORIES_MEDSMALL,
+        perishtime = TUNING.PERISH_FAST,
+        sanity = TUNING.SANITY_MED,
+		cooktime = 2,
+        potlevel = "high",
+        floater = {"med", 0.05, 0.65},
+	},
+
+	figkabab =
+	{
+		test = function(cooker, names, tags) return (names.fig or names.fig_cooked) and names.twigs and tags.meat and tags.meat >= 1 and (not tags.monster or tags.monster <= 1) end,
+		priority = 30,
+		overridebuild = "cook_pot_food8",
+		foodtype = FOODTYPE.MEAT,
+		health = TUNING.HEALING_MED,
+		hunger = TUNING.CALORIES_MED,
+		perishtime = TUNING.PERISH_SLOW,
+		sanity = TUNING.SANITY_MED,
+		temperature = TUNING.HOT_FOOD_BONUS_TEMP,
+		temperatureduration = TUNING.FOOD_TEMP_LONG,
+		cooktime = 1,
+        potlevel = "high",
+        floater = {"med", nil, 0.55},
+	},
+
+	frognewton =
+	{
+		test = function(cooker, names, tags) return (names.fig or names.fig_cooked) and (names.froglegs or names.froglegs_cooked) end,
+		priority = 1,
+		overridebuild = "cook_pot_food8",
+		foodtype = FOODTYPE.MEAT,
+		health = TUNING.HEALING_MEDSMALL,
+		hunger = TUNING.CALORIES_MEDSMALL,
+		perishtime = TUNING.PERISH_SLOW,
+		sanity = TUNING.SANITY_SMALL,
+		temperature = TUNING.HOT_FOOD_BONUS_TEMP,
+		temperatureduration = TUNING.FOOD_TEMP_LONG,
+		cooktime = 1,
+        potlevel = "high",
+        floater = {"med", nil, 0.55},
+	},
+
+    frozenbananadaiquiri =
+    {
+        test = function(cooker, names, tags)
+            return (names.cave_banana or names.cave_banana_cooked)
+                and (tags.frozen and tags.frozen >= 1)
+        end,
+        priority = 1,
+        overridebuild = "cook_pot_food9",
+        foodtype = FOODTYPE.GOODIES,
+        health = TUNING.HEALING_MEDLARGE,
+        hunger = TUNING.CALORIES_MEDSMALL,
+        perishtime = TUNING.PERISH_SLOW,
+        sanity = TUNING.SANITY_MED,
+        temperature = TUNING.COLD_FOOD_BONUS_TEMP,
+        temperatureduration = TUNING.FOOD_TEMP_LONG,
+        cooktime = 1,
+        floater = {"small", 0.05, 0.7},
+    },
+
+    bunnystew =
+    {
+        test = function(cooker, names, tags)
+            return (tags.meat and tags.meat < 1)
+                and (tags.frozen and tags.frozen >= 2)
+                and (not tags.inedible)
+        end,
+        priority = 1,
+        overridebuild = "cook_pot_food9",
+        foodtype = FOODTYPE.MEAT,
+		health = TUNING.HEALING_MED,
+		hunger = TUNING.CALORIES_LARGE,
+        perishtime = TUNING.PERISH_MED, 
+		sanity = TUNING.SANITY_TINY,
+        temperature = TUNING.HOT_FOOD_BONUS_TEMP,
+        temperatureduration = TUNING.FOOD_TEMP_BRIEF,
+        cooktime = 0.5,
+        floater = {"med", 0.05, 0.55},
+    },
 }
 
 for k, v in pairs(foods) do

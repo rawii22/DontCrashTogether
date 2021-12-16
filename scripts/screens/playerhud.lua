@@ -14,6 +14,7 @@ local SandOver = require "widgets/sandover"
 local SandDustOver = require "widgets/sanddustover"
 local MoonstormOver = require "widgets/moonstormover"
 local MoonstormOver_Lightning = require "widgets/moonstormover_lightning"
+local Leafcanopy = require "widgets/leafcanopy"
 local MindControlOver = require "widgets/mindcontrolover"
 local InkOver = require "widgets/inkover"
 local GogglesOver = require "widgets/gogglesover"
@@ -91,6 +92,7 @@ function PlayerHud:CreateOverlays(owner)
     self.vig:GetAnimState():SetBuild("vig")
     self.vig:GetAnimState():SetBank("vig")
     self.vig:GetAnimState():PlayAnimation("basic", true)
+    self.vig:GetAnimState():AnimateWhilePaused(false)
 
     self.vig:SetHAnchor(ANCHOR_MIDDLE)
     self.vig:SetVAnchor(ANCHOR_MIDDLE)
@@ -102,6 +104,7 @@ function PlayerHud:CreateOverlays(owner)
     self.drops_vig:GetAnimState():SetBuild("paddle_over")
     self.drops_vig:GetAnimState():SetBank("paddle_over")
     self.drops_vig:GetAnimState():PlayAnimation("over", true)
+    self.drops_vig:GetAnimState():AnimateWhilePaused(false)
 
     self.drops_vig:SetHAnchor(ANCHOR_MIDDLE)
     self.drops_vig:SetVAnchor(ANCHOR_MIDDLE)
@@ -118,9 +121,11 @@ function PlayerHud:CreateOverlays(owner)
                     self.droptask:Cancel()
                     self.droptask = nil
                 end
-                self.droptask = self.inst:DoTaskInTime(3,function() self.dropsplash = nil end)
+                self.droptask = self.inst:DoSimTaskInTime(3,function() self.dropsplash = nil end)
             end
         end, owner)
+
+    self.leafcanopy = self.overlayroot:AddChild(Leafcanopy(owner))
 
     self.storm_root = self.over_root:AddChild(Widget("storm_root"))
     self.storm_overlays = self.storm_root:AddChild(Widget("storm_overlays"))
@@ -169,12 +174,26 @@ function PlayerHud:CreateOverlays(owner)
     self.clouds:GetAnimState():SetMultColour(self.clouds.cloudcolour[1], self.clouds.cloudcolour[2], self.clouds.cloudcolour[3], 0)
     self.clouds:Hide()
 
+    self.serverpause_underlay = self.under_root:AddChild(Image("images/global.xml", "square.tex"))
+    self.serverpause_underlay:SetVRegPoint(ANCHOR_MIDDLE)
+    self.serverpause_underlay:SetHRegPoint(ANCHOR_MIDDLE)
+    self.serverpause_underlay:SetVAnchor(ANCHOR_MIDDLE)
+    self.serverpause_underlay:SetHAnchor(ANCHOR_MIDDLE)
+    self.serverpause_underlay:SetScaleMode(SCALEMODE_FILLSCREEN)
+    self.serverpause_underlay:SetTint(0,0,0,0.5)
+	self.serverpause_underlay:Hide()
+    self:SetServerPaused(TheNet:IsServerPaused(true))
+
     self.eventannouncer = self.under_root:AddChild(Widget("eventannouncer_root"))
     self.eventannouncer:SetScaleMode(SCALEMODE_PROPORTIONAL)
     self.eventannouncer:SetHAnchor(ANCHOR_MIDDLE)
     self.eventannouncer:SetVAnchor(ANCHOR_TOP)
-    self.eventannouncer = self.eventannouncer:AddChild(EventAnnouncer(owner))
+    self.eventannouncer = self.eventannouncer:AddChild(Widget("eventannouncer"))
     self.eventannouncer:SetPosition(0, GetGameModeProperty("eventannouncer_offset") or 0)
+
+    if TheFrontEnd:GetActiveScreen() == ThePlayer.HUD then
+        ThePlayer.HUD:OffsetServerPausedWidget(TheFrontEnd.serverpausewidget)
+    end
 end
 
 function PlayerHud:OnDestroy()
@@ -696,6 +715,9 @@ function PlayerHud:OnUpdate(dt)
             self.controls.godmodeindicator = nil
         end
     end
+    if self.leafcanopy then
+        self.leafcanopy:OnUpdate(dt)
+    end
 end
 
 function PlayerHud:HideControllerCrafting()
@@ -711,8 +733,10 @@ end
 function PlayerHud:OpenControllerInventory()
     TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/craft_open")
     TheFrontEnd:StopTrackingMouse()
-    self:CloseControllerCrafting()
-    self:HideControllerCrafting()
+    if self:IsControllerCraftingOpen() then
+        self:CloseControllerCrafting()
+	    self:HideControllerCrafting()
+    end
     self.controls.inv:OpenControllerInventory()
     self.controls.item_notification:ToggleController(true)
     self.controls.yotb_notification:ToggleController(true)
@@ -832,7 +856,9 @@ function PlayerHud:OpenControllerCrafting()
     if self.controls.crafttabs.tabs:GetFirstIdx() ~= nil then
         TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/craft_open")
         TheFrontEnd:StopTrackingMouse()
-        self:CloseControllerInventory()
+        if self:IsControllerInventoryOpen() then
+            self:CloseControllerInventory()
+		end
         self.controls.inv:Disable()
         self.controls.crafttabs:OpenControllerCrafting()
         self.controls.item_notification:ToggleController(true)
@@ -905,6 +931,9 @@ function PlayerHud:OnControl(control, down)
         else
             self.owner.components.playercontroller:CancelAOETargeting()
         end
+        return true
+    elseif control == CONTROL_SERVER_PAUSE then
+        SetServerPaused()
         return true
     end
 
@@ -1106,6 +1135,20 @@ function PlayerHud:HideRingMeter(success, duration)
             self.ringmeter:FadeOut(duration)
         end
         self.ringmeter = nil
+    end
+end
+
+function PlayerHud:SetServerPaused(paused)
+    if paused and not Profile:GetHidePauseUnderlay() then
+        self.serverpause_underlay:Show()
+    else
+        self.serverpause_underlay:Hide()
+    end
+end
+
+function PlayerHud:OffsetServerPausedWidget(serverpausewidget)
+    if self.eventannouncer then
+        serverpausewidget:SetOffset(self.eventannouncer:GetPosition():Get())
     end
 end
 

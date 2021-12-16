@@ -319,8 +319,8 @@ local function onhit(inst, hitter, work_left, work_done)
 end
 
 local function display_name_fn(inst)
-    return (inst:HasTag("prototyper") and STRINGS.NAMES.MOON_ALTAR.MOON_ALTAR) or
-            STRINGS.NAMES.MOON_ALTAR.MOON_ALTAR_WIP
+    return (inst:HasTag("prototyper") and STRINGS.NAMES.MOON_ALTAR) or
+            STRINGS.NAMES.MOON_ALTAR_WIP
 end
 
 local function display_name_astral_fn(inst)
@@ -639,6 +639,7 @@ local function markerfn(product)
         inst:AddTag("FX")
         inst:AddTag("NOCLICK")
         inst:AddTag("moon_altar_astral_marker")
+        inst:AddTag("antlion_sinkhole_blocker")
 
         inst.entity:SetPristine()
 

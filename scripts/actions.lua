@@ -43,9 +43,7 @@ local function CheckRowRange(doer, dest)
 end
 
 local function CheckIsOnPlatform(doer, dest)
-	local doer_pos = doer:GetPosition()
-	local p = TheWorld.Map:GetPlatformAtPoint(doer_pos.x, doer_pos.z)
-	return p ~= nil
+    return doer:GetCurrentPlatform() ~= nil
 end
 
 local function CheckOceanFishingCastRange(doer, dest)
@@ -171,6 +169,7 @@ Action = Class(function(self, data, instant, rmb, distance, ghost_valid, ghost_e
 	self.silent_fail = data.silent_fail or nil
 
     --new params, only supported by passing via data field
+    self.paused_valid = data.paused_valid or false
     self.actionmeter = data.actionmeter or nil
     self.customarrivecheck = data.customarrivecheck
     self.is_relative_to_platform = data.is_relative_to_platform
@@ -210,8 +209,8 @@ ACTIONS =
     FILL = Action(),
     FILL_OCEAN = Action({ is_relative_to_platform=true, extra_arrive_dist=ExtraDropDist }),
     DRY = Action(),
-    ADDFUEL = Action({ mount_valid=true }),
-    ADDWETFUEL = Action({ mount_valid=true }),
+    ADDFUEL = Action({ mount_valid=true, paused_valid=true }),
+    ADDWETFUEL = Action({ mount_valid=true, paused_valid=true }),
     LIGHT = Action({ priority=-4 }),
     EXTINGUISH = Action({ priority=0 }),
     LOOKAT = Action({ priority=-3, instant=true, ghost_valid=true, mount_valid=true, encumbered_valid=true }),
@@ -230,8 +229,8 @@ ACTIONS =
     MARK = Action({ distance=2, priority=-1 }),
     UNHITCH = Action({ distance=2, priority=-1 }),
     HITCH = Action({ priority=-1 }),
-    EQUIP = Action({ priority=0,instant=true, mount_valid=true, encumbered_valid=true }),
-    UNEQUIP = Action({ priority=-2,instant=true, mount_valid=true, encumbered_valid=true }),
+    EQUIP = Action({ priority=0,instant=true, mount_valid=true, encumbered_valid=true, paused_valid=true }),
+    UNEQUIP = Action({ priority=-2,instant=true, mount_valid=true, encumbered_valid=true, paused_valid=true }),
     --OPEN_SHOP = Action(),
     SHAVE = Action({ mount_valid=true }),
     STORE = Action(),
@@ -262,7 +261,7 @@ ACTIONS =
     JUMPIN = Action({ ghost_valid=true, encumbered_valid=true }),
     TELEPORT = Action({ rmb=true, distance=2 }),
     RESETMINE = Action({ priority=3 }),
-    ACTIVATE = Action(),
+    ACTIVATE = Action({priority=2}),
     MURDER = Action({ priority=1, mount_valid=true }),
     HEAL = Action({ mount_valid=true }),
     INVESTIGATE = Action(),
@@ -279,6 +278,7 @@ ACTIONS =
     TAKEITEM = Action(),
     MAKEBALLOON = Action({ mount_valid=true }),
     CASTSPELL = Action({ priority=-1, rmb=true, distance=20, mount_valid=true }),
+	CAST_POCKETWATCH = Action({ priority=-1, rmb=true, mount_valid=true }), -- to actually use the mounted action, the pocket watch will need the pocketwatch_mountedcast tag
     BLINK = Action({ priority=HIGH_ACTION_PRIORITY, rmb=true, distance=36, mount_valid=true }),
     COMBINESTACK = Action({ mount_valid=true, extra_arrive_dist=ExtraPickupRange }),
     TOGGLE_DEPLOY_MODE = Action({ priority=HIGH_ACTION_PRIORITY, instant=true }),
@@ -393,6 +393,9 @@ ACTIONS =
     ADDCOMPOSTABLE = Action(),
     WAX = Action({ encumbered_valid = true, }),
     APPRAISE = Action(),
+    UNLOAD_WINCH = Action({rmb=true, priority=3}),
+    USE_HEAVY_OBSTACLE = Action({encumbered_valid=true, rmb=true, priority=1}),
+    ADVANCE_TREE_GROWTH = Action(),
 
     CARNIVAL_HOST_SUMMON = Action(),
 
@@ -408,6 +411,9 @@ ACTIONS =
     HERD_FOLLOWERS = Action({ mount_valid=true }),
     REPEL = Action({ mount_valid=true }),
     BEDAZZLE = Action(),
+
+    -- WANDA
+    DISMANTLE_POCKETWATCH = Action({ mount_valid=true }),
 }
 
 ACTIONS_BY_ACTION_CODE = {}
@@ -539,6 +545,8 @@ ACTIONS.PICKUP.fn = function(act)
             if trainer ~= nil and trainer ~= act.doer then
                 return false, "NOTMINE_YOTC"
             end
+		elseif act.doer.components.inventory.noheavylifting and act.target:HasTag("heavy") then
+			return false, "NO_HEAVY_LIFTING"
         end
 
         if (act.target:HasTag("spider") and act.doer:HasTag("spiderwhisperer")) and 
@@ -697,14 +705,14 @@ ACTIONS.LOOKAT.fn = function(act)
     local targ = act.target or act.invobject
 
     if targ ~= nil and targ.components.inspectable ~= nil then
-        local desc = targ.components.inspectable:GetDescription(act.doer)
+        local desc, text_filter_context, original_author = targ.components.inspectable:GetDescription(act.doer)
         if desc ~= nil then
             if act.doer.components.playercontroller == nil or
                 not act.doer.components.playercontroller.directwalking then
                 act.doer.components.locomotor:Stop()
             end
             if act.doer.components.talker ~= nil then
-                act.doer.components.talker:Say(desc, nil, targ.components.inspectable.noanim)
+                act.doer.components.talker:Say(desc, nil, targ.components.inspectable.noanim, nil, nil, nil, text_filter_context, original_author)
             end
             return true
         end
@@ -2042,6 +2050,19 @@ ACTIONS.ACTIVATE.strfn = function(act)
     if act.target.GetActivateVerb ~= nil then
         return act.target:GetActivateVerb(act.doer)
     end
+end
+
+ACTIONS.CAST_POCKETWATCH.strfn = function(act)
+    if act.invobject ~= nil then
+        return FunctionOrValue(act.invobject.GetActionVerb_CAST_POCKETWATCH, act.invobject, act.doer, act.target)
+    end
+end
+
+ACTIONS.CAST_POCKETWATCH.fn = function(act)
+    local caster = act.doer
+    if act.invobject ~= nil and caster ~= nil and caster:HasTag("pocketwatchcaster") then
+		return act.invobject.components.pocketwatch:CastSpell(caster, act.target, act:GetActionPoint())
+	end
 end
 
 ACTIONS.HAUNT.fn = function(act)
@@ -3637,6 +3658,30 @@ ACTIONS.WAX.fn = function(act)
     end
 end
 
+ACTIONS.UNLOAD_WINCH.fn = function(act)
+    if act.target.components.winch ~= nil and act.target.components.winch.unloadfn ~= nil then
+        return act.target.components.winch.unloadfn(act.target)
+    end
+end
+
+ACTIONS.USE_HEAVY_OBSTACLE.strfn = function(act)
+	return act.target.use_heavy_obstacle_string_key
+end
+
+ACTIONS.USE_HEAVY_OBSTACLE.fn = function(act)
+    local heavy_item = act.doer.replica.inventory:GetEquippedItem(EQUIPSLOTS.BODY)
+
+    if heavy_item == nil or not act.target:HasTag("can_use_heavy")
+        or (act.target.use_heavy_obstacle_action_filter ~= nil and not act.target.use_heavy_obstacle_action_filter(act.target, act.doer, heavy_item)) then
+
+        return false
+    end
+    
+    if heavy_item ~= nil and act.target ~= nil and act.target.components.heavyobstacleusetarget ~= nil then
+        return act.target.components.heavyobstacleusetarget:UseHeavyObstacle(act.doer, heavy_item)
+    end
+end
+
 ACTIONS.YOTB_SEW.fn = function(act)
     if act.target:HasTag("sewingmachine") then
         if act.target.components.yotb_sewer:IsSewing() then
@@ -3724,4 +3769,21 @@ ACTIONS.REPEL.fn = function(act)
     end
 
     return false
+end
+
+ACTIONS.ADVANCE_TREE_GROWTH.fn = function(act)
+    if act.target ~= nil and act.invobject.components.treegrowthsolution then
+        return act.invobject.components.treegrowthsolution:GrowTarget(act.target)
+    end
+
+    return false
+end
+
+ACTIONS.DISMANTLE_POCKETWATCH.fn = function(act)
+    local can_dismantle, reason = act.invobject.components.pocketwatch_dismantler:CanDismantle(act.target, act.doer)
+    if can_dismantle then
+        act.invobject.components.pocketwatch_dismantler:Dismantle(act.target, act.doer)
+    end
+
+    return can_dismantle, reason
 end

@@ -68,17 +68,64 @@ CommonHandlers.OnFossilize = function()
 end
 
 --------------------------------------------------------------------------
-local function onattacked(inst, data)
+-- delay: how long before we can play another hit reaction animation, 
+-- max_hitreacts: the number of hit reacts before we enter the react cooldown. The creature's AI may still early out of this.
+-- skip_cooldown_fn: return true if you want to allow hit reacts while the hit react is in cooldown (allowing stun locking)
+local function hit_recovery_delay(inst, delay, max_hitreacts, skip_cooldown_fn)
+	local on_cooldown = false
+	if (inst._last_hitreact_time ~= nil and inst._last_hitreact_time + (delay or inst.hit_recovery or TUNING.DEFAULT_HIT_RECOVERY) >= GetTime()) then	-- is hit react is on cooldown?
+		max_hitreacts = max_hitreacts or inst._max_hitreacts
+		if max_hitreacts then
+			if inst._hitreact_count == nil then
+				inst._hitreact_count = 2
+				return false
+			elseif inst._hitreact_count < max_hitreacts then
+				inst._hitreact_count = inst._hitreact_count + 1
+				return false
+			end
+		end
+
+		skip_cooldown_fn = skip_cooldown_fn or inst._hitreact_skip_cooldown_fn
+		if skip_cooldown_fn ~= nil then
+			on_cooldown = not skip_cooldown_fn(inst, inst._last_hitreact_time, delay)
+		elseif inst.components.combat ~= nil then
+			on_cooldown = not (inst.components.combat:InCooldown() and inst.sg:HasStateTag("idle"))		-- skip the hit react cooldown if the creature is ready to attack
+		else
+			on_cooldown = true
+		end
+	end
+
+	if inst._hitreact_count ~= nil and not on_cooldown then
+		inst._hitreact_count = 1
+	end
+	return on_cooldown
+end
+
+CommonHandlers.HitRecoveryDelay = hit_recovery_delay -- returns true if inst is still in a hit reaction cooldown
+
+local function update_hit_recovery_delay(inst)
+	inst._last_hitreact_time = GetTime()
+end
+
+CommonHandlers.UpdateHitRecoveryDelay = update_hit_recovery_delay
+local function onattacked(inst, data, hitreact_cooldown, max_hitreacts, skip_cooldown_fn)
     if inst.components.health ~= nil and not inst.components.health:IsDead()
-        and (not inst.sg:HasStateTag("busy") or
-            inst.sg:HasStateTag("caninterrupt") or
-            inst.sg:HasStateTag("frozen")) then
+		and not hit_recovery_delay(inst, hitreact_cooldown, max_hitreacts, skip_cooldown_fn)
+        and (not inst.sg:HasStateTag("busy")
+            or inst.sg:HasStateTag("caninterrupt")
+            or inst.sg:HasStateTag("frozen")) then
         inst.sg:GoToState("hit")
     end
 end
 
-CommonHandlers.OnAttacked = function()
-    return EventHandler("attacked", onattacked)
+CommonHandlers.OnAttacked = function(hitreact_cooldown, max_hitreacts, skip_cooldown_fn) -- params are optional
+	hitreact_cooldown = type(hitreact_cooldown) == "number" and hitreact_cooldown or nil -- validting the data because a lot of poeple were passing in 'true' for no reason
+
+	if hitreact_cooldown ~= nil or max_hitreacts ~= nil or skip_cooldown_fn ~= nil then
+		return EventHandler("attacked", function(inst, data) onattacked(inst, data, hitreact_cooldown, max_hitreacts, skip_cooldown_fn) end)
+	else
+	    return EventHandler("attacked", onattacked)
+	end
 end
 
 --------------------------------------------------------------------------
@@ -175,7 +222,7 @@ CommonStates.AddIdle = function(states, funny_idle_state, anim_override, timelin
 end
 
 --------------------------------------------------------------------------
-CommonStates.AddSimpleState = function(states, name, anim, tags, finishstate)
+CommonStates.AddSimpleState = function(states, name, anim, tags, finishstate, timeline)
     table.insert(states, State{
         name = name,
         tags = tags or {},
@@ -186,6 +233,8 @@ CommonStates.AddSimpleState = function(states, name, anim, tags, finishstate)
             end
             inst.AnimState:PlayAnimation(anim)
         end,
+        
+        timeline = timeline,
 
         events =
         {
@@ -630,7 +679,7 @@ CommonStates.AddHopStates = function(states, wait_for_pre, anims, timelines, lan
 
 		onexit = function(inst)
 			-- here for now, should be moved into timeline
-            if land_sound and TheWorld.Map:GetPlatformAtPoint(inst.Transform:GetWorldPosition()) ~= nil then
+            if land_sound and inst:GetCurrentPlatform() then
 	            --For now we just have the land on boat sound
                 inst.SoundEmitter:PlaySound(land_sound)
             end
@@ -710,7 +759,7 @@ CommonStates.AddAmphibiousCreatureHopStates = function(states, config, anims, ti
 					inst.components.locomotor:FinishHopping()
 
 					local x, y, z = inst.Transform:GetWorldPosition()
-					inst.sg:GoToState("hop_pst", not TheWorld.Map:IsVisualGroundAtPoint(x, y, z) and TheWorld.Map:GetPlatformAtPoint(x, z) == nil)
+					inst.sg:GoToState("hop_pst", not TheWorld.Map:IsVisualGroundAtPoint(x, y, z) and inst:GetCurrentPlatform() == nil)
 				end
             elseif inst.sg.statemem.timeout or
                    (inst.sg.statemem.tryexit and inst.sg.statemem.swimming == TheWorld.Map:IsVisualGroundAtPoint(inst.Transform:GetWorldPosition())) or
@@ -718,7 +767,7 @@ CommonStates.AddAmphibiousCreatureHopStates = function(states, config, anims, ti
 				inst.components.embarker:Cancel()
 				inst.components.locomotor:FinishHopping()
 				local x, y, z = inst.Transform:GetWorldPosition()
-				inst.sg:GoToState("hop_pst", not TheWorld.Map:IsVisualGroundAtPoint(x, y, z) and TheWorld.Map:GetPlatformAtPoint(x, z) == nil)
+				inst.sg:GoToState("hop_pst", not TheWorld.Map:IsVisualGroundAtPoint(x, y, z) and inst:GetCurrentPlatform() == nil)
 			end
 		end,
 
@@ -732,7 +781,7 @@ CommonStates.AddAmphibiousCreatureHopStates = function(states, config, anims, ti
         {
             EventHandler("done_embark_movement", function(inst)
 				if not inst.AnimState:IsCurrentAnimation("jump_loop") then
-					inst.AnimState:PlayAnimation("jump_loop", false)
+					inst.AnimState:PlayAnimation(anims.loop or "jump_loop", false)
 				end
 				inst.sg.statemem.embarked = true
             end),
@@ -743,7 +792,7 @@ CommonStates.AddAmphibiousCreatureHopStates = function(states, config, anims, ti
 							inst.sg.statemem.tryexit = true
 						end
 					end
-					inst.AnimState:PlayAnimation("jump_loop", false)
+					inst.AnimState:PlayAnimation(anims.loop or "jump_loop", false)
 				end
             end),
         },
@@ -776,7 +825,7 @@ CommonStates.AddAmphibiousCreatureHopStates = function(states, config, anims, ti
 				onenters.hop_pst(inst)
 			end
 
-            inst.AnimState:PlayAnimation("jump_pst")
+            inst.AnimState:PlayAnimation(anims.pst or "jump_pst")
         end,
 
         timeline = timelines.hop_pst,
@@ -805,7 +854,7 @@ CommonStates.AddAmphibiousCreatureHopStates = function(states, config, anims, ti
             inst.components.locomotor:StopMoving()
             inst.sg.statemem.swimming = inst:HasTag("swimming")
 
-            inst.AnimState:PlayAnimation("jump_antic")
+            inst.AnimState:PlayAnimation(anims.antic or "jump_antic")
 
             inst.sg:SetTimeout(30 * FRAMES)
 
@@ -1044,6 +1093,8 @@ CommonStates.AddCombatStates = function(states, timelines, anims, fns)
             if inst.SoundEmitter ~= nil and inst.sounds ~= nil and inst.sounds.hit ~= nil then
                 inst.SoundEmitter:PlaySound(inst.sounds.hit)
             end
+
+			update_hit_recovery_delay(inst)
         end,
 
         timeline = timelines ~= nil and timelines.hittimeline or nil,
@@ -1122,6 +1173,8 @@ CommonStates.AddHitState = function(states, timeline, anim)
             if inst.SoundEmitter ~= nil and inst.sounds ~= nil and inst.sounds.hit ~= nil then
                 inst.SoundEmitter:PlaySound(inst.sounds.hit)
             end
+
+			update_hit_recovery_delay(inst)
         end,
 
         timeline = timeline,
@@ -1446,7 +1499,7 @@ CommonStates.AddRowStates = function(states, is_client)
 
             local my_x, my_y, my_z = inst.Transform:GetWorldPosition()
             local boat_x, boat_y, boat_z = 0, 0, 0
-            local boat = TheWorld.Map:GetPlatformAtPoint(my_x, my_z)
+            local boat = inst:GetCurrentPlatform()
             if boat ~= nil then
                 boat_x, boat_y, boat_z = boat.Transform:GetWorldPosition()
             end

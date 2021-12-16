@@ -5,7 +5,7 @@ require "behaviours/follow"
 
 local BrainCommon = require("brains/braincommon")
 
-local MIN_FOLLOW_DIST = 1
+local MIN_FOLLOW_DIST = 0
 local TARGET_FOLLOW_DIST = 7
 local MAX_FOLLOW_DIST = 12
 
@@ -97,7 +97,7 @@ end
 local function GetWanderDist(inst)
    local platform = inst:GetCurrentPlatform()
     if platform then
-        return platform.components.walkableplatform and platform.components.walkableplatform.radius or PLATFORM_WANDER_DIST
+        return platform.components.walkableplatform and platform.components.walkableplatform.platform_radius or PLATFORM_WANDER_DIST
     else
         return WANDER_DIST
     end

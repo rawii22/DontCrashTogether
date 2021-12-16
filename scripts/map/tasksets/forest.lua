@@ -41,6 +41,7 @@ AddTaskSet("default", {
 			"sculpture_rook",
 			"sculpture_bishop",
 			"sculpture_knight",
+            "terrariumchest",
 		},
 		set_pieces = {
 			["ResurrectionStone"] = { count = 2, tasks={"Make a pick", "Dig that rock", "Great Plains", "Squeltch", "Beeeees!", "Speak to the king", "Forest hunters", "Badlands" } },
@@ -57,6 +58,7 @@ AddTaskSet("default", {
 			["BrinePool1"] = {count = 4}, -- todo: make this scale based on world gen size
 			["BrinePool2"] = {count = 2}, -- todo: make this scale based on world gen size
 			["BrinePool3"] = {count = 2}, -- todo: make this scale based on world gen size
+			["Waterlogged1"] = {count = 3}, -- todo: make this scale based on world gen size
 		},
 
 		ocean_population = {

@@ -63,6 +63,7 @@ STRINGS =
         warly = "Warly",
         wurt = "Wurt",
         walter = "Walter",
+        wanda = "Wanda",
         unknown = "The Unknown",
         random = "Random",
     },
@@ -87,6 +88,7 @@ STRINGS =
         warly = "\"Nothing worthwhile is ever done on an empty stomach!\"",
         wurt = "\"Mermfolk known for hos-per-tality, florp.\"",
         walter = "\"A Pinetree Pioneer is always prepared!\"",
+        wanda = "\"Time! I just need more time!\"",
         random = "Anybody could be under that hat.",
     },
 
@@ -109,6 +111,7 @@ STRINGS =
         warly = "The Culinarian",
         wurt = "The Half-Pint",
         walter = "The Fearless",
+        wanda = "The Timekeeper",
     },
 
     -- Use GetCharacterDescription from stringutil -- it handles variants!
@@ -133,6 +136,7 @@ STRINGS =
         warly = "*Has his own line of custom portable cookware \n*Can spice things up \n*Has an insatiable appetite \n*Only eats gourmet food",
         wurt = "*At home in the swamp \n*Has big plans for Merm-kind \n*Is a vegetarian",
         walter = "*Not afraid of anything, except getting hurt \n*Good with a slingshot \n*Has a four-legged friend \n*Allergic to bees \n*Has no interest in fashion",
+        wanda = "*Has excellent time management skills \n*Only as old as she feels \n*In a constant race against the clock",
         random = "Anybody could be under that hat",
     },
 
@@ -157,6 +161,7 @@ STRINGS =
         warly = "*PLACEHOLDER\n\n\n\nExpertise:\nPLACEHOLDER",
         wurt = "*PLACEHOLDER\n\n\n\nExpertise:\nPLACEHOLDER",
         walter = "*PLACEHOLDER\n\n\n\nExpertise:\nPLACEHOLDER",
+        wanda = "*PLACEHOLDER\n\n\n\nExpertise:\nPLACEHOLDER",
         random = "\nSelect a random character",
     },
 
@@ -181,6 +186,7 @@ STRINGS =
         warly = "*PLACEHOLDER\n\n\n\nExpertise:\nPLACEHOLDER",
         wurt = "*PLACEHOLDER\n\n\n\nExpertise:\nPLACEHOLDER",
         walter = "*PLACEHOLDER\n\n\n\nExpertise:\nPLACEHOLDER",
+        wanda = "*PLACEHOLDER\n\n\n\nExpertise:\nPLACEHOLDER",
         random = "\nSelect a random character",
     },
 
@@ -203,6 +209,7 @@ STRINGS =
         warly = "To Warly, cooking is a language through which to express love and gratitude to those he holds dear.",
         wurt = "Wurt is a curious young Merm trying to expand her horizons... as long as those horizons don't extend into Pig territory.",
         walter = "Walter is an odd but cheerful boy, whose ability to assess danger leaves something to be desired.",
+        wanda = "Wanda is a skilled clockmaker who will stop at nothing to outrun her future.",
     },
 
 	CHARACTER_BIOS =
@@ -310,6 +317,12 @@ STRINGS =
             { title = "Favorite Food", desc = "Trail Mix" },
             { title = "Constant Companion", desc = "The only thing that could ever rival Walter's love for the great outdoors was his fascination with monsters and mystery. Nothing captured his interest more than a spooky story heard over the radio or a local legend about an elusive cryptid.\nIt was that pursuit of the unknown that eventually led him to the Constant. While searching for a man who Walter believed would have answers to his questions about a mysterious creature rumored to live in the woods, he instead came upon an abandoned cabin. The owner seemed to have left hastily, leaving all their belongings behind... including an odd radio that miraculously still seemed to be working. With curiosity getting the better of him he investigated the radio further, springing a trap that had lain dormant for years...\nNow finding himself trapped in the Constant, Walter has befriended another lost soul - a scruffy dog named Woby. Though much about her remains a mystery, Walter has vowed to one day return her to her rightful home (after all, returning lost dogs is the Pinetree Pioneer thing to do)." },
 		},
+        wanda =
+		{
+			{ title = "Birthday", desc = "August 8" },
+            { title = "Favorite Food", desc = "Taffy" },
+            { title = "Long Shadows", desc = "An enigmatic woman of... well, fluctuating age, Wanda was torn from the world she knew after accidentally creating a fracture in time and space, pulling her from her own timeline into the land of the Constant. Though she avoids divulging many details of her past with the other Survivors, she seems to have an odd familiarity with them, as though she's run into them before... or perhaps, later?" },
+		},
 	},
 
 	CHARACTER_DETAILS =
@@ -342,6 +355,7 @@ STRINGS =
         warly = "Grim",
         wurt = "Slim",
         walter = "Slim",
+        wanda = "Slim",
         random = "Unknown",
         default = "Unknown",
     },
@@ -436,7 +450,7 @@ STRINGS =
         TALKTO = "Talk to",
 		INTERACT_WITH =
 		{
-            GENERIC = "Interact With",
+            GENERIC = "Use",
 			FARM_PLANT = "Talk To",
 		},
         MINE = "Mine",
@@ -798,6 +812,16 @@ STRINGS =
 
         WAX = "Wax",
 
+        UNLOAD_WINCH = "Drop Overboard",
+
+        USE_HEAVY_OBSTACLE =
+        {
+            GENERIC = "Use",
+            LOAD_WINCH = "Load Winch",
+        },
+
+        ADVANCE_TREE_GROWTH = "Apply",
+
 		-- Winter's Feast 2019
 		WINTERSFEAST_FEAST = "Feast",
 
@@ -821,11 +845,22 @@ STRINGS =
             UNMARK = "Take Back",
         },
 
+		-- wanda
+		CAST_POCKETWATCH =
+		{
+            GENERIC = "Activate",
+			REVIVER = "Revive",
+			RECALL_MARK = "Set Time In Space",
+			--RECALL = "Travel Back",
+		},
+
         -- Webber
         MUTATE_SPIDER = "Feed",
         HERD_FOLLOWERS = "Herd Spiders",
         REPEL = "Shoo Spiders",
         BEDAZZLE = "Decorate",
+
+        DISMANTLE_POCKETWATCH = "Take Apart",
 	},
 
     -- PC controls get hex ranges EE90xx to EE9Fxx
@@ -1271,6 +1306,7 @@ STRINGS =
         WARLY = "Warly",
         WURT = "Wurt",
         WALTER = "Walter",
+        WANDA = "Wanda",
 
         PIGKING = "Pig King",
         STRAWHAT = "Straw Hat",
@@ -1689,7 +1725,7 @@ STRINGS =
        -- SPIDERHOLE_ROCK = "Spilagmite",
 
         EYEPLANT = "Eye Plant",
-        LUREPLANT = "Meat Bulb",
+        LUREPLANT = "Lureplant",
         LUREPLANTBULB = "Fleshy Bulb",
         BATBAT = "Bat Bat",
         BATCAVE = "Bat Cave",
@@ -1952,6 +1988,7 @@ STRINGS =
         HALF_HEALTH = "Maximum Health",
         DECREASE_SANITY = "Sanity",
         HALF_SANITY = "Maximum Sanity",
+		DECREASE_OLDAGE = "Years",
 
         SCULPTING_MATERIAL = "Sculpting Block",
 
@@ -2022,6 +2059,8 @@ STRINGS =
         CHESSPIECE_BEEQUEEN = "Bee Queen Figure",
         CHESSPIECE_ANTLION = "Antlion Figure",
         CHESSPIECE_GUARDIANPHASE3 = "Celestial Champion Figure",
+		CHESSPIECE_EYEOFTERROR = "Eye Of Terror Figure",
+        CHESSPIECE_TWINSOFTERROR = "Twins of Terror Figure",
 
         CHESSPIECE_PAWN_BUILDER = "Pawn Figure",
         CHESSPIECE_ROOK_BUILDER = "Rook Figure",
@@ -2051,6 +2090,8 @@ STRINGS =
         CHESSPIECE_BEEQUEEN_BUILDER = "Bee Queen Figure",
         CHESSPIECE_ANTLION_BUILDER = "Antlion Figure",
         CHESSPIECE_GUARDIANPHASE3_BUILDER = "Celestial Champion Figure",
+		CHESSPIECE_EYEOFTERROR_BUILDER = "Eye Of Terror Figure",
+        CHESSPIECE_TWINSOFTERROR_BUILDER = "Twins of Terror Figure",
 
 
         CHESSPIECE_BUTTERFLY_SKETCH = "Moon Moth Figure Sketch",
@@ -2670,11 +2711,8 @@ STRINGS =
         GLASSCUTTER = "Glass Cutter",
 
         MOON_FISSURE = "Celestial Fissure",
-        MOON_ALTAR =
-        {
-            MOON_ALTAR_WIP = "Partially Assembled Altar",
-            MOON_ALTAR = "Celestial Altar",
-        },
+        MOON_ALTAR_WIP = "Partially Assembled Altar",
+        MOON_ALTAR = "Celestial Altar",
         MOON_ALTAR_IDOL = "Celestial Altar Idol",
         MOON_ALTAR_GLASS = "Celestial Altar Base",
         MOON_ALTAR_SEED = "Celestial Altar Orb",
@@ -2726,6 +2764,7 @@ STRINGS =
 		OCEANFISH_MEDIUM_6 = "Dappled Koi",
 		OCEANFISH_MEDIUM_7 = "Golden Koi",
 		OCEANFISH_MEDIUM_8 = "Ice Bream",
+        OCEANFISH_MEDIUM_9 = "Sweetish Fish",
 
 		OCEANFISH_SMALL_1_INV = "Runty Guppy",
 		OCEANFISH_SMALL_2_INV = "Needlenosed Squirt",
@@ -2744,6 +2783,7 @@ STRINGS =
 		OCEANFISH_MEDIUM_6_INV = "Dappled Koi",
 		OCEANFISH_MEDIUM_7_INV = "Golden Koi",
 		OCEANFISH_MEDIUM_8_INV = "Ice Bream",
+        OCEANFISH_MEDIUM_9_INV = "Sweetish Fish",
 
 		PONDFISH = "Freshwater Fish",
 		PONDEEL = "Live Eel",
@@ -2820,6 +2860,22 @@ STRINGS =
 		SLINGSHOTAMMO_POOP = "Poop Pellets",
         PORTABLETENT_ITEM = "Tent Roll",
         PORTABLETENT = "Camper's Tent",
+
+		-- WANDA
+		OLDAGER_COMPONENT = "the passage of time", -- for "was killed by ..." string
+
+		POCKETWATCH_PARTS = "Time Pieces",
+		POCKETWATCH_WEAPON = "Alarming Clock",
+		POCKETWATCH_DISMANTLER = "Clockmaker's Tools",
+		POCKETWATCH_RECALL = "Backtrek Watch",
+		POCKETWATCH_HEAL = "Ageless Watch",
+		POCKETWATCH_REVIVE = "Second Chance Watch",
+		POCKETWATCH_REVIVE_REVIVER = "Second Chance Watch", -- for "was revived by ..." string
+		POCKETWATCH_WARP = "Backstep Watch",
+		POCKETWATCH_PORTAL = "Rift Watch",
+
+		POCKETWATCH_PORTAL_ENTRANCE = "Time Rift",
+		POCKETWATCH_PORTAL_EXIT = "Time Rift",
 
         -- Wigfrid
         BATTLESONG_DURABILITY = "Weaponized Warble",
@@ -2947,6 +3003,7 @@ STRINGS =
         OCEANHORROR = "Terrorclaw",
 
         MASTUPGRADE_LAMP_ITEM = "Deck Illuminator",
+        MASTUPGRADE_LAMP = "Deck Illuminator",
         MASTUPGRADE_LIGHTNINGROD_ITEM = "Lightning Conductor",
 
         WATERPUMP = "Fire Pump",
@@ -3018,8 +3075,8 @@ STRINGS =
         MOON_ALTAR_LINK = "Mysterious Energy",
 
         -- FARMING
-		FARM_PLOW = "Garden Rigamajig",
-		FARM_PLOW_ITEM = "Garden Rigamajig",
+		FARM_PLOW = "Garden Digamajig",
+		FARM_PLOW_ITEM = "Garden Digamajig",
 		FARM_HOE = "Garden Hoe",
 		GOLDEN_FARM_HOE = "Splendid Garden Hoe",
         NUTRIENTSGOGGLESHAT = "Premier Gardeneer Hat",
@@ -3134,7 +3191,8 @@ STRINGS =
         MOON_DEVICE_CONSTRUCTION3 = "Lunar Siphonator",
 
         MOON_DEVICE = "Lunar Siphonator",
-		-- Webber
+
+        -- Webber
         MUTATOR_WARRIOR = "Warrior Switcherdoodle",
         MUTATOR_DROPPER = "Dangler Switcherdoodle",
         MUTATOR_HIDER = "Cave Switcherdoodle",
@@ -3146,6 +3204,52 @@ STRINGS =
         SPIDER_HEALER = "Nurse Spider",
         SPIDER_REPELLENT = "Shoo Box",
         SPIDER_HEALER_ITEM = "Healing Glop",
+
+        -- Waterlog
+        WATERTREE_PILLAR = "Great Tree Trunk",
+        WATERTREE_ROOT = "Great Tree Root",
+
+        OCEANTREE_PILLAR = "Above-Average Tree Trunk",
+
+        OCEANTREE = "Knobbly Tree",
+        OCEANTREENUT = "Knobbly Tree Nut",
+
+        OCEANVINE = "Mossy Vine",
+        FIG = "Fig",
+        FIG_COOKED = "Cooked Fig",
+
+        GRASSGATOR = "Grass Gator",
+
+        SPIDER_WATER = "Sea Strider",
+        MUTATOR_WATER = "Strider Switcherdoodle",
+        OCEANVINE_COCOON = "Sea Strider Nest",
+        OCEANVINE_COCOON_BURNT = "Sea Strider Nest",
+
+        TREEGROWTHSOLUTION = "Tree Jam",
+
+        FIGATONI = "Figatoni",
+        FIGKABAB = "Figkabab",
+        KOALEFIG_TRUNK = "Fig-Stuffed Trunk",
+        FROGNEWTON = "Figgy Frogwich",
+
+        -- Terraria
+        EYEOFTERROR = "Eye Of Terror",
+        EYEOFTERROR_MINI = "Suspicious Peeper",
+        EYEOFTERROR_MINI_GROUNDED = "Egg Of Terror",
+        TERRARIUM = "Terrarium",
+		EYEMASKHAT = "Eye Mask",
+        SHIELDOFTERROR = "Shield of Terror",
+        TWINOFTERROR1 = "Retinazor",
+        TWINOFTERROR2 = "Spazmatism",
+
+        FROZENBANANADAIQUIRI = "Frozen Banana Daiquiri",
+        BUNNYSTEW = "Bunny Stew",
+        MILKYWHITES = "Milky Whites",
+
+        TERRARIUMCHEST = "Conspicuous Chest",
+
+        CRITTER_EYEOFTERROR = "Friendly Peeper",
+        CRITTER_EYEOFTERROR_BUILDER = "Friendly Peeper",
 	},
 
     NAME_DETAIL_EXTENTION =
@@ -3527,6 +3631,8 @@ STRINGS =
         CHESSPIECE_BEEQUEEN_BUILDER = "More regal than real.",
         CHESSPIECE_ANTLION_BUILDER = "Ain't this Antlion beautiful?",
         CHESSPIECE_GUARDIANPHASE3_BUILDER = "Its design radiates an otherworldly strangeness.",
+		CHESSPIECE_EYEOFTERROR_BUILDER = "Its stony gaze reminds you of an evil presence.",
+        CHESSPIECE_TWINSOFTERROR_BUILDER = "Double the eyes, double the terror.",
 
         CHESSPIECE_BUTTERFLY_SKETCH = "A sculpture sketch of a Moon Moth.",
         CHESSPIECE_ANCHOR_SKETCH = "A sculpture sketch of an anchor.",
@@ -3720,6 +3826,16 @@ STRINGS =
         PORTABLETENT = "Portable protection from the elements.",
         PORTABLETENT_ITEM = "Portable protection from the elements.",
 
+		-- WANDA
+		POCKETWATCH_PARTS = "It's what's inside, that counts.",
+		POCKETWATCH_WEAPON = "This clock strikes YOU.",
+		POCKETWATCH_DISMANTLER = "Tinker with timepieces.",
+		POCKETWATCH_RECALL = "Return to a distant point in time.",
+		POCKETWATCH_HEAL = "You're only as old as you feel.",
+		POCKETWATCH_REVIVE = "Undo a friend's untimely end.",
+		POCKETWATCH_WARP = "Retrace your last steps.",
+		POCKETWATCH_PORTAL = "Time travel is better with friends.",
+
         -- Wigfrid
         BATTLESONG_DURABILITY = "Give weapons more time in the spotlight.",
         BATTLESONG_HEALTHGAIN = "An ode to stealing hearts.",
@@ -3836,9 +3952,16 @@ STRINGS =
         MUTATOR_MOON = "Its recipient will be over the moon!",
         MUTATOR_HEALER = "Extra grainy, so it has to be healthy!",
         SPIDER_WHISTLE = "Call your creepy crawly friends.",
-        SPIDERDEN_BEDAZZLER = "A nice home makes for a nice disposition.",        
+        SPIDERDEN_BEDAZZLER = "A nice home makes for a nice disposition.",
         SPIDER_REPELLENT = "Let your friends know you need some space.",
         SPIDER_HEALER_ITEM = "Gross, gooey, and good for you!",
+
+        -- Waterlog
+        MUTATOR_WATER = "They look simply mouthwatering!",
+        TREEGROWTHSOLUTION = "Encourages trees to reach new heights.",
+
+		-- Terraria
+        CRITTER_EYEOFTERROR_BUILDER = "Summon a friendly ocular companion.",
         
     },    -- MAXWELL_TEST = {"Say pal, you don't look so good.", "You better find something to eat before night comes!"},
 
@@ -5033,6 +5156,7 @@ STRINGS =
 		WINTERSFEASTCOOKING = "Feast",
         HERMITCRABSHOP = "Bottle Exchange",
 		SLINGSHOTAMMO = "Slingshot Ammo",
+		CLOCKMAKER = "Clocksmithy",
         TURFCRAFTING = "Landscaping",
 		BALLOONOMANCY = "Balloonomancy",
     },
@@ -5068,7 +5192,7 @@ STRINGS =
     YOTB_CONTEST_THIRD_PLACE = "Alright, my pick for third place is...",
     YOTB_CONTEST_SECOND_PLACE = "And In second place...",
     YOTB_CONTEST_FIRST_PLACE = "Finally, my first place pick is...",
-    YOTB_CONGRATS_WINNER = "Congrats little guy! you win!",
+    YOTB_CONGRATS_WINNER = "Congrats little guy! You win!",
     YOTB_CONGRATS_WINNER_SECOND = "Congratulations!",
     YOTB_CONGRATS_WINNER_THIRD = "Take a bow!",
 
@@ -5390,6 +5514,14 @@ STRINGS =
 
     WAGSTAFF_GOTTAGO1 = "Aha! This selenological anomaly can only mean one thing!",
     WAGSTAFF_GOTTAGO2 = "Now is my chance!",
+
+    -- Terraria
+    EYEOFTERROR_COMING = "You feel an evil presence watching you...",
+    EYEOFTERROR_TARGET = "The Eye of Terror turns its gaze toward {player_name}",
+    EYEOFTERROR_CANCEL = "The evil presence has subsided.",
+
+    TWINS_COMING = "This is going to be a terrible night...",
+    TWINS_TARGET = "The Twins turn their gaze toward {player_name}",
 }
 
 STRINGS.BUNNYMANNAMES =
@@ -5757,6 +5889,7 @@ STRINGS.UI =
         BUILD = "Build",
         PROTOTYPE = "Prototype",
         RESEARCH = "Research",
+        GAMEPAUSED = "Unpause the game to craft this.",
         TABACTION =
         {
             CARTOGRAPHY = "Scribe",
@@ -5773,6 +5906,10 @@ STRINGS.UI =
 			QUAGMIRE_TRADER_KID = "Purchase",
 			MADSCIENCE = "Mix",
         },
+		RECIPEACTION =
+		{
+            SOCKET = "Socket",
+		},
         TABNEEDSTUFF =
         {
             QUAGMIRE_MEALINGSTONE = "Find ingredients \nto grind!",
@@ -6264,8 +6401,8 @@ STRINGS.UI =
         CANT_LOAD_TITLE = "Load Failed",
         CANT_LOAD_ROG = "Reign of Giants is not installed. Unable to load.",
 
-		MAINBANNER_ROT_BETA_TITLE = "Return of Them Beta\nEye of the Storm",
-		MAINBANNER_BETA_TITLE = "March QoL\nBeta Build",
+		MAINBANNER_ROT_BETA_TITLE = "Beta Build", --unused now.
+		MAINBANNER_BETA_TITLE = "October QoL\nBeta Build",
 
         CONSOLE_EDITION_TEXT = "Console Edition",
 
@@ -6836,6 +6973,7 @@ STRINGS.UI =
         TITLE = "Game Options",
         GRAPHICS = "Graphics",
         SETTINGS = "Settings",
+        ADVANCED = "Advanced",
         CONTROLS = "Controls",
         LANGUAGES = "Languages",
         LANG_TITLE = "Language Options",
@@ -6843,6 +6981,7 @@ STRINGS.UI =
         MORE = "More",
         TOOLTIP_GRAPHICS = "Modify the graphics settings",
         TOOLTIP_SETTINGS = "Modify features of the game and user interface",
+        TOOLTIP_ADVANCED = "Modify advanced features of the game and user interface",
         TOOLTIP_CONTROLS = "Rebind which input does which in-game action",
         TOOLTIP_LANGUAGES = "Select display language",
 		TOOLTIP_CONTROLS_CONSOLE = "Check which control does which in-game action",
@@ -6885,8 +7024,11 @@ STRINGS.UI =
         HUDSIZE = "HUD Size:",
         VIBRATION = "Vibration:",
         WATHGRITHRFONT = "Wigfrid's Umlauts:",
+        WALTERCAMERA = "Campfire Camera:",
         BOATCAMERA = "Seafaring Camera:",
         BACKPACKMODE = "Backpack Layout:",
+        AUTOPAUSE = "Auto-pause:",
+        CONSOLEAUTOPAUSE = "Console Auto-pause:",
 		INTEGRATEDBACKPACK_DISABLED = "Separated",
 		INTEGRATEDBACKPACK_ENABLED = "Integrated",
         DATACOLLECTION = "Data Collection:",
@@ -6897,6 +7039,7 @@ STRINGS.UI =
         TEXTURESTREAMING = "Texture Streaming",
         THREADEDRENDER = "Threaded Render:",
 		SCREEN_FLASH_INTENSITY = "Screen Flashes:",
+        DYNAMIC_TREE_SHADOWS = "Canopy Shadows:",
         RESTART_TEXTURE_STREAMING_TITLE = "Restart Required",
         RESTART_TEXTURE_STREAMING_BODY = "For Texture Streaming changes to take effect, you will have to exit and restart the game.",
         RESTART_THREADED_RENDER_TITLE = "Restart Required",
@@ -6911,6 +7054,7 @@ STRINGS.UI =
         ANIMATED_HEADS = "Moving Head Icons:",
         SHOWPASSWORD = "Show Passwords:",
 		SERVER_NAME_PROFANITY_FILTER = "Filter Server Names:",
+		SERVER_NAME_PROFANITY_CHAT_FILTER = "Steam Chat Filtering:",
         SNAPSHOTS = "Server Snapshots",
         INPUT = "Input Device:",
         ACTION = "Action",
@@ -7095,6 +7239,7 @@ STRINGS.UI =
             VERSION_MISMATCH_PUBLIC_BETA = "Public Beta Server",
             VERSION_MISMATCH_ARNBETA = "A New Reign Beta",
 			VERSION_MISMATCH_ROTBETA = "Return of Them Beta",
+			VERSION_MISMATCH_UPDATEBETA = "Beta Branch",
             VERSION_HANDSHAKE_FAILED    = "Version Mismatch",
             ID_INCOMPATIBLE_PROTOCOL_VERSION = "Version Mismatch",
             ID_DST_INCOMPATIBLE_PROTOCOL_VERSION = "Version Mismatch",
@@ -7161,6 +7306,7 @@ STRINGS.UI =
             VERSION_MISMATCH_PUBLIC_BETA = "The server is running a public beta world. You'll need to opt into the beta to play on this server.",
             VERSION_MISMATCH_ARNBETA = "The server is running the A New Reign Beta version. You'll need to opt into the beta to play on this server.",
 			VERSION_MISMATCH_ROTBETA = "The server is running the Return of Them Beta version. You'll need to opt into the beta to play on this server.",
+			VERSION_MISMATCH_UPDATEBETA = "The server is running the Beta Branch version. You'll need to opt into the beta to play on this server.",
             VERSION_HANDSHAKE_FAILED = "The server is on a different version than you. Please check that your game version is up-to-date.",
             ID_INCOMPATIBLE_PROTOCOL_VERSION = "The server has a different version than you do. Please check that your game version is up-to-date.",
             ID_DST_INCOMPATIBLE_PROTOCOL_VERSION = "The server has a different version than you do. Please check that your game version is up-to-date.",
@@ -7230,6 +7376,16 @@ STRINGS.UI =
         ISSUE = "Report an Issue",
         SERVERACTIONS = "Server Commands",
         CLOSE = "Close",
+        PAUSED_DST_TITLE = "Paused!",
+        AUTOPAUSED_DST_TITLE = "Auto-Paused!",
+        PAUSED_DST_SUBTITLE = "Seriously. It is!",
+        PAUSE_SERVER = "Pause Server",
+        UNPAUSE_SERVER = "Unpause Server",
+
+        AUTOPAUSE_TEXT = "The game is auto-paused.",
+        PLAYERPAUSED_TEXT = "{player} paused the game.",
+        HOSTPAUSED_TEXT = "The server host has paused the game.",
+        SELFPAUSED_TEXT = "You have paused the game.",
     },
 
 	WORDPREDICTIONWIDET =
@@ -7606,6 +7762,8 @@ STRINGS.UI =
             DST_CAVE_PLUS = "Caves Plus",
             LAVAARENA = "The Forge",
             QUAGMIRE = "The Gorge",
+            TERRARIA = "Taste of Terraria",
+            TERRARIA_CAVE = "Caves of Terraria",
 
             MOD_MISSING = "<MOD MISSING>",
         },
@@ -7635,6 +7793,8 @@ STRINGS.UI =
             DST_CAVE_PLUS = "A darker, more arachnid-y cave experience.",
             LAVAARENA = "Dare you prove yourself in The Forge?",
             QUAGMIRE = "Can you stand the heat in The Gorge?",
+            TERRARIA = "Don't Starve Together, with a Terarria-inspired twist.",
+            TERRARIA_CAVE = "Don't Starve Together, with a Terarria-inspired twist... in the caves!",
 
             MOD_MISSING = "This preset came from a mod, but that mod isn't active right now!",
         },
@@ -7852,6 +8012,11 @@ STRINGS.UI =
         OCEAN_WATERPLANT = "Sea Weeds",
         OCEAN_WOBSTERDEN = "Wobster Mounds",
         OCEAN_BULLKELP = "Bull Kelp",
+
+		EYEOFTERROR = "Eye of Terror",
+		TERRARIUMCHEST = "Terrarium",
+
+		-- End of world customization strings
     },
 
     QUICKJOINSCREEN =
@@ -7929,6 +8094,7 @@ STRINGS.UI =
         SERVERTYPE = "Server Type:",
         ISEMPTY = "Show Empty Servers:",
         ISFULL = "Show Full Servers:",
+        ISPAUSED = "Hide Paused Servers:",
         MINCURRPLAYERS = "Min Players Active",
         MAXCURRPLAYERS = "Max Players Active",
         MAXSERVERSIZE = "Max Players",--"Max Server Size",
@@ -7966,6 +8132,7 @@ STRINGS.UI =
         CLIENT_MODS_DISABLED_BODY = "Your client mods will be temporarily disabled while playing on this server.",
         PASSWORD_ICON_HOVER = "Passworded",
         DEDICATED_ICON_HOVER = "Dedicated Server",
+        PAUSED = "Paused",
 		DEDICATED_KLEI_ICON_HOVER = "Klei Official Server",
         FRIEND_ICON_HOVER = "Friends Playing",
         FRIEND_SERVER_ICON_HOVER = "Friend-Hosted",
@@ -7983,6 +8150,8 @@ STRINGS.UI =
         OFFLINE_MODE_BODY_PS4 = "You are currently in offline mode and cannot join online worlds. Please log in and try again.",
         OFFLINEWARNINGTITLE = "Offline World",
         OFFLINEMODEBODYJOIN = "Are you sure you want to join an offline world? You will not be able to receive or use Collection Items in this world.",
+        PAUSEDWARNING_TITLE = "Paused World",
+        PAUSEDWARNING_BODY = "Are you sure you want to join a paused world? You will not be able to play until the server is unpaused.",
         NO_CONNECTION_TO_MASTER_SERVER = "Network Error",
         NO_CONNECTION_TO_MASTER_SERVER_DESC = "Failed to connect to the master server.\nPlease check your network connection.",
         CHAR_AGE_1 = "Survived ",
@@ -8253,6 +8422,7 @@ STRINGS.UI =
         UNKNOWN_USER_NAME = "[unknown]", -- this is consistent with what steam when it can't get a player name
         SNAPSHOTS_TITLE = "Snapshots: ",
         RESTORE_SNAPSHOT = "Restore Snapshot",
+        SYSTEMMESSAGE = "Server",
     },
 
     LOBBYSCREEN =
@@ -8309,6 +8479,12 @@ STRINGS.UI =
     {
         TITLE = "Clothing Presets",
     },
+    
+    ITEM_SKIN_DEFAULTS =
+    {
+        TITLE = "Curios for Starting Items",
+    },
+
 
     LOBBY_WAITING_FOR_PLAYERS_SCREEN =
     {
@@ -9672,8 +9848,8 @@ STRINGS.UI =
         Reward          = "Reward",
         Event           = "Event (Limited-Time Use)",
 
-        Lustrous        = "Lustrous",
 		Woven		    = "Woven - ",
+		Inspired        = "Inspired - ",
         CharacterModifier = "",
 
     },
@@ -10244,6 +10420,7 @@ STRINGS.UI =
             "Menu Misc 3", --controller
             "Menu Misc 4", --controller
             "Inspect Self",
+            "Pause Server",
         },
 
         DEVICE_TITLE = "Controls",
@@ -11051,6 +11228,7 @@ STRINGS.CHARACTERS =
     WARLY = require "speech_warly",
     WURT = require "speech_wurt",
     WALTER = require "speech_walter",
+    WANDA = require "speech_wanda",
 }
 
 STRINGS.LUCY =

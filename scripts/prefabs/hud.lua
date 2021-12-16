@@ -88,6 +88,7 @@ local assets =
     Asset("INV_IMAGE", "decrease_health"),
     Asset("INV_IMAGE", "decrease_hunger"),
     Asset("INV_IMAGE", "decrease_sanity"),
+    Asset("INV_IMAGE", "decrease_oldage"),
 
     Asset("INV_IMAGE", "half_health"),
     Asset("INV_IMAGE", "half_hunger"),
@@ -109,6 +110,8 @@ local assets =
     Asset("PKGREF", "images/bg_redux_wardrobe_bg.tex"),
 
     Asset("ANIM", "anim/ink_over.zip"),
+
+    Asset("ANIM", "anim/leaves_canopy.zip"),
 }
 
 local prefabs =

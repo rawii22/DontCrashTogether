@@ -1,4 +1,18 @@
 
+local function FlagForRetrofitting_Forest(savedata, flag_name)
+    if savedata ~= nil and savedata.map ~= nil and savedata.map.prefab == "forest" then
+        if savedata.map.persistdata == nil then
+            savedata.map.persistdata = {}
+        end
+
+        if savedata.map.persistdata.retrofitforestmap_anr == nil then
+            savedata.map.persistdata.retrofitforestmap_anr = {}
+        end
+        savedata.map.persistdata.retrofitforestmap_anr[flag_name] = true
+    end
+
+end
+
 local t = nil
 t = {
     utilities = {
@@ -1101,6 +1115,46 @@ t = {
                 --        savedata.map.persistdata.retrofitforestmap_anr.retrofit_removeextraaltarpieces = true
                 --    end
                 --end
+            end,
+        },
+
+        {
+            version = 5.07, --Waterlogged - new content
+            fn = function(savedata)
+                if savedata ~= nil and savedata.map ~= nil and savedata.map.prefab == "forest" then
+                    if savedata.map.persistdata == nil then
+                        savedata.map.persistdata = {}
+                    end
+                    savedata.retrofit_waterlogged_waterlog_setpiece = true -- static layouts need to be done before the map is finalized
+                end
+            end,
+        },
+        {
+            version = 5.08, --Waterlogged retry retrofitting
+            fn = function(savedata)
+                if savedata ~= nil and savedata.map ~= nil and savedata.map.prefab == "forest" then
+                    if savedata.map.persistdata == nil then
+                        savedata.map.persistdata = {}
+                    end
+                    local place_count = 0
+                    if savedata.ents and savedata.ents.watertree_pillar then
+                        --the orignal setpiece each had 3 watertrees.
+                        --we can determine the amount of placed setpieces by dividing the number watertree_pillars divided by 3.
+                        place_count = math.floor(#savedata.ents.watertree_pillar / 3)
+                    end
+                    --don't run the retrofitting if you already have 3 placed setpieces.
+                    if place_count < 3 then
+                        savedata.retrofit_waterlogged_waterlog_setpiece_retry = true -- static layouts need to be done before the map is finalized
+                        savedata.retrofit_waterlogged_waterlog_place_count = 3 - place_count
+                    end
+                end
+            end,
+        },
+
+        {
+            version = 5.09, -- Terraria - new content
+            fn = function(savedata)
+				FlagForRetrofitting_Forest(savedata, "retrofit_terraria_terrarium")
             end,
         },
     },

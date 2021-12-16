@@ -169,6 +169,8 @@ CONTROL_MENU_MISC_4 = 71  -- R
 
 CONTROL_INSPECT_SELF = 72 -- Keyboard self inspect [I]
 
+CONTROL_SERVER_PAUSE = 73
+
 CONTROL_CUSTOM_START = 100
 
 XBOX_CONTROLLER_ID = 17
@@ -353,7 +355,8 @@ DST_CHARACTERLIST =
     "wortox",
     "wormwood",
     "wurt",
-    "walter"
+    "walter",
+    "wanda",
 }
 
 CHARACTER_VIDEOS =
@@ -375,6 +378,7 @@ CHARACTER_VIDEOS =
     warly = {"https://bit.ly/39vp0tG"},
     wurt = {"https://bit.ly/2QVJup1"},
 	walter = {"https://bit.ly/31Ajrpj"},
+	wanda = {"https://klei.gg/dst-wanda-short"},
 }
 
 
@@ -498,6 +502,7 @@ CHARACTER_GENDERS =
         "wathgrithr",
         "winona",
         "wurt",
+        "wanda",
     },
     MALE =
     {
@@ -611,7 +616,7 @@ GROUND =
 
     FARMING_SOIL = 47,
 
-	-- PUBLIC USE SPACE FOR MODS is 70 to 89 --
+	-- PUBLIC USE SPACE FOR MODS is 70 to 109 --
 
     --NOISE -- from 110 to 127 -- TODO: move noise tile range to > 255
 	FUNGUSMOON_NOISE = 120,
@@ -652,6 +657,7 @@ GROUND =
 	OCEAN_BRINEPOOL = 205,
 	OCEAN_BRINEPOOL_SHORE = 206,
 	OCEAN_HAZARDOUS = 207,
+    OCEAN_WATERLOG = 208, 
 
 	-- MODS OCEAN TILES [231, 247]  <--PUBLIC USE SPACE FOR MODS --
 
@@ -917,10 +923,11 @@ end
 FE_MUSIC =
     (FESTIVAL_EVENT_MUSIC[WORLD_FESTIVAL_EVENT] ~= nil and FESTIVAL_EVENT_MUSIC[WORLD_FESTIVAL_EVENT].sound) or
     (SPECIAL_EVENT_MUSIC[WORLD_SPECIAL_EVENT] ~= nil and SPECIAL_EVENT_MUSIC[WORLD_SPECIAL_EVENT].sound) or
+    "terraria1/common/music_main_eot"
+    --"dontstarve/music/music_FE"
     --"dontstarve/music/music_moonstorm_FE"
-   "dontstarve/music/music_FE_webber"
-   --"dontstarve/music/music_FE"
-
+    --"dontstarve/music/music_FE_webber"
+    --"dontstarve/music/music_FE_wanda"
 
 ---------------------------------------------------------
 NUM_HALLOWEENCANDY = 14
@@ -1161,6 +1168,8 @@ COLLISION =
     GIANTS            = 16384,	-- collide with obstacles but not small obstacles
 }
 
+MAX_PHYSICS_RADIUS = 4 --boats are currently the largest.
+
 BLENDMODE =
 {
 	Disabled = 0,
@@ -1222,7 +1231,8 @@ CUSTOM_RECIPETABS =
     SPIDERCRAFT   = { str = "SPIDERCRAFT",      sort = 999, icon = "tab_spidercraft.tex",   owner_tag = "spiderwhisperer", icon_atlas = "images/hud2.xml" },
     NATURE        = { str = "NATURE",			sort = 999, icon = "tab_nature.tex",        owner_tag = "plantkin"     },
 	SLINGSHOTAMMO =	{ str = "SLINGSHOTAMMO",	sort = 999, icon = "tab_slingshot.tex",	    owner_tag = "pebblemaker"  },
-	BALLOONOMANCY = { str = "BALLOONOMANCY",	sort = 999, icon = "tab_balloonomancy.tex",	owner_tag = "balloonomancer", icon_atlas = "images/hud2.xml" },
+	BALLOONOMANCY = { str = "BALLOONOMANCY",	sort = 999, icon = "tab_balloonomancy.tex",	owner_tag = "balloonomancer",	icon_atlas = "images/hud2.xml" },
+	CLOCKMAKER =	{ str = "CLOCKMAKER",		sort = 999, icon = "tab_clockmaker.tex",	owner_tag = "clockmaker",		icon_atlas = "images/hud2.xml"},
 }
 
 QUAGMIRE_RECIPETABS =
@@ -1451,6 +1461,7 @@ CHARACTER_COLOURS =
     wormwood     = WEBCOLOURS.RED, --VITO do something here
     wurt         = WEBCOLOURS.RED, --VITO do something here
     walter       = WEBCOLOURS.RED, --VITO do something here
+    wanda        = WEBCOLOURS.RED, --VITO do something here
     --
     default      = WEBCOLOURS.THISTLE,
 }
@@ -1523,8 +1534,7 @@ SamplerColourMode = {
 }
 
 TexSamplers = {}
-UniformVariables = {
-}
+UniformVariables = {}
 SamplerEffects = {}
 PostProcessorEffects = {}
 
@@ -1536,6 +1546,8 @@ RESET_ACTION =
 	DO_DEMO = 3,
     JOIN_SERVER = 4
 }
+
+ShadeTypes = {}
 
 HUD_ATLAS = "images/hud.xml"
 UI_ATLAS = "images/ui.xml"
@@ -1717,6 +1729,7 @@ CHARACTER_INGREDIENT =
     MAX_HEALTH = "half_health",
     SANITY = "decrease_sanity",
     MAX_SANITY = "half_sanity",
+	OLDAGE = "decrease_oldage",
 }
 
 --Character ingredient amounts must be multiples of 5
@@ -2179,6 +2192,13 @@ CURRENT_BETA = 1 -- set to 0 if there is no beta. Note: release builds wont use 
 BETA_INFO =
 {
     {
+		NAME = "UPDATEBETA",
+		SERVERTAG = "public_update_beta",
+		VERSION_MISMATCH_STRING = "VERSION_MISMATCH_UPDATEBETA",
+		URL = "https://forums.kleientertainment.com/forums/topic/106156-how-to-opt-in-to-return-of-them-beta-for-dont-starve-together/",
+	},
+
+    {
 		NAME = "ROTBETA",
 		SERVERTAG = "return_of_them_beta",
 		VERSION_MISMATCH_STRING = "VERSION_MISMATCH_ROTBETA",
@@ -2214,6 +2234,7 @@ TEXT_FILTER_CTX_UNKNOWN = 0
 TEXT_FILTER_CTX_GAME = 1
 TEXT_FILTER_CTX_CHAT = 2
 TEXT_FILTER_CTX_NAME = 3
+TEXT_FILTER_CTX_SERVERNAME = 0 -- not sure how we want to handle this
 
 
 CHARACTER_BUTTON_OFFSET =
@@ -2226,6 +2247,7 @@ CHARACTER_BUTTON_OFFSET =
     winona = -49,
     wurt = -45,
     webber = -45,
+    wanda = -51,
 
     default = -47,
 }
@@ -2258,6 +2280,8 @@ SKIN_TYPES_THAT_RECEIVE_CLOTHING =
 	"stage_2",
     "stage_3",
     "stage_4",
+	"young_skin",
+	"old_skin",
 	"powerup",
 	"NO_BASE",
 }

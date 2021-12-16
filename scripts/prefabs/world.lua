@@ -32,6 +32,7 @@ local assets =
     Asset("ANIM", "anim/frames_comp.zip"),
 
     Asset("ANIM", "anim/frozen.zip"),
+    Asset("ANIM", "anim/floating_items.zip"),
 
     Asset("DYNAMIC_ATLAS", "images/bg_spiral_anim.xml"),
     Asset("PKGREF", "images/bg_spiral_anim.tex"),
@@ -439,7 +440,7 @@ function MakeWorld(name, customprefabs, customassets, common_postinit, master_po
         inst:AddComponent("walkableplatformmanager")
 
         inst:AddComponent("waterphysics")
-        inst.components.waterphysics.restitution = 1.75
+        inst.components.waterphysics.restitution = 0.75
 
         if not inst.ismastersim then
             return inst

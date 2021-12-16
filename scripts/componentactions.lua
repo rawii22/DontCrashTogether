@@ -18,7 +18,7 @@ local function Row(inst, doer, pos, actions)
     local platform_under_cursor = map:GetPlatformAtPoint(pos.x, pos.z)
 
     local doer_x, doer_y, doer_z = doer.Transform:GetWorldPosition()
-    local my_platform = map:GetPlatformAtPoint(doer_x, doer_z)
+    local my_platform = doer:GetCurrentPlatform()
     local is_controller_attached = doer.components.playercontroller.isclientcontrollerattached
 
     local is_hovering_cursor_over_my_platform = false
@@ -100,14 +100,21 @@ local function GetFishingAction(doer, fishing_target)
 	return nil
 end
 
--- SCENE, USEITEM, POINT, EQUIPPED, INVENTORY
+-- SCENE		using an object in the world
+-- USEITEM		using an inventory item on an object in the world
+-- POINT		using an inventory item on a point in the world
+-- EQUIPPED		using an equiped item on yourself or a target object in the world
+-- INVENTORY	using an inventory item
+
 local COMPONENT_ACTIONS =
 {
     SCENE = --args: inst, doer, actions, right
     {
-        activatable = function(inst, doer, actions)
+        activatable = function(inst, doer, actions, right)
             if inst:HasTag("inactive") then
-                table.insert(actions, ACTIONS.ACTIVATE)
+				if right or inst.replica.inventoryitem == nil then
+	                table.insert(actions, ACTIONS.ACTIVATE)
+				end
             end
         end,
 
@@ -165,7 +172,7 @@ local COMPONENT_ACTIONS =
         combat = function(inst, doer, actions, right)
             if not right and
                 doer:CanDoAction(ACTIONS.ATTACK) and
-                inst.replica.health ~= nil and not inst.replica.health:IsDead() and
+                not IsEntityDead(inst, true) and
                 inst.replica.combat ~= nil and inst.replica.combat:CanBeAttacked(doer) then
                 table.insert(actions, ACTIONS.ATTACK)
             end
@@ -245,6 +252,15 @@ local COMPONENT_ACTIONS =
         hauntable = function(inst, doer, actions)
             if not (inst:HasTag("haunted") or inst:HasTag("catchable")) then
                 table.insert(actions, ACTIONS.HAUNT)
+            end
+        end,
+        
+        heavyobstacleusetarget = function(inst, doer, actions, right)
+            local item = doer.replica.inventory:GetEquippedItem(EQUIPSLOTS.BODY)
+            if right and item ~= nil and item:HasTag("heavy") and inst:HasTag("can_use_heavy")
+                and (inst.use_heavy_obstacle_action_filter == nil or inst.use_heavy_obstacle_action_filter(inst, doer, item)) then
+                
+                table.insert(actions, ACTIONS.USE_HEAVY_OBSTACLE)
             end
         end,
 
@@ -599,6 +615,12 @@ local COMPONENT_ACTIONS =
             end
         end,
 
+        winch = function(inst, doer, actions, right)
+            if right and inst:HasTag("takeshelfitem") then
+                table.insert(actions, ACTIONS.UNLOAD_WINCH)
+            end
+        end,
+
         wintersfeasttable = function(inst, doer, actions, right)
             if right and inst:HasTag("readyforfeast") and not inst:HasTag("fire") and not inst:HasTag("burnt") then
 				table.insert(actions, ACTIONS.WINTERSFEAST_FEAST)
@@ -618,7 +640,7 @@ local COMPONENT_ACTIONS =
 
         yotc_racecompetitor = function(inst, doer, actions, right)
             if (inst:HasTag("has_prize") or inst:HasTag("has_no_prize"))
-                    and (inst.replica.health == nil or not inst.replica.health:IsDead()) then
+                    and not IsEntityDead(inst) then
                 table.insert(actions, ACTIONS.PICKUP)
             end
         end,
@@ -1010,6 +1032,14 @@ local COMPONENT_ACTIONS =
             end
         end,
 
+        pocketwatch = function(inst, doer, target, actions)
+            if inst:HasTag("pocketwatch_inactive") and doer:HasTag("pocketwatchcaster") and inst.pocketwatch_CanTarget ~= nil and inst:pocketwatch_CanTarget(doer, target) then
+				if not (doer.replica.rider ~= nil and doer.replica.rider:IsRiding()) or inst:HasTag("pocketwatch_mountedcast") then
+	                table.insert(actions, ACTIONS.CAST_POCKETWATCH)
+				end
+            end
+        end,
+
         preservative = function(inst, doer, target, actions, right)
 			if right and target.replica.health == nil
 				and (target:HasTag("fresh") or target:HasTag("stale") or target:HasTag("spoiled"))
@@ -1032,7 +1062,7 @@ local COMPONENT_ACTIONS =
                 for k, v in pairs(MATERIALS) do
                     if target:HasTag("repairable_"..v) then
                         if (inst:HasTag("work_"..v) and target:HasTag("workrepairable"))
-                            or (inst:HasTag("health_"..v) and target.replica.health ~= nil and not target.replica.health:IsFull())
+                            or (inst:HasTag("health_"..v) and target:HasTag("healthrepairable"))
                             or (inst:HasTag("freshen_"..v) and (target:HasTag("fresh") or target:HasTag("stale") or target:HasTag("spoiled"))) then
                             table.insert(actions, ACTIONS.REPAIR)
                         end
@@ -1138,6 +1168,19 @@ local COMPONENT_ACTIONS =
                 not (doer.replica.rider ~= nil and doer.replica.rider:IsRiding() and
                     not (target.replica.inventoryitem ~= nil and target.replica.inventoryitem:IsGrandOwner(doer))) then
                 table.insert(actions, ACTIONS.GIVE)
+            end
+		end,
+
+        treegrowthsolution = function(inst, doer, target, actions)
+            if target:HasTag("tree") and
+                not target:HasTag("monster") and
+                not target:HasTag("fire") and
+                not target:HasTag("burnt") and
+                not target:HasTag("stump") and
+                not target:HasTag("leif") and
+                not target:HasTag("no_force_grow") then
+
+                table.insert(actions, ACTIONS.ADVANCE_TREE_GROWTH)
             end
 		end,
 
@@ -1312,13 +1355,13 @@ local COMPONENT_ACTIONS =
         end,
 
         quagmire_slaughtertool = function(inst, doer, target, actions)
-            if target:HasTag("canbeslaughtered") and target.replica.health ~= nil and not target.replica.health:IsDead() then
+            if target:HasTag("canbeslaughtered") and not IsEntityDead(target) then
                 table.insert(actions, ACTIONS.SLAUGHTER)
             end
         end,
 
         spidermutator = function(inst, doer, target, actions)
-            if target:HasTag("spider") and target.replica.health ~= nil and not target.replica.health:IsDead() then
+            if target:HasTag("spider") and not IsEntityDead(target) then
                 table.insert(actions, ACTIONS.MUTATE_SPIDER)
             end
         end,
@@ -1326,6 +1369,12 @@ local COMPONENT_ACTIONS =
         bedazzler = function(inst, doer, target, actions)
             if doer:HasTag("spiderwhisperer") and target:HasTag("spiderden") and target:HasTag("bedazzleable") and not target:HasTag("bedazzled") then
                table.insert(actions, ACTIONS.BEDAZZLE) 
+            end
+        end,
+
+        pocketwatch_dismantler = function (inst, doer, target, actions)
+            if doer:HasTag("clockmaker") and target:HasTag("pocketwatch") then
+                table.insert(actions, ACTIONS.DISMANTLE_POCKETWATCH)
             end
         end,
     },
@@ -1583,7 +1632,7 @@ local COMPONENT_ACTIONS =
         spellcaster = function(inst, doer, target, actions, right)
             if right and not target:HasTag("nomagic") and (
                     inst:HasTag("castontargets") or
-                    (inst:HasTag("castonrecipes") and AllRecipes[target.prefab] ~= nil and not AllRecipes[target.prefab].no_deconstruction) or
+                    (inst:HasTag("castonrecipes") and AllRecipes[target.prefab] ~= nil and not FunctionOrValue(AllRecipes[target.prefab].no_deconstruction, target)) or
                     (target:HasTag("locomotor") and (
                         inst:HasTag("castonlocomotors") or
                         (inst:HasTag("castonlocomotorspvp") and (target == doer or TheNet:GetPVPEnabled() or not (target:HasTag("player") and doer:HasTag("player"))))
@@ -1831,6 +1880,14 @@ local COMPONENT_ACTIONS =
                 if rod ~= nil and rod.replica.container ~= nil and rod.replica.container:IsOpenedBy(doer) and rod:HasTag("accepts_oceanfishingtackle") and rod.replica.container:CanTakeItemInSlot(inst) then
                     table.insert(actions, ACTIONS.CHANGE_TACKLE)
                 end
+            end
+        end,
+
+        pocketwatch = function(inst, doer, actions)
+            if inst:HasTag("pocketwatch_inactive") and doer:HasTag("pocketwatchcaster") and inst:HasTag("pocketwatch_castfrominventory") then
+				if not (doer.replica.rider ~= nil and doer.replica.rider:IsRiding()) or inst:HasTag("pocketwatch_mountedcast") then
+	                table.insert(actions, ACTIONS.CAST_POCKETWATCH)
+				end
             end
         end,
 

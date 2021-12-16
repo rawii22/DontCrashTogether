@@ -1,3 +1,7 @@
+local easing = require("easing")
+
+local PROPAGATOR_DT = 0.5
+
 local Propagator = Class(function(self, inst)
     self.inst = inst
     self.flashpoint = 100
@@ -17,9 +21,16 @@ local Propagator = Class(function(self, inst)
     --used as a public property for configuring propagator.
     --self.pauseheating = nil
 
+    self:CalculateHeatCap()
+
     self.spreading = false
     self.delay = nil
 end)
+
+function Propagator:CalculateHeatCap()
+    self.heat_this_update = 0
+    self.max_heat_this_update = (self.flashpoint / easing.outCubic(math.random(), 1, 3, 1)) * PROPAGATOR_DT
+end
 
 function Propagator:OnRemoveFromEntity()
     self:StopSpreading(true)
@@ -46,6 +57,7 @@ function Propagator:Delay(time)
 end
 
 function Propagator:StopUpdating()
+    self:CalculateHeatCap()
     if self.task ~= nil then
         self.task:Cancel()
         self.task = nil
@@ -58,8 +70,7 @@ end
 
 function Propagator:StartUpdating()
     if self.task == nil then
-        local dt = .5
-        self.task = self.inst:DoPeriodicTask(dt, _OnUpdate, dt + math.random() * .67, self, dt)
+        self.task = self.inst:DoPeriodicTask(PROPAGATOR_DT, _OnUpdate, PROPAGATOR_DT + math.random() * 0.67, self, PROPAGATOR_DT)
     end
 end
 
@@ -73,7 +84,7 @@ function Propagator:StopSpreading(reset, heatpct)
     self.source = nil
     self.spreading = false
     if reset then
-        self.currentheat = heatpct ~= nil and heatpct * self.flashpoint or 0
+        self.currentheat = heatpct ~= nil and (heatpct * easing.outCubic(math.random(), 0, 1, 1)) * self.flashpoint or 0
         self.pauseheating = nil
     end
 end
@@ -93,7 +104,14 @@ function Propagator:AddHeat(amount)
         return
     end
 
-    self.currentheat = self.currentheat + amount * self:GetHeatResistance()
+    if self.heat_this_update >= self.max_heat_this_update then
+        return
+    end
+
+    local heat = math.min(amount * self:GetHeatResistance(), self.max_heat_this_update - self.heat_this_update)
+
+    self.heat_this_update = self.heat_this_update + heat
+    self.currentheat = self.currentheat + heat
 
     if self.currentheat ~= 0 then
         self:StartUpdating()
@@ -109,6 +127,7 @@ end
 
 function Propagator:Flash()
     if self.acceptsheat and not self.pauseheating and self.delay == nil then
+        self.heat_this_update = self.heat_this_update - (self.flashpoint + 1)
         self:AddHeat(self.flashpoint + 1)
     end
 end
@@ -116,6 +135,8 @@ end
 local TARGET_CANT_TAGS = { "INLIMBO" }
 local TARGET_MELT_MUST_TAGS = { "frozen", "firemelt" }
 function Propagator:OnUpdate(dt)
+    self:CalculateHeatCap()
+
     if self.currentheat > 0 then
         self.currentheat = math.max(0, self.currentheat - dt * self.decayrate)
     elseif self.currentheat < 0 then

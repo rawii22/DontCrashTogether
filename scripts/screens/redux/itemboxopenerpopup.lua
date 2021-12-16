@@ -89,6 +89,12 @@ local ItemBoxOpenerPopup = Class(Screen, function(self, options, open_box_fn, co
     self.current_item_summary = self.bundle_root:AddChild(self:_BuildItemSummary(summary_width))
     self.current_item_summary:SetPosition(420,0)
 
+    self.message = self.center_root:AddChild(Text(HEADERFONT, 35))
+    self.message:SetColour(UICOLOURS.GOLD_SELECTED)
+    self.message:SetString(options.message)
+    self.message:SetPosition(0, 285)
+    self.message:Hide()
+
     -- Actual animation
     self.bundle_bg = self.bundle_root:AddChild(UIAnim())
     self.bundle_bg:SetScale(.7)
@@ -125,6 +131,7 @@ local ItemBoxOpenerPopup = Class(Screen, function(self, options, open_box_fn, co
         self.bundle:GetAnimState():PushAnimation("idle", true)
         self.bundle_bg:GetAnimState():PlayAnimation("activate")
         self.bundle_bg:GetAnimState():PushAnimation("idle_loop", true)
+        self.message:Show()
 
         TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/Together_HUD/collectionscreen/mysterybox/intro")
         TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/Together_HUD/collectionscreen/mysterybox/LP","mysteryboxactive")
@@ -331,7 +338,7 @@ function ItemBoxOpenerPopup:_OpenItemBox()
             elseif #item_types == 22 or #item_types == 24 then
                 columns = 8
                 self.resize_root_small = true
-            elseif #item_types == 35 then
+            elseif #item_types == 31 or #item_types == 35 then
                 columns = 9
                 self.resize_root_small = true
             elseif #item_types == 38 then
@@ -341,6 +348,8 @@ function ItemBoxOpenerPopup:_OpenItemBox()
                 columns = 10
                 self.resize_root_small_higher = true
             else
+                columns = 10
+                self.resize_root_small_higher = true
                 print("Warning: Found an unexpected number of items in a box.", #item_types)
             end
 
@@ -380,7 +389,8 @@ end
 function ItemBoxOpenerPopup:_Close()
     self.ui_state = "OUTRO"
     self.bundle_root:Hide()
-
+    self.message:Hide()
+    
     self.bg.bgplate.image:TintTo(PP_ON_TINT, PP_OFF_TINT, TRANSITION_DURATION, function()
         TheFrontEnd:PopScreen(self)
 		if self.completed_cb ~= nil then

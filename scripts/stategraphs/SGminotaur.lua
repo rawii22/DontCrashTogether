@@ -213,6 +213,7 @@ local states =
         onenter = function(inst)
             inst.components.locomotor:StopMoving()
             inst.AnimState:PlayAnimation("hit")
+			CommonHandlers.UpdateHitRecoveryDelay(inst)
         end,
 
         timeline =
@@ -299,4 +300,4 @@ CommonStates.AddSleepStates(states,
 
 CommonStates.AddFrozenStates(states)
 
-return StateGraph("rook", states, events, "idle")
+return StateGraph("minotaur", states, events, "idle")

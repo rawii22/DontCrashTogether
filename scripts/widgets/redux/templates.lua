@@ -182,6 +182,38 @@ function TEMPLATES.ClayWargAnim()
     return anim
 end
 
+----------------
+----------------
+--  VERSION   --
+----------------
+----------------
+function TEMPLATES.GetBuildString()
+	local version_str = BRANCH == "dev" and "Internal"
+						or BRANCH == "staging" and "Preview"
+						or STRINGS.UI.MAINSCREEN.DST_UPDATENAME
+
+	return version_str.." v"..APP_VERSION.." ("..(APP_ARCHITECTURE == "x32" and "32-bit" or APP_ARCHITECTURE == "x64" and "64-bit" or "??-bit")..")"
+end
+
+function TEMPLATES.AddBuildString(parent_widget, config)
+	config = config or {}
+    local version = parent_widget:AddChild(Text(config.font or BODYTEXTFONT, config.size or 21))
+    version:SetPosition( config.x or 0, config.y or 0 )
+	if config.colour then
+	    version:SetColour(unpack(config.colour))
+	else
+	    version:SetColour(config.r or .8, config.g or .8, config.b or .8, config.a or 1)
+	end
+	if config.align ~= nil then
+	    version:SetHAlign(config.align)
+	end
+	if config.w ~= nil and config.h ~= nil then
+		version:SetRegionSize(config.w, config.h)
+	end
+    version:SetString(TEMPLATES.GetBuildString())
+	return version
+end
+
 
 ----------------
 ----------------
@@ -1275,7 +1307,7 @@ function TEMPLATES.CharacterSpinner(onchanged_fn, puppet, user_profile)
 end
 
 function TEMPLATES.ChatFlairBadge()
-    local flair = Widget("chat falir badge")
+    local flair = Widget("chat flair badge")
 
     flair.bg = flair:AddChild(Image())
     flair.bg:SetScale(0.8)
@@ -1302,10 +1334,7 @@ function TEMPLATES.ChatFlairBadge()
             if profileflair == "default" then
                 profileflair = nil
             end
-            self:Show()
             self.flair_img:SetTexture(GetProfileFlairAtlasAndTex(profileflair))
-        else
-            self:Hide()
         end
     end
 
@@ -1325,7 +1354,91 @@ function TEMPLATES.ChatFlairBadge()
 
     flair:SetScale(0.5)
 
+    flair.GetSize = function(self)
+        return self.flair_img:GetScaledSize()
+    end
+
     return flair
+end
+
+function TEMPLATES.AnnouncementBadge()
+    local announcement = Widget("chat announcement badge")
+
+    announcement.bg = announcement:AddChild(Image("images/button_icons.xml", "circle.tex"))
+    announcement.bg:SetScale(1.35)
+    announcement.bg:SetPosition(0,27)
+
+    announcement.announcement_img = announcement:AddChild(Image("images/button_icons.xml", "announcement.tex"))
+    announcement.announcement_img:SetScale(1.35)
+    announcement.announcement_img:SetPosition(0, 31)
+
+    announcement:Hide()
+    announcement:SetClickable(false)
+
+    --Setup custom widget functions
+    announcement.SetAnnouncement = function(self, announcement)
+        self.announcement = announcement
+
+        if announcement then
+            local icon_info = ANNOUNCEMENT_ICONS[announcement]
+            self.announcement_img:SetTexture(icon_info.atlas or "images/button_icons.xml", icon_info.texture or "announcement.tex")
+        end
+    end
+
+    announcement.GetAnnouncement = function(self)
+        return self.announcement
+    end
+
+    announcement.SetAlpha = function(self, a)
+        if a > 0.01 and self.announcement then
+            self:Show()
+            self.bg:SetTint(1,1,1, a)
+            self.announcement_img:SetTint(1,1,1, a)
+        else
+            self:Hide()
+        end
+    end
+
+    announcement:SetScale(0.5)
+
+    announcement.GetSize = function(self)
+        return self.announcement_img:GetScaledSize()
+    end
+
+    return announcement
+end
+
+function TEMPLATES.SystemMessageBadge()
+    local systemmessage = Widget("chat system message badge")
+
+    systemmessage.bg = systemmessage:AddChild(Image("images/servericons.xml", "bg_brown.tex"))
+    systemmessage.bg:SetScale(0.22)
+    systemmessage.bg:SetPosition(0,31)
+
+    systemmessage.systemmessage_img = systemmessage:AddChild(Image("images/servericons.xml", "dedicated.tex"))
+    systemmessage.systemmessage_img:SetScale(0.19)
+    systemmessage.systemmessage_img:SetPosition(0, 31)
+
+    systemmessage:Hide()
+    systemmessage:SetClickable(false)
+
+    systemmessage.SetAlpha = function(self, a)
+        if a > 0.01 then
+            self:Show()
+            self.bg:SetTint(1,1,1, a)
+            self.systemmessage_img:SetTint(1,1,1, a)
+        else
+            self:Hide()
+        end
+    end
+
+    systemmessage:SetScale(0.5)
+
+    systemmessage.GetSize = function(self)
+        return self.systemmessage_img:GetScaledSize()
+    end
+
+    return systemmessage
 end
 
 function TEMPLATES.RankBadge()
@@ -1888,11 +2001,11 @@ function TEMPLATES.ReduxForeground()
 end
 
 -- for making static health/hunger/sanity for using in the lobby
-function TEMPLATES.MakeUIStatusBadge(status_name, c)
-	local status = Widget(status_name.."_status")
-	status._status_name = status_name
+function TEMPLATES.MakeUIStatusBadge(_status_name, c)
+	local status = Widget(_status_name.."_status")
 
-	status.status_icon = status:AddChild(Image("images/global_redux.xml", "status_"..status_name..".tex"))
+	status.status_icon = status:AddChild(Image())
+	status.status_icon:SetTexture("images/global_redux.xml", "status_".._status_name..".tex")
 	status.status_icon:SetScale(.55)
 
 	status.status_image = status:AddChild(Image("images/global_redux.xml", "value_gold.tex"))
@@ -1903,6 +2016,10 @@ function TEMPLATES.MakeUIStatusBadge(status_name, c)
 	status.status_value:SetPosition(0, -34)
 
 	status.ChangeCharacter = function(self, character)
+		local status_name = TUNING.CHARACTER_DETAILS_OVERRIDE[character.."_".._status_name] or _status_name
+
+		status.status_icon:SetTexture("images/global_redux.xml", "status_"..status_name..".tex")
+
 		local v = tostring(TUNING[string.upper(character.."_"..status_name)] or STRINGS.CHARACTER_DETAILS.STAT_UNKNOW)
 		status.status_value:SetString(v)
 	end

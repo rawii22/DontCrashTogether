@@ -170,7 +170,7 @@ function c_spawn(prefab, count, dontselect)
 
     for i = 1, count do
         inst = DebugSpawn(prefab)
-        if inst.components.skinner ~= nil and IsRestrictedCharacter(prefab) then
+        if inst and inst.components.skinner ~= nil and IsRestrictedCharacter(prefab) then
             inst.components.skinner:SetSkinMode("normal_skin")
         end
     end
@@ -202,7 +202,7 @@ function c_despawn(player)
         --V2C: need to avoid targeting c_spawned player entities
         --player = ListingOrConsolePlayer(player)
         if type(player) == "string" or type(player) == "number" then
-            player = UserToPlayer(input)
+            player = UserToPlayer(player)
         end
         if player == nil then
             player = c_sel() ~= nil and c_sel():HasTag("player") and c_sel() or nil
@@ -411,9 +411,11 @@ function c_give(prefab, count, dontselect)
     prefab = string.lower(prefab)
 
     if MainCharacter ~= nil then
+        local first_inst = nil
         for i = 1, count or 1 do
             local inst = DebugSpawn(prefab)
             if inst ~= nil then
+                if first_inst == nil then first_inst = inst end
                 print("giving ", inst)
                 MainCharacter.components.inventory:GiveItem(inst)
                 if not dontselect then
@@ -422,6 +424,7 @@ function c_give(prefab, count, dontselect)
                 SuUsed("c_give_"..inst.prefab)
             end
         end
+        return first_inst
     end
 end
 
@@ -572,7 +575,7 @@ local lastfound = -1
 local lastprefab = nil
 function c_findnext(prefab, radius, inst)
     if type(inst) == "string" or type(inst) == "number" then
-        inst = UserToPlayer(input)
+        inst = UserToPlayer(inst)
         if inst == nil then
             return
         end
@@ -675,10 +678,10 @@ end
 
 function c_armor(player)
     player = ListingOrConsolePlayer(player)
-    if player ~= nil then
-        SuUsed("c_armor", true)
-        player.components.health:SetAbsorptionAmount(1)
-        print("Enabled full absorption on " .. tostring(player.userid))
+    if player ~= nil and player.components.health ~= nil then
+		SuUsed("c_armor", true)
+		player.components.health:SetAbsorptionAmount(1)
+		print("Enabled full absorption on " .. tostring(player.userid))
 	end
 end
 

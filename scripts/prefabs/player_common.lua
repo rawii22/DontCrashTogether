@@ -243,6 +243,9 @@ end
 
 local function OnGetItem(inst, giver, item)
     if item ~= nil and item.prefab == "reviver" and inst:HasTag("playerghost") then
+        if item.skin_sound then
+            item.SoundEmitter:PlaySound(item.skin_sound)
+        end
         item:PushEvent("usereviver", { user = giver })
         giver.hasRevivedPlayer = true
         AwardPlayerAchievement("hasrevivedplayer", giver)
@@ -468,6 +471,47 @@ fns.OnStormLevelChanged = function(inst, data)
 end
 
 --------------------------------------------------------------------------
+--Equipment Breaking Events
+--------------------------------------------------------------------------
+
+function fns.OnItemRanOut(inst, data)
+    if inst.components.inventory:GetEquippedItem(data.equipslot) == nil then
+        local sameTool = inst.components.inventory:FindItem(function(item)
+            return item.prefab == data.prefab and
+                item.components.equippable ~= nil and
+                item.components.equippable.equipslot == data.equipslot
+        end)
+        if sameTool ~= nil then
+            inst.components.inventory:Equip(sameTool)
+        end
+    end
+end
+
+function fns.OnUmbrellaRanOut(inst, data)
+    if inst.components.inventory:GetEquippedItem(data.equipslot) == nil then
+        local sameTool = inst.components.inventory:FindItem(function(item)
+            return item:HasTag("umbrella") and
+                item.components.equippable ~= nil and
+                item.components.equippable.equipslot == data.equipslot
+        end)
+        if sameTool ~= nil then
+            inst.components.inventory:Equip(sameTool)
+        end
+    end
+end
+
+function fns.ArmorBroke(inst, data)
+    if data.armor ~= nil then
+        local sameArmor = inst.components.inventory:FindItem(function(item)
+            return item.prefab == data.armor.prefab
+        end)
+        if sameArmor ~= nil then
+            inst.components.inventory:Equip(sameArmor)
+        end
+    end
+end
+
+--------------------------------------------------------------------------
 
 local function RegisterActivePlayerEventListeners(inst)
     --HUD Audio events
@@ -482,6 +526,10 @@ local function UnregisterActivePlayerEventListeners(inst)
 end
 
 local function RegisterMasterEventListeners(inst)
+    inst:ListenForEvent("itemranout", fns.OnItemRanOut)
+    inst:ListenForEvent("umbrellaranout", fns.OnUmbrellaRanOut)
+    inst:ListenForEvent("armorbroke", fns.ArmorBroke)
+
     --Audio events
     inst:ListenForEvent("picksomething", OnPickSomething)
     inst:ListenForEvent("dropitem", OnDropItem)
@@ -625,6 +673,7 @@ end
 
 local function EnableMovementPrediction(inst, enable)
     if USE_MOVEMENT_PREDICTION and not TheWorld.ismastersim then
+        inst:PushEvent("enablemovementprediction", enable)
         if enable then
             if inst.components.locomotor == nil then
                 local isghost =
@@ -671,7 +720,10 @@ local function EnableMovementPrediction(inst, enable)
                 end)
         end
     end
+end
 
+function fns.EnableBoatCamera(inst, enable)
+    inst:PushEvent("enableboatcamera", enable)
 end
 
 --Always on the bottom of the stack
@@ -726,11 +778,14 @@ local function OnSetOwner(inst)
     if inst ~= nil and (inst == ThePlayer or TheWorld.ismastersim) then
         if inst.components.playercontroller == nil then
             EnableMovementPrediction(inst, Profile:GetMovementPredictionEnabled())
+            fns.EnableBoatCamera(inst, Profile:IsBoatCameraEnabled())
             inst:AddComponent("playeractionpicker")
             inst:AddComponent("playercontroller")
             inst:AddComponent("playervoter")
             inst:AddComponent("playermetrics")
             inst.components.playeractionpicker:PushActionFilter(PlayerActionFilter, -99)
+            TheWorld:ListenForEvent("serverpauseddirty", function() ex_fns.OnWorldPaused(inst) end)
+            ex_fns.OnWorldPaused(inst)
         end
     elseif inst.components.playercontroller ~= nil then
         inst:RemoveComponent("playeractionpicker")
@@ -745,7 +800,17 @@ local function OnSetOwner(inst)
             ActivateHUD(inst)
             AddActivePlayerComponents(inst)
             RegisterActivePlayerEventListeners(inst)
-            inst.activatetask = inst:DoTaskInTime(0, ActivatePlayer)
+            inst.activatetask = inst:DoStaticTaskInTime(0, ActivatePlayer)
+
+            if not ChatHistory:HasHistory() then
+                ChatHistory:AddJoinMessageToHistory(
+                    ChatTypes.Announcement,
+                    nil,
+                    string.format(STRINGS.UI.NOTIFICATION.JOINEDGAME, Networking_Announcement_GetDisplayName(inst.name)),
+                    TheNet:GetClientTableForUser(inst.userid).colour or WHITE,
+                    "join_game"
+                )
+            end
         end
     elseif inst.HUD ~= nil then
         UnregisterActivePlayerEventListeners(inst)
@@ -841,6 +906,13 @@ local function OnSave(inst, data)
         data.wormlight = inst.wormlight:GetSaveRecord()
     end
 
+	if inst.last_death_position ~= nil then
+		data.death_posx = inst.last_death_position.x
+		data.death_posy = inst.last_death_position.y
+		data.death_posz = inst.last_death_position.z
+		data.death_shardid = inst.last_death_shardid
+	end
+
 	if IsConsole() then
 		TheGameService:NotifyProgress("flush",inst.components.age:GetDisplayAgeInDays(), inst.userid)
 		TheGameService:NotifyProgress("dayssaved",inst.components.age:GetDisplayAgeInDays(), inst.userid)
@@ -866,9 +938,13 @@ local function OnLoad(inst, data)
     inst.OnNewSpawn = nil
     inst._OnNewSpawn = nil
     inst.starting_inventory = nil
-
     if data ~= nil then
         if data.is_ghost then
+			if data.death_posx ~= nil and data.death_posy ~= nil and data.death_posz ~= nil then
+				inst.last_death_position = Vector3(data.death_posx, data.death_posy, data.death_posz)
+				inst.last_death_shardid = data.death_shardid
+			end
+
             ex_fns.OnMakePlayerGhost(inst, { loading = true })
         end
 
@@ -1048,17 +1124,17 @@ end
 
 --Will be triggered from SpawnNewPlayerOnServerFromSim
 --only if it is a new spawn
-local function OnNewSpawn(inst)
-	ex_fns.GivePlayerStartingItems(inst, inst.starting_inventory)
+local function OnNewSpawn(inst, starting_item_skins)
+	ex_fns.GivePlayerStartingItems(inst, inst.starting_inventory, starting_item_skins)
 
 	if TheWorld.components.playerspawner ~= nil and TheWorld.components.playerspawner:IsPlayersInitialSpawn(inst) then -- only give the late-starting assist on the very first time a player spawns (ie, not every time they respawn in Wilderness mode)
 		local extra_starting_items = TUNING.EXTRA_STARTING_ITEMS[TheWorld.state.season]
 		if extra_starting_items ~= nil and TheWorld.state.cycles >= TUNING.EXTRA_STARTING_ITEMS_MIN_DAYS then
-			ex_fns.GivePlayerStartingItems(inst, extra_starting_items)
+			ex_fns.GivePlayerStartingItems(inst, extra_starting_items, starting_item_skins)
 		end
 		local seasonal_starting_items = TUNING.SEASONAL_STARTING_ITEMS[TheWorld.state.season]
 		if seasonal_starting_items ~= nil and TheWorld.state.cycles > TheWorld.state.elapseddaysinseason then -- only if the world is not in the starting season.
-			ex_fns.GivePlayerStartingItems(inst, seasonal_starting_items)
+			ex_fns.GivePlayerStartingItems(inst, seasonal_starting_items, starting_item_skins)
 		end
 	end
 
@@ -1261,14 +1337,6 @@ local function LoadForReroll(inst, data)
     end
 end
 
-local function OnGotOnPlatform(player, platform)
-    player.Transform:SetIsOnPlatform(true)
-end
-
-local function OnGotOffPlatform(player, platform)
-    player.Transform:SetIsOnPlatform(false)
-end
-
 local function OnWintersFeastMusic(inst)
     if ThePlayer ~= nil and  ThePlayer == inst then
         ThePlayer:PushEvent("isfeasting")
@@ -1328,6 +1396,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         Asset("ANIM", "anim/player_actions_feast_eat.zip"),
         Asset("ANIM", "anim/player_actions_farming.zip"),
         Asset("ANIM", "anim/player_actions_cowbell.zip"),
+        Asset("ANIM", "anim/player_actions_reversedeath.zip"),
 
         Asset("ANIM", "anim/player_boat.zip"),
         Asset("ANIM", "anim/player_boat_plank.zip"),
@@ -1359,6 +1428,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         Asset("ANIM", "anim/player_superjump.zip"),
         Asset("ANIM", "anim/player_attack_leap.zip"),
         Asset("ANIM", "anim/player_book_attack.zip"),
+        Asset("ANIM", "anim/player_pocketwatch_portal.zip"),
 
         Asset("ANIM", "anim/player_parryblock.zip"),
         Asset("ANIM", "anim/player_attack_prop.zip"),
@@ -1457,6 +1527,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         "attune_in_fx",
         "attune_ghost_in_fx",
         "staff_castinglight",
+		"staff_castinglight_small",
         "staffcastfx",
         "staffcastfx_mount",
         "book_fx",
@@ -1524,6 +1595,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         inst.GetStormLevel = GetStormLevel -- Didn't want to make stormwatcher a networked component
         inst.IsCarefulWalking = IsCarefulWalking -- Didn't want to make carefulwalking a networked component
         inst.EnableMovementPrediction = EnableMovementPrediction
+        inst.EnableBoatCamera = fns.EnableBoatCamera
         inst.ShakeCamera = ShakeCamera
         inst.SetGhostMode = SetGhostMode
         inst.IsActionsVisible = IsActionsVisible
@@ -1538,6 +1610,14 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
                 inst:IsNear(inst, max_range) and
                 not inst.entity:FrustumCheck() and
                 CanEntitySeeTarget(viewer, inst)
+    end
+
+    local function OnUnderLeafCanopy(inst)
+        
+    end
+
+    local function OnChangeCanopyZone(inst, underleaves)
+        inst._underleafcanopy:set(underleaves)
     end
 
     local function fn()
@@ -1591,7 +1671,6 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         inst.AnimState:AddOverrideBuild("player_multithrust")
         inst.AnimState:AddOverrideBuild("player_parryblock")
         inst.AnimState:AddOverrideBuild("player_emote_extra")
-        inst.AnimState:AddOverrideBuild("player_boat")
         inst.AnimState:AddOverrideBuild("player_boat_plank")
         inst.AnimState:AddOverrideBuild("player_boat_net")
         inst.AnimState:AddOverrideBuild("player_boat_sink")
@@ -1667,6 +1746,8 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         inst:AddComponent("cookbookupdater")
         inst:AddComponent("plantregistryupdater")
 
+        inst:AddComponent("walkableplatformplayer")
+
 		if TheNet:GetServerGameMode() == "lavaarena" then
             inst:AddComponent("healthsyncer")
         end
@@ -1698,13 +1779,10 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         inst:AddComponent("embarker")
         inst.components.embarker.embark_speed = TUNING.WILSON_RUN_SPEED
 
-        --TODO(YOG): Replace these with relative error prediction in transform component
-        inst:ListenForEvent("got_on_platform", function(player, platform) OnGotOnPlatform(inst, platform) end)
-        inst:ListenForEvent("got_off_platform", function(player, platform) OnGotOffPlatform(inst, platform) end)
-
         inst._sharksoundparam = net_float(inst.GUID, "localplayer._sharksoundparam","sharksounddirty")
         inst._winters_feast_music = net_event(inst.GUID, "localplayer._winters_feast_music")
         inst._hermit_music = net_event(inst.GUID, "localplayer._hermit_music")
+        inst._underleafcanopy = net_bool(inst.GUID, "localplayer._underleafcanopy","underleafcanopydirty")
 
         if IsSpecialEventActive(SPECIAL_EVENTS.YOTB) then
             inst.yotb_skins_sets = net_shortint(inst.GUID, "player.yotb_skins_sets")
@@ -1719,7 +1797,8 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
             inst.components.hudindicatable:SetShouldTrackFunction(ShouldTrackfn)
         end
 
-        inst:ListenForEvent("sharksounddirty", OnSharkSound)
+        inst:ListenForEvent("sharksounddirty", OnSharkSound)  
+        inst:ListenForEvent("underleafcanopydirty", OnUnderLeafCanopy)        
 
         inst.entity:SetPristine()
         if not TheWorld.ismastersim then
@@ -1950,6 +2029,8 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
             inst.starting_inventory = starting_inventory
         end
 
+		inst.skeleton_prefab = "skeleton_player"
+
         if master_postinit ~= nil then
             master_postinit(inst)
         end
@@ -1978,6 +2059,7 @@ local function MakePlayerCharacter(name, customprefabs, customassets, common_pos
         inst:ListenForEvent("startfiredamage", OnStartFireDamage)
         inst:ListenForEvent("stopfiredamage", OnStopFireDamage)
         inst:ListenForEvent("burnt", OnBurntHands)
+        inst:ListenForEvent("onchangecanopyzone", OnChangeCanopyZone)
 --[[
         inst:ListenForEvent("stormlevel", function(owner, data)
             if data.stormtype == STORM_TYPES.MOONSTORM and data.level > 0 then

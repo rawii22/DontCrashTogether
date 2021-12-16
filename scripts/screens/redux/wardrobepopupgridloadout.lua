@@ -71,7 +71,7 @@ local GridWardrobePopupScreen = Class(Screen, function(self, owner_player, profi
 
 	local starting_skintype = GetSkinModeFromBuild(self.owner_player)
 
-	self.loadout = self.proot:AddChild(LoadoutSelect(profile, self.owner_player.prefab, starting_skintype))
+	self.loadout = self.proot:AddChild(LoadoutSelect(profile, self.owner_player.prefab, starting_skintype, true))
 	self.loadout:SetDefaultMenuOption()
 
 
@@ -96,9 +96,17 @@ local GridWardrobePopupScreen = Class(Screen, function(self, owner_player, profi
     TheCamera:PushScreenHOffset(self, SCREEN_OFFSET)
 
     self:DoFocusHookups()
+
+    SetAutopaused(true)
 end)
 
+function GridWardrobePopupScreen:OffsetServerPausedWidget(serverpausewidget)
+	serverpausewidget:SetOffset(-650,0)
+end
+
 function GridWardrobePopupScreen:OnDestroy()
+    SetAutopaused(false)
+
     TheCamera:PushScreenHOffset(self, SCREEN_OFFSET)
     self._base.OnDestroy(self)
 

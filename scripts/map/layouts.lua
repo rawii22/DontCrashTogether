@@ -1,5 +1,58 @@
 require("constants")
 
+local function waterlogged_tree_area()
+	local stuff = {}
+
+	table.insert(stuff,"oceantree")
+	for i=1,6 do
+		if math.random() < 0.1 then
+			table.insert(stuff,"oceantree")
+		end
+	end
+
+	table.insert(stuff,"oceanvine")
+	table.insert(stuff,"oceanvine_deco")
+
+
+	if math.random()<0.2 then
+		table.insert(stuff,"oceanvine")
+	end
+
+	for i=1,3 do
+		if math.random()<0.3 then
+			table.insert(stuff,"watertree_root")
+		end
+	end	
+
+	for i=1,3 do
+		if math.random()<0.3 then
+			table.insert(stuff,"oceanvine_deco")
+		end
+	end				
+	--[[
+	for i=1,4 do
+		if math.random()<0.3 then
+			table.insert(stuff,"lightrays_canopy")
+		end
+	end
+]]
+	
+	for i=1,2 do
+		if math.random()<0.3 then
+			table.insert(stuff,"oceanvine_cocoon")
+		end
+	end
+
+
+	for i=1,10 do
+		if math.random()<0.4 then
+			table.insert(stuff, "fireflies")
+		end
+	end
+
+	return stuff
+end
+
 local StaticLayout = require("map/static_layout")
 local ExampleLayout =
 	{
@@ -749,6 +802,9 @@ local ExampleLayout =
 		layout_position = LAYOUT_POSITION.CENTER,
 	},
 
+	["Terrarium_Forest_Spiders"] = StaticLayout.Get("map/static_layouts/terrarium_forest_spiders"),
+	["Terrarium_Forest_Pigs"] = StaticLayout.Get("map/static_layouts/terrarium_forest_pigs"),
+	["Terrarium_Forest_Fire"] = StaticLayout.Get("map/static_layouts/terrarium_forest_fire"),
 
 --------------------------------------------------------------------------------
 -- ANR - A New Reign
@@ -1007,9 +1063,43 @@ local ExampleLayout =
 		},
     }),
 
+	["Waterlogged1"] = StaticLayout.Get("map/static_layouts/waterlogged1", {
+	--	add_topology = {room_id = "StaticLayoutIsland:Waterlogged1", tags = {"Canopy"}},
+	--	min_dist_from_land = 0,
+		areas =
+		{
+			treearea = waterlogged_tree_area,
+		}
+    }),
 
+	["Waterlogged2"] = StaticLayout.Get("map/static_layouts/waterlogged2", {
+	--	add_topology = {room_id = "StaticLayoutIsland:Waterlogged2", tags = {"Canopy"}},
+	--	min_dist_from_land = 0,
+		areas =
+		{
+			treearea = waterlogged_tree_area,
+		}
+    }),
 
+	["Waterlogged3"] = StaticLayout.Get("map/static_layouts/waterlogged3", {
+	--	add_topology = {room_id = "StaticLayoutIsland:Waterlogged3", tags = {"Canopy"}},
+	--	min_dist_from_land = 0,
+		areas =
+		{
+			treearea = waterlogged_tree_area,
+		}
+    }),
 
+	["Waterlogged4"] = StaticLayout.Get("map/static_layouts/waterlogged4", {
+	--	add_topology = {room_id = "StaticLayoutIsland:Waterlogged4", tags = {"Canopy"}},
+	--	min_dist_from_land = 0,
+		areas =
+		{
+			treearea = waterlogged_tree_area,
+		}
+    }),
+	
+	
 --------------------------------------------------------------------------------
 
 }

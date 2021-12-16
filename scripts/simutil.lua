@@ -44,7 +44,7 @@ end
 function FindClosestPlayerInRangeSq(x, y, z, rangesq, isalive)
     local closestPlayer = nil
     for i, v in ipairs(AllPlayers) do
-        if (isalive == nil or isalive ~= (v.replica.health:IsDead() or v:HasTag("playerghost"))) and
+        if (isalive == nil or isalive ~= IsEntityDeadOrGhost(v)) and
             v.entity:IsVisible() then
             local distsq = v:GetDistanceSqToPoint(x, y, z)
             if distsq < rangesq then
@@ -72,7 +72,7 @@ end
 function FindClosestPlayerOnLandInRangeSq(x, y, z, rangesq, isalive)
     local closestPlayer = nil
     for i, v in ipairs(AllPlayers) do
-        if (isalive == nil or isalive ~= (v.replica.health:IsDead() or v:HasTag("playerghost"))) and
+        if (isalive == nil or isalive ~= IsEntityDeadOrGhost(v)) and
                 v.entity:IsVisible() and
                 v:IsOnValidGround() then
             local distsq = v:GetDistanceSqToPoint(x, y, z)
@@ -93,7 +93,7 @@ end
 function FindPlayersInRangeSq(x, y, z, rangesq, isalive)
     local players = {}
     for i, v in ipairs(AllPlayers) do
-        if (isalive == nil or isalive ~= (v.replica.health:IsDead() or v:HasTag("playerghost"))) and
+        if (isalive == nil or isalive ~= IsEntityDeadOrGhost(v)) and
             v.entity:IsVisible() and
             v:GetDistanceSqToPoint(x, y, z) < rangesq then
             table.insert(players, v)
@@ -108,7 +108,7 @@ end
 
 function IsAnyPlayerInRangeSq(x, y, z, rangesq, isalive)
     for i, v in ipairs(AllPlayers) do
-        if (isalive == nil or isalive ~= (v.replica.health:IsDead() or v:HasTag("playerghost"))) and
+        if (isalive == nil or isalive ~= IsEntityDeadOrGhost(v)) and
             v.entity:IsVisible() and
             v:GetDistanceSqToPoint(x, y, z) < rangesq then
             return true
@@ -209,16 +209,12 @@ function ShakeAllCameras(mode, duration, speed, scale, source_or_pt, maxDist)
 end
 
 function ShakeAllCamerasOnPlatform(mode, duration, speed, scale, platform)
-	if platform == nil then
-		return nil
-	end
+    local walkableplatform = platform and platform.components.walkableplatform or nil
+	if walkableplatform == nil then return end
 
-	for i, v in ipairs(AllPlayers) do
-		local x, y, z = v.Transform:GetWorldPosition()
-		if TheWorld.Map:GetPlatformAtPoint(x, z) == platform then
-			v:ShakeCamera(mode, duration, speed, scale)
-		end
-	end
+    for k in pairs(walkableplatform:GetPlayersOnPlatform()) do
+        k:ShakeCamera(mode, duration, speed, scale)
+    end
 end
 
 -- Use this function to fan out a search for a point that meets a condition.
@@ -260,7 +256,7 @@ end
 
 -- This function fans out a search from a starting position/direction and looks for a walkable
 -- position, and returns the valid offset, valid angle and whether the original angle was obstructed.
--- starting_angle is in radians
+-- start_angle is in radians
 function FindWalkableOffset(position, start_angle, radius, attempts, check_los, ignore_walls, customcheckfn, allow_water, allow_boats)
     return FindValidPositionByFan(start_angle, radius, attempts,
             function(offset)
@@ -383,6 +379,31 @@ function ErodeAway(inst, erode_time)
             Yield()
         end
         inst:Remove()
+    end)
+end
+
+function ErodeCB(inst, erode_time, cb, restore)
+    local time_to_erode = erode_time or 1
+    local tick_time = TheSim:GetTickTime()
+
+    if inst.DynamicShadow ~= nil then
+        inst.DynamicShadow:Enable(false)
+    end
+
+    inst:StartThread(function()
+        local ticks = 0
+        while ticks * tick_time < time_to_erode do
+            local erode_amount = ticks * tick_time / time_to_erode
+            inst.AnimState:SetErosionParams(erode_amount, 0.1, 1.0)
+            ticks = ticks + 1
+            Yield()
+        end
+		if restore then
+            inst.AnimState:SetErosionParams(0, 0, 0)
+		end
+        if cb ~= nil then
+			cb(inst)
+		end
     end)
 end
 

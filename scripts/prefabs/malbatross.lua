@@ -14,7 +14,7 @@ local rippleassets =
 
 local prefabs =
 {
-    "malbatross_ripple",
+    "boss_ripple_fx",
     "wave_med",
     "splash_green_large",
     "splash_green",
@@ -264,11 +264,10 @@ local function onothercollide(inst, other)
             local boat = other:GetCurrentPlatform()
             if boat then
                 local vx, vy, vz = inst.Physics:GetVelocity()
-                local speed_modified = VecUtil_Length(vx, vz) * 3
-                vx,vz = VecUtil_Normalize(vx,vz)
+                vx, vz = VecUtil_Normalize(vx, vz)
 
                 local boat_physics = boat.components.boatphysics
-                boat_physics:ApplyForce(vx, vz, speed_modified)
+                boat_physics:ApplyForce(vx, vz, 3)
             end
 
             spawnfeather(inst,0.4)
@@ -584,30 +583,4 @@ local function fn()
     return inst
 end
 
-local function ripplefn()
-    local inst = CreateEntity()
-
-    inst.entity:AddTransform()
-    inst.entity:AddAnimState()
-
-    inst.AnimState:SetBank("malbatross_ripple")
-    inst.AnimState:SetBuild("malbatross_ripple")
-    inst.AnimState:PlayAnimation("idle")
-
-    inst:AddTag("fx")
-
-    inst:ListenForEvent("animover", inst.Remove)
-
-    inst.AnimState:SetLayer(LAYER_BELOW_GROUND)
-    inst.AnimState:SetSortOrder(ANIM_SORT_ORDER_BELOW_GROUND.BOAT_TRAIL)
-
-    inst.entity:SetPristine()
-    if not TheWorld.ismastersim then
-        return inst
-    end
-
-    return inst
-end
-
-return Prefab("malbatross", fn, assets, prefabs),
-       Prefab("malbatross_ripple", ripplefn, rippleassets )
+return Prefab("malbatross", fn, assets, prefabs)

@@ -36,6 +36,7 @@ local ItemTile = Class(Widget, function(self, invitem)
         self.spoilage = self:AddChild(UIAnim())
         self.spoilage:GetAnimState():SetBank("spoiled_meter")
         self.spoilage:GetAnimState():SetBuild("spoiled_meter")
+        self.spoilage:GetAnimState():AnimateWhilePaused(false)
         self.spoilage:SetClickable(false)
     end
 
@@ -43,6 +44,7 @@ local ItemTile = Class(Widget, function(self, invitem)
     self.wetness:GetAnimState():SetBank("wet_meter")
     self.wetness:GetAnimState():SetBuild("wet_meter")
     self.wetness:GetAnimState():PlayAnimation("idle")
+    self.wetness:GetAnimState():AnimateWhilePaused(false)
     self.wetness:Hide()
     self.wetness:SetClickable(false)
 
@@ -53,6 +55,7 @@ local ItemTile = Class(Widget, function(self, invitem)
         self.rechargeframe:GetAnimState():SetBank("recharge_meter")
         self.rechargeframe:GetAnimState():SetBuild("recharge_meter")
         self.rechargeframe:GetAnimState():PlayAnimation("frame")
+        self.rechargeframe:GetAnimState():AnimateWhilePaused(false)
     end
 
     if self.item.inv_image_bg ~= nil then
@@ -73,6 +76,7 @@ local ItemTile = Class(Widget, function(self, invitem)
         self.recharge = self:AddChild(UIAnim())
         self.recharge:GetAnimState():SetBank("recharge_meter")
         self.recharge:GetAnimState():SetBuild("recharge_meter")
+        self.recharge:GetAnimState():AnimateWhilePaused(false)
         self.recharge:SetClickable(false)
     end
 
@@ -391,26 +395,29 @@ function ItemTile:SetPercent(percent)
 end
 
 function ItemTile:SetChargePercent(percent)
+	local prev_precent = self.rechargepct
     self.rechargepct = percent
-    if percent < 1 then
-        self.recharge:GetAnimState():SetPercent("recharge", percent)
-        if not self.rechargeframe.shown then
-            self.rechargeframe:Show()
-        end
-        if percent >= 0.9999 then
-            self:StopUpdating()
-        elseif self.rechargetime < math.huge then
-            self:StartUpdating()
-        end
-    else
-        if not self.recharge:GetAnimState():IsCurrentAnimation("frame_pst") then
-            self.recharge:GetAnimState():PlayAnimation("frame_pst")
-        end
-        if self.rechargeframe.shown then
-            self.rechargeframe:Hide()
-        end
-        self:StopUpdating()
-    end
+	if self.recharge.shown then
+		if percent < 1 then
+			self.recharge:GetAnimState():SetPercent("recharge", percent)
+			if not self.rechargeframe.shown then
+				self.rechargeframe:Show()
+			end
+			if percent >= 0.9999 then
+				self:StopUpdating()
+			elseif self.rechargetime < math.huge then
+				self:StartUpdating()
+			end
+		else
+			if prev_precent < 1 and not self.recharge:GetAnimState():IsCurrentAnimation("frame_pst") then
+				self.recharge:GetAnimState():PlayAnimation("frame_pst")
+			end
+			if self.rechargeframe.shown then
+				self.rechargeframe:Hide()
+			end
+			self:StopUpdating()
+		end
+	end
 end
 
 function ItemTile:SetChargeTime(t)
@@ -450,8 +457,9 @@ function ItemTile:StartDrag()
         end
         if self.recharge ~= nil then
             self.recharge:Hide()
-            self.rechargeframe:Hide()
-        end
+			self.rechargeframe:Hide()
+			self:StopUpdating()
+		end
         self.image:SetClickable(false)
     end
 end
@@ -476,6 +484,7 @@ function ItemTile:HasSpoilage()
 end
 
 function ItemTile:OnUpdate(dt)
+    if TheNet:IsServerPaused() then return end
     self:SetChargePercent(self.rechargetime > 0 and self.rechargepct + dt / self.rechargetime or .9999)
 end
 

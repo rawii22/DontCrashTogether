@@ -150,9 +150,19 @@ local function SetStage(inst, stage, skip_anim)
     inst.components.upgradeable:SetStage(stage)
     inst.data.stage = stage -- track here, as growable component may go away
 
-    local my_x, my_y, my_z = inst.Transform:GetWorldPosition()
-    if TheWorld.Map:GetPlatformAtPoint(my_x, my_z) == nil then
-        inst.GroundCreepEntity:SetRadius(TUNING.SPIDERDEN_CREEP_RADIUS[inst.data.stage])
+    if POPULATING then
+        if not inst.loadtask then
+            inst.loadtask = inst:DoTaskInTime(0, function()
+                if inst:GetCurrentPlatform() == nil then
+                    inst.GroundCreepEntity:SetRadius(TUNING.SPIDERDEN_CREEP_RADIUS[inst.data.stage])
+                end
+                inst.loadtask = nil
+            end)
+        end
+    else
+        if inst:GetCurrentPlatform() == nil then
+            inst.GroundCreepEntity:SetRadius(TUNING.SPIDERDEN_CREEP_RADIUS[inst.data.stage])
+        end
     end
 end
 
@@ -339,13 +349,13 @@ local function SpawnDefenders(inst, attacker)
 
             inst.components.childspawner.childname = "spider"
             if not inst:HasTag("bedazzled") then
-                local emergencyspider = inst.components.childspawner:TrySpawnEmergencyChild()
-                if emergencyspider ~= nil then
-                    emergencyspider.components.combat:SetTarget(attacker)
-                    emergencyspider.components.combat:BlankOutAttacks(1.5 + math.random() * 2)
-                end
+            local emergencyspider = inst.components.childspawner:TrySpawnEmergencyChild()
+            if emergencyspider ~= nil then
+                emergencyspider.components.combat:SetTarget(attacker)
+                emergencyspider.components.combat:BlankOutAttacks(1.5 + math.random() * 2)
             end
         end
+    end
     end
 end
 
@@ -408,11 +418,7 @@ local function SummonChildren(inst, data)
 
             if children_released then
                 for i,v in ipairs(children_released) do
-                    if v.components.debuffable == nil then
-                        v:AddComponent("debuffable")
-                    end
-                    
-                    v.components.debuffable:AddDebuff("spider_summoned_buff", "spider_summoned_buff")
+                    v:AddDebuff("spider_summoned_buff", "spider_summoned_buff")
                 end
             end
 
@@ -526,8 +532,8 @@ local function OnInit(inst)
 end
 
 local function OnStageAdvance(inst)
-    inst.components.growable:DoGrowth()
-    return true
+   inst.components.growable:DoGrowth()
+   return true
 end
 
 local function OnUpgrade(inst, upgrade_doer)
@@ -802,6 +808,6 @@ local function MakeSpiderDenFn(den_level)
     end
 end
 
-return Prefab("spiderden",   MakeSpiderDenFn(1), assets, prefabs),
-       Prefab("spiderden_2", MakeSpiderDenFn(2), assets, prefabs),
+return Prefab("spiderden", MakeSpiderDenFn(1), assets, prefabs),
+    Prefab("spiderden_2", MakeSpiderDenFn(2), assets, prefabs),
        Prefab("spiderden_3", MakeSpiderDenFn(3), assets, prefabs)

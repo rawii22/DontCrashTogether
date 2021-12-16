@@ -6,7 +6,6 @@ local assets =
 local assets_perd =
 {
     Asset("ANIM", "anim/fan.zip"),
-    Asset("ANIM", "anim/floating_items.zip"),
 }
 
 local prefabs_perd =
@@ -97,7 +96,8 @@ local function common_fn(overridesymbol, onchannelingfn)
         inst:AddTag("channelingfan")
     end
 
-    MakeInventoryFloatable(inst)
+    local swap_data = {bank = "fan", anim = "idle"}
+    MakeInventoryFloatable(inst, nil, nil, nil, nil, nil, swap_data)
 
     inst.entity:SetPristine()
 
@@ -138,7 +138,6 @@ local function feather_fn()
 
     inst.components.finiteuses:SetMaxUses(TUNING.FEATHERFAN_USES)
     inst.components.finiteuses:SetUses(TUNING.FEATHERFAN_USES)
-
 
     return inst
 end

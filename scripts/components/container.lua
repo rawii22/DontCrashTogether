@@ -376,7 +376,7 @@ function Container:Open(doer)
         if doer.HUD ~= nil then
             doer.HUD:OpenContainer(self.inst, self:IsSideWidget())
             if self:IsSideWidget() then
-                TheFocalPoint.SoundEmitter:PlaySound("dontstarve/wilson/backpack_open")
+                TheFocalPoint.SoundEmitter:PlaySound(self.inst.open_skin_sound or "dontstarve/wilson/backpack_open")
             else
                 if not self.skipopensnd then
                     TheFocalPoint.SoundEmitter:PlaySound("dontstarve/HUD/Together_HUD/container_open")
@@ -503,6 +503,12 @@ function Container:FindItems(fn)
     end
 
     return items
+end
+
+function Container:ForEachItem(fn, ...)
+    for k,v in pairs(self.slots) do
+        fn(v, ...)
+    end
 end
 
 function Container:Has(item, amount)
@@ -884,7 +890,7 @@ function Container:MoveItemFromAllOfSlot(slot, container, opener)
                     container.ignorefull = true
                 end
 
-                if not container:GiveItem(item, targetslot) then
+                if not container:GiveItem(item, targetslot, nil, false) then
                     self:GiveItem(item, slot, nil, true)
                 end
 

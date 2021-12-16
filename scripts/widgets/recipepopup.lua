@@ -133,13 +133,13 @@ function RecipePopup:BuildWithSpinner(horizontal)
         end
     end)
     self.button:SetOnDown(function()
-        if self.last_recipe_click and (GetTime() - self.last_recipe_click) < 1 then
+        if self.last_recipe_click and (GetStaticTime() - self.last_recipe_click) < 1 then
             self.recipe_held = true
             self.last_recipe_click = nil
         end
     end)
     self.button:SetOnClick(function()
-        self.last_recipe_click = GetTime()
+        self.last_recipe_click = GetStaticTime()
         if not self.recipe_held then
             if not DoRecipeClick(self.owner, self.recipe, self.skins_spinner.GetItem()) then
                 self.owner.HUD.controls.crafttabs:Close()
@@ -227,13 +227,13 @@ function RecipePopup:BuildNoSpinner(horizontal)
         end
     end)
     self.button:SetOnDown(function()
-        if self.last_recipe_click and (GetTime() - self.last_recipe_click) < 1 then
+        if self.last_recipe_click and (GetStaticTime() - self.last_recipe_click) < 1 then
             self.recipe_held = true
             self.last_recipe_click = nil
         end
     end)
     self.button:SetOnClick(function()
-        self.last_recipe_click = GetTime()
+        self.last_recipe_click = GetStaticTime()
         if not self.recipe_held then
             if not DoRecipeClick(self.owner, self.recipe) then
                 self.owner.HUD.controls.crafttabs:Close()
@@ -349,6 +349,10 @@ function RecipePopup:Refresh()
         --#BDOIG - does this need to listen for deltas and change while menu is open?
         --V2C: yes, but the entire craft tabs does. (will be added there)
         local has, amount = builder:HasCharacterIngredient(v)
+
+		if v.type == CHARACTER_INGREDIENT.HEALTH and owner:HasTag("health_as_oldage") then
+			v = Ingredient(CHARACTER_INGREDIENT.OLDAGE, math.ceil(v.amount * TUNING.OLDAGE_HEALTH_SCALE))
+		end
         local ing = self.contents:AddChild(IngredientUI(v:GetAtlas(), v:GetImage(), v.amount, amount, has, STRINGS.NAMES[string.upper(v.type)], owner, v.type))
         if GetGameModeProperty("icons_use_cc") then
             ing.ing:SetEffect("shaders/ui_cc.ksh")
@@ -388,12 +392,19 @@ function RecipePopup:Refresh()
         self.teaser:SetMultilineTruncatedString(str, 3, TEASER_TEXT_WIDTH, 38, true)
         self.teaser:Show()
         showamulet = false
+    elseif TheNet:IsServerPaused() then
+        self.button:Hide()
+
+        self.teaser:SetScale(TEASER_SCALE_TEXT)
+        self.teaser:SetMultilineTruncatedString(STRINGS.UI.CRAFTING.GAMEPAUSED, 3, TEASER_TEXT_WIDTH, 38, true)
+        self.teaser:Show()
     else
         self.teaser:Hide()
 
         local buttonstr =
             (not (knows or recipe.nounlock) and STRINGS.UI.CRAFTING.PROTOTYPE) or
             (buffered and STRINGS.UI.CRAFTING.PLACE) or
+			(recipe.actionstr ~= nil and STRINGS.UI.CRAFTING.RECIPEACTION[recipe.actionstr]) or
             STRINGS.UI.CRAFTING.TABACTION[recipe.tab.str] or
             STRINGS.UI.CRAFTING.BUILD
 

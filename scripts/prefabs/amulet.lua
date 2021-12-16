@@ -9,7 +9,7 @@ add and remove event listeners, or start/stop update functions here. ]]
 
 ---RED
 local function healowner(inst, owner)
-    if (owner.components.health and owner.components.health:IsHurt())
+    if (owner.components.health and owner.components.health:IsHurt() and not owner.components.oldager)
     and (owner.components.hunger and owner.components.hunger.current > 5 )then
         owner.components.health:DoDelta(TUNING.REDAMULET_CONVERSION,false,"redamulet")
         owner.components.hunger:DoDelta(-TUNING.REDAMULET_CONVERSION)
@@ -116,7 +116,7 @@ end
 
 ---ORANGE
 local ORANGE_PICKUP_MUST_TAGS = { "_inventoryitem" }
-local ORANGE_PICKUP_CANT_TAGS = { "INLIMBO", "NOCLICK", "knockbackdelayinteraction", "catchable", "fire", "minesprung", "mineactive" }
+local ORANGE_PICKUP_CANT_TAGS = { "INLIMBO", "NOCLICK", "knockbackdelayinteraction", "catchable", "fire", "minesprung", "mineactive", "spider" }
 local function pickup(inst, owner)
     if owner == nil or owner.components.inventory == nil then
         return
@@ -217,6 +217,12 @@ local function onunequip_yellow(inst, owner)
     turnoff_yellow(inst)
 end
 
+local function onfuelchanged_yellow(inst, data)
+    if data and data.percent and data.oldpercent and data.percent > data.oldpercent then
+        inst.SoundEmitter:PlaySound("dontstarve/common/nightmareAddFuel")
+    end
+end
+
 ---COMMON FUNCTIONS
 --[[
 local function unimplementeditem(inst)
@@ -238,6 +244,7 @@ local function commonfn(anim, tag, should_sink)
     inst.entity:AddTransform()
     inst.entity:AddAnimState()
     inst.entity:AddNetwork()
+    inst.entity:AddSoundEmitter()
 
     MakeInventoryPhysics(inst)
 
@@ -427,6 +434,7 @@ local function yellow()
     inst.components.fueled:SetDepletedFn(inst.Remove)
     inst.components.fueled:SetFirstPeriod(TUNING.TURNON_FUELED_CONSUMPTION, TUNING.TURNON_FULL_FUELED_CONSUMPTION)
     inst.components.fueled.accepting = true
+    inst:ListenForEvent("percentusedchange", onfuelchanged_yellow)
 
     MakeHauntableLaunch(inst)
 

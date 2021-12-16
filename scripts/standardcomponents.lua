@@ -166,8 +166,8 @@ function MakeSmallPropagator(inst)
     inst.components.propagator:SetOnFlashPoint(DefaultIgniteFn)
     inst.components.propagator.flashpoint = 5 + math.random()*5
     inst.components.propagator.decayrate = 0.5
-    inst.components.propagator.propagaterange = 5
-    inst.components.propagator.heatoutput = 5--8
+    inst.components.propagator.propagaterange = 3 + math.random()*2
+    inst.components.propagator.heatoutput = 3 + math.random()*2--8
 
     inst.components.propagator.damagerange = 2
     inst.components.propagator.damages = true
@@ -179,8 +179,8 @@ function MakeMediumPropagator(inst)
     inst.components.propagator:SetOnFlashPoint(DefaultIgniteFn)
     inst.components.propagator.flashpoint = 15+math.random()*10
     inst.components.propagator.decayrate = 0.5
-    inst.components.propagator.propagaterange = 7
-    inst.components.propagator.heatoutput = 8.5--12
+    inst.components.propagator.propagaterange = 5 + math.random()*2
+    inst.components.propagator.heatoutput = 5 + math.random()*3.5--12
 
     inst.components.propagator.damagerange = 3
     inst.components.propagator.damages = true
@@ -192,8 +192,8 @@ function MakeLargePropagator(inst)
     inst.components.propagator:SetOnFlashPoint(DefaultIgniteFn)
     inst.components.propagator.flashpoint = 45+math.random()*10
     inst.components.propagator.decayrate = 0.5
-    inst.components.propagator.propagaterange = 8
-    inst.components.propagator.heatoutput = 9.5--12
+    inst.components.propagator.propagaterange = 6 + math.random()*2
+    inst.components.propagator.heatoutput = 6 + math.random()*3.5--12
 
     inst.components.propagator.damagerange = 3
     inst.components.propagator.damages = true
@@ -591,19 +591,12 @@ local function onperish(inst)
     end
 end
 
-function MakeFeedableSmallLivestockPristine(inst)
+function MakeSmallPerishableCreaturePristine(inst)
     inst:AddTag("show_spoilage")
-    inst:AddTag("small_livestock")
 end
 
-function MakeFeedableSmallLivestock(inst, starvetime, oninventory, ondropped)
-    MakeFeedableSmallLivestockPristine(inst)
-
-    --This is acceptable.  Some eaters are added already to specify diets.
-    if inst.components.eater == nil then
-        inst:AddComponent("eater")
-    end
-    inst.components.eater:SetOnEatFn(oneat)
+function MakeSmallPerishableCreature(inst, starvetime, oninventory, ondropped)
+    MakeSmallPerishableCreaturePristine(inst)
 
     --We want to see the warnings for duplicating perishable
     inst:AddComponent("perishable")
@@ -624,6 +617,23 @@ function MakeFeedableSmallLivestock(inst, starvetime, oninventory, ondropped)
             ondropped(inst)
         end
     end)
+end
+
+function MakeFeedableSmallLivestockPristine(inst)
+    MakeSmallPerishableCreaturePristine(inst)
+    inst:AddTag("small_livestock")
+end
+
+function MakeFeedableSmallLivestock(inst, starvetime, oninventory, ondropped)
+    MakeFeedableSmallLivestockPristine(inst)
+
+    --This is acceptable.  Some eaters are added already to specify diets.
+    if inst.components.eater == nil then
+        inst:AddComponent("eater")
+    end
+    inst.components.eater:SetOnEatFn(oneat)
+
+    MakeSmallPerishableCreature(inst, starvetime, oninventory, ondropped)
 end
 
 --Backward compatibility for mods
@@ -1339,6 +1349,8 @@ function MakeInventoryFloatable(inst, size, offset, scale, swap_bank, float_inde
 
     if swap_bank then
         inst.components.floater:SetBankSwapOnFloat(swap_bank, float_index, swap_data)
+    elseif swap_data then
+        inst.components.floater:SetSwapData(swap_data)
     end
 end
 

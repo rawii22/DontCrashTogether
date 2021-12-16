@@ -2,7 +2,6 @@ local assets =
 {
     Asset("ANIM", "anim/glasscutter.zip"),
     Asset("ANIM", "anim/swap_glasscutter.zip"),
-    Asset("ANIM", "anim/floating_items.zip"),
 }
 
 local function onequip(inst, owner)
@@ -15,6 +14,10 @@ local function onequip(inst, owner)
     end
     owner.AnimState:Show("ARM_carry")
     owner.AnimState:Hide("ARM_normal")
+
+    if inst.skin_equip_sound and owner.SoundEmitter then
+        owner.SoundEmitter:PlaySound(inst.skin_equip_sound)
+    end
 end
 
 local function onunequip(inst, owner)

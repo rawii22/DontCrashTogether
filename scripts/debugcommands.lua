@@ -27,6 +27,7 @@ function d_allmutators()
     c_give("mutator_hider")
     c_give("mutator_spitter")
     c_give("mutator_moon")
+    c_give("mutator_water")
 end
 
 function d_spiders()
@@ -44,6 +45,7 @@ function d_spiders()
         local spider = c_spawn(v)
         spider.components.follower:SetLeader(ThePlayer)
     end
+    c_give("spider_water")
 end
 
 function d_decodedata(path)
@@ -229,7 +231,7 @@ function d_test_skins_popup(param)
 	TheFrontEnd:PushScreen( SkinsItemPopUp(param or TEST_ITEM_NAME, "Peter", {1.0, 0.2, 0.6, 1.0}) )
 end
 function d_test_skins_announce(param)
-	ThePlayer.HUD.eventannouncer:ShowSkinAnnouncement("Peter", {1.0, 0.2, 0.6, 1.0}, param or TEST_ITEM_NAME)
+	Networking_SkinAnnouncement("Peter", {1.0, 0.2, 0.6, 1.0}, param or TEST_ITEM_NAME)
 end
 function d_test_skins_gift(param)
 	local GiftItemPopUp = require "screens/giftitempopup"
@@ -981,4 +983,66 @@ function d_moonaltars()
 
 	altar = SpawnPrefab("moon_altar_cosmic")
 	altar.Transform:SetPosition(pos.x + offset, 0, pos.z + offset / 3)
+end
+
+function d_cookbook()
+	TheCookbook.save_enabled = false
+
+	local cooking = require("cooking")
+	for cat, cookbook_recipes in pairs(cooking.cookbook_recipes) do
+		for prefab, recipe_def in pairs(cookbook_recipes) do
+			TheCookbook:LearnFoodStats(prefab)
+			TheCookbook:AddRecipe(prefab, {"meat", "meat", "meat", "meat"})
+			TheCookbook:AddRecipe(prefab, {"twigs", "berries", "ice", "meat"})
+		end
+	end			
+end
+
+function d_statues(material)
+	local mats = 
+	{
+		"marble",
+		"stone",
+		"moonglass",
+	}
+
+	local items = {
+		"pawn",       
+		"rook",       
+		"knight",     
+		"bishop",     
+		"muse",       
+		"formal",     
+		"hornucopia", 
+		"pipe",       
+		"deerclops",  
+		"bearger",    
+		"moosegoose", 
+		"dragonfly",  
+		"clayhound",  
+		"claywarg",   
+		"butterfly",  
+		"anchor",     
+		"moon",       
+		"carrat",     
+		"beefalo",    
+		"crabking",   
+		"malbatross", 
+		"toadstool",	
+		"stalker",	
+		"klaus",		
+		"beequeen",	
+		"antlion",	
+		"minotaur",	
+		"guardianphase3",
+	}
+
+	local material = (type(material) == "string" and table.contains(mats, material)) and material
+					or type(material) == "number" and mats[material]
+					or "marble"
+
+	for i, v in ipairs(items) do
+		items[i] = "chesspiece_".. v .."_" .. (material or "marble")
+	end
+	_spawn_list(items, 5)
 end

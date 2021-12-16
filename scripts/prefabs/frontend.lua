@@ -54,9 +54,6 @@ local assets =
     -- Asset("ATLAS", "images/bg_color.xml"), -- Not currently used, but likely to come back
     -- Asset("IMAGE", "images/bg_color.tex"), -- Not currently used, but likely to come back
 
-    Asset("ATLAS", "images/servericons.xml"),
-    Asset("IMAGE", "images/servericons.tex"),
-
     Asset("ATLAS", "images/server_intentions.xml"),
     Asset("IMAGE", "images/server_intentions.tex"),
 
@@ -133,6 +130,7 @@ local assets =
     Asset("ANIM", "anim/player_idles_wathgrithr.zip"),
     Asset("ANIM", "anim/player_idles_wes.zip"),
     Asset("ANIM", "anim/player_idles_webber.zip"),
+    Asset("ANIM", "anim/player_idles_wanda.zip"),
     Asset("ANIM", "anim/bernie_build.zip"),
     Asset("ANIM", "anim/swap_lucy_axe.zip"),
 

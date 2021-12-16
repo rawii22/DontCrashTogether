@@ -7,7 +7,7 @@ local SteeringWheelUser = Class(function(self, inst)
 		    self.inst:StopUpdatingComponent(self)
 			self.inst:RemoveTag("steeringboat")
 
-            self.steering_wheel.components.steeringwheel:StopSteering(self.inst)
+            self.steering_wheel.components.steeringwheel:StopSteering()
             self.inst:PushEvent("stop_steering_boat")
             self.steering_wheel = nil
 
@@ -39,7 +39,7 @@ function SteeringWheelUser:SetSteeringWheel(steering_wheel)
 		end
 
 		if prev_steering_wheel.components.steeringwheel ~= nil then
-			prev_steering_wheel.components.steeringwheel:StopSteering(self.inst)
+			prev_steering_wheel.components.steeringwheel:StopSteering()
 		end
 
 		if self.boat then
@@ -54,8 +54,7 @@ function SteeringWheelUser:SetSteeringWheel(steering_wheel)
 	    self.inst:StartUpdatingComponent(self)
 		self.inst:AddTag("steeringboat")
 
-		self.inst.Transform:SetPosition(steering_wheel.Transform:GetWorldPosition())
-		self.inst.Physics:ClearTransformationHistory()
+		self.inst.Physics:Teleport(steering_wheel.Transform:GetWorldPosition())
 
         self.inst:ListenForEvent("onremove", self.wheel_remove_callback, steering_wheel)
 
@@ -84,29 +83,27 @@ end
 function SteeringWheelUser:SteerInDir(dir_x, dir_z)
 	-- if you are on a boat and the target heading is close enough to the current heading, don't do a steer.
 	local dontsteer = false
+	local rx, rz
 	if self.boat ~= nil then
 		self.boat.components.boatphysics:SetTargetRudderDirection(dir_x, dir_z)
 
 		local tx,tz = self.boat.components.boatphysics:GetTargetRudderDirection()
 
-		local rx,rz = self.boat.components.boatphysics:GetRudderDirection()
-		local TOLLERANCE = 0.1
+		rx, rz = self.boat.components.boatphysics:GetRudderDirection()
+		local TOLERANCE = 0.1
 
-		if math.abs(tx - rx)<TOLLERANCE and math.abs(tz - rz)<TOLLERANCE then
+		if math.abs(tx - rx)<TOLERANCE and math.abs(tz - rz)<TOLERANCE then
 			dontsteer = true
 		end
-	end
-	if not dontsteer then
-		local right_vec = TheCamera:GetRightVec()
-		self.should_play_left_turn_anim = VecUtil_Dot(right_vec.x, right_vec.z, dir_x, dir_z) > 0
-		self.inst:PushEvent("set_heading")
+		if not dontsteer then
+			self.should_play_left_turn_anim = (rz * dir_x - rx * dir_z) > 0
+			self.inst:PushEvent("set_heading")
+		end
 	end
 end
 
 function SteeringWheelUser:GetBoat()
-	local player_pos_x, player_pos_y, player_pos_z = self.inst.Transform:GetWorldPosition()
-	local boat = TheWorld.Map:GetPlatformAtPoint(player_pos_x, player_pos_z)
-	return boat
+	return self.inst:GetCurrentPlatform()
 end
 
 function SteeringWheelUser:OnUpdate(dt)

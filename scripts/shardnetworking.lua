@@ -4,10 +4,11 @@
 
 ShardPortals = {}
 
+ShardList = {}
 local ShardConnected = {}
 
 function Shard_IsWorldAvailable(world_id)
-    return ShardConnected[world_id or SHARDID.MASTER] ~= nil
+    return world_id ~= nil and (ShardConnected[world_id or SHARDID.MASTER] ~= nil or world_id == TheShard:GetShardId())
 end
 
 function Shard_IsWorldFull(world_id)
@@ -30,8 +31,10 @@ function Shard_UpdateWorldState(world_id, state, tags, world_data)
             world_data = {}
         end
         ShardConnected[world_id] = { ready = true, tags = tags, world = world_data }
+        ShardList[world_id] = true
     else
         ShardConnected[world_id] = nil
+        ShardList[world_id] = nil
     end
 
     for k, v in pairs(ShardPortals) do

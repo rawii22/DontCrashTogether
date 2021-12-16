@@ -292,6 +292,9 @@ local CraftTabs = Class(Widget, function(self, owner, top_root)
     self.inst:ListenForEvent("unlockrecipe", UpdateRecipes, self.owner)
     self.inst:ListenForEvent("refreshcrafting", UpdateRecipes, self.owner)
     self.inst:ListenForEvent("refreshinventory", UpdateRecipes, self.owner)
+    if TheWorld then
+        self.inst:ListenForEvent("serverpauseddirty", UpdateRecipes, TheWorld)
+    end
     self:DoUpdateRecipes()
     self:SetScale(self.base_scale)
     self:StartUpdating()
@@ -348,6 +351,8 @@ function CraftTabs:CloseControllerCrafting()
         self.controllercraftingopen = false
         self.tabs:DeselectAll()
         self.controllercrafting:Close()
+
+	    SetAutopaused(false)
     end
 end
 
@@ -358,6 +363,8 @@ function CraftTabs:OpenControllerCrafting()
         self.controllercraftingopen = true
         self.crafting:Close()
         self.controllercrafting:Open()
+
+	    SetAutopaused(true)
     end
 end
 

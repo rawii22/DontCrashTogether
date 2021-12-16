@@ -25,7 +25,7 @@ end
 local function spawnripple(inst)
     if not TheWorld.Map:IsVisualGroundAtPoint(inst.Transform:GetWorldPosition()) then
         inst.SoundEmitter:PlaySound("saltydog/creatures/boss/malbatross/ripple")
-        SpawnPrefab("malbatross_ripple").Transform:SetPosition(inst.Transform:GetWorldPosition())
+        SpawnPrefab("boss_ripple_fx").Transform:SetPosition(inst.Transform:GetWorldPosition())
     end
 end
 
@@ -829,7 +829,6 @@ CommonStates.AddSleepExStates(states,
     },
 },
 {
-    onsleepexit = raise_without_floater,
     onsleeping = function(inst)
         land_without_floater(inst)
         if not inst:IsOnPassablePoint() then
@@ -843,6 +842,7 @@ CommonStates.AddSleepExStates(states,
             inst.AnimState:PlayAnimation("sleep_ocean_pst")
         end
     end,
+    onexitwake = raise_without_floater,
 })
 
 CommonStates.AddFrozenStates(states, LandFlyingCreature, RaiseFlyingCreature)

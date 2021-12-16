@@ -19,8 +19,8 @@ end
 
 local function OnHerd(whistle, leader)
     local x, y, z = leader.Transform:GetWorldPosition()
-    local ents = TheSim:FindEntities(x, y, z, TUNING.SPIDER_WHISTLE_RANGE, {"spiderden"})
-    
+    local ents = TheSim:FindEntities(x, y, z, TUNING.SPIDER_WHISTLE_RANGE, nil, nil, {"spidercocoon", "spiderden"})
+
     for _, den in pairs(ents) do
         if den.components.childspawner and den.components.childspawner.childreninside > 0 and den.SummonChildren then
             den:SummonChildren()
@@ -31,13 +31,13 @@ local function OnHerd(whistle, leader)
     for _, spider in pairs(ents) do
         if spider.components.sleeper and spider.components.sleeper:IsAsleep() then
             spider.components.sleeper:WakeUp()
-            spider.components.debuffable:AddDebuff("spider_summoned_buff", "spider_summoned_buff")
+            spider:AddDebuff("spider_summoned_buff", "spider_summoned_buff")
         end
     end
 
     for follower, v in pairs(leader.components.leader.followers) do
         if follower:HasTag("spider") then
-            follower.components.debuffable:AddDebuff("spider_whistle_buff", "spider_whistle_buff")
+            follower:AddDebuff("spider_whistle_buff", "spider_whistle_buff")
         end
     end
 end
