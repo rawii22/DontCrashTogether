@@ -4,7 +4,7 @@ local assets =
 
 local prefabs =
 {
-
+	"oceanfish_medium_2",
 }
 
 local function OnSpawnFish(inst, child)
@@ -43,6 +43,8 @@ local function fn()
 
     inst:AddTag("NOBLOCK")
 	inst:AddTag("ignorewalkableplatforms")
+
+    inst:AddTag("oceanshoalspawner")
 
     inst.entity:SetPristine()
 

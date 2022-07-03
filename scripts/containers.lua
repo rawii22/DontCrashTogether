@@ -755,6 +755,7 @@ params.oceanfishingrod =
     acceptsstacks = false,
     usespecificslotsforitems = true,
     type = "hand_inv",
+    excludefromcrafting = true,
 }
 
 function params.oceanfishingrod.itemtestfn(container, item, slot)
@@ -785,6 +786,7 @@ params.slingshot =
     },
     usespecificslotsforitems = true,
     type = "hand_inv",
+    excludefromcrafting = true,
 }
 
 function params.slingshot.itemtestfn(container, item, slot)
@@ -969,6 +971,7 @@ params.alterguardianhat =
     },
     acceptsstacks = false,
     type = "hand_inv",
+    excludefromcrafting = true,
 }
 
 local AGHAT_SLOTSTART = 95
@@ -999,6 +1002,7 @@ params.pocketwatch =
         side_align_tip = 100,
     },
     type = "hand_inv",
+    excludefromcrafting = true,
 }
 
 for y = 1, 0, -1 do
@@ -1009,6 +1013,34 @@ end
 
 function params.pocketwatch.itemtestfn(container, item, slot)
 	return item:HasTag("pocketwatchpart")
+end
+
+--------------------------------------------------------------------------
+--[[ ocean_trawler ]]
+--------------------------------------------------------------------------
+
+params.ocean_trawler =
+{
+    widget =
+    {
+        slotpos =
+        {
+            Vector3(0, 100, 0),
+            Vector3(0, 20, 0),
+            Vector3(0, -60, 0),
+            Vector3(0, -140, 0),
+        },
+        animbank = "ui_cookpot_1x4",
+        animbuild = "ui_cookpot_1x4",
+        pos = Vector3(200, 0, 0),
+        side_align_tip = 100,
+    },
+    acceptsstacks = false,
+    type = "cooker",
+}
+
+function params.ocean_trawler.itemtestfn(container, item, slot)
+    return item:HasTag("cookable") or item:HasTag("oceanfish")
 end
 
 --------------------------------------------------------------------------

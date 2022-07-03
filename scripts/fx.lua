@@ -37,8 +37,6 @@ local function OceanTreeLeafFxFallUpdate(inst)
     inst.Transform:SetPosition(x, y - inst.fall_speed * FRAMES, z)
 end
 
-
-
 local fx =
 {
     {
@@ -272,6 +270,7 @@ local fx =
         bank = "small_puff",
         build = "smoke_puff_small",
         anim = "puff",
+        fn = FinalOffset1,
         --sound = "dontstarve/common/deathpoof",
     },
     {
@@ -1265,6 +1264,12 @@ local fx =
         anim = "unwrap",
     },
     {
+        name = "redpouch_yot_catcoon_unwrap",
+        bank = "redpouch",
+        build = "redpouch",
+        anim = "unwrap",
+    },
+    {
         name = "yotc_seedpacket_unwrap",
         bank = "bundle",
         build = "bundle",
@@ -1990,6 +1995,13 @@ local fx =
         fn = FinalOffset1,
     },
     {
+        name = "carnivalgame_shooting_projectile_fx",
+        bank = "carnivalgame_shooting_projectile",
+        build = "carnivalgame_shooting_projectile",
+        anim = "fx1",
+        sound = "summerevent/cannon/fire3",
+    },
+    {
         name = "alterguardian_spike_breakfx",
         bank = "alterguardian_spike",
         build = "alterguardian_spike",
@@ -2275,7 +2287,7 @@ local fx =
         anim = "idle",
         nofaced = true,
         fn = FinalOffsetNegative1,
-    },    
+    },
     {
         name = "mighty_gym_bell_fail_fx",
         bank = "mighty_gym",
@@ -2286,7 +2298,7 @@ local fx =
             inst.AnimState:SetMultColour(1,0,0,1)
             inst.AnimState:SetFinalOffset(1)
         end,
-    },  
+    },
     {
         name = "mighty_gym_bell_perfect_fx",
         bank = "mighty_gym",
@@ -2297,7 +2309,7 @@ local fx =
             inst.AnimState:SetMultColour(1,1,1,1)
             inst.AnimState:SetFinalOffset(1)
         end,
-    },  
+    },
     {
         name = "mighty_gym_bell_succeed_fx",
         bank = "mighty_gym",
@@ -2308,7 +2320,231 @@ local fx =
             inst.AnimState:SetMultColour(1,1,0,1)
             inst.AnimState:SetFinalOffset(1)
         end,
-    },                
+    },
+
+    {
+        name = "minotaur_blood1",
+        bank = "rook_rhino_blood_fx",
+        build = "rook_rhino_blood_fx",
+        anim = "blood1",
+        sound = "ancientguardian_rework/minotaur2/blood_splurt_small",
+        nofaced = true,
+        fn = function(inst)
+            inst.AnimState:SetMultColour(1, 1, 1, .5)
+            inst.Transform:SetTwoFaced()
+        end,
+    },
+
+    {
+        name = "minotaur_blood2",
+        bank = "rook_rhino_blood_fx",
+        build = "rook_rhino_blood_fx",
+        anim = "blood2",
+        sound = "ancientguardian_rework/minotaur2/blood_splurt_small",
+        nofaced = true,
+        fn = function(inst)
+            inst.AnimState:SetMultColour(1, 1, 1, .5)
+            inst.Transform:SetTwoFaced()
+        end,
+    },
+
+    {
+        name = "minotaur_blood3",
+        bank = "rook_rhino_blood_fx",
+        build = "rook_rhino_blood_fx",
+        anim = "blood3",
+        sound = "ancientguardian_rework/minotaur2/blood_splurt_small",
+        nofaced = true,
+        fn = function(inst)
+            inst.AnimState:SetMultColour(1, 1, 1, .5)
+            inst.Transform:SetTwoFaced()
+        end,
+    },
+
+    {
+        name = "wx78_heat_steam",
+        bank = "wx_fx",
+        build = "wx_fx",
+        anim = "steam",
+    },
+    {
+        name = "wx78_musicbox_fx",
+        bank = "wx_fx",
+        build = "wx_fx",
+        anim = "music1",
+        nofaced = true,
+        fn = function(inst)
+            inst.AnimState:PlayAnimation("music"..math.random(1, 4))
+            inst.AnimState:SetFinalOffset(1)
+        end,
+    },
+    {
+        name = "monkey_morphin_power_players_fx",
+        bank = "cursed_fx",
+        build = "cursed_fx",
+        anim = "idle",
+        sound = "monkeyisland/wonkycurse/curse_fx",
+        fn = FinalOffset1,
+        nofaced = true,
+    },
+    {
+        name = "monkey_de_morphin_fx",
+        bank = "monkey_change_fx",
+        build = "monkey_change_fx",
+        anim = "deform_hit",
+        fn = FinalOffset1,
+        nofaced = true,
+    },
+    {
+        name = "degrade_fx_grass",
+        bank = "boat_grass",
+        build = "boat_grass",
+        anim = "degrade_fx1",
+        animqueue = true,
+        fn = function(inst)
+            inst.AnimState:SetScale(0.5,0.5,0.5)
+            inst.AnimState:SetLayer(LAYER_BELOW_GROUND)
+            inst.AnimState:SetSortOrder(ANIM_SORT_ORDER_BELOW_GROUND.BOAT_LIP)
+            inst.AnimState:SetFinalOffset(0)
+            inst.AnimState:PlayAnimation("degrade_fx"..math.random(1,3), true)
+            inst:DoTaskInTime(180*FRAMES, function(i)
+                ErodeAway(i, 60*FRAMES)
+            end)
+        end,
+        nofaced = true,
+    },
+
+    {
+        name = "boat_grass_erode",
+        bank = "boat_grass",
+        build = "boat_grass",
+        anim = "erode",
+        animqueue = true,
+        fn = function(inst)
+            inst.AnimState:SetScale(0.75,0.75,0.75)
+            inst.AnimState:SetSortOrder(ANIM_SORT_ORDER.OCEAN_BOAT)
+            inst.AnimState:SetFinalOffset(1)
+            inst.AnimState:SetOrientation(ANIM_ORIENTATION.OnGround)
+            inst.AnimState:SetLayer(LAYER_BACKGROUND)
+        end,
+        nofaced = true,
+    },
+    {
+        name = "boat_grass_erode_water",
+        bank = "boat_grass",
+        build = "boat_grass",
+        anim = "erode_water",
+        animqueue = true,
+        fn = function(inst)
+            inst.AnimState:SetScale(0.75,0.75,0.75)
+            inst.AnimState:SetSortOrder(ANIM_SORT_ORDER.OCEAN_BOAT)
+            inst.AnimState:SetFinalOffset(1)
+            inst.AnimState:SetOrientation(ANIM_ORIENTATION.OnGround)
+            inst.AnimState:SetLayer(LAYER_BACKGROUND)
+            inst.alpha = 1
+            inst:DoPeriodicTask(1/30*FRAMES, function(i)
+                inst.alpha = math.max(0,inst.alpha - (1/30))
+               inst.AnimState:SetMultColour(inst.alpha,inst.alpha,inst.alpha,inst.alpha)
+            end)
+        end,
+        nofaced = true,
+    },
+    {
+        name = "boat_bumper_hit_kelp",
+        bank = "boat_bumper",
+        build = "boat_bumper",
+        anim = "fx_kelp",
+        sound = "dontstarve/characters/woodie/moose/hit",
+    },
+    {
+        name = "boat_bumper_hit_shell",
+        bank = "boat_bumper",
+        build = "boat_bumper_shell",
+        anim = "fx_shell",
+        sound = "dontstarve/characters/woodie/moose/hit",
+    },
+    {
+        name = "cannonball_used",
+        bank = "cannonball_rock",
+        build = "cannonball_rock",
+        anim = "used",
+    },
+    {
+        name = "monkey_cursed_pre_fx",
+        bank = "monkey_change_fx",
+        build = "monkey_change_fx",
+        anim = "cursed_pre",
+    },
+    {
+        name = "monkey_cursed_pst_fx",
+        bank = "monkey_change_fx",
+        build = "monkey_change_fx",
+        anim = "cursed_pst",
+    },
+    {
+        name = "monkey_deform_pre_fx",
+        bank = "monkey_change_fx",
+        build = "monkey_change_fx",
+        anim = "deform_pre",
+    },
+    {
+        name = "monkey_deform_pst_fx",
+        bank = "monkey_change_fx",
+        build = "monkey_change_fx",
+        anim = "deform_pst",
+    },
+    {
+        name = "fx_dock_crackle",
+        bank = "fx_dock_crackleandpop",
+        build = "fx_dock_crackleandpop",
+        anim = "crackle",
+        sound = "turnoftides/common/together/boat/creak",
+        fn = function(inst)
+            inst.entity:AddSoundEmitter()
+            inst.SoundEmitter:PlaySoundWithParams("monkeyisland/dock/damage")
+            inst:DoTaskInTime(2*FRAMES, function(i) i.SoundEmitter:PlaySoundWithParams("monkeyisland/dock/damage", {intensity=0.1}) end)
+            inst:DoTaskInTime(14*FRAMES, function(i) i.SoundEmitter:PlaySoundWithParams("monkeyisland/dock/damage", {intensity=0.1}) end)
+            inst:DoTaskInTime(25*FRAMES, function(i) i.SoundEmitter:PlaySoundWithParams("monkeyisland/dock/damage", {intensity=0.1}) end)
+            inst:DoTaskInTime(29*FRAMES, function(i) i.SoundEmitter:PlaySound("monkeyisland/dock/damage") end)
+            inst:DoTaskInTime(33*FRAMES, function(i) i.SoundEmitter:PlaySoundWithParams("monkeyisland/dock/damage", {intensity=0.2}) end)
+            inst:DoTaskInTime(45*FRAMES, function(i) i.SoundEmitter:PlaySoundWithParams("monkeyisland/dock/damage", {intensity=0.2}) end)
+            inst:DoTaskInTime(52*FRAMES, function(i) i.SoundEmitter:PlaySoundWithParams("monkeyisland/dock/damage", {intensity=0.3}) end)
+        end,
+    },
+    {
+        name = "fx_dock_pop",
+        bank = "fx_dock_crackleandpop",
+        build = "fx_dock_crackleandpop",
+        anim = "pop",
+        sound = "monkeyisland/dock/break",
+    },
+
+    {
+        name = "fx_grass_boat_fluff",
+        bank = "fx_portal_items",
+        build = "fx_portal_items",
+        anim = "grass",
+        --sound = "turnoftides/common/together/boat/sink",
+    },
+
+    {
+        name = "palmcone_leaf_fx_tall",
+        bank = "palmcone_leaf_fx_tall",
+        build = "palmcone_leaf_fx_tall",
+        anim = "chop",
+    },
+    {
+        name = "palmcone_leaf_fx_normal",
+        bank = "palmcone_leaf_fx_normal",
+        build = "palmcone_leaf_fx_normal",
+        anim = "chop",
+    },
+    {
+        name = "palmcone_leaf_fx_short",
+        bank = "palmcone_leaf_fx_short",
+        build = "palmcone_leaf_fx_short",
+        anim = "chop",
+    },
 }
 
 for cratersteamindex = 1, 4 do

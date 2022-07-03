@@ -24,6 +24,7 @@ return {
         {
             MOUNTED = "I can't place that from way up here.",
             HASPET = "I've already got a pet.",
+			TICOON = "I'm too invested in my own Ticoon to follow another one.",
         },
 		SHAVE =
 		{
@@ -68,7 +69,16 @@ return {
 			LOCKED_GATE = "The gate is locked.",
             HOSTBUSY = "He seems a bit preoccupied at the moment.",
             CARNIVAL_HOST_HERE = "He's around here somewhere.",
-            NOCARNIVAL = "It looks like those birds flew the coop."
+            NOCARNIVAL = "It looks like those birds flew the coop.",
+			EMPTY_CATCOONDEN = "Drat, I thought for sure there'd be something good inside!",
+			KITCOON_HIDEANDSEEK_NOT_ENOUGH_HIDERS = "It would be too easy, perhaps if there were more of these little guys...",
+			KITCOON_HIDEANDSEEK_NOT_ENOUGH_HIDING_SPOTS = "There aren't a lot of places around for them to hide.",
+			KITCOON_HIDEANDSEEK_ONE_GAME_PER_DAY = "I think that's enough for one day.",
+		},
+		OPEN_CRAFTING =
+		{
+            PROFESSIONALCHEF = "I'm not a fancy enough chef for that.",
+			SHADOWMAGIC = "That's not science.",
 		},
         COOK =
         {
@@ -99,7 +109,7 @@ return {
         READ =
         {
             GENERIC = "only_used_by_wickerbottom",
-            NOBIRDS = "only_used_by_wickerbottom"
+            NOBIRDS = "only_used_by_wickerbottom",
         },
 
         GIVE =
@@ -133,6 +143,8 @@ return {
             SPIDERNOHAT = "I can't fit them together in my pocket",
             TERRARIUM_REFUSE = "Maybe I should experiment with different kinds of fuel...",
             TERRARIUM_COOLDOWN = "I suppose the tree has to grow back before we can give it anything.",
+            NOTAMONKEY = "I don't speak monkey.",
+            QUEENBUSY = "She seems busy.",
         },
         GIVETOPLAYER =
         {
@@ -173,6 +185,7 @@ return {
         {
             TARGETINCOMBAT = "I know better than to bother an angry beefalo!",
             INUSE = "Someone beat me to the saddle!",
+			SLEEPING = "Time to wake up!",
         },
         SADDLE =
         {
@@ -189,6 +202,8 @@ return {
 
 			--MapSpotRevealer/messagebottle
 			MESSAGEBOTTLEMANAGER_NOT_FOUND = "I can't make anything out in this lighting!",--Likely trying to read messagebottle treasure map in caves
+
+            STASH_MAP_NOT_FOUND = "I don't see an \"X marks the spot\". They must've forgotten to draw it.",-- Likely trying to read stash map  in world without stash
         },
         WRAPBUNDLE =
         {
@@ -201,10 +216,11 @@ return {
             NOTMINE_SPIDER = "only_used_by_webber",
             NOTMINE_YOTC =
             {
-                "You're not my Carrat.",
+                "You're not my carrat.",
                 "OW, it bit me!",
             },
 			NO_HEAVY_LIFTING = "only_used_by_wanda",
+            FULL_OF_CURSES = "I'm not touching that.",
         },
         SLAUGHTER =
         {
@@ -321,11 +337,11 @@ return {
             FROZEN = "only_used_by_webber",
             ALREADY_BEDAZZLED = "only_used_by_webber",
         },
-        UPGRADE = 
+        UPGRADE =
         {
             BEDAZZLED = "only_used_by_webber",
         },
-		CAST_POCKETWATCH = 
+		CAST_POCKETWATCH =
 		{
 			GENERIC = "only_used_by_wanda",
 			REVIVE_FAILED = "only_used_by_wanda",
@@ -346,7 +362,34 @@ return {
             HUNGRY = "only_used_by_wolfang",
             FULL = "only_used_by_wolfang",
         },
+
+        APPLYMODULE =
+        {
+            COOLDOWN = "only_used_by_wx78",
+            NOTENOUGHSLOTS = "only_used_by_wx78",
+        },
+        REMOVEMODULES =
+        {
+            NO_MODULES = "only_used_by_wx78",
+        },
+        CHARGE_FROM =
+        {
+            NOT_ENOUGH_CHARGE = "only_used_by_wx78",
+            CHARGE_FULL = "only_used_by_wx78",
+        },
+
+        HARVEST =
+        {
+            DOER_ISNT_MODULE_OWNER = "It doesn't seem interested in a scientific discussion.",
+        },
     },
+
+	ANNOUNCE_CANNOT_BUILD =
+	{
+		NO_INGREDIENTS = "It looks like I'm missing some important components.",
+		NO_TECH = "This will need more scientific research!",
+		NO_STATION = "I can't make it right now.",
+	},
 
 	ACTIONFAIL_GENERIC = "I can't do that.",
 	ANNOUNCE_BOAT_LEAK = "We're taking on a lot of water.",
@@ -467,6 +510,7 @@ return {
 	ANNOUNCE_NODAYSLEEP_CAVE = "I'm not tired.",
 	ANNOUNCE_NOHUNGERSLEEP = "I'm too hungry to sleep, my growling tummy will keep me up!",
 	ANNOUNCE_NOSLEEPONFIRE = "I don't exactly have a burning desire to sleep in that.",
+    ANNOUNCE_NOSLEEPHASPERMANENTLIGHT = "only_used_by_wx78",
 	ANNOUNCE_NODANGERSIESTA = "It's too dangerous to siesta right now!",
 	ANNOUNCE_NONIGHTSIESTA = "Night is for sleeping, not taking siestas.",
 	ANNOUNCE_NONIGHTSIESTA_CAVE = "I don't think I could really relax down here.",
@@ -606,6 +650,10 @@ return {
         "only_used_by_walter",
 	},
 
+    -- wx specific
+    ANNOUNCE_WX_SCANNER_NEW_FOUND = "only_used_by_wx78",
+    ANNOUNCE_WX_SCANNER_FOUND_NO_DATA = "only_used_by_wx78",
+
     --quagmire event
     QUAGMIRE_ANNOUNCE_NOTRECIPE = "Those ingredients didn't make anything.",
     QUAGMIRE_ANNOUNCE_MEALBURNT = "I left it on too long.",
@@ -667,7 +715,7 @@ return {
 		BOOK_SILVICULTURE = "only_used_by_wurt",
 		BOOK_HORTICULTURE = "only_used_by_wurt",
     },
-    ANNOUNCE_WEAK_RAT = "This Carrat is in no shape to be training.",
+    ANNOUNCE_WEAK_RAT = "This carrat is in no shape to be training.",
 
     ANNOUNCE_CARRAT_START_RACE = "Let the experim- er, race begin!",
 
@@ -746,6 +794,33 @@ return {
         "Plant, you are such a good listener.",
 	},
 
+	ANNOUNCE_KITCOON_HIDEANDSEEK_START = "3, 2, 1... Ready or not, here I come!",
+	ANNOUNCE_KITCOON_HIDEANDSEEK_JOIN = "Aww, they're playing hide and seek.",
+	ANNOUNCE_KITCOON_HIDANDSEEK_FOUND =
+	{
+		"Found you!",
+		"There you are.",
+		"I knew you'd be hiding there!",
+		"I see you!",
+	},
+	ANNOUNCE_KITCOON_HIDANDSEEK_FOUND_ONE_MORE = "Now where's that last one hiding?",
+	ANNOUNCE_KITCOON_HIDANDSEEK_FOUND_LAST_ONE = "I found the last one!",
+	ANNOUNCE_KITCOON_HIDANDSEEK_FOUND_LAST_ONE_TEAM = "{name} found the last one!",
+	ANNOUNCE_KITCOON_HIDANDSEEK_TIME_ALMOST_UP = "These little guys must be getting impatient...",
+	ANNOUNCE_KITCOON_HIDANDSEEK_LOSEGAME = "I guess they don't want to play any more...",
+	ANNOUNCE_KITCOON_HIDANDSEEK_TOOFAR = "They probably wouldn't hide this far away, would they?",
+	ANNOUNCE_KITCOON_HIDANDSEEK_TOOFAR_RETURN = "The kitcoons should be nearby.",
+	ANNOUNCE_KITCOON_FOUND_IN_THE_WILD = "I knew I saw something hiding over here!",
+
+	ANNOUNCE_TICOON_START_TRACKING	= "He's caught the scent!",
+	ANNOUNCE_TICOON_NOTHING_TO_TRACK = "Looks like he couldn't find anything.",
+	ANNOUNCE_TICOON_WAITING_FOR_LEADER = "I should follow him!",
+	ANNOUNCE_TICOON_GET_LEADER_ATTENTION = "He really wants me to follow him.",
+	ANNOUNCE_TICOON_NEAR_KITCOON = "He must have found something!",
+	ANNOUNCE_TICOON_LOST_KITCOON = "Looks like someone else found what he was looking for.",
+	ANNOUNCE_TICOON_ABANDONED = "I'll find those little guys on my own.",
+	ANNOUNCE_TICOON_DEAD = "Poor guy... Now where was he leading me?",
+
     -- YOTB
     ANNOUNCE_CALL_BEEF = "Come on over!",
     ANNOUNCE_CANTBUILDHERE_YOTB_POST = "The judge won't be able to see my beefalo from here.",
@@ -755,6 +830,14 @@ return {
     ANNOUNCE_EYEOFTERROR_ARRIVE = "What is that- a giant floating eyeball?!",
     ANNOUNCE_EYEOFTERROR_FLYBACK = "Finally!",
     ANNOUNCE_EYEOFTERROR_FLYAWAY = "Get back here, I'm not finished with you yet!",
+
+    -- PIRATES
+    ANNOUNCE_CANT_ESCAPE_CURSE = "Of course it couldn't be that easy.",
+    ANNOUNCE_MONKEY_CURSE_1 = "I'm feeling a little wonkey...",
+    ANNOUNCE_MONKEY_CURSE_CHANGE = "Hey! What happened to my hair?!",
+    ANNOUNCE_MONKEY_CURSE_CHANGEBACK = "I'm done with this monkey business!",
+
+    ANNOUNCE_PIRATES_ARRIVE = "That shanty can only mean one thing...",
 
 	BATTLECRY =
 	{
@@ -1014,6 +1097,16 @@ return {
             REVIVER = "If it wasn't for %s, I'd be history!",
             GHOST = "I'd better hurry up and find a heart.",
             FIRESTARTER = "Let me guess, this has something to do with \"preserving the timeline\"?",
+        },
+
+        WONKEY =
+        {
+            GENERIC = "It's a monkey.",
+            ATTACKER = "Hey, stop monkeying around!",
+            MURDERER = "They've gone ape!",
+            REVIVER = "My life has been saved... by a monkey?",
+            GHOST = "That's one spooky monkey.",
+            FIRESTARTER = "I wonder if this is how the dinosaurs felt.",
         },
 
         MIGRATION_PORTAL =
@@ -1316,6 +1409,8 @@ return {
 
         TURF_SHELLBEACH = "A chunk of beach.",
 
+        TURF_MONKEY_GROUND = "A chunk of sand.",
+
 		POWCAKE = "Science help us.",
         CAVE_ENTRANCE = "I wonder if that rock could be moved.",
         CAVE_ENTRANCE_RUINS = "It's probably hiding something.",
@@ -1612,6 +1707,8 @@ return {
         CHESSPIECE_BEEQUEEN = "Very statuesque.",
         CHESSPIECE_ANTLION = "A stagn-antlion.",
         CHESSPIECE_BEEFALO = "This sculpture is pretty beefy.",
+		CHESSPIECE_KITCOON = "These ones are much easier to find.",
+		CHESSPIECE_CATCOON = "It would probably make a great scratching post.",
         CHESSPIECE_GUARDIANPHASE3 = "I much prefer it this way.",
         CHESSPIECE_EYEOFTERROR = "It's giving me a stony stare.",
         CHESSPIECE_TWINSOFTERROR = "That was a terrible night of very uncomfortable eye contact.",
@@ -2648,7 +2745,7 @@ return {
         YOTC_CARRATSHRINE =
         {
             GENERIC = "What to make...",
-            EMPTY = "Hm... what does a Carrat like to eat?",
+            EMPTY = "Hm... what does a carrat like to eat?",
             BURNT = "Smells like roasted carrots.",
         },
 
@@ -2660,34 +2757,34 @@ return {
         },
         YOTC_CARRAT_GYM_SPEED =
         {
-            GENERIC = "I need to get my Carrat up to speed.",
+            GENERIC = "I need to get my carrat up to speed.",
             RAT = "Faster... faster!",
             BURNT = "I may have overdone it.",
         },
         YOTC_CARRAT_GYM_REACTION =
         {
-            GENERIC = "Let's train those Carrat-like reflexes!",
+            GENERIC = "Let's train those carrat-like reflexes!",
             RAT = "The subject's response time is steadily improving!",
             BURNT = "A small loss to take in the pursuit of science.",
         },
         YOTC_CARRAT_GYM_STAMINA =
         {
             GENERIC = "Getting strong now!",
-            RAT = "This Carrat... will be unstoppable!!",
+            RAT = "This carrat... will be unstoppable!!",
             BURNT = "You can't stop progress! But this will delay it...",
         },
 
         YOTC_CARRAT_GYM_DIRECTION_ITEM = "I'd better get training!",
         YOTC_CARRAT_GYM_SPEED_ITEM = "I'd better get this assembled.",
-        YOTC_CARRAT_GYM_STAMINA_ITEM = "This should help improve my Carrat's stamina",
-        YOTC_CARRAT_GYM_REACTION_ITEM = "This should improve my Carrat's reaction time considerably.",
+        YOTC_CARRAT_GYM_STAMINA_ITEM = "This should help improve my carrat's stamina",
+        YOTC_CARRAT_GYM_REACTION_ITEM = "This should improve my carrat's reaction time considerably.",
 
-        YOTC_CARRAT_SCALE_ITEM = "This will help car-rate my Car-rat.",
+        YOTC_CARRAT_SCALE_ITEM = "This will help car-rate my car-rat.",
         YOTC_CARRAT_SCALE =
         {
             GENERIC = "Hopefully the scales tip in my favor.",
             CARRAT = "I suppose no matter what, it's still just a sentient vegetable.",
-            CARRAT_GOOD = "This Carrat looks ripe for racing!",
+            CARRAT_GOOD = "This carrat looks ripe for racing!",
             BURNT = "What a mess.",
         },
 
@@ -2756,6 +2853,8 @@ return {
 			BURNT = "It's out of style now.",
 		},
 		WARG = "You might be something to reckon with, big dog.",
+        WARGLET = "It's going to be one of those days...",
+
 		WASPHIVE = "I think those bees are mad.",
 		WATERBALLOON = "What a scientific marvel!",
 		WATERMELON = "Sticky sweet.",
@@ -3323,6 +3422,7 @@ return {
             BURNT = "The science has been lost to sea.",
         },
         BOAT_ITEM = "It would be nice to do some experiments on the water.",
+        BOAT_GRASS_ITEM = "It's technically a boat.",
         STEERINGWHEEL_ITEM = "That's going to be the steering wheel.",
         ANCHOR_ITEM = "Now I can build an anchor.",
         MAST_ITEM = "Now I can build a mast.",
@@ -3393,6 +3493,7 @@ return {
         GNARWAIL_HORN = "Gnarly!",
 
         WALKINGPLANK = "Couldn't we have just made a lifeboat?",
+        WALKINGPLANK_GRASS = "Couldn't we have just made a lifeboat?",
         OAR = "Manual ship acceleration.",
 		OAR_DRIFTWOOD = "Manual ship acceleration.",
 
@@ -3980,6 +4081,38 @@ return {
 		},
 		CARNIVALGAME_HERDING_CHICK = "Come back here!",
 
+		CARNIVALGAME_SHOOTING_KIT = "This really is a pop-up carnival.",
+		CARNIVALGAME_SHOOTING_STATION =
+		{
+			GENERIC = "It won't let me play until I give it something shiny.",
+			PLAYING = "I could calculate the trajectory, but it involves a lot of complicated numbers and squiggles.",
+		},
+		CARNIVALGAME_SHOOTING_TARGET =
+		{
+			GENERIC = "It's a little trapdoor.",
+			PLAYING = "That target's really starting to bug me.",
+		},
+
+		CARNIVALGAME_SHOOTING_BUTTON =
+		{
+			GENERIC = "It won't let me play until I give it something shiny.",
+			PLAYING = "Science compels me to press that big shiny button!",
+		},
+
+		CARNIVALGAME_WHEELSPIN_KIT = "This really is a pop-up carnival.",
+		CARNIVALGAME_WHEELSPIN_STATION =
+		{
+			GENERIC = "It won't let me play until I give it something shiny.",
+			PLAYING = "It turns out that spinning your wheels is actually very productive.",
+		},
+
+		CARNIVALGAME_PUCKDROP_KIT = "This really is a pop-up carnival.",
+		CARNIVALGAME_PUCKDROP_STATION =
+		{
+			GENERIC = "It won't let me play until I give it something shiny.",
+			PLAYING = "Physics don't always work the same way twice.",
+		},
+
 		CARNIVAL_PRIZEBOOTH_KIT = "The real prize is the booth we made along the way.",
 		CARNIVAL_PRIZEBOOTH =
 		{
@@ -4008,6 +4141,8 @@ return {
 		CARNIVALDECOR_LAMP = "It's powered by whimsy.",
 		CARNIVALDECOR_PLANT_KIT = "Maybe it's a boxwood?",
 		CARNIVALDECOR_PLANT = "Either it's small, or I'm gigantic.",
+		CARNIVALDECOR_BANNER_KIT = "I have to build it myself? I should have known there'd be a catch.",
+		CARNIVALDECOR_BANNER = "I think all these shiny decorations reflect well on me.",
 
 		CARNIVALDECOR_FIGURE =
 		{
@@ -4016,6 +4151,7 @@ return {
 			GENERIC = "I seem to be getting a lot of these...",
 		},
 		CARNIVALDECOR_FIGURE_KIT = "The thrill of discovery!",
+		CARNIVALDECOR_FIGURE_KIT_SEASON2 = "The thrill of discovery!",
 
         CARNIVAL_BALL = "It's genius in its simplicity.", --unimplemented
 		CARNIVAL_SEEDPACKET = "I was feeling a bit peckish.",
@@ -4086,6 +4222,47 @@ return {
         BEAST_BLUEPRINT = "I'm feeling lucky about this one!",
 
         BEEF_BELL = "It makes beefalo friendly. I'm sure there's a very scientific explanation.",
+
+		-- YOT Catcoon
+		KITCOONDEN =
+		{
+			GENERIC = "You'd have to be pretty small to fit in there.",
+            BURNT = "NOOOO!",
+			PLAYING_HIDEANDSEEK = "Now where could they be...",
+			PLAYING_HIDEANDSEEK_TIME_ALMOST_UP = "Not much time left! Where are they?!",
+		},
+
+		KITCOONDEN_KIT = "The whole kit and caboodle.",
+
+		TICOON =
+		{
+			GENERIC = "He looks like he knows what he's doing!",
+			ABANDONED = "I'm sure I can find them on my own.",
+			SUCCESS = "Hey, he found one!",
+			LOST_TRACK = "Someone else found them first.",
+			NEARBY = "Looks like there's something nearby.",
+			TRACKING = "I should follow his lead.",
+			TRACKING_NOT_MINE = "He's leading the way for someone else.",
+			NOTHING_TO_TRACK = "It doesn't look like there's anything left to find.",
+			TARGET_TOO_FAR_AWAY = "They might be too far away for him to sniff out.",
+		},
+
+		YOT_CATCOONSHRINE =
+        {
+            GENERIC = "What to make...",
+            EMPTY = "Maybe it would like a feather to play with...",
+            BURNT = "Smells like scorched fur.",
+        },
+
+		KITCOON_FOREST = "Aren't you the cutest little cat thing!",
+		KITCOON_SAVANNA = "Aren't you the cutest little cat thing!",
+		KITCOON_MARSH = "I must collect more... for research!",
+		KITCOON_DECIDUOUS = "Aren't you the cutest little cat thing!",
+		KITCOON_GRASS = "Aren't you the cutest little cat thing!",
+		KITCOON_ROCKY = "I must collect more... for research!",
+		KITCOON_DESERT = "I must collect more... for research!",
+		KITCOON_MOON = "I must collect more... for research!",
+		KITCOON_YOT = "I must collect more... for research!",
 
         -- Moon Storm
         ALTERGUARDIAN_PHASE1 = {
@@ -4174,7 +4351,7 @@ return {
         POCKETWATCH_PARTS = "Wait a minute, this is starting to look more like magic than science!",
         POCKETWATCH_DISMANTLER = "I wonder if she got them second hand.",
 
-        POCKETWATCH_PORTAL_ENTRANCE = 
+        POCKETWATCH_PORTAL_ENTRANCE =
 		{
 			GENERIC = "Onward, to discovery!",
 			DIFFERENTSHARD = "Onward, to discovery!",
@@ -4188,7 +4365,7 @@ return {
         WATERTREE_ROOT = "It's not a square root.",
 
         OCEANTREE_PILLAR = "It's not quite as great as the original, but still pretty good.",
-        
+
         OCEANVINE = "The scientific term is \"tree noodles\".",
         FIG = "I'll call it \"Newton's Fig\".",
         FIG_COOKED = "It's been warmed by science.",
@@ -4218,7 +4395,7 @@ return {
         },
 
         -- Wolfgang
-        MIGHTY_GYM = 
+        MIGHTY_GYM =
         {
             GENERIC = "I think I pulled a muscle just looking at it...",
             BURNT = "It won't pull any muscles now.",
@@ -4226,11 +4403,12 @@ return {
 
         DUMBBELL = "I usually let my mind do all the heavy lifting.",
         DUMBBELL_GOLDEN = "It's worth its weight in gold.",
+		DUMBBELL_MARBLE = "I've trained my brain to be the strongest muscle in my body.",
         DUMBBELL_GEM = "I'll conquer this weight with the power of-- ACK! My spine!!",
         POTATOSACK = "It's either filled with potato-shaped rocks or rock-shaped potatoes.",
 
 
-        TERRARIUMCHEST = 
+        TERRARIUMCHEST =
 		{
 			GENERIC = "What harm ever came from peeking inside a box?",
 			BURNT = "It won't be bothering anyone anymore.",
@@ -4252,6 +4430,132 @@ return {
         SHIELDOFTERROR ="The best defense is a good mawfence.",
         TWINOFTERROR1 = "Maybe they're friendly? ...Maybe not.",
         TWINOFTERROR2 = "Maybe they're friendly? ...Maybe not.",
+
+        -- Year of the Catcoon
+        CATTOY_MOUSE = "Mice with wheels, what will science think up next?",
+        KITCOON_NAMETAG = "I should think of some names! Let's see, Wilson Jr., Wilson Jr. 2...",
+
+		KITCOONDECOR1 =
+        {
+            GENERIC = "It's not a real bird, but the kits don't know that.",
+            BURNT = "Combustion!",
+        },
+		KITCOONDECOR2 =
+        {
+            GENERIC = "Those kits are so easily distracted. Now what was I doing again?",
+            BURNT = "It went up in flames.",
+        },
+
+		KITCOONDECOR1_KIT = "It looks like there's some assembly required.",
+		KITCOONDECOR2_KIT = "It doesn't look too hard to build.",
+
+        -- WX78
+        WX78MODULE_MAXHEALTH = "So much science packed into one tiny gizmo.",
+        WX78MODULE_MAXSANITY1 = "So much science packed into one tiny gizmo.",
+        WX78MODULE_MAXSANITY = "So much science packed into one tiny gizmo.",
+        WX78MODULE_MOVESPEED = "So much science packed into one tiny gizmo.",
+        WX78MODULE_MOVESPEED2 = "So much science packed into one tiny gizmo.",
+        WX78MODULE_HEAT = "So much science packed into one tiny gizmo.",
+        WX78MODULE_NIGHTVISION = "So much science packed into one tiny gizmo.",
+        WX78MODULE_COLD = "So much science packed into one tiny gizmo.",
+        WX78MODULE_TASER = "So much science packed into one tiny gizmo.",
+        WX78MODULE_LIGHT = "So much science packed into one tiny gizmo.",
+        WX78MODULE_MAXHUNGER1 = "So much science packed into one tiny gizmo.",
+        WX78MODULE_MAXHUNGER = "So much science packed into one tiny gizmo.",
+        WX78MODULE_MUSIC = "So much science packed into one tiny gizmo.",
+        WX78MODULE_BEE = "So much science packed into one tiny gizmo.",
+        WX78MODULE_MAXHEALTH2 = "So much science packed into one tiny gizmo.",
+
+        WX78_SCANNER =
+        {
+            GENERIC ="WX-78 really puts a piece of themselves into their work.",
+            HUNTING = "Get that data!",
+            SCANNING = "Seems like it's found something.",
+        },
+
+        WX78_SCANNER_ITEM = "I wonder if it dreams about scanning sheep.",
+        WX78_SCANNER_SUCCEEDED = "It's got the look of someone eager to show their work.",
+
+        WX78_MODULEREMOVER = "Obviously a very delicate and complicated scientific instrument.",
+
+        SCANDATA = "Smells like fresh research.",
+
+        -- Pirates
+        BOAT_ROTATOR = "Things are going in the right direction. Or maybe the left.",
+        BOAT_ROTATOR_KIT = "I think I'll take it out for a spin.",
+        BOAT_BUMPER_KELP = "It won't save the boat from everything, but it sure kelps.",
+        BOAT_BUMPER_KELP_KIT = "A soon-to-be boat bumper.",
+        BOAT_BUMPER_SHELL = "It gives the boat a little shellf defence.",
+        BOAT_BUMPER_SHELL_KIT = "A soon-to-be boat bumper.",
+        BOAT_CANNON = {
+            GENERIC = "I should load it with something.",
+            AMMOLOADED = "The cannon is ready to fire!",
+            NOAMMO = "I didn't forget the cannonballs, I'm just letting the anticipation build.",
+        },
+        BOAT_CANNON_KIT = "It's not a cannon yet, but it will be.",
+        CANNONBALL_ROCK_ITEM = "This will fit into a cannon perfectly.",
+
+        OCEAN_TRAWLER = {
+            GENERIC = "It makes fishing more effishient.",
+            LOWERED = "And now we wait.",
+            CAUGHT = "It caught something!",
+            ESCAPED = "Looks like something was caught, but it escaped...",
+            FIXED = "All ready to catch fish again!",
+        },
+        OCEAN_TRAWLER_KIT = "I should put it somewhere with lots of fish.",
+
+        BOAT_MAGNET =
+        {
+            GENERIC = "I'm always drawn to physics, like a... ah, can't think of the word.",
+            ACTIVATED = "It's working!! Er, I knew it would work, of course.",
+        },
+        BOAT_MAGNET_KIT = "One of my more genius ideas, if I do say so myself.",
+
+        BOAT_MAGNET_BEACON =
+        {
+            GENERIC = "This will attract any strong magnets nearby.",
+            ACTIVATED = "Magnetism!",
+        },
+        DOCK_KIT = "Everything I need to build a dock for my boat.",
+        DOCK_WOODPOSTS_ITEM = "Aha! I thought the dock was missing something.",
+
+        MONKEYHUT =
+        {
+            GENERIC = "Treehouses are terribly flammable places to conduct experiments.",
+            BURNT = "Like I said!",
+        },
+        POWDER_MONKEY = "Don't you dare monkey around with my boat!",
+        PRIME_MATE = "A nice hat is always a clear indicator of who's in charge.",
+		LIGHTCRAB = "It's bioluminous!",
+        CUTLESS = "What it lacks in slicing it makes up for in splinters.",
+        CURSED_MONKEY_TOKEN = "It seems harmless.",
+        OAR_MONKEY = "It really puts the paddle to the battle.",
+        BANANABUSH = "That bush is bananas!",
+        DUG_BANANABUSH = "That bush is bananas!",
+        PALMCONETREE = "Kind of piney, for a palm tree.",
+        PALMCONE_SEED = "The very beginnings of a tree.",
+        PALMCONE_SAPLING = "It has big dreams of being a tree one day.",
+        PALMCONE_SCALE = "If trees had toenails, I imagine they'd look like this.",
+        MONKEYTAIL = "I wonder if they're edible? Maybe an experiment is in order.",
+        DUG_MONKEYTAIL = "I wonder if they're edible? Maybe an experiment is in order.",
+
+        MONKEY_MEDIUMHAT = "I think it makes me look very dashing and captain-like.",
+        MONKEY_SMALLHAT = "At least it will keep my hair dry.",
+        POLLY_ROGERSHAT = "A little bird told me it will come in handy.",
+        POLLY_ROGERS = "That's the little bird.",
+
+        MONKEYISLAND_PORTAL = "Nothing can get in, but it keeps spitting things out.",
+        MONKEYISLAND_PORTAL_DEBRIS = "This machinery looks oddly familiar...",
+        MONKEYQUEEN = "She looks like the top banana around here.",
+        MONKEYPILLAR = "A real pillar of the community.",
+        PIRATE_FLAG_POLE = "Ahoy!",
+
+        BLACKFLAG = "Gentleman Pirate-Scientist does have a bit of a ring to it.",
+        PIRATE_STASH = "I'm diggin' the decor.",
+        STASH_MAP = "It's nice to have some direction in life.",
+
+
+        BANANAJUICE = "Makes me feel a bit rogueish.",
     },
 
     DESCRIBE_GENERIC = "It's a... thing.",

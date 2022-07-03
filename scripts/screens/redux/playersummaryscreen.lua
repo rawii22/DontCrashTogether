@@ -17,6 +17,8 @@ local RedeemDialog = require "screens/redeemdialog"
 local Puppet = require "widgets/skinspuppet"
 local WardrobeScreen = require "screens/redux/wardrobescreen"
 
+local KitcoonPuppet = require "widgets/kitcoonpuppet"
+
 require("characterutil")
 require("skinsutils")
 
@@ -26,6 +28,8 @@ local PlayerSummaryScreen = Class(Screen, function(self, prev_screen, user_profi
     self.prev_screen = prev_screen
     self.user_profile = user_profile
 	self.can_shop = IsNotConsole()
+    
+    self.character_list = GetFEVisibleCharacterList()
 
     TheSim:PauseFileExistsAsync(true)
 
@@ -37,9 +41,23 @@ local PlayerSummaryScreen = Class(Screen, function(self, prev_screen, user_profi
 end)
 
 function PlayerSummaryScreen:DoInit()
+    self.letterbox = self:AddChild(TEMPLATES.old.ForegroundLetterbox())
+
     self.root = self:AddChild(TEMPLATES.ScreenRoot())
     self.bg = self.root:AddChild(TEMPLATES.BrightMenuBackground())
     self.title = self.root:AddChild(TEMPLATES.ScreenTitle(STRINGS.UI.PLAYERSUMMARYSCREEN.TITLE, ""))
+   
+    self:_BuildPosse()
+
+    self.bottom_root = self.root:AddChild(Widget("bottom_root"))
+    self.bottom_root:SetPosition(100, -200)
+    self.new_items = self.bottom_root:AddChild(self:_BuildItemsSummary())
+
+    self.kit_puppet = self.root:AddChild(KitcoonPuppet( Profile, nil, {
+        { x = -380, y = 50, scale = 0.75 },
+        { x = -380, y = 170, scale = 0.75 },
+        { x = -330, y = -300, scale = 0.75 },
+    } ))
 
     self.onlinestatus = self.root:AddChild(OnlineStatus(true))
 
@@ -51,14 +69,7 @@ function PlayerSummaryScreen:DoInit()
         -- Profileflair and rank are displayed on experiencebar when its visible.
         self.puppet:AlwaysHideRankBadge()
     end
-
-    self:_BuildPosse()
-
-    self.bottom_root = self.root:AddChild(Widget("bototom_root"))
-    self.bottom_root:SetPosition(100, -200)
-    self.new_items = self.bottom_root:AddChild(self:_BuildItemsSummary())
-
-
+    
     self.musicstopped = true
 
     self.menu = self:_BuildMenu()
@@ -100,7 +111,7 @@ function PlayerSummaryScreen:_BuildItemsSummary()
     no_items:SetRegionSize(width,30)
     no_items:Hide()
 
-	if TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode() then
+    if not TheInventory:HasSupportForOfflineSkins() and (TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode()) then
 		no_items:SetString(STRINGS.UI.PLAYERSUMMARYSCREEN.OFFLINE_NO_ITEMS)
 	    no_items:Show()
 
@@ -118,12 +129,6 @@ function PlayerSummaryScreen:_BuildItemsSummary()
 			table.insert(items, item)
 		end
 
-		-- This msg will be stomped by UpdateItems!
-		local unopened_msg = new_root:AddChild(Text(CHATFONT, 25, "", UICOLOURS.WHITE))
-		unopened_msg:SetPosition(0,-240)
-		unopened_msg:SetRegionSize(width,30)
-		unopened_msg:Hide()
-
         local counter = 0
         new_root.UpdateItems = function()
 		    if self.hide_items or not TheInventory:HasDownloadedInventory() then
@@ -132,7 +137,6 @@ function PlayerSummaryScreen:_BuildItemsSummary()
 				end
 				no_items:Show()
 				no_items:SetString(STRINGS.UI.PLAYERSUMMARYSCREEN.LOADING_STUFF)
-				unopened_msg:Hide()
 
 				new_root.ScheduleRefresh()
 				return
@@ -167,12 +171,6 @@ function PlayerSummaryScreen:_BuildItemsSummary()
 			for key,count in pairs(GetMysteryBoxCounts()) do
 				box_count = box_count + count
 			end
-			if box_count > 0 then
-				unopened_msg:SetString(subfmt(STRINGS.UI.PLAYERSUMMARYSCREEN.UNOPENED_BOXES_FMT, {num_boxes = box_count}))
-				unopened_msg:Show()
-			else
-				unopened_msg:Hide()
-			end
 		end
     end
 
@@ -192,7 +190,7 @@ function PlayerSummaryScreen:_BuildItemsSummary()
 end
 
 function PlayerSummaryScreen:_BuildPosse()
-    self.posse_root = self.root:AddChild(Widget("bototom_root"))
+    self.posse_root = self.root:AddChild(Widget("posse_root"))
     self.posse_root:SetPosition(-230, 150)
     --self.posse_root:SetScale(0.8)
 
@@ -217,7 +215,7 @@ function PlayerSummaryScreen:_BuildPosse()
     local y = 0
     local offset = 0
 
-    for k,v in pairs( DST_CHARACTERLIST ) do
+    for k,v in pairs( self.character_list ) do
         local puppet = self.posse_root:AddChild(Puppet( 15, 40 ))
         puppet.add_change_emote_for_idle = true
         puppet:SetScale(1.8)
@@ -254,9 +252,9 @@ function PlayerSummaryScreen:_RefreshPuppets()
     end
     self.puppet:UpdatePlayerListing(nil, nil, herocharacter, clothing.base, clothing, playerportrait, profileflair)
 
-    local keys = shuffledKeys(DST_CHARACTERLIST)
+    local keys = shuffledKeys(self.character_list)
     for k,rand_key in pairs(keys) do
-        local prefab = DST_CHARACTERLIST[rand_key]
+        local prefab = self.character_list[rand_key]
         local clothing = self.user_profile:GetSkinsForCharacter(prefab)
         self.posse[k]:SetSkins(prefab, clothing.base, clothing, true)
 
@@ -356,6 +354,10 @@ end
 function PlayerSummaryScreen:OnBecomeActive()
     PlayerSummaryScreen._base.OnBecomeActive(self)
 
+    if self.kit_puppet then
+        self.kit_puppet:Enable()
+    end
+
 	if self.last_focus_widget then
 		self.menu:RestoreFocusTo(self.last_focus_widget)
 	end
@@ -365,6 +367,14 @@ function PlayerSummaryScreen:OnBecomeActive()
     self:StartMusic()
 
     DisplayInventoryFailedPopup( self )
+end
+
+function PlayerSummaryScreen:OnBecomeInactive()
+    PlayerSummaryScreen._base.OnBecomeInactive(self)
+
+    if self.kit_puppet then
+        self.kit_puppet:Disable()
+    end
 end
 
 function PlayerSummaryScreen:_RefreshTitles()

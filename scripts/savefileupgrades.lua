@@ -1157,6 +1157,27 @@ t = {
 				FlagForRetrofitting_Forest(savedata, "retrofit_terraria_terrarium")
             end,
         },
+
+        {
+            version = 5.10, -- Catcoon De-extinction
+            fn = function(savedata)
+				FlagForRetrofitting_Forest(savedata, "retrofit_catcoonden_deextinction")
+            end,
+        },
+
+        {
+            version = 5.11, --remove OCEAN_BRINEPOOL_SHORE
+            fn = function(savedata)
+                savedata.retrofit_remove_ocean_brinepool_shore = true
+            end
+        },
+
+        {
+            version = 5.12, -- Curse of Moon Quay - new content
+            fn = function(savedata)
+                savedata.retrofit_moonquay_monkeyisland_setpiece = true
+            end,
+        },
     },
 }
 

@@ -42,7 +42,9 @@ end
 
 local WANDER_TIMES = {minwalktime=0.25, randwalktime=0.5, minwaittime=0.0, randwaittime=0.0}
 local function getWanderDist(inst)
-	return (inst.components.herdmember ~= nil and inst.components.herdmember.enabled) and 2 or 16
+	return (inst.components.herdmember ~= nil and inst.components.herdmember.enabled) and 2 
+			or inst.fish_def ~= nil and inst.fish_def.herdless_wander_dist
+			or 16
 end
 
 local function WanderTarget(inst)
@@ -53,15 +55,28 @@ local function WanderTarget(inst)
 	end
 end
 
+local function getWanderData(inst)
+	if inst.fish_def ~= nil and inst.fish_def.wander_seek_dist ~= nil then
+		return {wander_dist = inst.fish_def.wander_seek_dist}
+	end
+	return nil
+end
+
 local function GetFisherPosition(inst)
 	local rod = inst.components.oceanfishable:GetRod()
 	return rod ~= nil and rod:GetPosition() or nil
 end
 
 local function GetFoodTarget(inst)
-	if inst.food_target ~= nil then
-		if inst.food_target:IsValid() and not inst.food_target:HasTag("INLIMBO") and TheWorld.Map:IsOceanAtPoint(inst.food_target.Transform:GetWorldPosition())  then
-			return inst.food_target
+	local ft = inst.food_target
+	if ft ~= nil then
+		if ft:IsValid() and not ft:HasTag("INLIMBO") and TheWorld.Map:IsOceanAtPoint(ft.Transform:GetWorldPosition()) then
+			if not ft:HasTag("oceantrawler") then
+				return ft
+			end
+			if ft.components.oceantrawler and ft.components.oceantrawler:IsLowered() then
+				return ft
+			end
 		end
 		inst.food_target = nil
 	end
@@ -73,7 +88,7 @@ local function GetFoodTargetPos(inst)
 end
 
 local FINDFOOD_CANT_TAGS = {"planted", "INLIMBO"}
-local FINDFOOD_ONEOF_TAGS = {"fishinghook"}
+local FINDFOOD_ONEOF_TAGS = {"fishinghook", "oceantrawler"}
 local function FindFoodAction(inst)
 	if GetFoodTarget(inst) == nil then
 		local target = FindEntity(inst, SEE_LURE_OR_FOOD_DIST, function(food)
@@ -82,6 +97,10 @@ local function FindFoodAction(inst)
 									and TheWorld.Map:IsOceanAtPoint(food.Transform:GetWorldPosition())
 									and not food.components.oceanfishinghook:HasLostInterest(inst)
 									and food.components.oceanfishinghook:TestInterest(inst)
+							elseif food:HasTag("oceantrawler") then
+								return food.components.oceantrawler ~= nil
+									and food.components.oceantrawler:IsLowered()
+									and food.components.oceantrawler:GetBait(inst.prefab) ~= nil
 							end
 							return inst:IsNear(food, SEE_FOOD_DIST) and TheWorld.Map:IsOceanAtPoint(food.Transform:GetWorldPosition())
 						end,
@@ -198,7 +217,7 @@ function OceanFishBrain:OnStart()
 				),
 
 				FindClosest(self.inst, TUNING.OCEANFISH_SEE_CHUM_DIST, 0, { "chum" }),
-				Wander(self.inst, WanderTarget, getWanderDist(self.inst), WANDER_TIMES, getdirectionFn)
+				Wander(self.inst, WanderTarget, getWanderDist(self.inst), WANDER_TIMES, getdirectionFn, nil, nil, getWanderData(self.inst))
             }, 0.25)),
     }, 0.25)
 
@@ -206,7 +225,7 @@ function OceanFishBrain:OnStart()
 end
 
 function OceanFishBrain:OnInitializationComplete()
-    self.inst.components.knownlocations:RememberLocation("home", Point(self.inst.Transform:GetWorldPosition()), true)
+    self.inst.components.knownlocations:RememberLocation("home", self.inst:GetPosition(), true)
 end
 
 return OceanFishBrain

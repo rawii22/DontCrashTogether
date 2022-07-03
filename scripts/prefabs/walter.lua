@@ -174,6 +174,12 @@ local function OnDespawn(inst)
     end
 end
 
+local function OnReroll(inst)
+    if inst.woby ~= nil then
+		inst.woby:OnPlayerLinkDespawn(true)
+    end
+end
+
 local function OnSave(inst, data)
 	data.woby = inst.woby ~= nil and inst.woby:GetSaveRecord() or nil
 end
@@ -271,6 +277,7 @@ local function master_postinit(inst)
 	inst.OnSave = OnSave
 	inst.OnLoad = OnLoad
     inst.OnDespawn = OnDespawn
+    inst:ListenForEvent("ms_playerreroll", OnReroll)
 	inst:ListenForEvent("onremove", OnRemoveEntity)
 
 end
@@ -278,7 +285,7 @@ end
 -------------------------------------------------------------------------------
 
 local function CampfireStory_OnNotNight(inst, isnight)
-	if not isnight and inst.storyteller:IsValid() and inst.storyteller.components.storyteller ~= nil then
+	if not isnight and inst.storyteller ~= nil and inst.storyteller:IsValid() and inst.storyteller.components.storyteller ~= nil then
 		inst.storyteller.components.storyteller:AbortStory(GetString(inst.storyteller, "ANNOUNCE_STORYTELLING_ABORT_NOT_NIGHT"))
 	end
 end

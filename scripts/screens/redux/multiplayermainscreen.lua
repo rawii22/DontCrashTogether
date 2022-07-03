@@ -31,10 +31,12 @@ local MainMenuMotdPanel = require "widgets/redux/mainmenu_motdpanel"
 local MainMenuStatsPanel = require "widgets/redux/mainmenu_statspanel"
 local PurchasePackScreen = require "screens/redux/purchasepackscreen"
 
+local KitcoonPuppet = require "widgets/kitcoonpuppet"
+
 local SHOW_DST_DEBUG_HOST_JOIN = BRANCH == "dev"
 local SHOW_QUICKJOIN = false
 
-local IS_BETA = BRANCH == "staging" --or BRANCH == "dev"
+local IS_BETA = BRANCH == "staging" or BRANCH == "dev"
 local IS_DEV_BUILD = BRANCH == "dev"
 
 local function PlayBannerSound(inst, self, sound)
@@ -43,8 +45,8 @@ local function PlayBannerSound(inst, self, sound)
     end
 end
 
-local function MakeWaterloggedBanner(self, baner_root, anim)
-    local anim_bg = baner_root:AddChild(UIAnim())
+local function MakeWaterloggedBanner(self, banner_root, anim)
+    local anim_bg = banner_root:AddChild(UIAnim())
     anim_bg:GetAnimState():SetBuild("dst_menu_waterlogged")
     anim_bg:GetAnimState():SetBank("dst_menu_waterlogged")
     anim_bg:SetScale(0.667)
@@ -52,7 +54,7 @@ local function MakeWaterloggedBanner(self, baner_root, anim)
     anim_bg:MoveToBack()
 end
 
-local function MakeMoonstormBanner(self, baner_root, anim)
+local function MakeMoonstormBanner(self, banner_root, anim)
     anim:GetAnimState():SetBuild("dst_menu_moonstorm_background")
     anim:GetAnimState():SetBank ("dst_menu_moonstorm_background")
     anim:GetAnimState():PlayAnimation("loop_w1", true)
@@ -62,7 +64,7 @@ local function MakeMoonstormBanner(self, baner_root, anim)
     end)
 
 
-    local anim_wrench = baner_root:AddChild(UIAnim())
+    local anim_wrench = banner_root:AddChild(UIAnim())
     anim_wrench:GetAnimState():SetBuild("dst_menu_moonstorm_wrench")
     anim_wrench:GetAnimState():SetBank ("dst_menu_moonstorm_wrench")
     anim_wrench:GetAnimState():PlayAnimation("loop_w1", false)
@@ -81,7 +83,7 @@ local function MakeMoonstormBanner(self, baner_root, anim)
     end)
 
 
-    local anim_wagstaff = baner_root:AddChild(UIAnim())
+    local anim_wagstaff = banner_root:AddChild(UIAnim())
     anim_wagstaff:GetAnimState():SetBuild("dst_menu_moonstorm_wagstaff")
     anim_wagstaff:GetAnimState():SetBank ("dst_menu_moonstorm_wagstaff")
     anim_wagstaff:GetAnimState():PlayAnimation("loop_w2", true)
@@ -135,7 +137,7 @@ local function MakeMoonstormBanner(self, baner_root, anim)
     anim_wagstaff.inst:DoTaskInTime(1.5 + wagstaff_invisible_time_min * math.random() + wagstaff_invisible_time_variance * math.random(), holo_fade_in)
 
 
-    local anim_foreground = baner_root:AddChild(UIAnim())
+    local anim_foreground = banner_root:AddChild(UIAnim())
     anim_foreground:GetAnimState():SetBuild("dst_menu_moonstorm_foreground")
     anim_foreground:GetAnimState():SetBank ("dst_menu_moonstorm_foreground")
     anim_foreground:GetAnimState():PlayAnimation("loop_w"..math.random(3), true)
@@ -145,8 +147,8 @@ local function MakeMoonstormBanner(self, baner_root, anim)
     end)
 end
 
-local function MakeYOTCBanner(self, baner_root, anim)
-    local anim_bg = baner_root:AddChild(UIAnim())
+local function MakeYOTCBanner(self, banner_root, anim)
+    local anim_bg = banner_root:AddChild(UIAnim())
     anim_bg:GetAnimState():SetBuild("dst_menu_carrat_bg")
     anim_bg:GetAnimState():SetBank("dst_carrat_bg")
     anim_bg:SetScale(0.7)
@@ -178,57 +180,64 @@ local function MakeYOTCBanner(self, baner_root, anim)
     end
 end
 
-local function MakeHallowedNightsBanner(self, baner_root, anim)
+local function MakeYOTCatcoonBanner(self, banner_root, anim)
+    anim:GetAnimState():SetBuild("dst_menu_yot_catcoon")
+    anim:GetAnimState():SetBank ("dst_menu_yot_catcoon")
+    anim:SetScale(.667)
+    anim:GetAnimState():PlayAnimation("loop", true)
+end
+
+local function MakeHallowedNightsBanner(self, banner_root, anim)
     anim:GetAnimState():SetBuild("dst_menu_halloween2")
     anim:GetAnimState():SetBank ("dst_menu_halloween2")
     anim:SetScale(.667)
     anim:GetAnimState():PlayAnimation("loop", true)
 end
 
-local function MakeCawnivalBanner(self, baner_root, anim)
+local function MakeCawnivalBanner(self, banner_root, anim)
     anim:GetAnimState():SetBuild("dst_menu_carnival")
     anim:GetAnimState():SetBank ("dst_menu_carnival")
     anim:SetScale(.667)
     anim:GetAnimState():PlayAnimation("loop", true)
 end
 
-local function MakeWebberCawnivalBanner(self, baner_root, anim)
+local function MakeWebberCawnivalBanner(self, banner_root, anim)
     anim:GetAnimState():SetBuild("dst_menu_webber_carnival")
     anim:GetAnimState():SetBank ("dst_menu_webber")
     anim:SetScale(.667)
     anim:GetAnimState():PlayAnimation("loop", true)
 end
 
-local function MakeWesV1Banner(self, baner_root, anim)
+local function MakeWesV1Banner(self, banner_root, anim)
     anim:GetAnimState():SetBuild("dst_menu_wes")
     anim:GetAnimState():SetBank("dst_menu_wes")
     anim:GetAnimState():PlayAnimation("loop", true)
     anim:SetScale(.667)
 end
 
-local function MakeWesV2Banner(self, baner_root, anim)
+local function MakeWesV2Banner(self, banner_root, anim)
     anim:GetAnimState():SetBuild("dst_menu_wes2")
     anim:GetAnimState():SetBank ("dst_menu_wes2")
     anim:SetScale(.667)
     anim:GetAnimState():PlayAnimation("loop", true)
 end
 
-local function MakeWendyBanner(self, baner_root, anim)
+local function MakeWendyBanner(self, banner_root, anim)
     anim:GetAnimState():SetBuild("dst_menu_wendy")
     anim:GetAnimState():SetBank("dst_menu_wendy")
     anim:GetAnimState():PlayAnimation("loop", true)
     anim:SetScale(.667)
 end
 
-local function MakeWebberBanner(self, baner_root, anim)
+local function MakeWebberBanner(self, banner_root, anim)
     anim:GetAnimState():SetBuild("dst_menu_webber")
     anim:GetAnimState():SetBank ("dst_menu_webber")
     anim:SetScale(.667)
     anim:GetAnimState():PlayAnimation("loop", true)
 end
 
-local function MakeWandaBanner(self, baner_root, anim)
-    local anim_bg = baner_root:AddChild(UIAnim())
+local function MakeWandaBanner(self, banner_root, anim)
+    local anim_bg = banner_root:AddChild(UIAnim())
     anim_bg:GetAnimState():SetBuild("dst_menu_wanda")
     anim_bg:GetAnimState():SetBank("dst_menu_wanda")
     anim_bg:SetScale(0.667)
@@ -260,11 +269,25 @@ local function MakeWolfgangBanner(self, banner_root, anim)
     anim:SetScale(.667)
 end
 
-local function MakeDefaultBanner(self, baner_root, anim)
-	local banner_height = 350
-	baner_root:SetPosition(0, RESOLUTION_Y / 2 - banner_height / 2 + 1 ) -- positioning for when we had the top banner art
+local function MakeWX78Banner(self, banner_root, anim)
+    anim:GetAnimState():SetBuild("dst_menu_wx")
+    anim:GetAnimState():SetBank("dst_menu_wx")
+    anim:GetAnimState():PlayAnimation("loop", true)
+    anim:SetScale(.667)
+end
 
-    local anim_bg = baner_root:AddChild(UIAnim())
+local function MakePiratesBanner(self, banner_root, anim)
+    anim:GetAnimState():SetBuild("dst_menu_pirates")
+    anim:GetAnimState():SetBank("dst_menu_pirates")
+    anim:GetAnimState():PlayAnimation("loop", true)
+    anim:SetScale(.667)
+end
+
+local function MakeDefaultBanner(self, banner_root, anim)
+	local banner_height = 350
+	banner_root:SetPosition(0, RESOLUTION_Y / 2 - banner_height / 2 + 1 ) -- positioning for when we had the top banner art
+
+    local anim_bg = banner_root:AddChild(UIAnim())
     anim_bg:GetAnimState():SetBuild("dst_menu_v2_bg")
     anim_bg:GetAnimState():SetBank("dst_menu_v2_bg")
     anim:SetScale(.667)
@@ -285,6 +308,7 @@ local function MakeDefaultBanner(self, baner_root, anim)
         "creature_hound",
         "creature_malbatross",
     }
+
     for _,v in pairs(creatures) do
         anim:GetAnimState():Hide(v)
     end
@@ -302,29 +326,31 @@ end
 function MakeBanner(self)
 	local title_str = nil
 
-	local baner_root = Widget("banner_root")
-	baner_root:SetPosition(0, 0)
-	local anim = baner_root:AddChild(UIAnim())
+	local banner_root = Widget("banner_root")
+	banner_root:SetPosition(0, 0)
+	local anim = banner_root:AddChild(UIAnim())
 
 	if IS_BETA then
 		title_str = STRINGS.UI.MAINSCREEN.MAINBANNER_BETA_TITLE
-        MakeWolfgangBanner(self, baner_root, anim)
+        MakePiratesBanner(self, banner_root, anim)
 	elseif IsSpecialEventActive(SPECIAL_EVENTS.YOTC) then
-        MakeYOTCBanner(self, baner_root, anim)
+        MakeYOTCBanner(self, banner_root, anim)
+	elseif IsSpecialEventActive(SPECIAL_EVENTS.YOT_CATCOON) then
+        MakeYOTCatcoonBanner(self, banner_root, anim)
 	elseif IsSpecialEventActive(SPECIAL_EVENTS.HALLOWED_NIGHTS) then
-        MakeHallowedNightsBanner(self, baner_root, anim)
+        MakeHallowedNightsBanner(self, banner_root, anim)
 	elseif IsSpecialEventActive(SPECIAL_EVENTS.CARNIVAL) then
-        MakeWebberCawnivalBanner(self, baner_root, anim)
-	elseif true then
-        MakeWolfgangBanner(self, baner_root, anim)
+        MakeCawnivalBanner(self, banner_root, anim)
 	else
-        MakeDefaultBanner(self, baner_root, anim)
+        --MakeDefaultBanner(self, banner_root, anim)
+        MakePiratesBanner(self, banner_root, anim)
+        --MakeWX78Banner(self, banner_root, anim)
         --[[
 		local cur_time = os.time()
 		if cur_time <= 1585810740 and (not IsConsole() or cur_time >= 1585759200) then -- 9:40am to 11:59pm PDT
-            MakeWesV1Banner(self, baner_root, anim)
+            MakeWesV1Banner(self, banner_root, anim)
 		else
-            MakeWendyBanner(self, baner_root, anim)
+            MakeWendyBanner(self, banner_root, anim)
         end
         ]]
 	end
@@ -336,12 +362,12 @@ function MakeBanner(self)
 			local text_width = 880
 
 			local font_size = 22
-			local title = baner_root:AddChild(Text(self.info_font, font_size, title_str, UICOLOURS.HIGHLIGHT_GOLD))
+			local title = banner_root:AddChild(Text(self.info_font, font_size, title_str, UICOLOURS.HIGHLIGHT_GOLD))
 			title:SetRegionSize(text_width, 2*(font_size + 2))
 			title:SetHAlign(ANCHOR_RIGHT)
 			title:SetPosition(x, y + 4)
 
-			local shadow = baner_root:AddChild(Text(self.info_font, font_size, title_str, UICOLOURS.BLACK))
+			local shadow = banner_root:AddChild(Text(self.info_font, font_size, title_str, UICOLOURS.BLACK))
 			shadow:SetRegionSize(text_width, 2*(font_size + 2))
 			shadow:SetHAlign(ANCHOR_RIGHT)
 			shadow:SetPosition(x + 1.5, y - 1.5)
@@ -349,7 +375,49 @@ function MakeBanner(self)
 		end
 	end
 
-	return baner_root
+	return banner_root
+end
+
+--------------------------------------------------------------------------------
+
+local function MakeWX78BannerFront(self, banner_front, anim)
+    anim:GetAnimState():SetBuild("dst_menu_wx")
+    anim:GetAnimState():SetBank("dst_menu_wx")
+    anim:GetAnimState():PlayAnimation("loop_top", true)
+    anim:SetScale(0.667)
+end
+
+-- For drawing things in front of the MOTD panels
+local function MakeBannerFront(self)
+    if IS_BETA then
+        --[[
+        local banner_front = Widget("banner_front")
+        banner_front:SetPosition(0, 0)
+        local anim = banner_front:AddChild(UIAnim())
+
+        MakeWX78BannerFront(self, banner_front, anim)
+
+        return banner_front
+        ]]
+    elseif IsSpecialEventActive(SPECIAL_EVENTS.YOTC) then
+        return nil
+    elseif IsSpecialEventActive(SPECIAL_EVENTS.YOT_CATCOON) then
+        return nil
+    elseif IsSpecialEventActive(SPECIAL_EVENTS.HALLOWED_NIGHTS) then
+        return nil
+    elseif IsSpecialEventActive(SPECIAL_EVENTS.CARNIVAL) then
+        return nil
+    else
+        --[[
+        local banner_front = Widget("banner_front")
+        banner_front:SetPosition(0, 0)
+        local anim = banner_front:AddChild(UIAnim())
+
+        MakeWX78BannerFront(self, banner_front, anim)
+        
+        return banner_front
+        ]]
+    end
 end
 
 local MultiplayerMainScreen = Class(Screen, function(self, prev_screen, profile, offline, session_data)
@@ -357,6 +425,10 @@ local MultiplayerMainScreen = Class(Screen, function(self, prev_screen, profile,
 
 	self.info_font = BODYTEXTFONT -- CHATFONT, FALLBACK_FONT, CHATFONT_OUTLINE
 
+    --kitcoon stuff in the UI
+	PostProcessor:SetColourCubeData( 0, "images/colour_cubes/day05_cc.tex", "images/colour_cubes/dusk03_cc.tex" )
+	PostProcessor:SetColourCubeLerp( 0, 0.05 )
+	TheSim:SetVisualAmbientColour( 0.6, 0.6, 0.6 )
 
     self.profile = profile
     self.offline = offline
@@ -368,7 +440,7 @@ local MultiplayerMainScreen = Class(Screen, function(self, prev_screen, profile,
 end)
 
 function MultiplayerMainScreen:GotoShop( filter_info )
-	if TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode() then
+	if not TheInventory:HasSupportForOfflineSkins() and (TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode()) then
 		TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.MAINSCREEN.OFFLINE, STRINGS.UI.MAINSCREEN.ITEMCOLLECTION_DISABLE,
 			{
 				{text=STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_LOGIN, cb = function()
@@ -385,7 +457,7 @@ end
 
 function MultiplayerMainScreen:getStatsPanel()
     return MainMenuStatsPanel({store_cb = function()
-        if TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode() then
+        if not TheInventory:HasSupportForOfflineSkins() and (TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode()) then
             TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.MAINSCREEN.OFFLINE, STRINGS.UI.MAINSCREEN.ITEMCOLLECTION_DISABLE,
                 {
                     {text=STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_LOGIN, cb = function()
@@ -448,6 +520,13 @@ function MultiplayerMainScreen:DoInit()
 
     ----------------------------------------------------------
 	-- new MOTD
+
+    local kit_puppet_positions = {
+        { x = 90.0, y = 20.0, scale = 0.75 },
+        { x = 390.0, y = 20.0, scale = 0.75 },
+    }
+    self.kit_puppet = self.fixed_root:AddChild(KitcoonPuppet( Profile, nil, kit_puppet_positions ))
+
 	if TheFrontEnd.MotdManager:IsEnabled() then
 		local motd_panel = MainMenuMotdPanel({font = self.info_font, x = 100, y = -150,
 			on_no_focusforward = self.menu,
@@ -461,13 +540,20 @@ function MultiplayerMainScreen:DoInit()
 	end
 
     if IsAnyFestivalEventActive() then
-        if not TheFrontEnd:GetIsOfflineMode() then
+        if TheInventory:HasSupportForOfflineSkins() or not TheFrontEnd:GetIsOfflineMode() then
 			self.userprogress = self.fixed_root:AddChild(TEMPLATES.UserProgress(function()
 				self:OnPlayerSummaryButton()
 			end))
 		end
     end
 
+    ----------------------------------------------------------
+
+    local banner_front = MakeBannerFront(self)
+    if banner_front ~= nil then
+        self.banner_front = self.fixed_root:AddChild(banner_front)
+        self.banner_front:MoveToFront()
+    end
 
     ----------------------------------------------------------
 
@@ -594,7 +680,7 @@ function MultiplayerMainScreen:_GoToFestfivalEventScreen(fadeout_cb)
 end
 
 function MultiplayerMainScreen:OnFestivalEventButton()
-    if TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode() then
+    if not TheInventory:HasSupportForOfflineSkins() and (TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode()) then
         TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_TITLE, STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_BODY[WORLD_FESTIVAL_EVENT],
             {
                 {text=STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_LOGIN, cb = function()
@@ -679,8 +765,7 @@ function MultiplayerMainScreen:OnBrowseServersButton()
 end
 
 function MultiplayerMainScreen:OnPlayerSummaryButton()
-
-    if TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode() then
+    if not TheInventory:HasSupportForOfflineSkins() and (TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode()) then
         TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.MAINSCREEN.OFFLINE, STRINGS.UI.MAINSCREEN.ITEMCOLLECTION_DISABLE,
             {
                 {text=STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_LOGIN, cb = function()
@@ -716,8 +801,8 @@ function MultiplayerMainScreen:OnQuickJoinServersButton()
 end
 
 
-function MultiplayerMainScreen:Settings()
-    self:_FadeToScreen(OptionsScreen, {self})
+function MultiplayerMainScreen:Settings( default_section )
+    self:_FadeToScreen(OptionsScreen, {default_section})
 end
 
 function MultiplayerMainScreen:OnModsButton()
@@ -832,7 +917,7 @@ function MultiplayerMainScreen:MakeSubMenu()
     local submenuitems = {}
 
     if IsSteam() or IsRail() then
-		if not IsLinux() then
+		if not IsLinux() and not IsSteamDeck() then
 			table.insert(submenuitems, {widget = TEMPLATES.IconButton("images/button_icons.xml", "folder.tex", STRINGS.UI.MAINSCREEN.SAVE_LOCATION, false, true, function() TheSim:OpenDocumentsFolder() end, {font=NEWFONT_OUTLINE})})
 		end
 
@@ -889,6 +974,10 @@ function MultiplayerMainScreen:OnBecomeActive()
 		self.motd_panel:OnBecomeActive()
 	end
 
+    if self.kit_puppet then
+        self.kit_puppet:Enable()
+    end
+
     --delay for a frame to allow the screen to finish building, then check the entity count for leaks
 	if IS_DEV_BUILD then
 		self.inst:DoTaskInTime(0, function()
@@ -903,6 +992,14 @@ function MultiplayerMainScreen:OnBecomeActive()
 			self.cached_entity_count = TheSim:GetNumberOfEntities()
 		end)
 	end
+end
+
+function MultiplayerMainScreen:OnBecomeInactive()
+    MultiplayerMainScreen._base.OnBecomeInactive(self)
+
+    if self.kit_puppet then
+        self.kit_puppet:Disable()
+    end
 end
 
 function MultiplayerMainScreen:FinishedFadeIn()
@@ -982,34 +1079,21 @@ function MultiplayerMainScreen:FinishedFadeIn()
                 local thankyou_popup = ThankYouPopup(items)
                 TheFrontEnd:PushScreen(thankyou_popup)
             else
-                if IsConsole() or IsSteam() then
-                    --Make sure we only do one mainscreen popup at a time
-                    --Do language assistance popup
+                --Make sure we only do one mainscreen popup at a time, do language assistance popups
+                if IsSteam() then
                     local interface_lang = TheNet:GetLanguageCode()
                     if interface_lang ~= "english" then
-                        if Profile:GetValue("language_asked_"..interface_lang) ~= true then
-                            local lang_id = LANGUAGE_STEAMCODE_TO_ID[interface_lang]
-                            local locale = LOC.GetLocale(lang_id)
-                            if locale ~= nil then
-                                local show_dialog = false
-                                if IsConsole() then
-                                    show_dialog = locale.in_console_menu
-                                elseif IsSteam() then
-                                    show_dialog = locale.in_steam_menu
-                                end
-
-                                if show_dialog then
-                                    local popup_screen = PopupDialogScreen( STRINGS.PRETRANSLATED.LANGUAGES_TITLE[locale.id], STRINGS.PRETRANSLATED.LANGUAGES_BODY[locale.id],
-                                            {
-                                                { text = STRINGS.PRETRANSLATED.LANGUAGES_YES[locale.id], cb = function() Profile:SetLanguageID(lang_id, function() SimReset() end ) end },
-                                                { text = STRINGS.PRETRANSLATED.LANGUAGES_NO[locale.id], cb = function() TheFrontEnd:PopScreen() end}
-                                            }
-                                        )
-                                    TheFrontEnd:PushScreen( popup_screen )
-                                    Profile:SetValue("language_asked_"..interface_lang, true)
-                                    Profile:Save()
-                                end
-                            end
+                        if Profile:GetValue("steam_language_asked") ~= true then
+                            local popup_screen = PopupDialogScreen( STRINGS.UI.OPTIONS.LANG_TITLE, STRINGS.UI.OPTIONS.LANG_BODY_STEAM,
+                                    {
+                                        {text=STRINGS.UI.OPTIONS.YES, cb = function() TheFrontEnd:PopScreen() self:Settings("LANG") end },
+                                        {text=STRINGS.UI.OPTIONS.NO, cb = function() TheFrontEnd:PopScreen() end}
+                                    }
+                                )
+                            TheFrontEnd:PushScreen( popup_screen )
+                            Profile:SetValue("steam_language_asked", true)
+                            Profile:Save()
+                
                         end
                     end
                 end

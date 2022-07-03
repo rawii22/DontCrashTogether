@@ -4,7 +4,7 @@ local assets =
 	Asset("ANIM", "anim/carnivaldecor_lamp.zip"),
 }
 
-local NUM_SHAPES = 3
+local NUM_SHAPES = 6
 
 local function onhammered(inst, worker)
     local fx = SpawnPrefab("collapse_small")
@@ -111,6 +111,7 @@ local function fn(data)
 	inst:AddTag("carnivaldecor")
 	inst:AddTag("carnivallamp")
     inst:AddTag("structure")
+    inst:AddTag("cattoyairborne")
 
     inst.entity:SetPristine()
 

@@ -253,7 +253,7 @@ local function MakeCritter(name, animname, face, diet, flying, data, prefabs)
 		end
 
 		if data ~= nil and data.master_postinit ~= nil then
-			data.master_postinit(inst)
+			data.master_postinit(inst, data)
 		end
 
         inst.OnSave = OnSave
@@ -343,7 +343,7 @@ return MakeCritter("critter_lamb", "sheepington", 6, standard_diet, false, {favo
        MakeBuilder("critter_lamb"),
        MakeCritter("critter_puppy", "pupington", 4, standard_diet, false, {favoritefood="monsterlasagna", allow_platform_hopping=true}),
        MakeBuilder("critter_puppy"),
-       MakeCritter("critter_kitten", "kittington", 6, standard_diet, false, {favoritefood="fishsticks", allow_platform_hopping=true}),
+       MakeCritter("critter_kitten", "kittington", 6, standard_diet, false, {favoritefood="fishsticks", playmatetags={"kitcoon"}, allow_platform_hopping=true}),
        MakeBuilder("critter_kitten"),
        MakeCritter("critter_perdling", "perdling", 4, standard_diet, false, {favoritefood="trailmix", allow_platform_hopping=true}),
        MakeBuilder("critter_perdling"),

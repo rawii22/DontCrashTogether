@@ -14,6 +14,7 @@ return{
         {
             MOUNTED = "Either I must get down, or the world must come up.",
             HASPET = "I've made my pact with a beast already.",
+			TICOON = "Oh, but one's enough, hyuyu!",
         },
 		SHAVE =
 		{
@@ -58,7 +59,16 @@ return{
 			LOCKED_GATE = "Am I locked out, or in?",
             HOSTBUSY = "Goodfeather, hm? I think I know him by another name.",
             CARNIVAL_HOST_HERE = "Now where is our feathered friend?",
-            NOCARNIVAL = "They've come and gone, were they but a dream all along?"
+            NOCARNIVAL = "They've come and gone, were they but a dream all along?",
+			EMPTY_CATCOONDEN = "No one's home, I'm all alone!",
+			KITCOON_HIDEANDSEEK_NOT_ENOUGH_HIDERS = "We'll need more friends if we want to play, hyuyu!",
+			KITCOON_HIDEANDSEEK_NOT_ENOUGH_HIDING_SPOTS = "The game was denied, there's nowwhere to hide!",
+			KITCOON_HIDEANDSEEK_ONE_GAME_PER_DAY = "If we play any more, it's gonna be a chore.",
+		},
+		OPEN_CRAFTING =
+		{
+            PROFESSIONALCHEF = "Warly won't let me peek inside. He's no fun.",
+			SHADOWMAGIC = "I don't think he knows how to use it.",
 		},
         COOK =
         {
@@ -89,7 +99,7 @@ return{
 --fallback to speech_wilson.lua         READ =
 --fallback to speech_wilson.lua         {
 --fallback to speech_wilson.lua             GENERIC = "only_used_by_wickerbottom",
---fallback to speech_wilson.lua             NOBIRDS = "only_used_by_wickerbottom"
+--fallback to speech_wilson.lua             NOBIRDS = "only_used_by_wickerbottom",
 --fallback to speech_wilson.lua         },
 
         GIVE =
@@ -123,6 +133,8 @@ return{
             SPIDERNOHAT = "My pocket's too tight for that hat to sit right.",
             TERRARIUM_REFUSE = "What a picky little prism!",
             TERRARIUM_COOLDOWN = "Now wait one minute, there's nothing in it!",
+            NOTAMONKEY = "I speak in tongues, but not that one.",
+            QUEENBUSY = "Her majesty's schedule must be bananas, hyuyu!",
         },
         GIVETOPLAYER =
         {
@@ -163,6 +175,7 @@ return{
         {
             TARGETINCOMBAT = "Its focus is elsewhere.",
             INUSE = "It has made a pact with another.",
+			SLEEPING = "It's had its forty winks, methinks.",
         },
         SADDLE =
         {
@@ -179,6 +192,8 @@ return{
 
 			--MapSpotRevealer/messagebottle
 			MESSAGEBOTTLEMANAGER_NOT_FOUND = "Not here, my dear.",--Likely trying to read messagebottle treasure map in caves
+
+            STASH_MAP_NOT_FOUND = "There's no rhyme or riddle to it.",-- Likely trying to read stash map  in world without stash
         },
         WRAPBUNDLE =
         {
@@ -195,6 +210,7 @@ return{
                 "This soul is already bound to someone else.",
             },
 --fallback to speech_wilson.lua 			NO_HEAVY_LIFTING = "only_used_by_wanda",
+            FULL_OF_CURSES = "I've had enough of this monkey stuff.",
         },
         SLAUGHTER =
         {
@@ -311,11 +327,11 @@ return{
 --fallback to speech_wilson.lua             FROZEN = "only_used_by_webber",
 --fallback to speech_wilson.lua             ALREADY_BEDAZZLED = "only_used_by_webber",
         },
-        UPGRADE = 
+        UPGRADE =
         {
 --fallback to speech_wilson.lua             BEDAZZLED = "only_used_by_webber",
         },
-		CAST_POCKETWATCH = 
+		CAST_POCKETWATCH =
 		{
 --fallback to speech_wilson.lua 			GENERIC = "only_used_by_wanda",
 --fallback to speech_wilson.lua 			REVIVE_FAILED = "only_used_by_wanda",
@@ -336,7 +352,34 @@ return{
 --fallback to speech_wilson.lua             HUNGRY = "only_used_by_wolfang",
 --fallback to speech_wilson.lua             FULL = "only_used_by_wolfang",
         },
+
+        APPLYMODULE =
+        {
+            COOLDOWN = "only_used_by_wx78",
+            NOTENOUGHSLOTS = "only_used_by_wx78",
+        },
+        REMOVEMODULES =
+        {
+            NO_MODULES = "only_used_by_wx78",
+        },
+        CHARGE_FROM =
+        {
+            NOT_ENOUGH_CHARGE = "only_used_by_wx78",
+            CHARGE_FULL = "only_used_by_wx78",
+        },
+
+        HARVEST =
+        {
+            DOER_ISNT_MODULE_OWNER = "The tin gnat is not keen to chat.",
+        },
     },
+
+	ANNOUNCE_CANNOT_BUILD =
+	{
+		NO_INGREDIENTS = "I seem to be missing a thing or two.",
+		NO_TECH = "Its making is a mystery to me.",
+		NO_STATION = "No, no, this just won't do.",
+	},
 
 	ACTIONFAIL_GENERIC = "No, no, no.",
 	ANNOUNCE_BOAT_LEAK = "Now this ride's getting fun!",
@@ -457,6 +500,7 @@ return{
 	ANNOUNCE_NODAYSLEEP_CAVE = "An imp must stay on guard when underground.",
 	ANNOUNCE_NOHUNGERSLEEP = "I'm too soul-famished to sleep.",
 	ANNOUNCE_NOSLEEPONFIRE = "I'd prefer not to singe my fur.",
+    ANNOUNCE_NOSLEEPHASPERMANENTLIGHT = "It's far too bright to sleep tonight.",
 	ANNOUNCE_NODANGERSIESTA = "Why sleep when there's fun afoot?",
 	ANNOUNCE_NONIGHTSIESTA = "No honorable imp would siesta at night.",
 	ANNOUNCE_NONIGHTSIESTA_CAVE = "An imp must stay on guard when underground.",
@@ -601,6 +645,10 @@ return{
 --fallback to speech_wilson.lua         "only_used_by_walter",
 --fallback to speech_wilson.lua 	},
 
+    -- wx specific
+    ANNOUNCE_WX_SCANNER_NEW_FOUND = "only_used_by_wx78",
+--fallback to speech_wilson.lua     ANNOUNCE_WX_SCANNER_FOUND_NO_DATA = "only_used_by_wx78",
+
     --quagmire event
     QUAGMIRE_ANNOUNCE_NOTRECIPE = "That was nothing! Nothing!",
     QUAGMIRE_ANNOUNCE_MEALBURNT = "Well it's not raw! Hyuyu!",
@@ -741,6 +789,33 @@ return{
         "Let's pull a prank! What do you think the mortals would do if you sprouted into a sheep?",
 	},
 
+	ANNOUNCE_KITCOON_HIDEANDSEEK_START = "The cats have run, the game's begun!",
+	ANNOUNCE_KITCOON_HIDEANDSEEK_JOIN = "Oh, what fun, I'll help find one!",
+	ANNOUNCE_KITCOON_HIDANDSEEK_FOUND =
+	{
+		"I found a cat, but no fiddle, hyuyu!",
+		"The cat's out of the bag, hyuyu!",
+		"Your tail's a tattletale!",
+		"Always at the last place I would look!",
+	},
+	ANNOUNCE_KITCOON_HIDANDSEEK_FOUND_ONE_MORE = "The last one better hide with all their might, hyuyu!",
+	ANNOUNCE_KITCOON_HIDANDSEEK_FOUND_LAST_ONE = "Smile from ear to ear, the cats are all here!",
+	ANNOUNCE_KITCOON_HIDANDSEEK_FOUND_LAST_ONE_TEAM = "I found, we found, the cats all around!",
+	ANNOUNCE_KITCOON_HIDANDSEEK_TIME_ALMOST_UP = "I'm late! I'm late! I'll lose at this rate.",
+	ANNOUNCE_KITCOON_HIDANDSEEK_LOSEGAME = "I'll have to note down those hiding spots, hyuyu.",
+	ANNOUNCE_KITCOON_HIDANDSEEK_TOOFAR = "No furry mortal would hide far far away!",
+	ANNOUNCE_KITCOON_HIDANDSEEK_TOOFAR_RETURN = "Back to the guessing game, hyuyu.",
+	ANNOUNCE_KITCOON_FOUND_IN_THE_WILD = "And what are you doing over here?",
+
+	ANNOUNCE_TICOON_START_TRACKING	= "He'll get us nowhere fast, hyuyu!",
+	ANNOUNCE_TICOON_NOTHING_TO_TRACK = "No tracks, no clue, I say we're through.",
+	ANNOUNCE_TICOON_WAITING_FOR_LEADER = "He won't go ahead unless I keep my step, hyuyu!",
+	ANNOUNCE_TICOON_GET_LEADER_ATTENTION = "Oh, is it me you're looking for?",
+	ANNOUNCE_TICOON_NEAR_KITCOON = "We're close, closer, yet closer!",
+	ANNOUNCE_TICOON_LOST_KITCOON = "Oh me, oh my, they passed me by!",
+	ANNOUNCE_TICOON_ABANDONED = "I did my best, now I'll rest.",
+	ANNOUNCE_TICOON_DEAD = "My guide is gone, do I carry on?",
+
     -- YOTB
     ANNOUNCE_CALL_BEEF = "Over here, beefalo dear!",
     ANNOUNCE_CANTBUILDHERE_YOTB_POST = "Alas, I fear I can't build that here.",
@@ -750,6 +825,14 @@ return{
     ANNOUNCE_EYEOFTERROR_ARRIVE = "I don't suppose this is a friendly visit? Hyuyu...",
     ANNOUNCE_EYEOFTERROR_FLYBACK = "Hyuyu, back for more fun?",
     ANNOUNCE_EYEOFTERROR_FLYAWAY = "The light of day keeps the eye at bay!",
+
+    -- PIRATES
+    ANNOUNCE_CANT_ESCAPE_CURSE = "Oh dear, I really should have known better.",
+    ANNOUNCE_MONKEY_CURSE_1 = "As curses go, it could be worse.",
+    ANNOUNCE_MONKEY_CURSE_CHANGE = "Hyuyu you've made a monkey out of me!",
+    ANNOUNCE_MONKEY_CURSE_CHANGEBACK = "All's well that ends spells.",
+
+    ANNOUNCE_PIRATES_ARRIVE = "Something scurvy this way comes.",
 
 	BATTLECRY =
 	{
@@ -1009,6 +1092,16 @@ return{
             REVIVER = "Hyuyu, %s doesn't seem to be wise to soul power, thankfully.",
             GHOST = "You're looking much tastier than usual, %s!",
             FIRESTARTER = "Oooh, mind if I join in?",
+        },
+
+        WONKEY =
+        {
+            GENERIC = "Hyuyuyu, someone's gotten themselves in a hairy situation!",
+            ATTACKER = "It looks like the curse has brought out your worst.",
+            MURDERER = "Now now, I think chimps and imps should get along!",
+            REVIVER = "The day is saved, with the ape's aid.",
+            GHOST = "I wonder if monkey souls are banana-flavored?",
+            FIRESTARTER = "What a marvelously mischievous monkey.",
         },
 
 --fallback to speech_wilson.lua         MIGRATION_PORTAL =
@@ -1311,6 +1404,8 @@ return{
 
         TURF_SHELLBEACH = "Floor or ceiling, depending on your perspective.",
 
+        TURF_MONKEY_GROUND = "Floor or ceiling, depending on your perspective.",
+
 		POWCAKE = "Hyuyu! This cake packs a wallop!",
         CAVE_ENTRANCE = "Clear the way I say!",
         CAVE_ENTRANCE_RUINS = "Let me have a peek inside!",
@@ -1608,6 +1703,8 @@ return{
         CHESSPIECE_BEEQUEEN = "Stationary majesty. Static insect.",
         CHESSPIECE_ANTLION = "An anti Ant Lion, formerly furry. Hyuyu!",
         CHESSPIECE_BEEFALO = "This beefalo is even more hard-headed than most!",
+		CHESSPIECE_KITCOON = "They'll reach the sky on high!",
+		CHESSPIECE_CATCOON = "This little guy and I don't see eye to eye, hyuyu.",
         CHESSPIECE_GUARDIANPHASE3 = "In all its selenic splendour!",
         CHESSPIECE_EYEOFTERROR = "He's gone, no matter how you look at it, hyuyu!",
         CHESSPIECE_TWINSOFTERROR = "What an eye-catching statue, hyuyu!",
@@ -2752,6 +2849,8 @@ return{
 			BURNT = "The fashion dimension has been sealed off.",
 		},
 		WARG = "I'll not be a feast for that beast!",
+        WARGLET = "You wouldn't want to eat me, imps give terrible indigestion!",
+
 		WASPHIVE = "Do I want to start some mischief?",
 		WATERBALLOON = "You'd never see me coming!",
 		WATERMELON = "I do not want it.",
@@ -3319,6 +3418,7 @@ return{
             BURNT = "The fire caused it to expire!",
         },
         BOAT_ITEM = "Let's craft a raft!",
+        BOAT_GRASS_ITEM = "This grass will pass for a boat, hyuyu!",
         STEERINGWHEEL_ITEM = "I can see the appeal of a steering wheel.",
         ANCHOR_ITEM = "Such funny ship things I could build.",
         MAST_ITEM = "A mast to sail the ocean vast.",
@@ -3389,6 +3489,7 @@ return{
         GNARWAIL_HORN = "It makes a compelling point, hyuyu!",
 
         WALKINGPLANK = "It's just a last resort, worrywart!",
+        WALKINGPLANK_GRASS = "It's just a last resort, worrywart!",
         OAR = "I'll splash all my friends with this!",
 		OAR_DRIFTWOOD = "It's an oar, for shore!",
 
@@ -3510,7 +3611,7 @@ return{
 
         SUNKENCHEST =
         {
-            GENERIC = "I fear it's only a shell of it's former self.",
+            GENERIC = "I fear it's only a shell of its former self.",
             LOCKED = "We need a key for this gift from the sea!",
         },
 
@@ -3976,6 +4077,38 @@ return{
 		},
 		CARNIVALGAME_HERDING_CHICK = "To the center, if you please.",
 
+		CARNIVALGAME_SHOOTING_KIT = "We're almost ready for the fun to begin!",
+		CARNIVALGAME_SHOOTING_STATION =
+		{
+			GENERIC = "Allow me to propose a trade: one shiny trinket to play your game.",
+			PLAYING = "For this merry game, squashing bugs is the aim.",
+		},
+		CARNIVALGAME_SHOOTING_TARGET =
+		{
+			GENERIC = "A small trap door is set in the floor.",
+			PLAYING = "I can't rest until I finish those pests!",
+		},
+
+		CARNIVALGAME_SHOOTING_BUTTON =
+		{
+			GENERIC = "Allow me to propose a trade: one shiny trinket to play your game.",
+			PLAYING = "Hyuyuyu! What does it do?",
+		},
+
+		CARNIVALGAME_WHEELSPIN_KIT = "We're almost ready for the fun to begin!",
+		CARNIVALGAME_WHEELSPIN_STATION =
+		{
+			GENERIC = "Allow me to propose a trade: one shiny trinket to play your game.",
+			PLAYING = "It's easy to win, just give it a spin!",
+		},
+
+		CARNIVALGAME_PUCKDROP_KIT = "We're almost ready for the fun to begin!",
+		CARNIVALGAME_PUCKDROP_STATION =
+		{
+			GENERIC = "Allow me to propose a trade: one shiny trinket to play your game.",
+			PLAYING = "There goes the ball, where will it fall?",
+		},
+
 		CARNIVAL_PRIZEBOOTH_KIT = "What kind of goodies will it have, I wonder?",
 		CARNIVAL_PRIZEBOOTH =
 		{
@@ -4004,6 +4137,8 @@ return{
 		CARNIVALDECOR_LAMP = "A fairy light to glow in the night.",
 		CARNIVALDECOR_PLANT_KIT = "Nearly there.",
 		CARNIVALDECOR_PLANT = "We can take a small bit of the Cawnival wherever we go.",
+		CARNIVALDECOR_BANNER_KIT = "Nearly there.",
+		CARNIVALDECOR_BANNER = "Is that the glint of fairy gold?",
 
 		CARNIVALDECOR_FIGURE =
 		{
@@ -4012,6 +4147,7 @@ return{
 			GENERIC = "Mortals do love their trinkets.",
 		},
 		CARNIVALDECOR_FIGURE_KIT = "Hyuyu, how very mysterious!",
+		CARNIVALDECOR_FIGURE_KIT_SEASON2 = "Hyuyu, how very mysterious!",
 
         CARNIVAL_BALL = "It goes quite nicely with my fur!", --unimplemented
 		CARNIVAL_SEEDPACKET = "I'm sure they won't be offended if I dump these on the ground.",
@@ -4082,6 +4218,47 @@ return{
         BEAST_BLUEPRINT = "Lucky, hm? Perhaps it's made with fairy gold.",
 
         BEEF_BELL = "What a strange enchantment!",
+
+		-- YOT Catcoon
+		KITCOONDEN =
+		{
+			GENERIC = "Where all the furry mortals go.",
+            BURNT = "Just a little prank, hyuyu!",
+			PLAYING_HIDEANDSEEK = "They've gone out to play!",
+			PLAYING_HIDEANDSEEK_TIME_ALMOST_UP = "Playtime's almost over, hyuyu!",
+		},
+
+		KITCOONDEN_KIT = "They're here to play, or so they say, hyuyu!",
+
+		TICOON =
+		{
+			GENERIC = "I've set my worries to the side, they'll be my guide!",
+			ABANDONED = "All alone, no mortal to play with.",
+			SUCCESS = "It found all the little pranksters!",
+			LOST_TRACK = "Fee-fi-fo-fum, where have they gone?",
+			NEARBY = "They too can feel a trickster's around, hyuyu!",
+			TRACKING = "Oh where, where could they be, hyuyu.",
+			TRACKING_NOT_MINE = "They're not looking for who I'm looking for.",
+			NOTHING_TO_TRACK = "No one to find, oh my, oh my.",
+			TARGET_TOO_FAR_AWAY = "They're far far away, yet here I stay.",
+		},
+
+		YOT_CATCOONSHRINE =
+        {
+            GENERIC = "Such a pretty little kitty!",
+            EMPTY = "Whatever was here, disappeared!",
+            BURNT = "Well, that's that.",
+        },
+
+		KITCOON_FOREST = "They could prank, hide around, and never be found!",
+		KITCOON_SAVANNA = "Your stripes can't trick my eyes!",
+		KITCOON_MARSH = "There's no tentacle in that fur, right? Hyuyu.",
+		KITCOON_DECIDUOUS = "I prefer playing with smarter mortals.",
+		KITCOON_GRASS = "Ooo, the fingers your fur could prick, hyuyu.",
+		KITCOON_ROCKY = "Oh my friend, why the stone face?",
+		KITCOON_DESERT = "Oh kitty, what big ears you have!",
+		KITCOON_MOON = "The kit jumped over the moon, hyuyu!",
+		KITCOON_YOT = "Oh what a date, let's celebrate!",
 
         -- Moon Storm
         ALTERGUARDIAN_PHASE1 = {
@@ -4170,7 +4347,7 @@ return{
         POCKETWATCH_PARTS = "Ooohoohoo, someone's been naughty!",
         POCKETWATCH_DISMANTLER = "The tools of a time tinkerer.",
 
-        POCKETWATCH_PORTAL_ENTRANCE = 
+        POCKETWATCH_PORTAL_ENTRANCE =
 		{
 			GENERIC = "Hyuyuyu, we'll be sure to get there in a timely manner!",
 			DIFFERENTSHARD = "Hyuyuyu, we'll be sure to get there in a timely manner!",
@@ -4184,7 +4361,7 @@ return{
         WATERTREE_ROOT = "Hyuyuyu! You won't trip me up with your tricky roots!",
 
         OCEANTREE_PILLAR = "They grow up so fast!",
-        
+
         OCEANVINE = "A fine enough vine.",
         FIG = "They say the low hanging fruit is the sweetest!",
         FIG_COOKED = "The mortals seem to prefer it this way.",
@@ -4214,7 +4391,7 @@ return{
         },
 
         -- Wolfgang
-        MIGHTY_GYM = 
+        MIGHTY_GYM =
         {
             GENERIC = "Mortals have such curious ways.",
             BURNT = "The exercise has been exorcised.",
@@ -4222,11 +4399,12 @@ return{
 
         DUMBBELL = "It's neither dumb, nor a bell. Mortals are strange, indeed.",
         DUMBBELL_GOLDEN = "It's neither dumb, nor a bell. Mortals are strange, indeed.",
+		DUMBBELL_MARBLE = "Marbellous, simply marbellous!",
         DUMBBELL_GEM = "He's turned those gemstones into gymstones, hyuyu!",
         POTATOSACK = "Hyuyuyu, wouldn't it be fun to hide inside and give him a scare?",
 
 
-        TERRARIUMCHEST = 
+        TERRARIUMCHEST =
 		{
 			GENERIC = "Extraordinarily ordinary!",
 			BURNT = "Hyuyu, someone's been playing pranks.",
@@ -4248,6 +4426,132 @@ return{
         SHIELDOFTERROR ="I stole the grin right off of him, hyuyu!",
         TWINOFTERROR1 = "Double double, we're in trouble!",
         TWINOFTERROR2 = "Double double, we're in trouble!",
+
+        -- Year of the Catcoon
+        CATTOY_MOUSE = "Wind the bobbin up, pull, pull!",
+        KITCOON_NAMETAG = "To help identify who's theirs and who's mine.",
+
+		KITCOONDECOR1 =
+        {
+            GENERIC = "Let it spin and wobble if it doesn't squabble.",
+            BURNT = "A burnt toy brings no fun.",
+        },
+		KITCOONDECOR2 =
+        {
+            GENERIC = "This fish will be no dish, hyuyu.",
+            BURNT = "A burnt toy brings no fun.",
+        },
+
+		KITCOONDECOR1_KIT = "To make a toy is such a joy!",
+		KITCOONDECOR2_KIT = "To make a toy is such a joy!",
+
+        -- WX78
+        WX78MODULE_MAXHEALTH = "Are you the brightest bulb of the bunch?",
+        WX78MODULE_MAXSANITY1 = "Are you the brightest bulb of the bunch?",
+        WX78MODULE_MAXSANITY = "Are you the brightest bulb of the bunch?",
+        WX78MODULE_MOVESPEED = "Are you the brightest bulb of the bunch?",
+        WX78MODULE_MOVESPEED2 = "Are you the brightest bulb of the bunch?",
+        WX78MODULE_HEAT = "Are you the brightest bulb of the bunch?",
+        WX78MODULE_NIGHTVISION = "Are you the brightest bulb of the bunch?",
+        WX78MODULE_COLD = "Are you the brightest bulb of the bunch?",
+        WX78MODULE_TASER = "Are you the brightest bulb of the bunch?",
+        WX78MODULE_LIGHT = "Are you the brightest bulb of the bunch?",
+        WX78MODULE_MAXHUNGER1 = "Are you the brightest bulb of the bunch?",
+        WX78MODULE_MAXHUNGER = "Are you the brightest bulb of the bunch?",
+        WX78MODULE_MUSIC = "Are you the brightest bulb of the bunch?",
+        WX78MODULE_BEE = "Are you the brightest bulb of the bunch?",
+        WX78MODULE_MAXHEALTH2 = "Are you the brightest bulb of the bunch?",
+
+        WX78_SCANNER =
+        {
+            GENERIC ="My my, how the tin flies!",
+            HUNTING = "My my, how the tin flies!",
+            SCANNING = "My my, how the tin flies!",
+        },
+
+        WX78_SCANNER_ITEM = "The tiny tin terror's tuckered out!",
+        WX78_SCANNER_SUCCEEDED = "It's done its toil, now our friend must collect the spoils.",
+
+        WX78_MODULEREMOVER = "It'll work in a pinch, hyuyu!",
+
+        SCANDATA = "Hyuyuyu, I think our friend has some tricks up those tin sleeves!",
+
+        -- Pirates
+        BOAT_ROTATOR = "One good turn deserves another, hyuyu!",
+        BOAT_ROTATOR_KIT = "It's something or rudder!",
+        BOAT_BUMPER_KELP = "Some friendly help from fronds of kelp.",
+        BOAT_BUMPER_KELP_KIT = "But idle hands are such good playthings!",
+        BOAT_BUMPER_SHELL = "We shell be well protected, hyuyu!",
+        BOAT_BUMPER_SHELL_KIT = "But idle hands are such good playthings!",
+        BOAT_CANNON = {
+            GENERIC = "Rounded stones are required for this cannon to fire.",
+            AMMOLOADED = "Ready to fire, but decidedly unready to brimstone.",
+            NOAMMO = "This cannon cannot fire.",
+        },
+        BOAT_CANNON_KIT = "I'll build it quick, then put it on the ship.",
+        CANNONBALL_ROCK_ITEM = "Oh what a sinking feeling it brings!",
+
+        OCEAN_TRAWLER = {
+            GENERIC = "The mortals wish to capture fish.",
+            LOWERED = "How many will get caught up in the net?",
+            CAUGHT = "Filled with riches of fishes.",
+            ESCAPED = "They got away, no fish today.",
+            FIXED = "It was a simple fix. I just had to pull a few strings, hyuyu!",
+        },
+        OCEAN_TRAWLER_KIT = "I've been taught toil only leads to trouble!",
+
+        BOAT_MAGNET =
+        {
+            GENERIC = "Why would I row when I can be towed?",
+            ACTIVATED = "I'll just sit back while it keeps me on track.",
+        },
+        BOAT_MAGNET_KIT = "The troubling toil never ends.",
+
+        BOAT_MAGNET_BEACON =
+        {
+            GENERIC = "Mortals come up with the funniest things.",
+            ACTIVATED = "It brought me here, so it must attract trouble, hyuyu!",
+        },
+        DOCK_KIT = "It would a-pier I have some work to do.",
+        DOCK_WOODPOSTS_ITEM = "I'll fix it in post, hyuyu!",
+
+        MONKEYHUT =
+        {
+            GENERIC = "Knock knock! Won't you let me in?",
+            BURNT = "It looks like I missed all the fun!",
+        },
+        POWDER_MONKEY = "Be careful not to take things too far, little thief.",
+        PRIME_MATE = "Monkey sea, monkey do.",
+		LIGHTCRAB = "They're brighter than the monkeys at least.",
+        CUTLESS = "It's a cut below the rest.",
+        CURSED_MONKEY_TOKEN = "Oh me oh my, I couldn't leave it if I tried!",
+        OAR_MONKEY = "Shall I battle oar paddle?",
+        BANANABUSH = "Hyuyu, little shrub, are you waving at me?",
+        DUG_BANANABUSH = "Hyuyu, little shrub, are you waving at me?",
+        PALMCONETREE = "Perhaps the tough bark is for warding off sharks.",
+        PALMCONE_SEED = "Now a seed, but soon a tree.",
+        PALMCONE_SAPLING = "A tall tree you'll one day be.",
+        PALMCONE_SCALE = "The tree's been tipped, and so has its scale.",
+        MONKEYTAIL = "How funny, a plant that apes monkeys!",
+        DUG_MONKEYTAIL = "How funny, a plant that apes monkeys!",
+
+        MONKEY_MEDIUMHAT = "I hope this tricorn fits around my horns.",
+        MONKEY_SMALLHAT = "When at sea, do as the monkeys do, hyuyu!",
+        POLLY_ROGERSHAT = "A jaunty feather makes a hat look better.",
+        POLLY_ROGERS = "What spell compels her to help?",
+
+        MONKEYISLAND_PORTAL = "Poor mortals, they have so much trouble traveling from plane to plane!",
+        MONKEYISLAND_PORTAL_DEBRIS = "Hyuyuyu, someone's been up to some mischief!",
+        MONKEYQUEEN = "Her kingdom for a swing!",
+        MONKEYPILLAR = "Are these the pillars of monkey society?",
+        PIRATE_FLAG_POLE = "Hyuyuyu, that flag spells trouble!",
+
+        BLACKFLAG = "It's inspiring me to make a little mischief of my own.",
+        PIRATE_STASH = "What a splendid \"X\"! Well worth the trip.",
+        STASH_MAP = "This map has the clues I need, now where does it lead?",
+
+
+        BANANAJUICE = "Mortals will eat bananas in just about any form.",
     },
 
     DESCRIBE_GENERIC = "Ooo, a mystery!",

@@ -88,7 +88,9 @@ function IsRail()
 	return PLATFORM == "WIN32_RAIL"
 end
 
-
+function IsSteamDeck()
+	return IS_STEAM_DECK
+end
 
 require("stacktrace")
 
@@ -105,6 +107,7 @@ require("json")
 require("vector3")
 require("class")
 require("util")
+require("datagrid")
 require("ocean_util")
 require("dlcsupport_worldgen")
 require("constants")
@@ -112,6 +115,8 @@ require("tuning")
 require("strings")
 require("dlcsupport_strings")
 require("prefabs")
+require("tiledefs")
+require("tilegroups")
 require("profiler")
 require("dumper")
 local savefileupgrades = require("savefileupgrades")
@@ -132,7 +137,6 @@ if moddata then
 	KnownModIndex:RestoreCachedSaveData(moddata.index)
 	ModManager:LoadMods(true)
 end
-
 
 print ("running worldgen_main.lua\n")
 SEED = SetWorldGenSeed(SEED)

@@ -287,7 +287,7 @@ end
 
 local function OnPicked(inst, doer)
 	local x, y, z = inst.Transform:GetWorldPosition()
-	if TheWorld.Map:GetTileAtPoint(x, y, z) == GROUND.FARMING_SOIL then
+	if TheWorld.Map:GetTileAtPoint(x, y, z) == WORLD_TILES.FARMING_SOIL then
 		local soil = SpawnPrefab("farm_soil")
 		soil.Transform:SetPosition(x, y, z)
 		soil:PushEvent("breaksoil")
@@ -299,8 +299,6 @@ local function OnPicked(inst, doer)
 	end
 
 	call_for_reinforcements(inst, doer)
-
-    inst:Remove()
 end
 
 local function MakePickable(inst, enable, product)
@@ -311,6 +309,7 @@ local function MakePickable(inst, enable, product)
         if inst.components.pickable == nil then
             inst:AddComponent("pickable")
             inst.components.pickable.onpickedfn = OnPicked
+			inst.components.pickable.remove_when_picked = true
         end
 	    inst.components.pickable:SetUp(nil)
 		inst.components.pickable.use_lootdropper_for_product = true

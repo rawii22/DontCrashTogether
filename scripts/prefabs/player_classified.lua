@@ -120,7 +120,8 @@ local function OnConsumeHealthCost(parent)
     parent.player_classified.builderdamagedevent:push()
 end
 
-local function OnLearnRecipeSuccess(parent)
+local function OnLearnRecipeSuccess(parent, data)
+    SendRPCToClient(CLIENT_RPC.LearnBuilderRecipe, parent.userid, data.recipe)
     parent.player_classified.learnrecipeevent:push()
 end
 
@@ -232,7 +233,7 @@ local function OnEntityReplicated(inst)
                 inst._parent.replica[v]:AttachClassified(inst)
             end
         end
-        for i, v in ipairs({ "playercontroller", "playervoter" }) do
+        for i, v in ipairs({ "playercontroller", "playervoter", "boatcannonuser" }) do
             if inst._parent.components[v] ~= nil then
                 inst._parent.components[v]:AttachClassified(inst)
             end
@@ -422,6 +423,48 @@ local function OnMightinessDirty(inst)
     end
 end
 
+-- WX78 Upgrade Module UI functions ------------------------------------------
+
+fns.OnEnergyLevelDirty = function(inst)
+    if inst._parent ~= nil then
+        local energylevel = inst.currentenergylevel:value()
+        local data =
+        {
+            old_level = inst._oldcurrentenergylevel,
+            new_level = energylevel,
+        }
+
+        inst._oldcurrentenergylevel = energylevel
+
+        inst._parent:PushEvent("energylevelupdate", data)
+    end
+end
+
+fns.OnUIRobotSparks = function(inst)
+    if inst._parent ~= nil then
+        inst._parent:PushEvent("do_robot_spark")
+    end
+end
+
+fns.OnUpgradeModulesListDirty = function(inst)
+    if inst._parent ~= nil then
+        local module1 = inst.upgrademodules[1]:value()
+        local module2 = inst.upgrademodules[2]:value()
+        local module3 = inst.upgrademodules[3]:value()
+        local module4 = inst.upgrademodules[4]:value()
+        local module5 = inst.upgrademodules[5]:value()
+        local module6 = inst.upgrademodules[6]:value()
+
+        if module1 == 0 and module2 == 0 and module3 == 0 and module4 == 0 and module5 == 0 and module6 == 0 then
+            inst._parent:PushEvent("upgrademoduleowner_popallmodules")
+        else
+            inst._parent:PushEvent("upgrademodulesdirty", {module1, module2, module3, module4, module5, module6})
+        end
+    end
+end
+
+------------------------------------------------------------------------------
+
 local function OnMoistureDirty(inst)
     if inst._parent ~= nil then
         local data =
@@ -473,6 +516,12 @@ local function OnTechTreesDirty(inst)
     end
     if inst._parent ~= nil then
         inst._parent:PushEvent("techtreechange", { level = inst.techtrees })
+    end
+end
+
+fns.RefreshCrafting = function(inst)
+    if inst._parent ~= nil then
+        inst._parent:PushEvent("refreshcrafting")
     end
 end
 
@@ -583,6 +632,12 @@ local function OnAttunedResurrectorDirty(inst)
     end
 end
 
+fns.OnCannonDirty = function(inst)
+    if inst._parent ~= nil then
+        inst._parent:PushEvent("aimingcannonchanged", inst.cannon:value())
+    end
+end
+
 --------------------------------------------------------------------------
 --Common interface
 --------------------------------------------------------------------------
@@ -603,6 +658,15 @@ end
 local function OnBuilderDamagedEvent(inst)
     if inst._parent ~= nil and TheFocalPoint.entity:GetParent() == inst._parent then
         inst._parent:PushEvent("damaged")
+    end
+end
+
+local function OnOpenCraftingMenuEvent(inst)
+	local player = inst._parent
+    if player ~= nil and TheFocalPoint.entity:GetParent() == player then
+		if player.HUD ~= nil then
+			player.HUD:OpenCrafting()
+		end
     end
 end
 
@@ -860,6 +924,18 @@ end
 
 --------------------------------------------------------------------------
 
+fns.FinishSeamlessPlayerSwap = function(inst)
+    OnStormLevelDirty(inst)
+    OnGiftsDirty(inst)
+    fns.OnYotbSkinDirty(inst)
+    OnMountHurtDirty(inst)
+    OnGhostModeDirty(inst)
+    OnPlayerHUDDirty(inst)
+    OnPlayerCameraDirty(inst)
+end
+
+--------------------------------------------------------------------------
+
 local function RegisterNetListeners(inst)
     if TheWorld.ismastersim then
         inst._parent = inst.entity:GetParent()
@@ -904,6 +980,9 @@ local function RegisterNetListeners(inst)
 		inst:ListenForEvent("inspirationsong2dirty", function(_inst) fns.OnInspirationSongsDirty(_inst, 2) end)
 		inst:ListenForEvent("inspirationsong3dirty", function(_inst) fns.OnInspirationSongsDirty(_inst, 3) end)
         inst:ListenForEvent("mightinessdirty", OnMightinessDirty)
+        inst:ListenForEvent("upgrademoduleenergyupdate", fns.OnEnergyLevelDirty)
+        inst:ListenForEvent("upgrademoduleslistdirty", fns.OnUpgradeModulesListDirty)
+        inst:ListenForEvent("uirobotsparksevent", fns.OnUIRobotSparks)
         inst:ListenForEvent("temperaturedirty", OnTemperatureDirty)
         inst:ListenForEvent("moisturedirty", OnMoistureDirty)
         inst:ListenForEvent("techtreesdirty", OnTechTreesDirty)
@@ -918,7 +997,7 @@ local function RegisterNetListeners(inst)
         inst:ListenForEvent("playercamerashake", OnPlayerCameraShake)
         inst:ListenForEvent("playerscreenflashdirty", OnPlayerScreenFlashDirty)
         inst:ListenForEvent("attunedresurrectordirty", OnAttunedResurrectorDirty)
-        
+        inst:ListenForEvent("cannondirty", fns.OnCannonDirty)
 
         OnIsTakingFireDamageDirty(inst)
         OnTemperatureDirty(inst)
@@ -941,8 +1020,9 @@ local function RegisterNetListeners(inst)
     inst:ListenForEvent("hasinspirationbuffdirty", fns.OnHasInspirationBuffDirty)
     inst:ListenForEvent("builder.build", OnBuildEvent)
     inst:ListenForEvent("builder.damaged", OnBuilderDamagedEvent)
-    inst:ListenForEvent("inked", OnInkedEvent)
+    inst:ListenForEvent("builder.opencraftingmenu", OnOpenCraftingMenuEvent)
     inst:ListenForEvent("builder.learnrecipe", OnLearnRecipeEvent)
+    inst:ListenForEvent("inked", OnInkedEvent)
     inst:ListenForEvent("MapExplorer.learnmap", OnLearnMapEvent)
 	inst:ListenForEvent("MapSpotRevealer.revealmapspot", OnRevealMapSpotEvent)
     inst:ListenForEvent("repair.repair", OnRepairEvent)
@@ -958,6 +1038,8 @@ local function RegisterNetListeners(inst)
     inst:ListenForEvent("morguedirty", OnMorgueDirty)
     inst:ListenForEvent("houndwarningdirty", OnHoundWarningDirty)
 	inst:ListenForEvent("startfarmingmusicevent", fns.StartFarmingMusicEvent)
+    inst:ListenForEvent("ingredientmoddirty", fns.RefreshCrafting)
+
     OnStormLevelDirty(inst)
     OnGiftsDirty(inst)
     fns.OnYotbSkinDirty(inst)
@@ -966,6 +1048,8 @@ local function RegisterNetListeners(inst)
     OnPlayerHUDDirty(inst)
     OnPlayerCameraDirty(inst)
 
+    --finishseamlessplayerswap will be able to retrigger all the instant events if the initialization happened in the "wrong"" order.
+    inst:ListenForEvent("finishseamlessplayerswap", fns.FinishSeamlessPlayerSwap, inst._parent)
     --Fade is initialized by OnPlayerActivated in gamelogic.lua
 end
 
@@ -1046,6 +1130,22 @@ local function fn()
     inst.currentmightiness = net_byte(inst.GUID, "mightiness.current", "mightinessdirty")
     inst.mightinessratescale = net_tinybyte(inst.GUID, "mightiness.ratescale")
 
+    -- Upgrade Module Owner
+    inst.uirobotsparksevent = net_event(inst.GUID, "uirobotsparksevent")
+
+    inst._oldcurrentenergylevel = 0
+    inst.currentenergylevel = net_smallbyte(inst.GUID, "upgrademodules.currentenergylevel", "upgrademoduleenergyupdate")
+
+    inst.upgrademodules =
+    {
+        net_smallbyte(inst.GUID, "upgrademodules.mods1", "upgrademoduleslistdirty"),
+        net_smallbyte(inst.GUID, "upgrademodules.mods2", "upgrademoduleslistdirty"),
+        net_smallbyte(inst.GUID, "upgrademodules.mods3", "upgrademoduleslistdirty"),
+        net_smallbyte(inst.GUID, "upgrademodules.mods4", "upgrademoduleslistdirty"),
+        net_smallbyte(inst.GUID, "upgrademodules.mods5", "upgrademoduleslistdirty"),
+        net_smallbyte(inst.GUID, "upgrademodules.mods6", "upgrademoduleslistdirty"),
+    }
+
 	-- oldager
     inst.oldager_yearpercent = net_float(inst.GUID, "oldager.yearpercent")
     inst.oldager_rate = net_smallbyte(inst.GUID, "oldager.rate") -- use the Get and Set functions because this value is a signed value incoded into an unsigned net_var
@@ -1115,7 +1215,7 @@ local function fn()
     inst.builderdamagedevent = net_event(inst.GUID, "builder.damaged")
     inst.learnrecipeevent = net_event(inst.GUID, "builder.learnrecipe")
     inst.techtrees = deepcopy(TECH.NONE)
-    inst.ingredientmod = net_tinybyte(inst.GUID, "builder.ingredientmod")
+    inst.ingredientmod = net_tinybyte(inst.GUID, "builder.ingredientmod", "ingredientmoddirty")
     for i, v in ipairs(TechTree.BONUS_TECH) do
         local bonus = net_tinybyte(inst.GUID, "builder."..string.lower(v).."bonus")
 		inst[string.lower(v).."bonus"] = bonus
@@ -1126,6 +1226,8 @@ local function fn()
         inst[string.lower(v).."level"] = level
     end
     inst.isfreebuildmode = net_bool(inst.GUID, "builder.freebuildmode", "recipesdirty")
+	inst.current_prototyper = net_entity(inst.GUID, "builder.current_prototyper", "current_prototyper_dirty")
+    inst.opencraftingmenuevent = net_event(inst.GUID, "builder.opencraftingmenu")
     inst.recipes = {}
     inst.bufferedbuilds = {}
     for k, v in pairs(AllRecipes) do
@@ -1195,6 +1297,9 @@ local function fn()
 
     --CarefulWalking variables
     inst.iscarefulwalking = net_bool(inst.GUID, "carefulwalking.careful", "iscarefulwalkingdirty")
+
+    --BoatCannonUser variables
+    inst.cannon = net_entity(inst.GUID, "boatcannonuser.cannon", "cannondirty")
 
     --Morgue variables
     inst.isdeathbypk = net_bool(inst.GUID, "morgue.isdeathbypk", "morguedirty")

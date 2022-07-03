@@ -3,6 +3,7 @@ local assets =
     Asset("ANIM", "anim/boat_mast2_wip.zip"),
     Asset("INV_IMAGE", "mast_item"),
     Asset("ANIM", "anim/seafarer_mast.zip"),
+    Asset("MINIMAP_IMAGE", "mast"),
 }
 
 local malbatross_assets =
@@ -13,6 +14,7 @@ local malbatross_assets =
     Asset("ANIM", "anim/boat_mast_malbatross_build.zip"),
 
     Asset("ANIM", "anim/seafarer_mast_malbatross.zip"), -- item
+    Asset("MINIMAP_IMAGE", "mast_malbatross"),
 }
 
 local upgrade_assets =
@@ -104,7 +106,7 @@ local function lamp_turnon(inst)
         inst.components.fueled:StartConsuming()
 
         if inst._lamp == nil then
-            if inst.saved_upgraded_from_item ~= nil then
+            if inst.saved_upgraded_from_item ~= nil and inst.saved_upgraded_from_item.linked_skinname then
                 inst._lamp = SpawnPrefab("mastupgrade_lamp", inst.saved_upgraded_from_item.linked_skinname, inst.saved_upgraded_from_item.skin_id )
             else
                 inst._lamp = SpawnPrefab("mastupgrade_lamp")
@@ -149,10 +151,20 @@ local function upgrade_lamp(inst, no_built_callback)
 end
 
 local function upgrade_lightningrod(inst, no_built_callback)
-    inst._lightningrod = SpawnPrefab("mastupgrade_lightningrod")
+    if inst.saved_upgraded_from_item ~= nil and inst.saved_upgraded_from_item.linked_skinname then
+        inst._lightningrod = SpawnPrefab("mastupgrade_lightningrod", inst.saved_upgraded_from_item.linked_skinname, inst.saved_upgraded_from_item.skin_id )
+    else
+        inst._lightningrod = SpawnPrefab("mastupgrade_lightningrod")
+    end
+
     inst._lightningrod.entity:SetParent(inst.entity)
 
-    local top = SpawnPrefab("mastupgrade_lightningrod_top")
+    local top = nil
+    if inst.saved_upgraded_from_item ~= nil and inst.saved_upgraded_from_item.linked_skinname then
+        top = SpawnPrefab("mastupgrade_lightningrod_top", inst.saved_upgraded_from_item.linked_skinname .. "_top", inst.saved_upgraded_from_item.skin_id )
+    else
+        top = SpawnPrefab("mastupgrade_lightningrod_top")
+    end
     top.entity:SetParent(inst.entity)
     top.entity:AddFollower():FollowSymbol(inst.GUID, "mastupgrade_lightningrod_top", 0, 0, 0)
 
@@ -170,8 +182,10 @@ end
 
 local function OnUpgrade(inst, performer, upgraded_from_item)
     local numupgrades = inst.components.upgradeable.numupgrades
-    if numupgrades == 1 then
+    if upgraded_from_item.linked_skinname ~= nil then
         inst.saved_upgraded_from_item = { linked_skinname = upgraded_from_item.linked_skinname, skin_id = upgraded_from_item.skin_id }
+    end
+    if numupgrades == 1 then
         upgrade_lamp(inst)
     elseif numupgrades == 2 then
         upgrade_lightningrod(inst)
@@ -255,6 +269,7 @@ local function onsave(inst, data)
     elseif inst._lightningrod ~= nil then
         data.lightningrod = true
         data.lightningrod_chargeleft = inst._lightningrod.chargeleft
+        data.saved_upgraded_from_item = inst.saved_upgraded_from_item
     end
 end
 
@@ -286,6 +301,7 @@ local function onload(inst, data)
                 lamp_turnon(inst)
             end
         elseif data.lightningrod ~= nil then
+            inst.saved_upgraded_from_item = data.saved_upgraded_from_item
             upgrade_lightningrod(inst, true)
             if data.lightningrod_chargeleft ~= nil and data.lightningrod_chargeleft > 0 then
                 inst._lightningrod:_setchargedfn(data.lightningrod_chargeleft)
@@ -300,6 +316,7 @@ local function fn_pre(inst)
     inst.entity:AddLight()
     inst.entity:AddSoundEmitter()
     inst.entity:AddNetwork()
+    inst.entity:AddMiniMapEntity()
     MakeObstaclePhysics(inst, .2)
 
     inst.Light:Enable(false)
@@ -358,6 +375,8 @@ local function fn()
     inst.AnimState:SetBuild("boat_mast2_wip")
     inst.AnimState:PlayAnimation("closed")
 
+    inst.MiniMapEntity:SetIcon("mast.png")
+
     inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
@@ -382,6 +401,8 @@ local function malbatrossfn()
     inst.AnimState:SetBank("mast_malbatross")
     inst.AnimState:SetBuild("boat_mast_malbatross_build")
     inst.AnimState:PlayAnimation("closed")
+
+    inst.MiniMapEntity:SetIcon("mast_malbatross.png")
 
     inst.entity:SetPristine()
 

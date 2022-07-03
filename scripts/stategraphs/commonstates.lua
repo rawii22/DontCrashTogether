@@ -222,16 +222,19 @@ CommonStates.AddIdle = function(states, funny_idle_state, anim_override, timelin
 end
 
 --------------------------------------------------------------------------
-CommonStates.AddSimpleState = function(states, name, anim, tags, finishstate, timeline)
+CommonStates.AddSimpleState = function(states, name, anim, tags, finishstate, timeline, fns)
     table.insert(states, State{
         name = name,
         tags = tags or {},
 
-        onenter = function(inst)
+        onenter = function(inst, params)
             if inst.components.locomotor ~= nil then
                 inst.components.locomotor:StopMoving()
             end
             inst.AnimState:PlayAnimation(anim)
+			if fns ~= nil and fns.onenter ~= nil then
+				fns.onenter(inst, params)
+			end
         end,
         
         timeline = timeline,
@@ -244,6 +247,8 @@ CommonStates.AddSimpleState = function(states, name, anim, tags, finishstate, ti
                 end
             end),
         },
+
+		onexit = fns ~= nil and fns.onexit or nil
     })
 end
 
@@ -253,19 +258,22 @@ local function performbufferedaction(inst)
 end
 
 --------------------------------------------------------------------------
-CommonStates.AddSimpleActionState = function(states, name, anim, time, tags, finishstate)
+CommonStates.AddSimpleActionState = function(states, name, anim, time, tags, finishstate, timeline, fns)
     table.insert(states, State{
         name = name,
         tags = tags or {},
 
-        onenter = function(inst)
+        onenter = function(inst, params)
             if inst.components.locomotor ~= nil then
                 inst.components.locomotor:StopMoving()
             end
             inst.AnimState:PlayAnimation(anim)
+			if fns ~= nil and fns.onenter ~= nil then
+				fns.onenter(inst, params)
+			end
         end,
 
-        timeline =
+        timeline = timeline or 
         {
             TimeEvent(time, performbufferedaction),
         },
@@ -278,6 +286,8 @@ CommonStates.AddSimpleActionState = function(states, name, anim, time, tags, fin
                 end
             end),
         },
+
+		onexit = fns ~= nil and fns.onexit or nil
     })
 end
 
@@ -782,6 +792,7 @@ CommonStates.AddAmphibiousCreatureHopStates = function(states, config, anims, ti
             EventHandler("done_embark_movement", function(inst)
 				if not inst.AnimState:IsCurrentAnimation("jump_loop") then
 					inst.AnimState:PlayAnimation(anims.loop or "jump_loop", false)
+					inst.components.amphibiouscreature:OnExitOcean()
 				end
 				inst.sg.statemem.embarked = true
             end),
@@ -793,6 +804,8 @@ CommonStates.AddAmphibiousCreatureHopStates = function(states, config, anims, ti
 						end
 					end
 					inst.AnimState:PlayAnimation(anims.loop or "jump_loop", false)
+
+					inst.components.amphibiouscreature:OnExitOcean()
 				end
             end),
         },
@@ -922,6 +935,8 @@ CommonStates.AddSleepStates = function(states, timelines, fns)
         tags = { "busy", "sleeping" },
 
         onenter = onentersleeping,
+
+        onexit = fns and fns.onsleepexit or nil,
 
         timeline = timelines ~= nil and timelines.sleeptimeline or nil,
 
@@ -1113,7 +1128,7 @@ CommonStates.AddCombatStates = function(states, timelines, anims, fns)
             if inst.components.locomotor ~= nil then
                 inst.components.locomotor:StopMoving()
             end
-            inst.AnimState:PlayAnimation(anims ~= nil and anims.attack or "atk")
+            inst.AnimState:PlayAnimation(anims ~= nil and anims.attack or (fns and fns.attackanimfn and fns.attackanimfn(inst)) or "atk")
             inst.components.combat:StartAttack()
 
             --V2C: Cached to force the target to be the same one later in the timeline

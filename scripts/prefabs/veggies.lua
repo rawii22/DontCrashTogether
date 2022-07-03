@@ -95,7 +95,7 @@ VEGGIES =
                                     {"med", nil, 0.7},      {"med", nil, 0.65},
                                     nil,
                                     FOODTYPE.BERRY,
-                                    nil, 
+                                    nil,
                                     {lure_data = TUNING.OCEANFISHING_LURE.BERRY, single_use = true, build = "oceanfishing_lure_mis", symbol = "hook_fig"}),
 
     cactus_meat = MakeVegStats(0, TUNING.CALORIES_SMALL, -TUNING.HEALING_SMALL, TUNING.PERISH_MED, -TUNING.SANITY_TINY,
@@ -135,6 +135,9 @@ VEGGIES =
                                     TUNING.CALORIES_TINY, -TUNING.HEALING_SMALL, TUNING.PERISH_SLOW, -TUNING.SANITY_SMALL,
                                     {nil, 0.1, 0.75}),
 }
+
+VEGGIES.cave_banana.extra_tags_fresh = {"monkeyqueenbribe"}
+VEGGIES.cave_banana.extra_tags_cooked = {"monkeyqueenbribe"}
 
 local SEEDLESS =
 {
@@ -189,26 +192,11 @@ local function oversized_calcweightcoefficient(name)
 end
 
 local function oversized_onequip(inst, owner)
-    if PLANT_DEFS[inst._base_name].build ~= nil then
-        owner.AnimState:OverrideSymbol("swap_body", PLANT_DEFS[inst._base_name].build, "swap_body")
-    else
-        owner.AnimState:OverrideSymbol("swap_body", "farm_plant_"..inst._base_name, "swap_body")
-    end
+	local swap = inst.components.symbolswapdata
+    owner.AnimState:OverrideSymbol("swap_body", swap.build, swap.symbol)
 end
 
 local function oversized_onunequip(inst, owner)
-    owner.AnimState:ClearOverrideSymbol("swap_body")
-end
-
-local function oversized_onequip_rotten(inst, owner)
-    if PLANT_DEFS[inst._base_name].build_rotten ~= nil then
-        owner.AnimState:OverrideSymbol("swap_body", PLANT_DEFS[inst._base_name].build_rotten, "swap_body")
-    else
-        owner.AnimState:OverrideSymbol("swap_body", "farm_plant_"..inst._base_name, "swap_body")
-    end
-end
-
-local function oversized_onunequip_rotten(inst, owner)
     owner.AnimState:ClearOverrideSymbol("swap_body")
 end
 
@@ -324,10 +312,6 @@ local function MakeVeggie(name, has_seeds)
 	if VEGGIES[name].lure_data ~= nil then
 		table.insert(assets, Asset("ANIM", "anim/"..VEGGIES[name].lure_data.build..".zip"))
 	end
-
-    if PLANT_DEFS[name] and PLANT_DEFS[name].build_rotten then
-        table.insert(assets, Asset("ANIM", "anim/"..PLANT_DEFS[name].build_rotten..".zip"))
-    end  
 
     table.insert(assets,Asset("INV_IMAGE", name.."_oversized_rot"))
 
@@ -485,6 +469,12 @@ local function MakeVeggie(name, has_seeds)
             inst:AddTag("weighable_OVERSIZEDVEGGIES")
         end
 
+        if VEGGIES[name].extra_tags_fresh then
+            for _, extra_tag in ipairs(VEGGIES[name].extra_tags_fresh) do
+                inst:AddTag(extra_tag)
+            end
+        end
+
         local float = VEGGIES[name].float_settings
         if float ~= nil then
             MakeInventoryFloatable(inst, float[1], float[2], float[3])
@@ -525,6 +515,12 @@ local function MakeVeggie(name, has_seeds)
         if name == "watermelon" then
             inst.components.edible.temperaturedelta = TUNING.COLD_FOOD_BONUS_TEMP
             inst.components.edible.temperatureduration = TUNING.FOOD_TEMP_BRIEF
+        end
+
+        if name == "kelp" then
+            inst:AddComponent("repairer")
+            inst.components.repairer.repairmaterial = MATERIALS.KELP
+            inst.components.repairer.healthrepairvalue = TUNING.REPAIR_KELP_HEALTH
         end
 
 		if dryable ~= nil then
@@ -595,6 +591,12 @@ local function MakeVeggie(name, has_seeds)
         inst.AnimState:SetBank(name)
         inst.AnimState:SetBuild(name)
         inst.AnimState:PlayAnimation("cooked")
+
+        if VEGGIES[name].extra_tags_cooked then
+            for _, extra_tag in ipairs(VEGGIES[name].extra_tags_cooked) do
+                inst:AddTag(extra_tag)
+            end
+        end
 
         local float = VEGGIES[name].cooked_float_settings
         if float ~= nil then
@@ -801,7 +803,7 @@ local function MakeVeggie(name, has_seeds)
 
         inst:AddTag("heavy")
         inst:AddTag("oversized_veggie")
-        
+
         inst.gymweight = 4
 
         inst.displayadjectivefn = displayadjectivefn
@@ -904,7 +906,7 @@ local function MakeVeggie(name, has_seeds)
         inst.components.workable:SetWorkLeft(OVERSIZED_MAXWORK)
 
         inst:AddComponent("pickable")
-        inst.components.pickable.onpickedfn = inst.Remove
+		inst.components.pickable.remove_when_picked = true
 	    inst.components.pickable:SetUp(nil)
 		inst.components.pickable.use_lootdropper_for_product = true
 	    inst.components.pickable.picksound = "dontstarve/wilson/harvest_berries"
@@ -913,16 +915,16 @@ local function MakeVeggie(name, has_seeds)
         inst.components.inventoryitem.cangoincontainer = false
 		--inst.components.inventoryitem.canbepickedup = false
         inst.components.inventoryitem:SetSinks(true)
-        
+
         inst:AddComponent("equippable")
         inst.components.equippable.equipslot = EQUIPSLOTS.BODY
-        inst.components.equippable:SetOnEquip(oversized_onequip_rotten)
-        inst.components.equippable:SetOnUnequip(oversized_onunequip_rotten)
+        inst.components.equippable:SetOnEquip(oversized_onequip)
+        inst.components.equippable:SetOnUnequip(oversized_onunequip)
         inst.components.equippable.walkspeedmult = TUNING.HEAVY_SPEED_MULT
 
         inst:AddComponent("submersible")
         inst:AddComponent("symbolswapdata")
-        inst.components.symbolswapdata:SetData(plant_def.build_rotten, "swap_body")
+        inst.components.symbolswapdata:SetData(plant_def.build, "swap_body_rotten")
 
         inst:AddComponent("lootdropper")
         inst.components.lootdropper:SetLoot(plant_def.loot_oversized_rot)

@@ -35,8 +35,8 @@ end
 
 --------------------------------------------------------------------------
 
-local function IsValidVictim(victim)
-    return wortox_soul_common.HasSoul(victim) and victim.components.health:IsDead()
+local function IsValidVictim(victim, explosive)
+    return wortox_soul_common.HasSoul(victim) and (victim.components.health:IsDead() or explosive)
 end
 
 local function OnRestoreSoul(victim)
@@ -81,7 +81,7 @@ local function OnEntityDropLoot(inst, data)
         victim:IsValid() and
         (   victim == inst or
             (   not inst.components.health:IsDead() and
-                IsValidVictim(victim) and
+                IsValidVictim(victim, data.explosive) and
                 inst:IsNear(victim, TUNING.WORTOX_SOULEXTRACT_RANGE)
             )
         ) then
@@ -92,7 +92,8 @@ local function OnEntityDropLoot(inst, data)
 end
 
 local function OnEntityDeath(inst, data)
-    if data.inst ~= nil and data.inst.components.lootdropper == nil then
+    -- NOTES(JBK): Explosive entities do not drop loot.
+    if data.inst ~= nil and (data.inst.components.lootdropper == nil or data.explosive) then
         OnEntityDropLoot(inst, data)
     end
 end
@@ -180,34 +181,51 @@ local function SortByStackSize(l, r)
     return GetStackSize(l) < GetStackSize(r)
 end
 
-local function CheckSoulsAdded(inst)
-    inst._checksoulstask = nil
+local function GetSouls(inst)
     local souls = inst.components.inventory:FindItems(IsSoul)
     local count = 0
     for i, v in ipairs(souls) do
         count = count + GetStackSize(v)
     end
+    return souls, count
+end
+
+local function DropSouls(inst, souls, dropcount)
+    if dropcount <= 0 then
+        return
+    end
+    table.sort(souls, SortByStackSize)
+    local pos = inst:GetPosition()
+    for _, v in ipairs(souls) do
+        local vcount = GetStackSize(v)
+        if vcount < dropcount then
+            inst.components.inventory:DropItem(v, true, true, pos)
+            dropcount = dropcount - vcount
+        else
+            if vcount == dropcount then
+                inst.components.inventory:DropItem(v, true, true, pos)
+            else
+                v = v.components.stackable:Get(dropcount)
+                v.Transform:SetPosition(pos:Get())
+                v.components.inventoryitem:OnDropped(true)
+            end
+            break
+        end
+    end
+end
+
+local function OnReroll(inst)
+    local souls, count = GetSouls(inst)
+    DropSouls(inst, souls, count)
+end
+
+local function CheckSoulsAdded(inst)
+    inst._checksoulstask = nil
+    local souls, count = GetSouls(inst)
     if count > TUNING.WORTOX_MAX_SOULS then
         --convert count to drop count
         count = count - math.floor(TUNING.WORTOX_MAX_SOULS / 2) + math.random(0, 2) - 1
-        table.sort(souls, SortByStackSize)
-        local pos = inst:GetPosition()
-        for i, v in ipairs(souls) do
-            local vcount = GetStackSize(v)
-            if vcount < count then
-                inst.components.inventory:DropItem(v, true, true, pos)
-                count = count - vcount
-            else
-                if vcount == count then
-                    inst.components.inventory:DropItem(v, true, true, pos)
-                else
-                    v = v.components.stackable:Get(count)
-                    v.Transform:SetPosition(pos:Get())
-                    v.components.inventoryitem:OnDropped(true)
-                end
-                break
-            end
-        end
+        DropSouls(inst, souls, count)
         inst.components.sanity:DoDelta(-TUNING.SANITY_MEDLARGE)
         inst:PushEvent("souloverload")
     elseif count > TUNING.WORTOX_MAX_SOULS * .8 then
@@ -372,6 +390,7 @@ local function master_postinit(inst)
     inst:ListenForEvent("harvesttrapsouls", OnHarvestTrapSouls)
     inst:ListenForEvent("ms_respawnedfromghost", OnRespawnedFromGhost)
     inst:ListenForEvent("ms_becameghost", OnBecameGhost)
+    inst:ListenForEvent("ms_playerreroll", OnReroll)
 
     OnRespawnedFromGhost(inst)
 end

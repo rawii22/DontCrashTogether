@@ -14,6 +14,7 @@ return{
         {
             MOUNTED = "Not up here",
             HASPET = "Already have Care Friend",
+			TICOON = "Already have friend",
         },
 		SHAVE =
 		{
@@ -58,7 +59,16 @@ return{
 			LOCKED_GATE = "Nope. Locked",
             HOSTBUSY = "Big Tweeter busy",
             CARNIVAL_HOST_HERE = "Hello? Big Tweeter here?",
-            NOCARNIVAL = "Tweeters? Aww..."
+            NOCARNIVAL = "Tweeters? Aww...",
+			EMPTY_CATCOONDEN = "No friend inside",
+			KITCOON_HIDEANDSEEK_NOT_ENOUGH_HIDERS = "Not many friends to hide",
+			KITCOON_HIDEANDSEEK_NOT_ENOUGH_HIDING_SPOTS = "Not many hideys for friends",
+			KITCOON_HIDEANDSEEK_ONE_GAME_PER_DAY = "Already had fun",
+		},
+		OPEN_CRAFTING =
+		{
+            PROFESSIONALCHEF = "Not mine",
+			SHADOWMAGIC = "Nope",
 		},
         COOK =
         {
@@ -89,7 +99,7 @@ return{
 --fallback to speech_wilson.lua         READ =
 --fallback to speech_wilson.lua         {
 --fallback to speech_wilson.lua             GENERIC = "only_used_by_wickerbottom",
---fallback to speech_wilson.lua             NOBIRDS = "only_used_by_wickerbottom"
+--fallback to speech_wilson.lua             NOBIRDS = "only_used_by_wickerbottom",
 --fallback to speech_wilson.lua         },
 
         GIVE =
@@ -123,6 +133,8 @@ return{
             SPIDERNOHAT = "No room",
             TERRARIUM_REFUSE = "Want something else?",
             TERRARIUM_COOLDOWN = "Friend is away... will come back later?",
+            NOTAMONKEY = "Don't know how to speak Cheeky",
+            QUEENBUSY = "She very busy! Maybe try later",
         },
         GIVETOPLAYER =
         {
@@ -163,6 +175,7 @@ return{
         {
             TARGETINCOMBAT = "Too much fighting!",
             INUSE = "Someone else's",
+			SLEEPING = "Upsie daisies!",
         },
         SADDLE =
         {
@@ -179,6 +192,8 @@ return{
 
 			--MapSpotRevealer/messagebottle
 			MESSAGEBOTTLEMANAGER_NOT_FOUND = "Not here",--Likely trying to read messagebottle treasure map in caves
+
+            STASH_MAP_NOT_FOUND = "Hmmm... nothing?",-- Likely trying to read stash map  in world without stash
         },
         WRAPBUNDLE =
         {
@@ -195,6 +210,7 @@ return{
                 "Not friend",
             },
 --fallback to speech_wilson.lua 			NO_HEAVY_LIFTING = "only_used_by_wanda",
+            FULL_OF_CURSES = "Already got lots. Save for someone else?",
         },
         SLAUGHTER =
         {
@@ -311,11 +327,11 @@ return{
 --fallback to speech_wilson.lua             FROZEN = "only_used_by_webber",
 --fallback to speech_wilson.lua             ALREADY_BEDAZZLED = "only_used_by_webber",
         },
-        UPGRADE = 
+        UPGRADE =
         {
 --fallback to speech_wilson.lua             BEDAZZLED = "only_used_by_webber",
         },
-		CAST_POCKETWATCH = 
+		CAST_POCKETWATCH =
 		{
 --fallback to speech_wilson.lua 			GENERIC = "only_used_by_wanda",
 --fallback to speech_wilson.lua 			REVIVE_FAILED = "only_used_by_wanda",
@@ -336,7 +352,34 @@ return{
 --fallback to speech_wilson.lua             HUNGRY = "only_used_by_wolfang",
 --fallback to speech_wilson.lua             FULL = "only_used_by_wolfang",
         },
+
+        APPLYMODULE =
+        {
+            COOLDOWN = "only_used_by_wx78",
+            NOTENOUGHSLOTS = "only_used_by_wx78",
+        },
+        REMOVEMODULES =
+        {
+            NO_MODULES = "only_used_by_wx78",
+        },
+        CHARGE_FROM =
+        {
+            NOT_ENOUGH_CHARGE = "only_used_by_wx78",
+            CHARGE_FULL = "only_used_by_wx78",
+        },
+
+        HARVEST =
+        {
+            DOER_ISNT_MODULE_OWNER = "Shy?",
+        },
     },
+
+	ANNOUNCE_CANNOT_BUILD =
+	{
+		NO_INGREDIENTS = "Hmm. Need things",
+		NO_TECH = "Don't know how",
+		NO_STATION = "Can't",
+	},
 
 	ACTIONFAIL_GENERIC = "Nope",
 	ANNOUNCE_BOAT_LEAK = "Water! Water coming!",
@@ -457,6 +500,7 @@ return{
 	ANNOUNCE_NODAYSLEEP_CAVE = "Can't",
 	ANNOUNCE_NOHUNGERSLEEP = "Too hungry",
 	ANNOUNCE_NOSLEEPONFIRE = "Burning!",
+    ANNOUNCE_NOSLEEPHASPERMANENTLIGHT = "Bright, robot friend! Bright!!",
 	ANNOUNCE_NODANGERSIESTA = "Too dangerous",
 	ANNOUNCE_NONIGHTSIESTA = "Can't. It's nighttime",
 	ANNOUNCE_NONIGHTSIESTA_CAVE = "Not in caves",
@@ -600,6 +644,10 @@ return{
 --fallback to speech_wilson.lua         "only_used_by_walter",
 --fallback to speech_wilson.lua 	},
 
+    -- wx specific
+    ANNOUNCE_WX_SCANNER_NEW_FOUND = "only_used_by_wx78",
+--fallback to speech_wilson.lua     ANNOUNCE_WX_SCANNER_FOUND_NO_DATA = "only_used_by_wx78",
+
     --quagmire event
     QUAGMIRE_ANNOUNCE_NOTRECIPE = "Oops. Not good belly stuff",
     QUAGMIRE_ANNOUNCE_MEALBURNT = "Burnt. Oh",
@@ -740,6 +788,33 @@ return{
         "Nice to talk to other plants",
 	},
 
+	ANNOUNCE_KITCOON_HIDEANDSEEK_START = "Friends hiding now",
+	ANNOUNCE_KITCOON_HIDEANDSEEK_JOIN = "Looking for friends too",
+	ANNOUNCE_KITCOON_HIDANDSEEK_FOUND =
+	{
+		"Found you",
+		"Peek-a-boo",
+		"Hello there",
+		"Hi hi",
+	},
+	ANNOUNCE_KITCOON_HIDANDSEEK_FOUND_ONE_MORE = "Just one friend left",
+	ANNOUNCE_KITCOON_HIDANDSEEK_FOUND_LAST_ONE = "Last friend found",
+	ANNOUNCE_KITCOON_HIDANDSEEK_FOUND_LAST_ONE_TEAM = "Someone found last friend",
+	ANNOUNCE_KITCOON_HIDANDSEEK_TIME_ALMOST_UP = "Find friends fast",
+	ANNOUNCE_KITCOON_HIDANDSEEK_LOSEGAME = "Friends hide too good",
+	ANNOUNCE_KITCOON_HIDANDSEEK_TOOFAR = "Friends not hiding here",
+	ANNOUNCE_KITCOON_HIDANDSEEK_TOOFAR_RETURN = "Going back to friends",
+	ANNOUNCE_KITCOON_FOUND_IN_THE_WILD = "Friend not in hidey?",
+
+	ANNOUNCE_TICOON_START_TRACKING	= "Looking for friends?",
+	ANNOUNCE_TICOON_NOTHING_TO_TRACK = "No friend to find",
+	ANNOUNCE_TICOON_WAITING_FOR_LEADER = "He's waiting",
+	ANNOUNCE_TICOON_GET_LEADER_ATTENTION = "Should follow",
+	ANNOUNCE_TICOON_NEAR_KITCOON = "Friend nearby",
+	ANNOUNCE_TICOON_LOST_KITCOON = "Friend already found",
+	ANNOUNCE_TICOON_ABANDONED = "Friend left me",
+	ANNOUNCE_TICOON_DEAD = "Friend left?",
+
     -- YOTB
     ANNOUNCE_CALL_BEEF = "Here Shaggy Buddy!",
     ANNOUNCE_CANTBUILDHERE_YOTB_POST = "Too far for contest",
@@ -749,6 +824,14 @@ return{
     ANNOUNCE_EYEOFTERROR_ARRIVE = "Big peeper peeping!",
     ANNOUNCE_EYEOFTERROR_FLYBACK = "Big peeper back!",
     ANNOUNCE_EYEOFTERROR_FLYAWAY = "Where going?",
+
+    -- PIRATES
+    ANNOUNCE_CANT_ESCAPE_CURSE = "Want to keep the pretty danglies",
+    ANNOUNCE_MONKEY_CURSE_1 = "This feeling new... don't know if good...",
+    ANNOUNCE_MONKEY_CURSE_CHANGE = "Huh? Hairy?",
+    ANNOUNCE_MONKEY_CURSE_CHANGEBACK = "Was fun!",
+
+    ANNOUNCE_PIRATES_ARRIVE = "Hmm? Funny sounds coming...",
 
 	BATTLECRY =
 	{
@@ -1008,6 +1091,16 @@ return{
             REVIVER = "%s is nice friend",
             GHOST = "Is %s? Need helping?",
             FIRESTARTER = "No fire, %s! No fire!",
+        },
+
+        WONKEY =
+        {
+            GENERIC = "Hello Cheeky!",
+            ATTACKER = "Why this one so mean?",
+            MURDERER = "That Cheeky is very bad!",
+            REVIVER = "You help friend! Thank you",
+            GHOST = "Cheeky is floaty now",
+            FIRESTARTER = "No! Fire bad, Cheeky!",
         },
 
         MIGRATION_PORTAL =
@@ -1310,6 +1403,8 @@ return{
 
         TURF_SHELLBEACH = "Sand",
 
+        TURF_MONKEY_GROUND = "Sand... with friend hair?",
+
 		POWCAKE = "Ka-pow!",
         CAVE_ENTRANCE = "Goes somewhere",
         CAVE_ENTRANCE_RUINS = "Goes somewhere",
@@ -1606,6 +1701,8 @@ return{
         CHESSPIECE_BEEQUEEN = "No more buzz-buzz",
         CHESSPIECE_ANTLION = "Not moving",
         CHESSPIECE_BEEFALO = "Not fluffy...",
+		CHESSPIECE_KITCOON = "Not hiding?",
+		CHESSPIECE_CATCOON = "No tail swish swoosh",
         CHESSPIECE_GUARDIANPHASE3 = "Big",
         CHESSPIECE_EYEOFTERROR = "Not watching?",
         CHESSPIECE_TWINSOFTERROR = "Can't see now",
@@ -2750,6 +2847,8 @@ return{
 			BURNT = "Fire bad",
 		},
 		WARG = "Big Bad Woofer",
+        WARGLET = "Big Bad Woofer",
+
 		WASPHIVE = "Bad Buzz home",
 		WATERBALLOON = "Water Booper",
 		WATERMELON = "Watery Sweet belly stuff",
@@ -3317,6 +3416,7 @@ return{
             BURNT = "Fire... (sigh)",
         },
         BOAT_ITEM = "Needs water",
+        BOAT_GRASS_ITEM = "Friends help make Floaty",
         STEERINGWHEEL_ITEM = "For pointing Floaty",
         ANCHOR_ITEM = "Heavy...",
         MAST_ITEM = "Tall friend for Floater.",
@@ -3387,6 +3487,7 @@ return{
         GNARWAIL_HORN = "Sharp!",
 
         WALKINGPLANK = "Splashy jump spot",
+        WALKINGPLANK_GRASS = "Splashy jump spot",
         OAR = "Friend helps push water",
 		OAR_DRIFTWOOD = "Friend helps push water fast!",
 
@@ -3974,6 +4075,38 @@ return{
 		},
 		CARNIVALGAME_HERDING_CHICK = "Over here!",
 
+		CARNIVALGAME_SHOOTING_KIT = "Tweeter games!",
+		CARNIVALGAME_SHOOTING_STATION =
+		{
+			GENERIC = "Needs shiny",
+			PLAYING = "Protect tweeters!",
+		},
+		CARNIVALGAME_SHOOTING_TARGET =
+		{
+			GENERIC = "Hello? Hiding?",
+			PLAYING = "Bad bugs",
+		},
+
+		CARNIVALGAME_SHOOTING_BUTTON =
+		{
+			GENERIC = "Needs shiny",
+			PLAYING = "Pew pew!",
+		},
+
+		CARNIVALGAME_WHEELSPIN_KIT = "Tweeter games!",
+		CARNIVALGAME_WHEELSPIN_STATION =
+		{
+			GENERIC = "Needs shiny",
+			PLAYING = "Spinny spin!",
+		},
+
+		CARNIVALGAME_PUCKDROP_KIT = "Tweeter games!",
+		CARNIVALGAME_PUCKDROP_STATION =
+		{
+			GENERIC = "Needs shiny",
+			PLAYING = "Plunk plunk plop",
+		},
+
 		CARNIVAL_PRIZEBOOTH_KIT = "Make house for Tweeter treasure",
 		CARNIVAL_PRIZEBOOTH =
 		{
@@ -4002,6 +4135,8 @@ return{
 		CARNIVALDECOR_LAMP = "Friend make nice glowy light",
 		CARNIVALDECOR_PLANT_KIT = "Find nice place for friend",
 		CARNIVALDECOR_PLANT = "Short friend",
+		CARNIVALDECOR_BANNER_KIT = "Prize!",
+		CARNIVALDECOR_BANNER = "Friend holding treasure",
 
 		CARNIVALDECOR_FIGURE =
 		{
@@ -4010,6 +4145,7 @@ return{
 			GENERIC = "Ooooh",
 		},
 		CARNIVALDECOR_FIGURE_KIT = "Surprise",
+		CARNIVALDECOR_FIGURE_KIT_SEASON2 = "Surprise",
 
         CARNIVAL_BALL = "Bouncy bounce", --unimplemented
 		CARNIVAL_SEEDPACKET = "Thanks Tweeters!",
@@ -4080,6 +4216,47 @@ return{
         BEAST_BLUEPRINT = "Lucky!",
 
         BEEF_BELL = "Ding dong",
+
+		-- YOT Catcoon
+		KITCOONDEN =
+		{
+			GENERIC = "Where friends live",
+            BURNT = "Fire very bad",
+			PLAYING_HIDEANDSEEK = "Friends out playing",
+			PLAYING_HIDEANDSEEK_TIME_ALMOST_UP = "Hidey game ending soon",
+		},
+
+		KITCOONDEN_KIT = "Makes house for friends",
+
+		TICOON =
+		{
+			GENERIC = "Big fur friend",
+			ABANDONED = "Please come back",
+			SUCCESS = "Friend found friend",
+			LOST_TRACK = "Someone found friend first",
+			NEARBY = "Friend near us",
+			TRACKING = "Should follow friend",
+			TRACKING_NOT_MINE = "Looking for other friend",
+			NOTHING_TO_TRACK = "Nothing to find",
+			TARGET_TOO_FAR_AWAY = "Friends are very far",
+		},
+
+		YOT_CATCOONSHRINE =
+        {
+            GENERIC = "Kitty likes box",
+            EMPTY = "Wants to play?",
+            BURNT = "Fire so evil",
+        },
+
+		KITCOON_FOREST = "Looks like friend hair",
+		KITCOON_SAVANNA = "Friend full of lines",
+		KITCOON_MARSH = "Friend is soggy",
+		KITCOON_DECIDUOUS = "Small fur friend",
+		KITCOON_GRASS = "Scared friend?",
+		KITCOON_ROCKY = "Rocky friend",
+		KITCOON_DESERT = "Hear me, friend?",
+		KITCOON_MOON = "Friend likes night ball",
+		KITCOON_YOT = "Happy friend",
 
         -- Moon Storm
         ALTERGUARDIAN_PHASE1 = {
@@ -4168,7 +4345,7 @@ return{
         POCKETWATCH_PARTS = "Tick Tock insides",
         POCKETWATCH_DISMANTLER = "Full of funny little sticks",
 
-        POCKETWATCH_PORTAL_ENTRANCE = 
+        POCKETWATCH_PORTAL_ENTRANCE =
 		{
 			GENERIC = "Spinny hole",
 			DIFFERENTSHARD = "Spinny hole",
@@ -4182,7 +4359,7 @@ return{
         WATERTREE_ROOT = "Oh! Don't bump into friends!",
 
         OCEANTREE_PILLAR = "Biiig friend!",
-        
+
         OCEANVINE = "Wants to give fruit",
         FIG = "From hanging tree friend",
         FIG_COOKED = "Sweet yums",
@@ -4212,7 +4389,7 @@ return{
         },
 
         -- Wolfgang
-        MIGHTY_GYM = 
+        MIGHTY_GYM =
         {
             GENERIC = "Muscle man home",
             BURNT = "Oh... poor muscle man...",
@@ -4220,11 +4397,12 @@ return{
 
         DUMBBELL = "Rocks",
         DUMBBELL_GOLDEN = "Heavy!",
+		DUMBBELL_MARBLE = "Heaaavy rocks",
         DUMBBELL_GEM = "Sparkly rocks",
         POTATOSACK = "Carry friends",
 
 
-        TERRARIUMCHEST = 
+        TERRARIUMCHEST =
 		{
 			GENERIC = "Shiny gone...",
 			BURNT = "Oh",
@@ -4246,6 +4424,132 @@ return{
         SHIELDOFTERROR ="Chomp chomp!",
         TWINOFTERROR1 = "Big machine peeper!",
         TWINOFTERROR2 = "Big machine peeper!",
+
+        -- Year of the Catcoon
+        CATTOY_MOUSE = "Squeak squeak",
+        KITCOON_NAMETAG = "For furry friends to wear",
+
+		KITCOONDECOR1 =
+        {
+            GENERIC = "Tweeter likes to dance",
+            BURNT = "No! Fire took tweeter",
+        },
+		KITCOONDECOR2 =
+        {
+            GENERIC = "Glub glub is stuck",
+            BURNT = "No! Fire took glub glub",
+        },
+
+		KITCOONDECOR1_KIT = "Makes toy for friends",
+		KITCOONDECOR2_KIT = "Makes toy for friends",
+
+        -- WX78
+        WX78MODULE_MAXHEALTH = "Beep boops",
+        WX78MODULE_MAXSANITY1 = "Beep boops",
+        WX78MODULE_MAXSANITY = "Beep boops",
+        WX78MODULE_MOVESPEED = "Beep boops",
+        WX78MODULE_MOVESPEED2 = "Beep boops",
+        WX78MODULE_HEAT = "Beep boops",
+        WX78MODULE_NIGHTVISION = "Beep boops",
+        WX78MODULE_COLD = "Beep boops",
+        WX78MODULE_TASER = "Beep boops",
+        WX78MODULE_LIGHT = "Beep boops",
+        WX78MODULE_MAXHUNGER1 = "Beep boops",
+        WX78MODULE_MAXHUNGER = "Beep boops",
+        WX78MODULE_MUSIC = "Beep boops",
+        WX78MODULE_BEE = "Beep boops",
+        WX78MODULE_MAXHEALTH2 = "Beep boops",
+
+        WX78_SCANNER =
+        {
+            GENERIC ="Little friend of robot friend",
+            HUNTING = "Little friend of robot friend",
+            SCANNING = "Little friend of robot friend",
+        },
+
+        WX78_SCANNER_ITEM = "Little friend of robot friend",
+        WX78_SCANNER_SUCCEEDED = "Blinky blink",
+
+        WX78_MODULEREMOVER = "Robot friend fixer",
+
+        SCANDATA = "Hmm!",
+
+        -- Pirates
+        BOAT_ROTATOR = "Wee! Floaty go spinny!",
+        BOAT_ROTATOR_KIT = "Can make the Floaty spin with this",
+        BOAT_BUMPER_KELP = "Keeps Floaty safe",
+        BOAT_BUMPER_KELP_KIT = "Will help protect Floaty",
+        BOAT_BUMPER_SHELL = "Keeps Floaty safe",
+        BOAT_BUMPER_SHELL_KIT = "Will help protect Floaty",
+        BOAT_CANNON = {
+            GENERIC = "Empty",
+            AMMOLOADED = "Boom!",
+            NOAMMO = "Oops! Forgot rocks",
+        },
+        BOAT_CANNON_KIT = "Things for Boom maker",
+        CANNONBALL_ROCK_ITEM = "Rock big, good for go boom",
+
+        OCEAN_TRAWLER = {
+            GENERIC = "Catch Glub Glubs.",
+            LOWERED = "Busy now",
+            CAUGHT = "Yay!!",
+            ESCAPED = "Aww... Glub Glubs leave?",
+            FIXED = "All better",
+        },
+        OCEAN_TRAWLER_KIT = "Things for Glub Glub catcher",
+
+        BOAT_MAGNET =
+        {
+            GENERIC = "Robot friend doesn't like Pull Rock",
+            ACTIVATED = "Big Pull Rock find little friend!",
+        },
+        BOAT_MAGNET_KIT = "Not done yet",
+
+        BOAT_MAGNET_BEACON =
+        {
+            GENERIC = "Little Pull Rock is friend of big Pull Rock",
+            ACTIVATED = "Calling big Pull Rock here",
+        },
+        DOCK_KIT = "Makes home for Floaties",
+        DOCK_WOODPOSTS_ITEM = "Plant friends on dock.",
+
+        MONKEYHUT =
+        {
+            GENERIC = "Cheeky house",
+            BURNT = "Poor Cheekies",
+        },
+        POWDER_MONKEY = "Mean Cheeky!",
+        PRIME_MATE = "Big Cheeky... scary!",
+		LIGHTCRAB = "Glowy crawly",
+        CUTLESS = "Friend fighting?",
+        CURSED_MONKEY_TOKEN = "Ooooh, pretty danglies",
+        OAR_MONKEY = "That Cheeky has a big branch!",
+        BANANABUSH = "New friend!",
+        DUG_BANANABUSH = "New friend!",
+        PALMCONETREE = "Came from far away",
+        PALMCONE_SEED = "Grows friends from far away",
+        PALMCONE_SAPLING = "You will be big and strong soon!",
+        PALMCONE_SCALE = "Bit of friend clothes",
+        MONKEYTAIL = "Oh! Where you from?",
+        DUG_MONKEYTAIL = "Oh! Where you from?",
+
+        MONKEY_MEDIUMHAT = "Wear on Floaty, look nice",
+        MONKEY_SMALLHAT = "Cheeky head thing",
+        POLLY_ROGERSHAT = "Head thing with Tweeter clothes",
+        POLLY_ROGERS = "Tweeter helping!",
+
+        MONKEYISLAND_PORTAL = "Broken",
+        MONKEYISLAND_PORTAL_DEBRIS = "Hmmm",
+        MONKEYQUEEN = "Oh... she think Night Ball is friend hair?",
+        MONKEYPILLAR = "Metal trunk",
+        PIRATE_FLAG_POLE = "Friend holding picture",
+
+        BLACKFLAG = "Lots of black. Friend hair color better",
+        PIRATE_STASH = "Yay! Found treasure stuff",
+        STASH_MAP = "Where Cheekies put treasure stuff",
+
+
+        BANANAJUICE = "Sweet friend water",
     },
 
     DESCRIBE_GENERIC = "Friend?",

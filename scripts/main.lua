@@ -7,7 +7,7 @@ math.randomseed(tonumber(tostring(os.time()):reverse():sub(1,6)))
 math.random()
 
 function IsConsole()
-	return (PLATFORM == "PS4") or (PLATFORM == "XBONE")
+	return PLATFORM == "PS4" or PLATFORM == "XBONE" or PLATFORM == "SWITCH"
 end
 
 function IsNotConsole()
@@ -15,11 +15,11 @@ function IsNotConsole()
 end
 
 function IsPS4()
-	return (PLATFORM == "PS4")
+	return PLATFORM == "PS4"
 end
 
 function IsXB1()
-	return (PLATFORM == "XBONE")
+	return PLATFORM == "XBONE"
 end
 
 function IsSteam()
@@ -38,6 +38,9 @@ function IsRail()
 	return PLATFORM == "WIN32_RAIL"
 end
 
+function IsSteamDeck()
+	return IS_STEAM_DECK
+end
 
 --defines
 MAIN = 1
@@ -185,6 +188,7 @@ require("class")
 require("util")
 require("vecutil")
 require("vec3util")
+require("datagrid")
 require("ocean_util")
 require("actions")
 require("debugtools")
@@ -193,6 +197,10 @@ require("scheduler")
 require("stategraph")
 require("behaviourtree")
 require("prefabs")
+require("tiledefs")
+require("tilegroups")
+require("falloffdefs")
+require("groundcreepdefs")
 require("prefabskin")
 require("entityscript")
 require("profiler")
@@ -222,7 +230,6 @@ require("saveindex") -- Added by Altgames for Android focus lost handling
 require("shardsaveindex")
 require("shardindex")
 require("custompresets")
-require("worldtiledefs")
 require("gamemodes")
 require("skinsutils")
 require("wxputils")
@@ -237,7 +244,8 @@ if TheConfig:IsEnabled("force_netbookmode") then
 end
 
 
-print ("running main.lua\n")
+print("Running main.lua\n")
+
 TheSystemService:SetStalling(true)
 
 VERBOSITY_LEVEL = VERBOSITY.ERROR
@@ -314,8 +322,12 @@ global("TheCookbook")
 TheCookbook = nil
 global("ThePlantRegistry")
 ThePlantRegistry = nil
+global("TheCraftingMenuProfile")
+TheCraftingMenuProfile = nil
 global("Lavaarena_CommunityProgression")
 Lavaarena_CommunityProgression = nil
+global("TheLoadingTips")
+TheLoadingTips = nil
 global("SaveGameIndex")
 SaveGameIndex = nil
 global("ShardGameIndex")
@@ -369,8 +381,15 @@ local function ModSafeStartup()
 	ThePlantRegistry = require("plantregistrydata")()
 	ThePlantRegistry:Load()
 	ThePlantRegistry.save_enabled = true
+	TheCraftingMenuProfile = require("craftingmenuprofile")()
+	TheCraftingMenuProfile:Load()
 	Lavaarena_CommunityProgression = require("lavaarena_communityprogression")()
 	Lavaarena_CommunityProgression:Load()
+
+	if TheLoadingTips == nil then
+		TheLoadingTips = require("loadingtipsdata")()
+		TheLoadingTips:Load()
+	end
 
     local FollowCamera = require("cameras/followcamera")
     TheCamera = FollowCamera()

@@ -251,8 +251,12 @@ function EntityScript:GetSaveRecord()
         record = {
             prefab = self.prefab,
             --id = self.GUID,
-            age = self.Network:GetPlayerAge()
+            age = self.Network:GetPlayerAge(),
         }
+
+		--if ThePlayer == self then
+		--	record.crafting_menu = TheCraftingMenuProfile:SerializeLocalClientSessionData()
+		--end
 
         local platform = self:GetCurrentPlatform()
         if platform then
@@ -262,9 +266,13 @@ function EntityScript:GetSaveRecord()
             local rx, ry, rz = x - px, y - py, z - pz
 
             --Qnan hunting
-            rx = rx ~= rx and 0 or rx
-            ry = ry ~= ry and 0 or ry
-            rz = rz ~= rz and 0 or rz
+			if rx ~= rx or ry ~= ry or rz ~= rz then
+				print("EntityScript:GetSaveRecord error saving position: ", self.prefab, rx, ry, rz, ":", x, y, z, ":", px, py, pz)
+				if CONFIGURATION ~= "PRODUCTION" then
+					error("EntityScript:GetSaveRecord qnan error")
+				end
+				rx, ry, rz = 0, 0, 0
+			end
 
             record.puid = platform.components.walkableplatform:GetUID()
 
@@ -284,9 +292,13 @@ function EntityScript:GetSaveRecord()
     local x, y, z = self.Transform:GetWorldPosition()
 
     --Qnan hunting
-    x = x ~= x and 0 or x
-    y = y ~= y and 0 or y
-    z = z ~= z and 0 or z
+	if x ~= x or y ~= y or z ~= z then
+		print("EntityScript:GetSaveRecord error saving position: ", self.prefab, x, y, z)
+		if CONFIGURATION ~= "PRODUCTION" then
+			error("EntityScript:GetSaveRecord qnan error")
+		end
+		x, y, z = 0, 0, 0
+	end
 
     record.x = x and math.floor(x*1000)/1000 or 0
     record.z = z and math.floor(z*1000)/1000 or 0
@@ -312,6 +324,10 @@ end
 
 function EntityScript:Show()
     self.entity:Show(false)
+end
+
+function EntityScript:IsOnWater()
+    return not self:GetCurrentPlatform() and not TheWorld.Map:IsVisualGroundAtPoint(self.Transform:GetWorldPosition())
 end
 
 function EntityScript:IsInLimbo()
@@ -536,6 +552,24 @@ end
 
 function EntityScript:HasTag(tag)
     return self.entity:HasTag(tag)
+end
+
+function EntityScript:HasTags(tags)
+	for i = 1, #tags do
+		if not self.entity:HasTag(tags[i]) then
+			return false
+		end
+	end
+	return true
+end
+
+function EntityScript:HasOneOfTags(tags)
+	for i = 1, #tags do
+		if self.entity:HasTag(tags[i]) then
+			return true
+		end
+	end
+	return false
 end
 
 require("entityreplica")
@@ -1419,6 +1453,7 @@ function EntityScript:PerformBufferedAction()
         end
 
         self:PushEvent("actionfailed", { action = self.bufferedaction, reason = reason })
+
         self.bufferedaction:Fail()
         self.bufferedaction = nil
     end
@@ -1445,10 +1480,8 @@ function EntityScript:Remove()
         self.parent:RemoveChild(self)
     end
 
-    if self.platformfollowers then
-        for k,v in pairs(self.platformfollowers) do
-            k.platform = nil
-        end
+    if self.platform then
+        self.platform:RemovePlatformFollower(self)
     end
 
     OnRemoveEntity(self.GUID)
@@ -1495,6 +1528,12 @@ function EntityScript:Remove()
         for k,v in pairs(self.children) do
             k.parent = nil
             k:Remove()
+        end
+    end
+
+    if self.platformfollowers then
+        for k,v in pairs(self.platformfollowers) do
+            k.platform = nil
         end
     end
 
@@ -1587,7 +1626,7 @@ function EntityScript:GetCurrentTileType()
     local actual_tile = map:GetTile(tx, ty)
 
     if actual_tile ~= nil and tilecenter_x ~= nil and tilecenter_z ~= nil then
-        if actual_tile >= GROUND.UNDERGROUND then
+        if not TileGroupManager:IsLandTile(actual_tile) then
             local xpercent = (tilecenter_x - ptx) / TILE_SCALE + .25
             local ypercent = (tilecenter_z - ptz) / TILE_SCALE + .25
 

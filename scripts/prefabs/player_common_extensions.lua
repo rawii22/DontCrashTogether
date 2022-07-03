@@ -280,7 +280,7 @@ local function DoActualRez(inst, source, item)
     if source ~= nil then
         inst.DynamicShadow:Enable(true)
         inst.AnimState:SetBank("wilson")
-        inst.components.skinner:SetSkinMode("normal_skin") -- restore skin
+        inst.ApplySkinOverrides(inst) -- restore skin
         inst.components.bloomer:PopBloom("playerghostbloom")
         inst.AnimState:SetLightOverride(0)
 
@@ -305,7 +305,7 @@ local function DoActualRez(inst, source, item)
 		if item ~= nil and (item.prefab == "pocketwatch_revive" or item.prefab == "pocketwatch_revive_reviver") then
 			inst.DynamicShadow:Enable(true)
 			inst.AnimState:SetBank("wilson")
-			inst.components.skinner:SetSkinMode("normal_skin") -- restore skin
+			inst.ApplySkinOverrides(inst) -- restore skin
 			inst.components.bloomer:PopBloom("playerghostbloom")
 			inst.AnimState:SetLightOverride(0)
 
@@ -798,6 +798,15 @@ local function OnTakeOversizedPicture(inst, data)
     end
 end
 
+local function CanSeeTileOnMiniMap(inst, tx, ty)
+    return inst.player_classified.MapExplorer:IsTileSeeable(tx, ty)
+end
+
+local function CanSeePointOnMiniMap(inst, px, py, pz) -- Convenience wrapper.
+    local tx, ty = TheWorld.Map:GetTileXYAtPoint(px, py, pz)
+    return inst.player_classified.MapExplorer:IsTileSeeable(tx, ty)
+end
+
 return
 {
     ShouldKnockout              = ShouldKnockout,
@@ -820,4 +829,6 @@ return
     OnLearnFertilizer           = OnLearnFertilizer,
     OnTakeOversizedPicture      = OnTakeOversizedPicture,
 	GivePlayerStartingItems		= GivePlayerStartingItems,
+    CanSeeTileOnMiniMap         = CanSeeTileOnMiniMap,
+    CanSeePointOnMiniMap        = CanSeePointOnMiniMap,
 }
