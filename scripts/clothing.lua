@@ -3850,8 +3850,7 @@ CLOTHING =
 	{
 		type = "body",
 		skin_tags = { "PIRATE", "CLOTHING_BODY", "CLOTHING", },
-		symbol_overrides = { "arm_lower", "arm_upper", "torso", },
-		symbol_in_base_hides = { "arm_upper_skin", },
+		symbol_overrides = { "arm_lower", "arm_upper", "arm_upper_skin", "torso", },
 		torso_tuck = "untucked",
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
@@ -8253,13 +8252,12 @@ CLOTHING =
 	{
 		type = "legs",
 		skin_tags = { "PIRATE", "CLOTHING_LEGS", "CLOTHING", },
-		symbol_overrides = { "torso_pelvis", "foot", "leg", },
+		symbol_overrides = { "torso_pelvis", "foot", "leg", "tail", },
 		symbol_hides = { "skirt", },
 		rarity = "Spiffy",
 		rarity_modifier = "Woven",
 		legs_cuff_size = 3,
 		feet_cuff_size = 3,
-		has_leg_boot = true,
 		release_group = 133,
 	},
 	legs_wortox_survivor =
@@ -8431,6 +8429,11 @@ for _,v in pairs(CLOTHING) do
 	end
 	if v.symbol_hides then
 		for _,sym in pairs(v.symbol_hides) do
+			HIDE_SYMBOLS[sym] = true
+		end
+	end
+	if v.symbol_in_base_hides then
+		for _,sym in pairs(v.symbol_in_base_hides) do
 			HIDE_SYMBOLS[sym] = true
 		end
 	end
