@@ -242,6 +242,9 @@ local TRANSLATE_TO_PREFABS = {
 
     -- Allow for the Terrarium to be a required world gen prefab, but still disable-able via World Gen settings
     ["terrariumchest"] =    {"terrariumchest"},
+
+    -- Allow for the stageplays to be required world gen prefabs, but still disable-able via World Gen settings
+	["stageplays"] =		{"charlie_stage_post", "statueharp_hedgespawner"},
 }
 
 local TRANSLATE_TO_CLUMP = {
@@ -1025,6 +1028,7 @@ return {
 	MULTIPLY = MULTIPLY,
 	TRANSLATE_AND_OVERRIDE = TRANSLATE_AND_OVERRIDE,
 	MULTIPLY_PREFABS = MULTIPLY_PREFABS,
+	TRANSLATE_TO_CLUMP = TRANSLATE_TO_CLUMP,
 	CLUMP = CLUMP,
 	CLUMPSIZE = CLUMPSIZE,
 	SEASONS = SEASONS,

@@ -104,7 +104,7 @@ local function RemoveDeadPlayer(inst, spawnskeleton)
         SpawnPrefab("die_fx").Transform:SetPosition(x, y, z)
     end
 
-    if not GetGameModeProperty("ghost_enabled") and not GetGameModeProperty("revivable_corpse") then
+    if not GetGhostEnabled() and not GetGameModeProperty("revivable_corpse") then
 		local followers = inst.components.leader.followers
 		for k, v in pairs(followers) do
 			if k.components.inventory ~= nil then
@@ -771,7 +771,7 @@ local function OnLearnCookbookStats(inst, product)
 end
 
 local function OnEat(inst, data)
-	local product = (data ~= nil and data.food ~= nil and data.food:HasTag("preparedfood")) and data.food.prefab or nil
+	local product = (data ~= nil and data.food ~= nil and data.food:HasTag("preparedfood")) and (data.food.food_basename or data.food.prefab) or nil
 	if product ~= nil then
 		OnLearnCookbookStats(inst, product)
 	end
@@ -807,6 +807,69 @@ local function CanSeePointOnMiniMap(inst, px, py, pz) -- Convenience wrapper.
     return inst.player_classified.MapExplorer:IsTileSeeable(tx, ty)
 end
 
+local function GenericCommander_OnAttackOther(inst, data)
+    if data and data.target and data.target ~= inst then
+        inst.components.commander:ShareTargetToAllSoldiers(data.target)
+    end
+end
+
+local function MakeGenericCommander(inst)
+    if inst.components.commander == nil then
+        inst:AddComponent("commander")
+        inst:ListenForEvent("onattackother", GenericCommander_OnAttackOther)
+    end
+end
+
+local function OnMurderCheckForFishRepel(inst, data)
+    local victim = data.victim
+    if not data.negligent and -- Do not punish neglecting fish in the inventory.
+        inst.components.leader and
+        victim ~= nil and victim:IsValid() and
+        victim:HasTag("fish") and
+        not inst.components.health:IsDead() then
+        -- This act is not looked too highly upon by anyone, not just Wurt!
+        for follower, _ in pairs(inst.components.leader.followers) do
+            if follower:HasTag("merm") and not follower:HasTag("mermking") then
+                follower.components.follower:StopFollowing()
+                if follower.DoDisapproval then
+                    follower:DoDisapproval()
+                end
+            end
+        end
+    end
+end
+
+local function clear_onstage(inst)
+    if inst._is_onstage_task then
+        inst._is_onstage_task:Cancel()
+    end
+    inst._is_onstage_task = nil
+end
+
+local function OnOnStageEvent(inst, duration)
+    duration = duration or FRAMES
+    if inst._is_onstage_task then
+        inst._is_onstage_task:Cancel()
+    end
+    inst._is_onstage_task = inst:DoTaskInTime(duration, clear_onstage)
+end
+
+local function IsActing(inst)
+    return inst.sg:HasStateTag("acting") or (inst._is_onstage_task ~= nil)
+end
+
+local function StartStageActing(inst)
+    if inst.ShowActions then
+        inst:ShowActions(false)
+    end
+end
+
+local function StopStageActing(inst)
+    if inst.ShowActions then
+        inst:ShowActions(true)
+    end
+end
+
 return
 {
     ShouldKnockout              = ShouldKnockout,
@@ -831,4 +894,10 @@ return
 	GivePlayerStartingItems		= GivePlayerStartingItems,
     CanSeeTileOnMiniMap         = CanSeeTileOnMiniMap,
     CanSeePointOnMiniMap        = CanSeePointOnMiniMap,
+    MakeGenericCommander        = MakeGenericCommander,
+    OnMurderCheckForFishRepel   = OnMurderCheckForFishRepel,
+    OnOnStageEvent              = OnOnStageEvent,
+    IsActing                    = IsActing,
+    StartStageActing            = StartStageActing,
+    StopStageActing             = StopStageActing,
 }

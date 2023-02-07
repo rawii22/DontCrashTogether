@@ -2,9 +2,6 @@ local prefabs = {}
 
 local assets =
 {
-	Asset("ATLAS", "images/quagmire_food_common_inv_images.xml"),
-	Asset("ATLAS", "images/quagmire_food_common_inv_images_hires.xml"),
-
     --FE
     Asset("DYNAMIC_ANIM", "anim/dynamic/credits.zip"),
     Asset("DYNAMIC_ANIM", "anim/dynamic/credits2.zip"),
@@ -56,6 +53,9 @@ local assets =
 
     Asset("ATLAS", "images/server_intentions.xml"),
     Asset("IMAGE", "images/server_intentions.tex"),
+
+    Asset("ATLAS", "images/serverplaystyles.xml"),
+    Asset("IMAGE", "images/serverplaystyles.tex"),
 
     Asset("DYNAMIC_ATLAS", "images/new_host_picker.xml"),
     Asset("PKGREF", "images/new_host_picker.tex"),
@@ -133,6 +133,8 @@ local assets =
     Asset("ANIM", "anim/player_idles_wanda.zip"),
     Asset("ANIM", "anim/player_idles_wx.zip"),
     Asset("ANIM", "anim/player_idles_wonkey.zip"),
+    Asset("ANIM", "anim/player_idles_wickerbottom.zip"),
+    Asset("ANIM", "anim/player_idles_waxwell.zip"),
     Asset("ANIM", "anim/bernie_build.zip"),
     Asset("ANIM", "anim/swap_lucy_axe.zip"),
 
@@ -162,17 +164,7 @@ local assets =
 
     Asset("ANIM", "anim/mod_player_build.zip"),
 
-
-    -- DISABLE SPECIAL RECIPES
-    --Asset("ANIM", "anim/button_weeklyspecial.zip"),
-
     Asset("ANIM", "anim/swapshoppe.zip"),
-
-    -- DISABLE SPECIAL RECIPES
-    --Asset("ANIM", "anim/swapshoppe_special_build.zip"),
-    --Asset("ANIM", "anim/swapshoppe_special_lightfx.zip"),
-    --Asset("ANIM", "anim/swapshoppe_special_transitionfx.zip"),
-
     Asset("ANIM", "anim/swapshoppe_bg.zip"),
     Asset("ANIM", "anim/joystick.zip"),
     Asset("ANIM", "anim/button.zip"),

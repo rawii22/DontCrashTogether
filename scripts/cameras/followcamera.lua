@@ -43,6 +43,7 @@ function FollowCamera:SetDefault()
 
     self.zoomstep = 4
     self.distancetarget = 30
+    --self.lockdistance = nil
 
     self.mindist = 15
     self.maxdist = 50 --40
@@ -141,6 +142,10 @@ function FollowCamera:PopScreenHOffset(ref)
             return
         end
     end
+end
+
+function FollowCamera:LockDistance(lock)
+    self.lockdistance = lock or nil
 end
 
 function FollowCamera:GetDistance()
@@ -275,7 +280,9 @@ function FollowCamera:Snap()
     self.currentscreenxoffset = #self.screenoffsetstack > 0 and self.screenoffsetstack[1].xoffset or 0
     self.currentpos.x, self.currentpos.y, self.currentpos.z = self.targetpos:Get()
     self.heading = self.headingtarget
-    self.distance = self.distancetarget
+    if not self.lockdistance then
+        self.distance = self.distancetarget
+    end
 
     self.pitch = lerp(self.mindistpitch, self.maxdistpitch, (self.distance - self.mindist) / (self.maxdist - self.mindist))
 
@@ -306,8 +313,8 @@ function FollowCamera:Update(dt, dontupdatepos)
         else
             if self.time_since_zoom ~= nil and not self.cutscene then
                 self.time_since_zoom = self.time_since_zoom + dt
-                if self.should_push_down and self.time_since_zoom > .25 then
-                    self.distancetarget = self.distance - self.zoomstep
+                if self.should_push_down and self.time_since_zoom > 1.0 then
+                    self.distancetarget = (self.maxdist - self.mindist) * 0.6 + self.mindist
                 end
             end
 
@@ -372,10 +379,8 @@ function FollowCamera:Update(dt, dontupdatepos)
             self.headingtarget + (self.heading > self.headingtarget and 360 or -360),
             dt * self.headinggain)
 
-    self.distance =
-        math.abs(self.distance - self.distancetarget) > .01 and
-        lerp(self.distance, self.distancetarget, dt * self.distancegain) or
-        self.distancetarget
+    self.distance = math.abs(self.distance - self.distancetarget) > .01 and lerp(self.distance, self.distancetarget, dt * self.distancegain)
+					or self.distancetarget
 
     self.pitch = lerp(self.mindistpitch, self.maxdistpitch, (self.distance - self.mindist) / (self.maxdist - self.mindist))
 

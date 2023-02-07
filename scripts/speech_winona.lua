@@ -64,6 +64,8 @@ return{
 			KITCOON_HIDEANDSEEK_NOT_ENOUGH_HIDERS = "Looks like we gotta find more players.",
 			KITCOON_HIDEANDSEEK_NOT_ENOUGH_HIDING_SPOTS = "Not really enough places for them to hide.",
 			KITCOON_HIDEANDSEEK_ONE_GAME_PER_DAY = "They look pretty tired, let's see if they wanna play again tomorrow.",
+            MANNEQUIN_EQUIPSWAPFAILED = "Just kiddin'!",
+            PILLOWFIGHT_NO_HANDPILLOW = "Err, I think I'm missin' something.",
 		},
 		OPEN_CRAFTING =
 		{
@@ -98,8 +100,19 @@ return{
         --wickerbottom specific action
 --fallback to speech_wilson.lua         READ =
 --fallback to speech_wilson.lua         {
---fallback to speech_wilson.lua             GENERIC = "only_used_by_wickerbottom",
---fallback to speech_wilson.lua             NOBIRDS = "only_used_by_wickerbottom",
+--fallback to speech_wilson.lua             GENERIC = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOWATERNEARBY = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             TOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             WAYTOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOFIRES =       "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOSILVICULTURE = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOHORTICULTURE = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOTENTACLEGROUND = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOSLEEPTARGETS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             TOOMANYBEES = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOMOONINCAVES = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             ALREADYFULLMOON = "only_used_by_waxwell_and_wicker",
 --fallback to speech_wilson.lua         },
 
         GIVE =
@@ -372,6 +385,16 @@ return{
         {
             DOER_ISNT_MODULE_OWNER = "I just thought the lil guy could use a polish.",
         },
+
+		CAST_SPELLBOOK =
+		{
+--fallback to speech_wilson.lua 			NO_TOPHAT = "only_used_by_waxwell",
+		},
+
+		CASTAOE =
+		{
+--fallback to speech_wilson.lua 			NO_MAX_SANITY = "only_used_by_waxwell",
+		},
     },
 
 	ANNOUNCE_CANNOT_BUILD =
@@ -392,6 +415,14 @@ return{
     --waxwell and wickerbottom specific strings
 --fallback to speech_wilson.lua     ANNOUNCE_TOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
 --fallback to speech_wilson.lua     ANNOUNCE_WAYTOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua     ANNOUNCE_NOWATERNEARBY = "only_used_by_waxwell_and_wicker",
+
+	--waxwell specific
+--fallback to speech_wilson.lua 	ANNOUNCE_SHADOWLEVEL_ITEM = "only_used_by_waxwell",
+--fallback to speech_wilson.lua 	ANNOUNCE_EQUIP_SHADOWLEVEL_T1 = "only_used_by_waxwell",
+--fallback to speech_wilson.lua 	ANNOUNCE_EQUIP_SHADOWLEVEL_T2 = "only_used_by_waxwell",
+--fallback to speech_wilson.lua 	ANNOUNCE_EQUIP_SHADOWLEVEL_T3 = "only_used_by_waxwell",
+--fallback to speech_wilson.lua 	ANNOUNCE_EQUIP_SHADOWLEVEL_T4 = "only_used_by_waxwell",
 
     --wolfgang specific
 --fallback to speech_wilson.lua     ANNOUNCE_NORMALTOMIGHTY = "only_used_by_wolfang",
@@ -455,6 +486,8 @@ return{
 --fallback to speech_wilson.lua         SAME_OLD_5 = "only_used_by_warly",
 --fallback to speech_wilson.lua 		TASTY = "only_used_by_warly",
     },
+
+	ANNOUNCE_FOODMEMORY = "only_used_by_warly",
 
     ANNOUNCE_ENCUMBERED =
     {
@@ -575,6 +608,7 @@ return{
     ANNOUNCE_REVIVED_FROM_CORPSE = "I'm back on the clock!",
 
     ANNOUNCE_FLARE_SEEN = "A flare! Hold on, I'm comin'!",
+    ANNOUNCE_MEGA_FLARE_SEEN = "Looks like someone's fixin' for a fight.",
     ANNOUNCE_OCEAN_SILHOUETTE_INCOMING = "Woah, that's a bigg'un!",
 
     --willow specific
@@ -710,6 +744,19 @@ return{
 --fallback to speech_wilson.lua         BOOK_GARDENING = "only_used_by_wurt",
 --fallback to speech_wilson.lua 		BOOK_SILVICULTURE = "only_used_by_wurt",
 --fallback to speech_wilson.lua 		BOOK_HORTICULTURE = "only_used_by_wurt",
+
+--fallback to speech_wilson.lua         BOOK_FISH = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_FIRE = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_WEB = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_TEMPERATURE = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_LIGHT = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_RAIN = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_MOON = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_BEES = "only_used_by_wurt",
+
+--fallback to speech_wilson.lua         BOOK_HORTICULTURE_UPGRADED = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_RESEARCH_STATION = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_LIGHT_UPGRADED = "only_used_by_wurt",
     },
     ANNOUNCE_WEAK_RAT = "It's too tuckered out.",
 
@@ -835,6 +882,12 @@ return{
 
     ANNOUNCE_PIRATES_ARRIVE = "Sounds like someone's about to throw a monkey wrench in the works...",
 
+--fallback to speech_wilson.lua     ANNOUNCE_BOOK_MOON_DAYTIME = "only_used_by_waxwell_and_wicker",
+
+    ANNOUNCE_OFF_SCRIPT = "That didn't seem right.",
+
+    ANNOUNCE_COZY_SLEEP = "I feel all bright-eyed and bushy-tailed!",
+
 	BATTLECRY =
 	{
 		GENERIC = "I'll demolish you!",
@@ -906,6 +959,11 @@ return{
         BERNIE_ACTIVE = "Is he clockwork? Can I peek inside?",
         BERNIE_BIG = "That girl knows how to put on a show.",
 
+		BOOKSTATION =
+		{
+			GENERIC = "I've gotta say, that's some pretty solid construction.",
+			BURNT = "Shoot. Grams is gonna have a fit.",
+		},
         BOOK_BIRDS = "I was never much of a book learner.",
         BOOK_TENTACLES = "I'm not really a \"book smarts\" kind of gal.",
         BOOK_GARDENING = "I prefer to learn from experience.",
@@ -913,6 +971,21 @@ return{
 		BOOK_HORTICULTURE = "I prefer to learn from experience.",
         BOOK_SLEEP = "I already know how to sleep, thanks.",
         BOOK_BRIMSTONE = "I prefer hands-on learning.",
+
+        BOOK_FISH = "I learn by doing, not reading.",
+        BOOK_FIRE = "Not really my kinda thing.",
+        BOOK_WEB = "This ain't one of them self-help books, is it?",
+        BOOK_TEMPERATURE = "Sorry grams, I'm not much of a reader.",
+        BOOK_LIGHT = "I gotta admit, pretty handy to have a book with a built-in reading lamp.",
+        BOOK_RAIN = "I'm too busy to sit around and read.",
+        BOOK_MOON = "At this point, I wish I knew less about the moon.",
+        BOOK_BEES = "I can't read when there's work to do!",
+        
+        BOOK_HORTICULTURE_UPGRADED = "I don't need a book tellin' me how to stick seeds in the ground.",
+        BOOK_RESEARCH_STATION = "You'll only really learn by gettin' your hands dirty.",
+        BOOK_LIGHT_UPGRADED = "It's all Greek to me.",
+
+        FIREPEN = "Yeesh, that pen's piping hot!",
 
         PLAYER =
         {
@@ -1405,7 +1478,19 @@ return{
 
         TURF_SHELLBEACH = "That's a chunk of sandy ground.",
 
+		TURF_RUINSBRICK = "That's a chunk of ground.",
+		TURF_RUINSBRICK_GLOW = "That's a chunk of ground.",
+		TURF_RUINSTILES = "That's a chunk of ground.",
+		TURF_RUINSTILES_GLOW = "That's a chunk of ground.",
+		TURF_RUINSTRIM = "That's a chunk of ground.",
+		TURF_RUINSTRIM_GLOW = "That's a chunk of ground.",
+
         TURF_MONKEY_GROUND = "That's a chunk of sandy ground.",
+
+        TURF_CARPETFLOOR2 = "That's a real dramatic chunk of ground.",
+        TURF_MOSAIC_GREY = "That's a chunk of ground.",
+        TURF_MOSAIC_RED = "That's a chunk of ground.",
+        TURF_MOSAIC_BLUE = "That's a chunk of ground.",
 
 		POWCAKE = "Gotta eat what you can around here.",
         CAVE_ENTRANCE = "Into the depths!",
@@ -1589,6 +1674,10 @@ return{
             RARE = "Progress on paper!",
         },
         SKETCH = "What a nice drawing.",
+		COOKINGRECIPECARD = 
+		{
+			GENERIC = "I can't make heads or tails of it.",
+		},
 		BLUE_CAP = "Yep. Blue mushroom.",
 		BLUE_CAP_COOKED = "Well, I don't THINK it's poison.",
 		BLUE_MUSHROOM =
@@ -1613,6 +1702,7 @@ return{
 		BUZZARD = "It lives off the hard work of others.",
 
 		SHADOWDIGGER = "Too lazy to do your own chores, Max?",
+        SHADOWDANCER = "Now even his shadow is slackin' off.",
 
 		CACTUS =
 		{
@@ -1705,6 +1795,7 @@ return{
         CHESSPIECE_BEEFALO = "Aw, it looks just like my beefalo.",
 		CHESSPIECE_KITCOON = "I can't tell if this a great feat of engineering or a very stupid one. Either way, it sure is cute.",
 		CHESSPIECE_CATCOON = "Aw, whatcha got there? ...Oh.",
+        CHESSPIECE_MANRABBIT = "It doesn't look like he has a care in the world.",
         CHESSPIECE_GUARDIANPHASE3 = "A little too lifelike for my comfort.",
         CHESSPIECE_EYEOFTERROR = "An eye (statue) for an eye (monster)!",
         CHESSPIECE_TWINSOFTERROR = "A fresh pair of eyes is just what we needed around here!",
@@ -1774,6 +1865,7 @@ return{
 		},
         GOGGLESHAT = "I hate fashion.",
         DESERTHAT = "Helps you see, see?",
+        ANTLIONHAT = "It sure makes landscaping a breeze!",
 		DEVTOOL = "What an incredible tool!",
 		DEVTOOL_NODEV = "Lazy builders.",
 		DIRTPILE = "Time to get my hands dirty.",
@@ -2799,6 +2891,34 @@ return{
         },
         BEEFALO_GROOMER_ITEM = "Better get building!",
 
+        YOTR_RABBITSHRINE =
+        {
+            GENERIC = "All this for a bunch of rabbits?",
+            EMPTY = "I'm guessing it's hungry for somethin'.",
+            BURNT = "Guess that's enough of that.",
+        },
+
+        NIGHTCAPHAT = "A solid night's sleep'll help ya do a solid day's work.",
+
+        YOTR_FOOD1 = "I guess a little cake break won't hurt anything.",
+        YOTR_FOOD2 = "Can't quite pin down the flavor, but I like it!",
+        YOTR_FOOD3 = "It looks like one of Warly's more fancy-pants desserts.",
+        YOTR_FOOD4 = "Sweetness on a stick.",
+
+        YOTR_TOKEN = "This'll get those layabouts off their fuzzy tushes!",
+
+        COZY_BUNNYMAN = "What a bunch of slackers!",
+
+        HANDPILLOW_BEEFALOWOOL = "It's cushy enough for me.",
+        HANDPILLOW_KELP = "It wouldn't be my first choice of pillow stuffing.",
+        HANDPILLOW_PETALS = "Way too flimsy, there's no support at all!",
+        HANDPILLOW_STEELWOOL = "Aww, it kinda makes me nostalgic for the old steel mill.",
+
+        BODYPILLOW_BEEFALOWOOL = "It's cushy enough for me.",
+        BODYPILLOW_KELP = "It wouldn't be my first choice of pillow stuffing.",
+        BODYPILLOW_PETALS = "Way too flimsy, there's no support at all!",
+        BODYPILLOW_STEELWOOL = "Aww, it kinda makes me nostalgic for the old steel mill.",
+
 		BISHOP_CHARGE_HIT = "Yeow!",
 		TRUNKVEST_SUMMER = "They weren't kidding about the breeze.",
 		TRUNKVEST_WINTER = "I wish it had sleeves.",
@@ -2856,7 +2976,11 @@ return{
 		WATERMELON = "We used to slice these up on hot summer days.",
 		WATERMELON_COOKED = "This was an odd choice.",
 		WATERMELONHAT = "A melon for your melon.",
-		WAXWELLJOURNAL = "I don't trust that thing one bit.",
+		WAXWELLJOURNAL =
+		{
+			GENERIC = "I don't trust that thing one bit.",
+--fallback to speech_wilson.lua 			NEEDSFUEL = "only_used_by_waxwell",
+		},
 		WETGOOP = "Yuck.",
         WHIP = "The preferred tool of the foreman.",
 		WINTERHAT = "Perfect for winters in the tenement house.",
@@ -3385,6 +3509,7 @@ return{
         ICEBERG_MELTED = "It's just a lil ice cube now.", --unimplemented
 
         MINIFLARE = "Safety in numbers, hey?",
+        MEGAFLARE = "If I'm gonna start somethin', I'd better be ready to finish it.",
 
 		MOON_FISSURE =
 		{
@@ -4476,6 +4601,13 @@ return{
 
         SCANDATA = "Yeesh, this stuff would make ol' Wickerbottom's writing seem flowery.",
 
+		-- QOL 2022
+		JUSTEGGS = "Nice and simple.",
+		VEGGIEOMLET = "Less dishes to wash if you leave it in the pan.",
+		TALLEGGS = "What's this, some kinda fancy boiled egg?",
+		BEEFALOFEED = "Feedin' time!",
+		BEEFALOTREAT = "My beefalo's been pulling her weight, she should get a reward.",
+
         -- Pirates
         BOAT_ROTATOR = "Controllin' the boat rotation is mighty useful.",
         BOAT_ROTATOR_KIT = "Time to put this doo-hickey to the test.",
@@ -4550,8 +4682,73 @@ return{
         PIRATE_STASH = "I think this is the place.",
         STASH_MAP = "Might find some loot if I follow this.",
 
-
         BANANAJUICE = "Would ya look at that, you can juice 'em too!",
+
+        FENCE_ROTATOR = "There's a right tool for every job.",
+
+        CHARLIE_STAGE_POST = "Who'd build a stage out here? Oh...",
+        CHARLIE_LECTURN = "Everyone's got their part to play, huh?",
+
+        CHARLIE_HECKLER = "You can't please everyone.",
+
+        PLAYBILL_THE_DOLL = "Somehow I think there's more to the story.",
+        STATUEHARP_HEDGESPAWNER = "Yeesh, this place needs a good pruning.",
+        HEDGEHOUND = "You're gettin' to be a real thorn in my side!",
+        HEDGEHOUND_BUSH = "Why am I gettin' a bad feeling...",
+
+        MASK_DOLLHAT = "Why do I feel like it's lookin' at me?",
+        MASK_DOLLBROKENHAT = "Why do I feel like it's lookin' at me?",
+        MASK_DOLLREPAIREDHAT = "Why do I feel like it's lookin' at me?",
+        MASK_BLACKSMITHHAT = "Why do I feel like it's lookin' at me?",
+        MASK_MIRRORHAT = "Why do I feel like it's lookin' at me?",
+        MASK_QUEENHAT = "Why do I feel like it's lookin' at me?",
+        MASK_KINGHAT = "Why do I feel like it's lookin' at me?",
+        MASK_TREEHAT = "Why do I feel like it's lookin' at me?",
+        MASK_FOOLHAT = "Why do I feel like it's lookin' at me?",
+
+        COSTUME_DOLL_BODY = "Looks like a doll's costume.",
+        COSTUME_QUEEN_BODY = "Looks like a Queen's costume.",
+        COSTUME_KING_BODY = "Looks like a King's costume.",
+        COSTUME_BLACKSMITH_BODY = "Hey, that looks like it'll fit me!",
+        COSTUME_MIRROR_BODY = "Looks like some kind of costume.",
+        COSTUME_TREE_BODY = "Looks like a tree costume.",
+        COSTUME_FOOL_BODY = "Looks like a jester costume.",
+
+        STAGEUSHER =
+        {
+            STANDING = "Shoo!",
+            SITTING = "Why's this table givin' me the creeps?",
+        },
+        SEWING_MANNEQUIN =
+        {
+            GENERIC = "Lookin' good!",
+            BURNT = "Yeesh, looks like this one's toast.",
+        },
+
+		-- Waxwell
+		MAGICIAN_CHEST = "I dunno if I want to stick my hand in there.",
+		TOPHAT_MAGICIAN = "Max is a little too good at keepin' things under his hat.",
+
+        -- Year of the Rabbit
+        YOTR_FIGHTRING_KIT = "Better get buildin'!",
+        YOTR_FIGHTRING_BELL =
+        {
+            GENERIC = "Heh. Being an older sister trained me well for this.",
+            PLAYING = "Looks like a good way to let off some steam.",
+        },
+
+        YOTR_DECOR_1 = {
+            GENERAL = "A little rustic for my tastes, but functional enough.",
+            OUT = "It ain't much to look at without its light.",
+        },
+        YOTR_DECOR_2 = {
+            GENERAL = "A little rustic for my tastes, but functional enough.",
+            OUT = "It ain't much to look at without its light.",
+        },
+
+        HAREBALL = "Yuck!",
+        YOTR_DECOR_1_ITEM = "Gotta find a good place for it.",
+        YOTR_DECOR_2_ITEM = "Gotta find a good place for it.",             
     },
 
     DESCRIBE_GENERIC = "Incredible! I have no idea what that is.",

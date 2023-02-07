@@ -64,6 +64,8 @@ return{
 			KITCOON_HIDEANDSEEK_NOT_ENOUGH_HIDERS = "NOT ENOUGH FLESHLINGS WILLING TO HIDE FROM MY POWER",
 			KITCOON_HIDEANDSEEK_NOT_ENOUGH_HIDING_SPOTS = "NOT ENOUGH LOCATIONS TO HIDE FROM MY POWER",
 			KITCOON_HIDEANDSEEK_ONE_GAME_PER_DAY = "THEY NEED TO RECHARGE",
+            MANNEQUIN_EQUIPSWAPFAILED = "THE CLOTHSACK CANNOT BE TRUSTED WITH SOMETHING LIKE THIS",
+            PILLOWFIGHT_NO_HANDPILLOW = "ERROR: PILLOW REQUIRED FOR COMBAT",
 		},
 		OPEN_CRAFTING =
 		{
@@ -98,8 +100,19 @@ return{
         --wickerbottom specific action
 --fallback to speech_wilson.lua         READ =
 --fallback to speech_wilson.lua         {
---fallback to speech_wilson.lua             GENERIC = "only_used_by_wickerbottom",
---fallback to speech_wilson.lua             NOBIRDS = "only_used_by_wickerbottom",
+--fallback to speech_wilson.lua             GENERIC = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOWATERNEARBY = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             TOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             WAYTOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOFIRES =       "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOSILVICULTURE = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOHORTICULTURE = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOTENTACLEGROUND = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOSLEEPTARGETS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             TOOMANYBEES = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOMOONINCAVES = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             ALREADYFULLMOON = "only_used_by_waxwell_and_wicker",
 --fallback to speech_wilson.lua         },
 
         GIVE =
@@ -372,6 +385,16 @@ return{
         {
             DOER_ISNT_MODULE_OWNER = "not_used_by_wx78",
         },
+
+		CAST_SPELLBOOK =
+		{
+--fallback to speech_wilson.lua 			NO_TOPHAT = "only_used_by_waxwell",
+		},
+
+		CASTAOE =
+		{
+--fallback to speech_wilson.lua 			NO_MAX_SANITY = "only_used_by_waxwell",
+		},
     },
 
 	ANNOUNCE_CANNOT_BUILD =
@@ -392,6 +415,14 @@ return{
     --waxwell and wickerbottom specific strings
 --fallback to speech_wilson.lua     ANNOUNCE_TOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
 --fallback to speech_wilson.lua     ANNOUNCE_WAYTOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua     ANNOUNCE_NOWATERNEARBY = "only_used_by_waxwell_and_wicker",
+
+	--waxwell specific
+--fallback to speech_wilson.lua 	ANNOUNCE_SHADOWLEVEL_ITEM = "only_used_by_waxwell",
+--fallback to speech_wilson.lua 	ANNOUNCE_EQUIP_SHADOWLEVEL_T1 = "only_used_by_waxwell",
+--fallback to speech_wilson.lua 	ANNOUNCE_EQUIP_SHADOWLEVEL_T2 = "only_used_by_waxwell",
+--fallback to speech_wilson.lua 	ANNOUNCE_EQUIP_SHADOWLEVEL_T3 = "only_used_by_waxwell",
+--fallback to speech_wilson.lua 	ANNOUNCE_EQUIP_SHADOWLEVEL_T4 = "only_used_by_waxwell",
 
     --wolfgang specific
 --fallback to speech_wilson.lua     ANNOUNCE_NORMALTOMIGHTY = "only_used_by_wolfang",
@@ -455,6 +486,8 @@ return{
 --fallback to speech_wilson.lua         SAME_OLD_5 = "only_used_by_warly",
 --fallback to speech_wilson.lua 		TASTY = "only_used_by_warly",
     },
+
+	ANNOUNCE_FOODMEMORY = "only_used_by_warly",
 
     ANNOUNCE_ENCUMBERED =
     {
@@ -575,6 +608,7 @@ return{
     ANNOUNCE_REVIVED_FROM_CORPSE = "BACK ONLINE",
 
     ANNOUNCE_FLARE_SEEN = "MINION PING RECEIVED",
+    ANNOUNCE_MEGA_FLARE_SEEN = "THEY GAVE AWAY THEIR LOCATION. THIS SHOULD BE FUNNY",
     ANNOUNCE_OCEAN_SILHOUETTE_INCOMING = "A GIANT ORGANIC APPROACHES",
 
     --willow specific
@@ -704,6 +738,19 @@ return{
 --fallback to speech_wilson.lua         BOOK_GARDENING = "only_used_by_wurt",
 --fallback to speech_wilson.lua 		BOOK_SILVICULTURE = "only_used_by_wurt",
 --fallback to speech_wilson.lua 		BOOK_HORTICULTURE = "only_used_by_wurt",
+
+--fallback to speech_wilson.lua         BOOK_FISH = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_FIRE = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_WEB = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_TEMPERATURE = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_LIGHT = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_RAIN = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_MOON = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_BEES = "only_used_by_wurt",
+
+--fallback to speech_wilson.lua         BOOK_HORTICULTURE_UPGRADED = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_RESEARCH_STATION = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_LIGHT_UPGRADED = "only_used_by_wurt",
     },
     ANNOUNCE_WEAK_RAT = "THIS ORGANIC IS NEARLY EXPIRED",
 
@@ -829,6 +876,12 @@ return{
 
     ANNOUNCE_PIRATES_ARRIVE = "MUSICAL REVELRY DETECTED. ANNOYANCE INCOMING",
 
+--fallback to speech_wilson.lua     ANNOUNCE_BOOK_MOON_DAYTIME = "only_used_by_waxwell_and_wicker",
+
+    ANNOUNCE_OFF_SCRIPT = "INCORRECT!",
+
+    ANNOUNCE_COZY_SLEEP = "ENERGY RESTORED, PROCESSOR SPEED: OPTIMAL",
+
 	BATTLECRY =
 	{
 		GENERIC = "I WILL DESTROY YOU",
@@ -900,6 +953,11 @@ return{
         BERNIE_ACTIVE = "HANG IN THERE, BEAR!",
         BERNIE_BIG = "IT FIGHTS FOR MY MINION, AND THEREFORE FOR ME",
 
+		BOOKSTATION =
+		{
+			GENERIC = "AN ARCHAIC DATA REPOSITORY",
+			BURNT = "I TOLD YOU ALL IT WAS A STUPID WAY TO STORE DATA",
+		},
         BOOK_BIRDS = "UPLOADING AVIAN FACTOIDS TO DATABASE...",
         BOOK_TENTACLES = "IT SUMMONS THE FLESH WOBBLERS",
         BOOK_GARDENING = "A USELESS TOME ON PLANT CULTIVATION",
@@ -907,6 +965,21 @@ return{
 		BOOK_HORTICULTURE = "A USELESS TOME ON PLANT CULTIVATION",
         BOOK_SLEEP = "POWERING DOown...",
         BOOK_BRIMSTONE = "A BOOK OF DESTRUCTION. EXCELLENT",
+
+        BOOK_FISH = "SUMMON FORTH THE SWIMMING MEAT",
+        BOOK_FIRE = "IT ELIMINATES FIREWALLS",
+        BOOK_WEB = "I DO NOT FEAR SPIDERS, THE SPIDERS SHOULD FEAR ME",
+        BOOK_TEMPERATURE = "THERMAL REGULATION DIRECTIVES",
+        BOOK_LIGHT = "LIGHT SOURCE: UNKNOWN",
+        BOOK_RAIN = "HOW HATEFUL",
+        BOOK_MOON = "GIVE ME YOUR SECRETS, MOON",
+        BOOK_BEES = "TO SUBJUGATE THE BEES MORE COMPLETELY",
+        
+        BOOK_HORTICULTURE_UPGRADED = "PLANTS ARE BEST WHEN THEY'RE DEAD",
+        BOOK_RESEARCH_STATION = "THE FLESHLINGS HAVE TO RECORD ALL THEIR DATA ON PAPER. PATHETIC",
+        BOOK_LIGHT_UPGRADED = "AMPLIFIED LIGHT SOURCE",
+
+        FIREPEN = "IT COULD BE DANGEROUS IN THE WRONG HANDS. I WILL TAKE IT",
 
         PLAYER =
         {
@@ -1399,7 +1472,19 @@ return{
 
         TURF_SHELLBEACH = "GROUND PARTS",
 
+		TURF_RUINSBRICK = "GROUND PARTS",
+		TURF_RUINSBRICK_GLOW = "GROUND PARTS",
+		TURF_RUINSTILES = "GROUND PARTS",
+		TURF_RUINSTILES_GLOW = "GROUND PARTS",
+		TURF_RUINSTRIM = "GROUND PARTS",
+		TURF_RUINSTRIM_GLOW = "GROUND PARTS",
+
         TURF_MONKEY_GROUND = "GROUND PARTS",
+
+        TURF_CARPETFLOOR2 = "CARPET GROUND",
+        TURF_MOSAIC_GREY = "GROUND PARTS",
+        TURF_MOSAIC_RED = "GROUND PARTS",
+        TURF_MOSAIC_BLUE = "GROUND PARTS",
 
 		POWCAKE = "IT NEVER GOES BAD",
         CAVE_ENTRANCE = "DESCENT BLOCKED. HOW TO PROCEED?",
@@ -1583,6 +1668,10 @@ return{
             RARE = "DRIPPING WITH DELICIOUS KNOWLEDGE",
         },
         SKETCH = "USELESS PAPER FOR MAKING USELESS SCULPTURES",
+		COOKINGRECIPECARD = 
+		{
+			GENERIC = "ERROR: RECIPE UNREADABLE",
+		},
 		BLUE_CAP = "MEDICINAL FUNGUS",
 		BLUE_CAP_COOKED = "MODIFIED FUNGUS",
 		BLUE_MUSHROOM =
@@ -1607,6 +1696,7 @@ return{
 		BUZZARD = "GARBAGE COLLECTOR LIFEFORM",
 
 		SHADOWDIGGER = "HE'S GOT THEM DOING HIS BIDDING. I RESPECT THAT",
+        SHADOWDANCER = "DANCE UNDERLING, DANCE FOR OUR AMUSEMENT!",
 
 		CACTUS =
 		{
@@ -1699,8 +1789,9 @@ return{
         CHESSPIECE_BEEFALO = "AN IMPROVEMENT ON THE FLESHY ORIGINAL",
 		CHESSPIECE_KITCOON = "THE URGE TO TOPPLE IT OVERWHELMS MY SYSTEMS",
 		CHESSPIECE_CATCOON = "A CLEAR IMPROVEMENT OVER ITS FLESHY COUNTERPART",
+        CHESSPIECE_MANRABBIT = "THEY'RE SO MUCH BETTER WHEN THEY'RE NOT MOVING",
         CHESSPIECE_GUARDIANPHASE3 = "WE WOULD HAVE BEEN UNSTOPPABLE. OH WELL",
-        CHESSPIECE_EYEOFTERROR = "ORGANIC REDUCED TO MINERAL - TYPICAL.",
+        CHESSPIECE_EYEOFTERROR = "ORGANIC REDUCED TO MINERAL - TYPICAL",
         CHESSPIECE_TWINSOFTERROR = "SIGH. I MISS THEM",
 
         CHESSJUNK1 = "EX-AUTOMATON",
@@ -1768,6 +1859,7 @@ return{
 		},
         GOGGLESHAT = "IT SERVES NO ASCERTAINABLE PURPOSE",
         DESERTHAT = "KEEPS OPTICAL HOLES DUST-FREE",
+        ANTLIONHAT = "THE GROUND WILL TREMBLE BEFORE ME",
 --fallback to speech_wilson.lua 		DEVTOOL = "It smells of bacon!",
 --fallback to speech_wilson.lua 		DEVTOOL_NODEV = "I'm not strong enough to wield it.",
 		DIRTPILE = "UNKNOWN PILE FORMAT",
@@ -2793,6 +2885,34 @@ return{
         },
         BEEFALO_GROOMER_ITEM = "BEGIN CONSTRUCTION",
 
+        YOTR_RABBITSHRINE =
+        {
+            GENERIC = "IT IS OPERATIONAL",
+            EMPTY = "REQUIRES VEGETABLE OFFERING",
+            BURNT = "DELETED",
+        },
+
+        NIGHTCAPHAT = "IT KEEPS THE PROCESSOR WARM",
+
+        YOTR_FOOD1 = "NO TRACE OF RABBIT DETECTED. DISAPPOINTING",
+        YOTR_FOOD2 = "THE MOON IS DELICIOUS",
+        YOTR_FOOD3 = "THE MOON JELLY IS MINE",
+        YOTR_FOOD4 = "SWEET EMPTY CALORIES",
+
+        YOTR_TOKEN = "VIOLENCE INITIATOR",
+
+        COZY_BUNNYMAN = "WHO LET YOU OUT",
+
+        HANDPILLOW_BEEFALOWOOL = "EXTRUDED BEEFALO DISGUSTINGNESS... IN A BAG",
+        HANDPILLOW_KELP = "WHO IS RESPONSIBLE FOR THIS. IT WAS THE GREEN ONE, WASN'T IT",
+        HANDPILLOW_PETALS = "FLOWERS ARE AN INEFFECTIVE CHOICE FOR A WEAPON",
+        HANDPILLOW_STEELWOOL = "THE ADDITION OF METAL HAS IMPROVED IT SUBSTANTIALLY",
+
+        BODYPILLOW_BEEFALOWOOL = "EXTRUDED BEEFALO DISGUSTINGNESS... IN A BAG",
+        BODYPILLOW_KELP = "WHO IS RESPONSIBLE FOR THIS. IT WAS THE GREEN ONE, WASN'T IT",
+        BODYPILLOW_PETALS = "FLOWERS ARE AN INEFFECTIVE CHOICE FOR ARMOR",
+        BODYPILLOW_STEELWOOL = "THE ADDITION OF METAL HAS IMPROVED IT SUBSTANTIALLY",
+
 		BISHOP_CHARGE_HIT = "DAMAGE!",
 		TRUNKVEST_SUMMER = "TEMPERATURE CONTROL HOUSING",
 		TRUNKVEST_WINTER = "IMPROVED TEMPERATURE CONTROL HOUSING",
@@ -2850,7 +2970,11 @@ return{
 		WATERMELON = "SPHERE OF JUICE",
 		WATERMELON_COOKED = "HOT JUICE",
 		WATERMELONHAT = "HAT SEEMS INCOMPATIBLE WITH MY FUNCTION",
-		WAXWELLJOURNAL = "GOOSEBUMPS ACTIVATED",
+		WAXWELLJOURNAL =
+		{
+			GENERIC = "GOOSEBUMPS ACTIVATED",
+--fallback to speech_wilson.lua 			NEEDSFUEL = "only_used_by_waxwell",
+		},
 		WETGOOP = "EDIBLE FILTH",
         WHIP = "I WILL COMMAND THE MEATLINGS",
 		WINTERHAT = "THIS WILL KEEP MY PROCESSOR FROM FREEZING",
@@ -3379,6 +3503,7 @@ return{
         ICEBERG_MELTED = "THE ICE HAS MELTED", --unimplemented
 
         MINIFLARE = "MAKESHIFT HOMING SIGNAL",
+        MEGAFLARE = "MINION! TAKE THIS FAR AWAY AND SET IT OFF",
 
 		MOON_FISSURE =
 		{
@@ -4470,6 +4595,13 @@ return{
 
         SCANDATA = "DISGUSTING RAW BIO DATA. BEGIN THE REFINING PROCESS",
 
+		-- QOL 2022
+		JUSTEGGS = "THIS IS ACCEPTABLE",
+		VEGGIEOMLET = "THE SKILLET IS NOT ACTUALLY PART OF THE BREAKFAST",
+		TALLEGGS = "BIRD-BASED NUTRIENTS",
+		BEEFALOFEED = "COME EAT YOUR STICKS",
+		BEEFALOTREAT = "I WANT A TREAT",
+
         -- Pirates
         BOAT_ROTATOR = "BOAT ROTATION ENABLED",
         BOAT_ROTATOR_KIT = "FOR BUILDING A STUPID RUDDER",
@@ -4544,8 +4676,73 @@ return{
         PIRATE_STASH = "THE TREASURE IS MINE",
         STASH_MAP = "FOOLS. THEY WROTE DOWN THE COORDINATES INSTEAD OF STORING THEM IN THEIR MEMORY BANKS",
 
-
         BANANAJUICE = "THE BANANAS HAVE BEEN SUFFICIENTLY PULVERIZED FOR CONSUMPTION",
+
+        FENCE_ROTATOR = "IT CAN BE USED FOR BOTH ORDER AND DESTRUCTION. IT'S PERFECT",
+
+        CHARLIE_STAGE_POST = "THEATER PROTOCOL STATES I MUST BREAK SOMEONE'S LEG",
+        CHARLIE_LECTURN = "PARTS REQUIRED",
+
+        CHARLIE_HECKLER = "I WILL NOT TAKE CRITICISM FROM ORGANICS",
+
+        PLAYBILL_THE_DOLL = "RUNSCRIPT \"THE ENCHANTED DOLL\"",
+        STATUEHARP_HEDGESPAWNER = "UGH THERE ARE ORGANISMS ALL OVER IT",
+        HEDGEHOUND = "ORGANIC TRICKERY!",
+        HEDGEHOUND_BUSH = "THERE IS SOMETHING INSIDE",
+
+        MASK_DOLLHAT = "IT HIDES DISGUSTING FLESH FACES. IT'S PERFECT",
+        MASK_DOLLBROKENHAT = "IT HIDES DISGUSTING FLESH FACES. IT'S PERFECT",
+        MASK_DOLLREPAIREDHAT = "IT HIDES DISGUSTING FLESH FACES. IT'S PERFECT",
+        MASK_BLACKSMITHHAT = "IT HIDES DISGUSTING FLESH FACES. IT'S PERFECT",
+        MASK_MIRRORHAT = "IT HIDES DISGUSTING FLESH FACES. IT'S PERFECT",
+        MASK_QUEENHAT = "IT HIDES DISGUSTING FLESH FACES. IT'S PERFECT",
+        MASK_KINGHAT = "IT HIDES DISGUSTING FLESH FACES. IT'S PERFECT",
+        MASK_TREEHAT = "IT HIDES DISGUSTING FLESH FACES. IT'S PERFECT",
+        MASK_FOOLHAT = "IT HIDES DISGUSTING FLESH FACES. IT'S PERFECT",
+
+        COSTUME_DOLL_BODY = "INSTALLATION REQUIRED FOR STAGE PERFORMANCE",
+        COSTUME_QUEEN_BODY = "INSTALLATION REQUIRED FOR STAGE PERFORMANCE",
+        COSTUME_KING_BODY = "INSTALLATION REQUIRED FOR STAGE PERFORMANCE",
+        COSTUME_BLACKSMITH_BODY = "INSTALLATION REQUIRED FOR STAGE PERFORMANCE",
+        COSTUME_MIRROR_BODY = "INSTALLATION REQUIRED FOR STAGE PERFORMANCE",
+        COSTUME_TREE_BODY = "INSTALLATION REQUIRED FOR STAGE PERFORMANCE",
+        COSTUME_FOOL_BODY = "INSTALLATION REQUIRED FOR STAGE PERFORMANCE",
+
+        STAGEUSHER =
+        {
+            STANDING = "FIVE DIGITS OF TERROR",
+            SITTING = "IT'S HORRIBLE, I HATE IT",
+        },
+        SEWING_MANNEQUIN =
+        {
+            GENERIC = "IT IS SOFT AND PATHETIC",
+            BURNT = "IT WILL NOT BE MISSED",
+        },
+
+		-- Waxwell
+		MAGICIAN_CHEST = "IF ONLY DATA COULD TRAVEL SO EASILY. THE CHAOS THAT COULD BE WROUGHT",
+		TOPHAT_MAGICIAN = "EXCELLENT. IT LOOKS MUCH MORE EVIL NOW",
+
+        -- Year of the Rabbit
+        YOTR_FIGHTRING_KIT = "ASSEMBLY REQUIRED",
+        YOTR_FIGHTRING_BELL =
+        {
+            GENERIC = "FIGHT FOR MY ENTERTAINMENT",
+            PLAYING = "LET THEM FIGHT",
+        },
+
+        YOTR_DECOR_1 = {
+            GENERAL = "RABBIT-SHAPED LIGHT SOURCE",
+            OUT = "LIGHT DEACTIVATED",
+        },
+        YOTR_DECOR_2 = {
+            GENERAL = "RABBIT-SHAPED LIGHT SOURCE",
+            OUT = "LIGHT DEACTIVATED",
+        },
+
+        HAREBALL = "IT IS TECHNICALLY EDIBLE",
+        YOTR_DECOR_1_ITEM = "I WILL FIND A SUITABLE LOCATION FOR IT",
+        YOTR_DECOR_2_ITEM = "I WILL FIND A SUITABLE LOCATION FOR IT",             
     },
 
     DESCRIBE_GENERIC = "ERROR: UNKNOWN",

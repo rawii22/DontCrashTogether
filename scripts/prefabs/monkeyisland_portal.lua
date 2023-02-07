@@ -84,7 +84,7 @@ local function followfx_fn()
 
     inst.AnimState:SetFinalOffset(1)
     inst.AnimState:SetScale(0.65, 0.65)
-    inst.AnimState:SetMultColour(0.4, 0.4, 0.4, 0.4)
+    inst.AnimState:SetMultColour(1, 1, 1, 0.4)
     inst.AnimState:SetBloomEffectHandle("shaders/anim.ksh")
     inst.AnimState:SetLightOverride(LOOT_LIGHT_OVERRIDE_AMOUNT)
 
@@ -302,13 +302,17 @@ end
 
 local function on_portal_save(inst, data)
     if inst._loot ~= nil and #inst._loot > 0 then
-        data.loot = {}
+		local loot = {}
         for _, loot_item in ipairs(inst._loot) do
-            table.insert(data.loot, loot_item.GUID)
+			if loot_item.persists and loot_item:IsValid() then
+				table.insert(loot, loot_item.GUID)
+			end
         end
+		if #loot > 0 then
+			data.loot = loot
+			return loot
+		end
     end
-
-    return data.loot
 end
 
 local function on_portal_loadpostpass(inst, ents, data)
@@ -327,12 +331,14 @@ local function on_portal_sleep(inst)
     if TUNING.MONKEYISLAND_PORTAL_ENABLED then
         inst.components.timer:PauseTimer(PORTALLOOT_TIMER_NAME)
     end
+    inst.SoundEmitter:KillSound("loop")
 end
 
 local function on_portal_wake(inst)
     if TUNING.MONKEYISLAND_PORTAL_ENABLED then
         inst.components.timer:ResumeTimer(PORTALLOOT_TIMER_NAME)
     end
+    inst.SoundEmitter:PlaySound("monkeyisland/portal/idle_lp", "loop")
 end
 
 local function on_timer_done(inst, data)
@@ -418,8 +424,6 @@ local function fn()
     end
 
     inst:WatchWorldState("cycles", on_cycles_changed)
-
-    inst.SoundEmitter:PlaySound("monkeyisland/portal/idle_lp","loop")
 
     ----------------------------------------------------------
     inst.OnSave = on_portal_save

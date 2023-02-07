@@ -19,11 +19,12 @@ function SpawnSecondInstance()
     end
 end
 
+
 --V2C: This is for server side processing of remote slash command requests
 function Networking_SlashCmd(guid, userid, cmd)
-    local entity = Ents[guid] or TheNet:GetClientTableForUser(userid)
-    if entity ~= nil then
-        UserCommands.RunTextUserCommand(cmd, entity, true)
+    local caller = Ents[guid] or TheNet:GetClientTableForUser(userid) -- NOTES(JBK): Either an actual entity or a table with some data.
+    if caller ~= nil then
+        UserCommands.RunTextUserCommand(cmd, caller, true)
     end
 end
 
@@ -197,6 +198,7 @@ function ValidateSpawnPrefabRequest(user_id, prefab_name, skin_base, clothing_bo
     if table.contains(SEAMLESSSWAP_CHARACTERLIST, prefab_name) and not allow_seamlessswap_characters then
         -- NOTES(JBK): This is not assertion level of importance but it is administrative note worthy level to know someone tried breaking things.
         in_valid_char_list = false
+        in_mod_char_list = false
         print(string.format("[WERR] Player with ID %s tried spawning as %s without having permissions to do so!", user_id or "?", prefab_name or "?"))
     end
 
@@ -801,8 +803,7 @@ function UpdateServerWorldGenDataString()
     end
 
     --V2C: TODO: Likely to exceed data size limit with custom multilevel worlds
-
-    TheNet:SetWorldGenData(DataDumper(clusteroptions, nil, false))
+    TheNet:SetWorldGenData(DataDumper(ZipAndEncodeSaveData(clusteroptions), nil, true))
 end
 
 function GetDefaultServerData()
@@ -812,9 +813,9 @@ function GetDefaultServerData()
     --     return the desired value.
     return
     {
-        intention = TheNet:GetDefaultServerIntention(),
         pvp = TheNet:GetDefaultPvpSetting(),
         game_mode = TheNet:GetDefaultGameMode(),
+		playstyle = TheNet:GetServerPlaystyle(),
         online_mode = TheNet:IsOnlineMode(),
         encode_user_path = TheNet:GetDefaultEncodeUserPath(),
         use_legacy_session_path = nil,
@@ -851,7 +852,7 @@ function StartDedicatedServer()
         local serverdata = GetDefaultServerData()
 
         local function onsaved()
-            -- Collect the tags we want and set the tags string
+			TheNet:SetServerPlaystyle(ShardGameIndex:GetServerData().playstyle or PLAYSTYLE_DEFAULT)
             UpdateServerTagsString()
             StartNextInstance({ reset_action = RESET_ACTION.LOAD_SLOT, save_slot = slot })
         end

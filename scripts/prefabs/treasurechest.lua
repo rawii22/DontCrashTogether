@@ -5,7 +5,12 @@ local SUNKEN_PHYSICS_RADIUS = .45
 local function onopen(inst)
     if not inst:HasTag("burnt") then
         inst.AnimState:PlayAnimation("open")
-        inst.SoundEmitter:PlaySound("dontstarve/wilson/chest_open")
+
+        if inst.skin_open_sound then
+            inst.SoundEmitter:PlaySound(inst.skin_open_sound)
+        else
+            inst.SoundEmitter:PlaySound("dontstarve/wilson/chest_open")
+        end
     end
 end
 
@@ -13,7 +18,12 @@ local function onclose(inst)
     if not inst:HasTag("burnt") then
         inst.AnimState:PlayAnimation("close")
         inst.AnimState:PushAnimation("closed", false)
-        inst.SoundEmitter:PlaySound("dontstarve/wilson/chest_close")
+
+        if inst.skin_close_sound then
+            inst.SoundEmitter:PlaySound(inst.skin_close_sound)
+        else
+            inst.SoundEmitter:PlaySound("dontstarve/wilson/chest_close")
+        end
     end
 end
 
@@ -33,19 +43,23 @@ end
 
 local function onhit(inst, worker)
     if not inst:HasTag("burnt") then
-        inst.AnimState:PlayAnimation("hit")
-        inst.AnimState:PushAnimation("closed", false)
         if inst.components.container ~= nil then
             inst.components.container:DropEverything()
             inst.components.container:Close()
         end
+        inst.AnimState:PlayAnimation("hit")
+        inst.AnimState:PushAnimation("closed", false)
     end
 end
 
 local function onbuilt(inst)
     inst.AnimState:PlayAnimation("place")
     inst.AnimState:PushAnimation("closed", false)
-    inst.SoundEmitter:PlaySound("dontstarve/common/chest_craft")
+    if inst.skin_place_sound then
+        inst.SoundEmitter:PlaySound(inst.skin_place_sound)
+    else
+        inst.SoundEmitter:PlaySound("dontstarve/common/chest_craft")
+    end
 end
 
 local function onsave(inst, data)

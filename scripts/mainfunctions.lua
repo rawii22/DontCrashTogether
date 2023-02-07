@@ -3,6 +3,9 @@ local WorldGenScreen = require "screens/worldgenscreen"
 local HealthWarningPopup = require "screens/healthwarningpopup"
 local Stats = require("stats")
 
+local DebugNodes = CAN_USE_DBUI and require("dbui_no_package/debug_nodes") or nil
+local DebugConsole = CAN_USE_DBUI and require("dbui_no_package/debug_console") or nil
+
 require "scheduler"
 --require "skinsutils"
 
@@ -355,6 +358,10 @@ function SpawnPrefabFromSim(name)
                 prefabpostinitany(inst)
             end
 
+            if TheWorld then
+                TheWorld:PushEvent("entity_spawned", inst)
+            end
+
             return inst.entity:GetGUID()
         else
             print( "Failed to spawn", name )
@@ -394,6 +401,20 @@ function ReplacePrefab(original_inst, name, skin, skin_id, creator)
     return replacement_inst
 end
 
+local function ResolveSaveRecordPosition(data)
+	if data.puid ~= nil then
+		local walkableplatformmanager = TheWorld.components.walkableplatformmanager
+		if walkableplatformmanager ~= nil then
+			local platform = walkableplatformmanager:GetPlatformWithUID(data.puid)
+			if platform ~= nil then
+				local x, y, z = platform.entity:LocalToWorldSpace(data.rx or 0, data.ry or 0, data.rz or 0)
+				return x, y, z, platform
+			end
+		end
+	end
+	return data.x or 0, data.y or 0, data.z or 0
+end
+
 function SpawnSaveRecord(saved, newents)
     --print(string.format("~~~~~~~~~~~~~~~~~~~~~SpawnSaveRecord [%s, %s, %s]", tostring(saved.id), tostring(saved.prefab), tostring(saved.data)))
     local inst = SpawnPrefab(saved.prefab, saved.skinname, saved.skin_id)
@@ -403,21 +424,25 @@ function SpawnSaveRecord(saved, newents)
 			inst.alt_skin_ids = saved.alt_skin_ids
 		end
 
-        inst.Transform:SetPosition(saved.x or 0, saved.y or 0, saved.z or 0)
+		local x, y, z, platform = ResolveSaveRecordPosition(saved)
+		inst.Transform:SetPosition(x, y, z)
         if not inst.entity:IsValid() then
             --print(string.format("SpawnSaveRecord [%s, %s] FAILED - entity invalid", tostring(saved.id), saved.prefab))
             return nil
-        end
+		elseif saved.is_snapshot_save_record then
+			--V2C: We won't properly attach to platforms when restoring snapshot save records.
+			--     ie. inst:GetCurrentPlatform() will likely return nil
+			--     Workaround for passing our platform over to the GetSaveRecord()
+			inst._snapshot_platform = platform
+		end
 
         if newents then
-
             --this is kind of weird, but we can't use non-saved ids because they might collide
             if saved.id  then
                 newents[saved.id] = {entity=inst, data=saved.data}
             else
                 newents[inst] = {entity=inst, data=saved.data}
             end
-
         end
 
         -- Attach scenario. This is a special component that's added based on save data, not prefab setup.
@@ -451,6 +476,7 @@ function CreateEntity(name)
 end
 
 local debug_entity = nil
+local debug_table = nil
 
 function OnRemoveEntity(entityguid)
 
@@ -489,7 +515,8 @@ function RemoveEntity(guid)
     local inst = Ents[guid]
     if inst then
         --certain things(like seamless player swapping) need to delay the despawning on a local client until they have ran their own code.
-        if (inst.delayclientdespawn and not TheNet:IsDedicated()) then
+        if inst.delayclientdespawn then
+            inst.delayclientdespawn_attempted = true
             return
         end
         inst:Remove()
@@ -610,6 +637,14 @@ function SetDebugEntity(inst)
     else
         debug_entity = nil
     end
+end
+
+function GetDebugTable()
+    return debug_table
+end
+
+function SetDebugTable(tbl)
+    debug_table = tbl
 end
 
 function OnEntitySleep(guid)
@@ -768,6 +803,13 @@ function ReplicateEntity(guid)
     end
 end
 
+function DisableLoadingProtection(guid)
+    local player = Ents[guid]
+    if player then
+        player:DisableLoadingProtection()
+    end
+end
+
 ------------------------------
 
 function PlayNIS(nisname, lines)
@@ -812,6 +854,13 @@ function SetSimPause(val)
 end
 
 function SetServerPaused(pause)
+    -- Ignore if an imgui window is open & has focus
+    if CAN_USE_DBUI then
+		if TheFrontEnd:IsImGuiWindowFocused() then
+	        return
+		end
+    end
+
     if pause == nil then pause = not TheNet:IsServerPaused(true) end
     TheNet:SetServerPaused(pause)
 end
@@ -840,7 +889,7 @@ end
 
 function DoAutopause()
     TheNet:SetAutopaused(
-        ((autopausecount > 0 and Profile:GetAutopauseEnabled()) 
+        ((autopausecount > 0 and Profile:GetAutopauseEnabled())
          or (craftingautopause and Profile:GetCraftingAutopauseEnabled())
          or (consoleautopausecount > 0 and Profile:GetConsoleAutopauseEnabled())
 		) and not TheFrontEnd:IsControlsDisabled()
@@ -1123,7 +1172,7 @@ function SaveGame(isshutdown, cb)
     local data = {}
     for key,value in pairs(save) do
         data[key] = DataDumper(value, nil, not PRETTY_PRINT)
-		
+
 		for i, corrupt_pattern in ipairs(patterns) do
 			local found = string.find(data[key], corrupt_pattern, 1, true)
 			if found ~= nil then
@@ -1134,7 +1183,7 @@ function SaveGame(isshutdown, cb)
 		end
     end
 
-	-- special handling for the entities table; contents are dumped per entity rather than 
+	-- special handling for the entities table; contents are dumped per entity rather than
 	-- dumping the whole entities table at once as is done for the other parts of the save data
 	data.ents = {}
 	for key, value in pairs(savedata_entities) do
@@ -1563,6 +1612,13 @@ function DisplayError(error)
                                                                                                 TheSim:ResetError()
                                                                                                 c_reset()
                                                                                             end})
+                if not Profile:GetThreadedRenderEnabled() then
+                    table.insert(buttons, 1, {text=STRINGS.UI.MAINSCREEN.SCRIPTERROR_DEBUG, cb = function()
+                        if not TheFrontEnd:FindOpenDebugPanel(DebugNodes.DebugConsole) then
+                            DebugNodes.ShowDebugPanel(DebugNodes.DebugConsole, false)
+                        end
+                    end})
+                end
             end
 
             if known_error_key == nil or ERRORS[known_error_key] == nil then
@@ -1848,6 +1904,14 @@ function TintBackground( bg )
     --end
 end
 
+--NOTES(JBK): Keeping this for PC Steam/RAIL only for now.
+local platforms_supporting_audio_focus = {
+    ["WIN32_STEAM"] = true,
+    ["WIN32_RAIL"] = true,
+    ["LINUX_STEAM"] = true,
+    ["OSX_STEAM"] = true,
+}
+
 -- Global for saving game on Android focus lost event
 function OnFocusLost()
     --check that we are in gameplay, not main menu
@@ -1855,14 +1919,18 @@ function OnFocusLost()
         SetPause(true)
         ShardGameIndex:SaveCurrent()
     end
+    if platforms_supporting_audio_focus[PLATFORM] and Profile:GetMuteOnFocusLost() then
+        TheMixer:SetLevel("master", 0)
+    end
 end
 
 function OnFocusGained()
     --check that we are in gameplay, not main menu
-    if inGamePlay then
-        if PLATFORM == "ANDROID" then
-            SetPause(false)
-        end
+    if PLATFORM == "ANDROID" and inGamePlay then
+        SetPause(false)
+    end
+    if platforms_supporting_audio_focus[PLATFORM] and Profile:GetMuteOnFocusLost() then
+        TheMixer:SetLevel("master", 1)
     end
 end
 
@@ -1873,7 +1941,7 @@ local function OnUserPickedCharacter(char, skin_base, clothing_body, clothing_ha
         local starting_skins = {}
         --get the starting inventory skins and send those along to the spawn request
         local inv_item_list = (TUNING.GAMEMODE_STARTING_ITEMS[TheNet:GetServerGameMode()] or TUNING.GAMEMODE_STARTING_ITEMS.DEFAULT)[string.upper(char)] or {}
-        
+
         local inv_items, item_count = {}, {}
         for _, v in ipairs(inv_item_list) do
             if item_count[v] == nil then
@@ -1940,9 +2008,14 @@ function ResumeExistingUserSession(data, guid)
         local player = Ents[guid]
         if player ~= nil then
             player:SetPersistData( data.data or {} )
+            player:EnableLoadingProtection()
 
             -- Spawn the player to last known location
-            TheWorld.components.playerspawner:SpawnAtLocation(TheWorld, player, data.x or 0, data.y or 0, data.z or 0, true, data.puid, data.rx or 0, data.ry or 0, data.rz or 0)
+			local x, y, z, platform = ResolveSaveRecordPosition(data)
+			TheWorld.components.playerspawner:SpawnAtLocation(TheWorld, player, x, y, z, true)
+			if platform ~= nil then
+				player.components.walkableplatformplayer:TestForPlatform()
+			end
 
             return player.player_classified ~= nil and player.player_classified.entity or nil
         end
@@ -1960,19 +2033,17 @@ function RestoreSnapshotUserSession(sessionid, userid)
                     local player = SpawnPrefab(prefab)
                     if player ~= nil then
                         player.userid = userid
+						player.is_snapshot_user_session = true
                         player:SetPersistData(playerdata.data or {})
-                        player.Physics:Teleport(playerdata.x or 0, playerdata.y or 0, playerdata.z or 0)
-                        if playerdata.puid then
-                            local walkableplatformmanager = TheWorld.components.walkableplatformmanager
-                            if walkableplatformmanager then
-                                local platform = walkableplatformmanager:GetPlatformWithUID(playerdata.puid)
-                                if platform then
-                                    local px, py, pz = platform.Transform:GetWorldPosition()
-                                    local x, y, z = px + (playerdata.rx or 0), py + (playerdata.ry or 0), pz + (playerdata.rz or 0)
-                                    player.Physics:Teleport(x, y, z)
-                                    player.components.walkableplatformplayer:TestForPlatform()
-                                end
-                            end
+						local x, y, z, platform = ResolveSaveRecordPosition(playerdata)
+						player.Physics:Teleport(x, y, z)
+						if platform ~= nil then
+							player.components.walkableplatformplayer:TestForPlatform()
+							--V2C: TestForPlatform does NOT do what you think it does in this context...
+							--     player:GetCurrentPlatform() returns unexpected nil
+							--     Might consider refactoring in the future.
+							--     But for now:
+							player._snapshot_platform = platform
                         end
 						--if playerdata.crafting_menu ~= nil then
 						--	TheCraftingMenuProfile:DeserializeLocalClientSessionData(playerdata.crafting_menu)

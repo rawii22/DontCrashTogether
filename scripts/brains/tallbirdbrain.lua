@@ -1,7 +1,7 @@
 require "behaviours/chaseandattack"
 require "behaviours/wander"
 require "behaviours/doaction"
-require "behaviours/panic"
+local BrainCommon = require("brains/braincommon")
 
 local MAX_CHASE_TIME = 20
 local MAX_WANDER_DIST = 16
@@ -51,6 +51,10 @@ local function KeepFaceTargetFn(inst, target)
         inst:GetDistanceSqToInst(target) <= KEEP_FACE_DIST*KEEP_FACE_DIST
 end
 
+local function CanMakeNewNest(inst)
+	return inst.components.homeseeker == nil and inst:CanMakeNewHome() and not inst.sg:HasStateTag("busy")
+end
+
 local TallbirdBrain = Class(Brain, function(self, inst)
     Brain._ctor(self, inst)
 end)
@@ -60,8 +64,7 @@ function TallbirdBrain:OnStart()
     local root =
         PriorityNode(
         {
-            WhileNode( function() return self.inst.components.hauntable and self.inst.components.hauntable.panic end, "PanicHaunted", Panic(self.inst)),
-            WhileNode( function() return self.inst.components.health.takingfiredamage end, "OnFire", Panic(self.inst)),
+			BrainCommon.PanicTrigger(self.inst),
 			ChaseAndAttack(self.inst, SpringCombatMod(MAX_CHASE_TIME)),
 			WhileNode(function() return self.inst.components.homeseeker and self.inst.components.homeseeker:HasHome() and GetNearbyThreatFn(self.inst.components.homeseeker.home) end, "ThreatNearNest",
 				DoAction(self.inst, function() return DefendHomeAction(self.inst) end, "GoHome", true)
@@ -70,6 +73,8 @@ function TallbirdBrain:OnStart()
 				DoAction(self.inst, function() return GoHomeAction(self.inst) end, "GoHome", true)
 			),
 			DoAction(self.inst, function() return LayEggAction(self.inst) end, "LayEgg", true),
+			WhileNode(function() return CanMakeNewNest(self.inst) end, "Make Nest",
+				ActionNode(function() self.inst:PushEvent("makenewnest") end)),
 			Wander(self.inst, function() return self.inst.components.knownlocations:GetLocation("home") end, MAX_WANDER_DIST),
       },1)
 

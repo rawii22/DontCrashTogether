@@ -44,6 +44,9 @@ end
 -- To repeat a periodic announcement: c_announce(msg, interval)
 -- To cancel a periodic announcement: c_announce()
 function c_announce(msg, interval, category)
+    msg = type(msg) == "string" and msg or tostring(msg)
+    interval = type(interval) == "number" and interval or nil
+    category = type(category) == "string" and category or nil
     if msg == nil then
         if TheWorld.__announcementtask ~= nil then
             TheWorld.__announcementtask:Cancel()
@@ -91,6 +94,21 @@ function c_mermthrone()
     c_spawn("merm")
 end
 
+function c_allbooks()
+    local books =
+    {
+        "book_birds", "book_horticulture", "book_silviculture", "book_sleep",
+        "book_brimstone", "book_tentacles", "book_fish", "book_fire", "book_web",
+        "book_temperature", "book_light", "book_rain", "book_moon", "book_bees",
+        "book_research_station", "book_horticulture_upgraded",
+        "book_light_upgraded"
+    }
+
+
+    for _,v in ipairs(books) do
+        c_give(v)
+    end
+end
 -- * Roll back *count* number of saves (default 1)
 -- * c_rollback() or c_rollback(1) will roll back to the
 --   last save file, if it's been longer than 30 seconds
@@ -333,13 +351,13 @@ end
 
 
 -- Some helper shortcut functions
-function c_freecrafting()
+function c_freecrafting(player)
     if TheWorld ~= nil and not TheWorld.ismastersim then
         c_remote("c_freecrafting()")
         return
     end
 
-    local player = ConsoleCommandPlayer()
+    player = ListingOrConsolePlayer(player)
 	player.components.builder:GiveAllRecipes()
 	player:PushEvent("techlevelchange")
 end
@@ -545,6 +563,7 @@ function c_goto(dest, inst)
             else
                 inst.Transform:SetPosition(dest.Transform:GetWorldPosition())
             end
+            inst:SnapCamera()
             SuUsed("c_goto", true)
             return dest
         end
@@ -1111,12 +1130,12 @@ end
 
 function c_emptyworld()
     for k,ent in pairs(Ents) do
-        if ent.widget == nil 
-			and not ent.isplayer 
+        if ent.widget == nil
+			and not ent.isplayer
 			and ent.entity:GetParent() == nil
 			and ent.Network ~= nil
-			and not ent:HasTag("CLASSIFIED") 
-			and not ent:HasTag("INLIMBO") 
+			and not ent:HasTag("CLASSIFIED")
+			and not ent:HasTag("INLIMBO")
 			then
 
             ent:Remove()
@@ -1138,7 +1157,7 @@ function c_remove(entity)
 
     if TheWorld == nil or mouseentity == nil then
         return
-    end    
+    end
 
     if mouseentity ~= ConsoleCommandPlayer() then
         if mouseentity.components.health then
@@ -1389,6 +1408,38 @@ function c_makeboat()
 	inst = SpawnPrefab("oceanfishingrod")
 	inst.Transform:SetPosition(x - 3.25, y, z + 1.25)
 
+    inst = SpawnPrefab("boat_bumper_kelp_kit")
+    inst.Transform:SetPosition(x - 1, y, z - 3)
+	inst.components.stackable:SetStackSize(8)
+    inst = SpawnPrefab("boat_bumper_shell_kit")
+    inst.Transform:SetPosition(x - 1, y, z - 1.5)
+	inst.components.stackable:SetStackSize(8)
+
+    inst = SpawnPrefab("mastupgrade_lamp_item")
+    inst.Transform:SetPosition(x - 2, y, z - 1.5)
+
+    inst = SpawnPrefab("boat_cannon_kit")
+    inst.Transform:SetPosition(x - 1, y, z + 3)
+    inst = SpawnPrefab("cannonball_rock_item")
+    inst.Transform:SetPosition(x, y, z + 3)
+	inst.components.stackable:SetStackSize(20)
+end
+
+function c_makegrassboat()
+	local x, y, z = ConsoleWorldPosition():Get()
+
+	local inst = SpawnPrefab("boat_grass")
+	inst.Transform:SetPosition(x, y, z)
+
+	local inst = SpawnPrefab("mast")
+	inst.Transform:SetPosition(x, y, z)
+	inst = SpawnPrefab("steeringwheel")
+	inst.Transform:SetPosition(x + 1, y, z)
+	inst = SpawnPrefab("anchor")
+	inst.Transform:SetPosition(x - 1, y, z + 1)
+
+	inst = SpawnPrefab("oar_driftwood")
+	inst.Transform:SetPosition(x + 1, y, z - 1)
 end
 
 function c_makecrabboat()
@@ -1847,6 +1898,47 @@ function c_guitartab(songdata, overrides, dont_spawn_shells)
 	return ret
 end
 
+function c_setrotation(angle)
+    local mouseentity = TheInput:GetWorldEntityUnderMouse() or c_sel()
+
+    if TheWorld == nil or mouseentity == nil then
+        return
+    end
+
+    mouseentity.Transform:SetRotation(angle or 0)
+end
+
+function c_rotatecw(delta)
+    local mouseentity = TheInput:GetWorldEntityUnderMouse() or c_sel()
+
+    if TheWorld == nil or mouseentity == nil then
+        return
+    end
+
+    local angle = mouseentity.Transform:GetRotation()
+    mouseentity.Transform:SetRotation(angle + (delta or 45))
+end
+
+function c_rotateccw(delta)
+    local mouseentity = TheInput:GetWorldEntityUnderMouse() or c_sel()
+
+    if TheWorld == nil or mouseentity == nil then
+        return
+    end
+
+    local angle = mouseentity.Transform:GetRotation()
+    mouseentity.Transform:SetRotation(angle - (delta or 45))
+end
+
+function c_record()
+    if not CAN_USE_DBUI or Profile:GetThreadedRenderEnabled() then
+		return
+	end
+
+    local on_off = TheFrontEnd.debugMenu.history:IsEnabled() and "OFF" or "ON"
+    print("***** History recording is set to " .. on_off .. " *****")
+    TheFrontEnd.debugMenu.history:ToggleHistoryRecording()
+end
 -- ========================================
 
 

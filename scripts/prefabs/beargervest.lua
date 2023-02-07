@@ -4,7 +4,14 @@ local assets =
 }
 
 local function onequip(inst, owner)
-    owner.AnimState:OverrideSymbol("swap_body", "torso_bearger", "swap_body")
+    local skin_build = inst:GetSkinBuild()
+    if skin_build ~= nil then
+        owner:PushEvent("equipskinneditem", inst:GetSkinName())
+        owner.AnimState:OverrideItemSkinSymbol("swap_body", skin_build, "swap_body", inst.GUID, "torso_bearger")
+    else
+        owner.AnimState:OverrideSymbol("swap_body", "torso_bearger", "swap_body")
+    end
+
     if owner.components.hunger ~= nil then
         owner.components.hunger.burnratemodifiers:SetModifier(inst, TUNING.ARMORBEARGER_SLOW_HUNGER)
     end
@@ -13,6 +20,18 @@ end
 
 local function onunequip(inst, owner)
     owner.AnimState:ClearOverrideSymbol("swap_body")
+    if owner.components.hunger ~= nil then
+        owner.components.hunger.burnratemodifiers:RemoveModifier(inst)
+    end
+    inst.components.fueled:StopConsuming()
+
+    local skin_build = inst:GetSkinBuild()
+    if skin_build ~= nil then
+        owner:PushEvent("unequipskinneditem", inst:GetSkinName())
+    end
+end
+
+local function onequiptomodel(inst, owner)
     if owner.components.hunger ~= nil then
         owner.components.hunger.burnratemodifiers:RemoveModifier(inst)
     end
@@ -68,6 +87,7 @@ local function fn()
 
     inst.components.equippable:SetOnEquip(onequip)
     inst.components.equippable:SetOnUnequip(onunequip)
+    inst.components.equippable:SetOnEquipToModel(onequiptomodel)
 
     MakeHauntableLaunch(inst)
 

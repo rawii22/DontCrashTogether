@@ -47,7 +47,7 @@ local function ConsumeNutrients(inst)
 end
 
 local function TryGrowResume(inst)
-	if inst.components.growable ~= nil and (inst.components.burnable == nil or not inst.components.burnable.burning) then
+	if inst.components.growable ~= nil and (inst.components.burnable == nil or not inst.components.burnable:IsBurning()) then
 		inst.components.growable:Resume()
 	end
 end
@@ -113,7 +113,7 @@ end
 local function PlayStageAnim(inst, anim, custom_pre)
 	if POPULATING or inst:IsAsleep() then
 		inst.AnimState:PlayAnimation("crop_"..anim, true)
-		inst.AnimState:SetTime(math.random() * inst.AnimState:GetCurrentAnimationLength())
+		inst.AnimState:SetFrame(math.random(inst.AnimState:GetCurrentAnimationNumFrames()) - 1)
 	elseif custom_pre ~= nil then
 		inst.AnimState:PlayAnimation(custom_pre, false)
 		inst.AnimState:PushAnimation("crop_"..anim, true)
@@ -355,7 +355,21 @@ local function on_planted(inst, data)
 end
 
 local function domagicgrowthfn(inst)
-	if inst:IsValid() and inst.components.growable:IsGrowing() then
+	if inst._magicgrowthtask ~= nil then
+		inst._magicgrowthtask:Cancel()
+		inst._magicgrowthtask = nil
+	end
+
+	if inst.magic_growth_delay ~= nil then
+		inst:AddTag("magicgrowth")
+		inst._magicgrowthtask = inst:DoTaskInTime(inst.magic_growth_delay, domagicgrowthfn)
+		inst.magic_growth_delay = nil
+		return true
+	end
+
+	TryGrowResume(inst)
+
+	if inst.components.growable:IsGrowing() then
 		if inst.components.farmsoildrinker ~= nil then
 			local remaining_time = inst.components.growable.targettime - GetTime()
 			local drink = remaining_time * inst.components.farmsoildrinker:GetMoistureRate()
@@ -364,13 +378,27 @@ local function domagicgrowthfn(inst)
 			TheWorld.components.farming_manager:AddSoilMoistureAtPoint(x, y, z, drink)
 		end
 
+		local magic_tending = inst.magic_tending
+
 		inst.components.growable:DoGrowth()
-		if inst.components.pickable == nil then
-			inst:DoTaskInTime(0.5 + math.random() + 0.25, domagicgrowthfn)
+		if magic_tending and inst.components.farmplanttendable then
+			inst.components.farmplanttendable:TendTo()
+			inst.magic_tending = true
 		end
+
+		if inst.components.pickable == nil then
+			inst:AddTag("magicgrowth")
+			inst._magicgrowthtask = inst:DoTaskInTime(3 + math.random(), domagicgrowthfn)
+		else
+			inst:RemoveTag("magicgrowth")
+			inst.magic_tending = nil
+		end
+		
 		return true
 	end
 
+	inst:RemoveTag("magicgrowth")
+	inst.magic_tending = nil
 	return false
 end
 
@@ -402,11 +430,29 @@ end
 local function OnSave(inst, data)
 	data.from_seed = inst.from_seed
 	data.mature = inst.mature
+
+	if inst._magicgrowthtask ~= nil then
+		data.magicgrowthtime = GetTaskRemaining(inst._magicgrowthtask)
+		data.magic_tending = inst.magic_tending
+	end
 end
 
 local function OnPreLoad(inst, data)
-	inst.from_seed = data.from_seed
-	inst.mature = data.mature
+	if data ~= nil then
+		inst.from_seed = data.from_seed
+		inst.mature = data.mature
+	end
+end
+
+local function OnLoad(inst, data)
+	if data ~= nil and data.magicgrowthtime ~= nil then
+		if inst._magicgrowthtask ~= nil then
+			inst._magicgrowthtask:Cancel()
+		end
+		inst._magicgrowthtask = inst:DoTaskInTime(data.magicgrowthtime, domagicgrowthfn)
+		inst.magic_tending = data.magic_tending
+		inst:AddTag("magicgrowth")
+	end
 end
 
 local function MakeWeed(weed_def)
@@ -531,6 +577,7 @@ local function MakeWeed(weed_def)
 
 		inst.OnSave = OnSave
 		inst.OnPreLoad = OnPreLoad
+		inst.OnLoad = OnLoad
 
 		if weed_def.masterpostinit ~= nil then
 			weed_def.masterpostinit(inst)

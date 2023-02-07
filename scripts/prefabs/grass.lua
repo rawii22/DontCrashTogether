@@ -4,7 +4,7 @@ local assets =
 {
     Asset("ANIM", "anim/grass.zip"),
     Asset("ANIM", "anim/grass1.zip"),
-    Asset("ANIM", "anim/grass_diseased_build.zip"),
+    Asset("PKGREF", "anim/grass_diseased_build.zip"),
     Asset("SOUND", "sound/common.fsb"),
 }
 
@@ -223,7 +223,7 @@ local function grass(name, stage)
             return inst
         end
 
-        inst.AnimState:SetTime(math.random() * 2)
+		inst.AnimState:SetFrame(math.random(inst.AnimState:GetCurrentAnimationNumFrames()) - 1)
         local color = 0.75 + math.random() * 0.25
         inst.AnimState:SetMultColour(color, color, color, 1)
 

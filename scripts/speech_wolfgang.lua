@@ -64,6 +64,8 @@ return{
 			KITCOON_HIDEANDSEEK_NOT_ENOUGH_HIDERS = "Wolfgang plays fair, where is fun in less kitties?",
 			KITCOON_HIDEANDSEEK_NOT_ENOUGH_HIDING_SPOTS = "Wolfgang plays fair, is nowhere for kitties to hide here!",
 			KITCOON_HIDEANDSEEK_ONE_GAME_PER_DAY = "Is enough games for Wolfgang.",
+            MANNEQUIN_EQUIPSWAPFAILED = "Is not for cloth man. Wolfgang will keep.",
+            PILLOWFIGHT_NO_HANDPILLOW = "Wolfgang needs pillow for fighting!",
 		},
 		OPEN_CRAFTING =
 		{
@@ -98,8 +100,19 @@ return{
         --wickerbottom specific action
 --fallback to speech_wilson.lua         READ =
 --fallback to speech_wilson.lua         {
---fallback to speech_wilson.lua             GENERIC = "only_used_by_wickerbottom",
---fallback to speech_wilson.lua             NOBIRDS = "only_used_by_wickerbottom",
+--fallback to speech_wilson.lua             GENERIC = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOWATERNEARBY = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             TOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             WAYTOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOFIRES =       "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOSILVICULTURE = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOHORTICULTURE = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOTENTACLEGROUND = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOSLEEPTARGETS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             TOOMANYBEES = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOMOONINCAVES = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             ALREADYFULLMOON = "only_used_by_waxwell_and_wicker",
 --fallback to speech_wilson.lua         },
 
         GIVE =
@@ -372,6 +385,16 @@ return{
         {
             DOER_ISNT_MODULE_OWNER = "Wolfgang thinks it only speaks robot.",
         },
+
+		CAST_SPELLBOOK =
+		{
+--fallback to speech_wilson.lua 			NO_TOPHAT = "only_used_by_waxwell",
+		},
+
+		CASTAOE =
+		{
+--fallback to speech_wilson.lua 			NO_MAX_SANITY = "only_used_by_waxwell",
+		},
     },
 
 	ANNOUNCE_CANNOT_BUILD =
@@ -392,6 +415,14 @@ return{
     --waxwell and wickerbottom specific strings
 --fallback to speech_wilson.lua     ANNOUNCE_TOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
 --fallback to speech_wilson.lua     ANNOUNCE_WAYTOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua     ANNOUNCE_NOWATERNEARBY = "only_used_by_waxwell_and_wicker",
+
+	--waxwell specific
+--fallback to speech_wilson.lua 	ANNOUNCE_SHADOWLEVEL_ITEM = "only_used_by_waxwell",
+--fallback to speech_wilson.lua 	ANNOUNCE_EQUIP_SHADOWLEVEL_T1 = "only_used_by_waxwell",
+--fallback to speech_wilson.lua 	ANNOUNCE_EQUIP_SHADOWLEVEL_T2 = "only_used_by_waxwell",
+--fallback to speech_wilson.lua 	ANNOUNCE_EQUIP_SHADOWLEVEL_T3 = "only_used_by_waxwell",
+--fallback to speech_wilson.lua 	ANNOUNCE_EQUIP_SHADOWLEVEL_T4 = "only_used_by_waxwell",
 
     --wolfgang specific
     ANNOUNCE_NORMALTOMIGHTY = "I AM MIGHTY!",
@@ -455,6 +486,8 @@ return{
 --fallback to speech_wilson.lua         SAME_OLD_5 = "only_used_by_warly",
 --fallback to speech_wilson.lua 		TASTY = "only_used_by_warly",
     },
+
+	ANNOUNCE_FOODMEMORY = "only_used_by_warly",
 
     ANNOUNCE_ENCUMBERED =
     {
@@ -576,6 +609,7 @@ return{
     ANNOUNCE_REVIVED_FROM_CORPSE = "Thank-you, friend!",
 
     ANNOUNCE_FLARE_SEEN = "Sky fire! Wolfgang is coming, dear friend!",
+    ANNOUNCE_MEGA_FLARE_SEEN = "Who set such bright sky fire? Will call monsters!",
     ANNOUNCE_OCEAN_SILHOUETTE_INCOMING = "Wolfgang does not like scary shadow!",
 
     --willow specific
@@ -705,6 +739,19 @@ return{
 --fallback to speech_wilson.lua         BOOK_GARDENING = "only_used_by_wurt",
 --fallback to speech_wilson.lua 		BOOK_SILVICULTURE = "only_used_by_wurt",
 --fallback to speech_wilson.lua 		BOOK_HORTICULTURE = "only_used_by_wurt",
+
+--fallback to speech_wilson.lua         BOOK_FISH = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_FIRE = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_WEB = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_TEMPERATURE = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_LIGHT = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_RAIN = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_MOON = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_BEES = "only_used_by_wurt",
+
+--fallback to speech_wilson.lua         BOOK_HORTICULTURE_UPGRADED = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_RESEARCH_STATION = "only_used_by_wurt",
+--fallback to speech_wilson.lua         BOOK_LIGHT_UPGRADED = "only_used_by_wurt",
     },
     ANNOUNCE_WEAK_RAT = "Is too weak for race.",
 
@@ -830,6 +877,12 @@ return{
 
     ANNOUNCE_PIRATES_ARRIVE = "Someone is music making?",
 
+--fallback to speech_wilson.lua     ANNOUNCE_BOOK_MOON_DAYTIME = "only_used_by_waxwell_and_wicker",
+
+    ANNOUNCE_OFF_SCRIPT = "Ha, is wrong! This is funny to Wolfgang!",
+
+    ANNOUNCE_COZY_SLEEP = "Wolfgang had nice dreams of fluffy bunnies.",
+
 	BATTLECRY =
 	{
 		GENERIC = "I will punch you!",
@@ -901,6 +954,11 @@ return{
         BERNIE_ACTIVE = "Is so brave!",
         BERNIE_BIG = "Oh no! Wolfgang has shrunken!",
 
+		BOOKSTATION =
+		{
+			GENERIC = "Makes brainlady happy, Wolfgang will protect it!",
+			BURNT = "Wolfgang will help brainlady build another!",
+		},
         BOOK_BIRDS = "Book is for the birds!",
         BOOK_TENTACLES = "Wolfgang wants many foes to fight!",
         BOOK_GARDENING = "Wolfgang rather grow muscle than flowers.",
@@ -908,6 +966,21 @@ return{
 		BOOK_HORTICULTURE = "Little book makes food grow for Wolfgang.",
         BOOK_SLEEP = "Wolfgang's eyes feel heavy like dumbbells.",
         BOOK_BRIMSTONE = "Tiny book scares Wolfgang!",
+
+        BOOK_FISH = "Pictures of fish make Wolfgang's belly rumble.",
+        BOOK_FIRE = "Wolfgang hopes is not explained in more big words...",
+        BOOK_WEB = "Eep!!",
+        BOOK_TEMPERATURE = "But Wolfgang needs to feel the burn!",
+        BOOK_LIGHT = "Wolfgang likes the book light.",
+        BOOK_RAIN = "Wolfgang will keep umbrella, just in case.",
+        BOOK_MOON = "Wolfgang doesn't need book to know where moon is.",
+        BOOK_BEES = "Is true, Wolfgang does not know much of ape culture.",
+        
+        BOOK_HORTICULTURE_UPGRADED = "Will thicker book grow thicker vegetables?",
+        BOOK_RESEARCH_STATION = "Hmm, is heavy book, maybe good for lifting.",
+        BOOK_LIGHT_UPGRADED = "Wolfgang is starting to find liking for books.",
+
+        FIREPEN = "Wolfgang does not want to write with that pen!",
 
         PLAYER =
         {
@@ -1400,7 +1473,19 @@ return{
 
         TURF_SHELLBEACH = "Step stones.",
 
+		TURF_RUINSBRICK = "Step stones.",
+		TURF_RUINSBRICK_GLOW = "Step stones.",
+		TURF_RUINSTILES = "Step stones.",
+		TURF_RUINSTILES_GLOW = "Step stones.",
+		TURF_RUINSTRIM = "Step stones.",
+		TURF_RUINSTRIM_GLOW = "Step stones.",
+
         TURF_MONKEY_GROUND = "Step stones.",
+
+        TURF_CARPETFLOOR2 = "Step stones.",
+        TURF_MOSAIC_GREY = "Step stones.",
+        TURF_MOSAIC_RED = "Step stones.",
+        TURF_MOSAIC_BLUE = "Step stones.",
 
 		POWCAKE = "Is made of nothings!",
         CAVE_ENTRANCE = "Even I am not that mighty.",
@@ -1584,6 +1669,10 @@ return{
             RARE = "Very, very fancy pictures!",
         },
         SKETCH = "Picture will help Wolfgang carve nice rocks!",
+		COOKINGRECIPECARD = 
+		{
+			GENERIC = "Wolfgang can't read puny writing!",
+		},
 		BLUE_CAP = "Is good for tired muscles, I think.",
 		BLUE_CAP_COOKED = "Is not same.",
 		BLUE_MUSHROOM =
@@ -1608,6 +1697,7 @@ return{
 		BUZZARD = "Carry on.",
 
 		SHADOWDIGGER = "Ha ha! Tiny men should dance for amusement!",
+        SHADOWDANCER = "Yes!! Dance tiny man, dance!",
 
 		CACTUS =
 		{
@@ -1700,6 +1790,7 @@ return{
         CHESSPIECE_BEEFALO = "Is look almost like real hair-cow.",
 		CHESSPIECE_KITCOON = "Wolfgang can lift twice as many!",
 		CHESSPIECE_CATCOON = "Ha! Is easy to find this one.",
+        CHESSPIECE_MANRABBIT = "Haha! Funny rabbit thought it could beat Wolfgang!",
         CHESSPIECE_GUARDIANPHASE3 = "Wolfgang glad is just statue.",
         CHESSPIECE_EYEOFTERROR = "No like the way it look at Wolfgang.",
         CHESSPIECE_TWINSOFTERROR = "Brrr, still sends chill down Wolfgang's spine.",
@@ -1769,6 +1860,7 @@ return{
 		},
         GOGGLESHAT = "Makes Wolfgang look very mighty.",
         DESERTHAT = "Sand cannot stop Wolfgang!",
+        ANTLIONHAT = "The ground will flee before mighty Wolfgang!",
 --fallback to speech_wilson.lua 		DEVTOOL = "It smells of bacon!",
 --fallback to speech_wilson.lua 		DEVTOOL_NODEV = "I'm not strong enough to wield it.",
 		DIRTPILE = "Dirty dirt.",
@@ -2794,6 +2886,34 @@ return{
         },
         BEEFALO_GROOMER_ITEM = "Do not worry, Wolfgang will build it!",
 
+        YOTR_RABBITSHRINE =
+        {
+            GENERIC = "Is well-fed rabbit!",
+            EMPTY = "Rabbit is hungry! Wolfgang understands this.",
+            BURNT = "Goodbye rabbit.",
+        },
+
+        NIGHTCAPHAT = "Is cozy sleeping hat.",
+
+        YOTR_FOOD1 = "Wolfgang likes the funny rabbit cake.",
+        YOTR_FOOD2 = "Ah. Wolfgang expected cheese.",
+        YOTR_FOOD3 = "Is funny wobble dessert.",
+        YOTR_FOOD4 = "Sticky chew puffs.",
+
+        YOTR_TOKEN = "Who will face mighty Wolfgang in pillow fight?",
+
+        COZY_BUNNYMAN = "Rabbits look ready for bedtime.",
+
+        HANDPILLOW_BEEFALOWOOL = "Is fluffy like hair-cow.",
+        HANDPILLOW_KELP = "Wolfgang does not know why anyone would do this.",
+        HANDPILLOW_PETALS = "Is very pretty pillow.",
+        HANDPILLOW_STEELWOOL = "Is good for smacking, but not sleeping.",
+
+        BODYPILLOW_BEEFALOWOOL = "Is fluffy like hair-cow.",
+        BODYPILLOW_KELP = "Wolfgang does not know why anyone would do this.",
+        BODYPILLOW_PETALS = "Is very pretty pillow.",
+        BODYPILLOW_STEELWOOL = "Is good thing Wolfgang has tough skin.",
+
 		BISHOP_CHARGE_HIT = "Rrrraa!",
 		TRUNKVEST_SUMMER = "Is warm fuzzy nose.",
 		TRUNKVEST_WINTER = "Cozy nosy!",
@@ -2851,7 +2971,11 @@ return{
 		WATERMELON = "So many seeds.",
 		WATERMELON_COOKED = "Seeds is cooked out of melon now.",
 		WATERMELONHAT = "Why not wear melon on head! Haha!",
-		WAXWELLJOURNAL = "Wolfgang is glad he cannot read!",
+		WAXWELLJOURNAL =
+		{
+			GENERIC = "Wolfgang is glad he cannot read!",
+--fallback to speech_wilson.lua 			NEEDSFUEL = "only_used_by_waxwell",
+		},
 		WETGOOP = "Is not bad to eat, but is not good.",
         WHIP = "Good to floss teeth with.",
 		WINTERHAT = "It make ears happy in cold!",
@@ -2883,7 +3007,7 @@ return{
         WINTER_FOOD2 = "Does Wolfgang have sugar in moustache?", --sugar cookie
         WINTER_FOOD3 = "Little sugar stick.", --candy cane
         WINTER_FOOD4 = "Wolfgang does not trust little fruit loaf.", --fruitcake
-        WINTER_FOOD5 = "Ha! Wolfgang will eat log, just like beardman!", --yule log cake
+        WINTER_FOOD5 = "Ha! Is not real log, Wolfgang was not fooled!", --yule log cake
         WINTER_FOOD6 = "Tiny yummy cakething make strong Wolfgang.", --plum pudding
         WINTER_FOOD7 = "Little fruit is sweet and tasty!", --apple cider
         WINTER_FOOD8 = "Wolfgang likes feeling cozy.", --hot cocoa
@@ -3380,6 +3504,7 @@ return{
         ICEBERG_MELTED = "Is all melty!", --unimplemented
 
         MINIFLARE = "Is tiny sky boom!",
+        MEGAFLARE = "Wolfgang will be careful with that one.",
 
 		MOON_FISSURE =
 		{
@@ -4406,7 +4531,7 @@ return{
 			SHIMMER = "Wolfgang wants to peek inside!",
 		},
 
-		EYEMASKHAT = "Wolgang not fan of squishy hat.",
+		EYEMASKHAT = "Wolfgang not fan of squishy hat.",
 
         EYEOFTERROR = "Wolfgang not like big scary eye!",
         EYEOFTERROR_MINI = "Feeling of being watched is bad, but feeling of being bitten is much worse!",
@@ -4470,6 +4595,13 @@ return{
         WX78_MODULEREMOVER = "Is funny robot thing.",
 
         SCANDATA = "Is tiny boring paper.",
+
+		-- QOL 2022
+		JUSTEGGS = "More egg to feed muscles!",
+		VEGGIEOMLET = "Egg with vegetables, a mighty breakfast!",
+		TALLEGGS = "Will make good workout for Wolfgang's jaw!",
+		BEEFALOFEED = "Hair-cow, come! Wolfgang has food for you!",
+		BEEFALOTREAT = "Is little treat for hair-cow.",
 
         -- Pirates
         BOAT_ROTATOR = "Is little turny lever.",
@@ -4545,8 +4677,73 @@ return{
         PIRATE_STASH = "Haha! Wolfgang has found treasure hiding-place!",
         STASH_MAP = "Is map to monkey riches.",
 
-
         BANANAJUICE = "Wolfgang would like more monkey drink.",
+
+        FENCE_ROTATOR = "Is sword for fences? Very strange.",
+
+        CHARLIE_STAGE_POST = "Is like little circus ring.",
+        CHARLIE_LECTURN = "Is there part for strongman?",
+
+        CHARLIE_HECKLER = "Wolfgang is thinking about hitting two birds with one stone...",
+
+        PLAYBILL_THE_DOLL = "Is very hard to remember so many words.",
+        STATUEHARP_HEDGESPAWNER = "Wolfgang could rip vines off with one mighty pull.",
+        HEDGEHOUND = "Is plant or puppy? Wolfgang is confused!",
+        HEDGEHOUND_BUSH = "Full of prickles.",
+
+        MASK_DOLLHAT = "Wolfgang does not like the spooky face.",
+        MASK_DOLLBROKENHAT = "Wolfgang does not like the spooky face.",
+        MASK_DOLLREPAIREDHAT = "Wolfgang does not like the spooky face.",
+        MASK_BLACKSMITHHAT = "Wolfgang does not like the spooky face.",
+        MASK_MIRRORHAT = "Wolfgang does not like the spooky face.",
+        MASK_QUEENHAT = "Wolfgang does not like the spooky face.",
+        MASK_KINGHAT = "Wolfgang does not like the spooky face.",
+        MASK_TREEHAT = "Wolfgang does not like the spooky face.",
+        MASK_FOOLHAT = "Wolfgang does not like the spooky face.",
+
+        COSTUME_DOLL_BODY = "Can tiny costume fit over Wolfgang's muscles?",
+        COSTUME_QUEEN_BODY = "Can tiny costume fit over Wolfgang's muscles?",
+        COSTUME_KING_BODY = "Can tiny costume fit over Wolfgang's muscles?",
+        COSTUME_BLACKSMITH_BODY = "Can tiny costume fit over Wolfgang's muscles?",
+        COSTUME_MIRROR_BODY = "Can tiny costume fit over Wolfgang's muscles?",
+        COSTUME_TREE_BODY = "Can tiny costume fit over Wolfgang's muscles?",
+        COSTUME_FOOL_BODY = "Can tiny costume fit over Wolfgang's muscles?",
+
+        STAGEUSHER =
+        {
+            STANDING = "GAH! Table is creepy walking fist!",
+            SITTING = "Wolfgang has no use for tiny table.",
+        },
+        SEWING_MANNEQUIN =
+        {
+            GENERIC = "Cloth man does not have much to say.",
+            BURNT = "Cloth man has even less to say now.",
+        },
+
+		-- Waxwell
+		MAGICIAN_CHEST = "Is little disappearing box.",
+		TOPHAT_MAGICIAN = "Wolfgang would rather wear something else.",
+
+        -- Year of the Rabbit
+        YOTR_FIGHTRING_KIT = "Do not worry, Wolfgang will put it in good spot.",
+        YOTR_FIGHTRING_BELL =
+        {
+            GENERIC = "Is time for pillow battle, yes?",
+            PLAYING = "Haha! Is good fun!",
+        },
+
+        YOTR_DECOR_1 = {
+            GENERAL = "Wolfgang likes rabbit night light.",
+            OUT = "Rabbit light ran out!",
+        },
+        YOTR_DECOR_2 = {
+            GENERAL = "Wolfgang likes rabbit night light.",
+            OUT = "Rabbit light ran out!",
+        },
+
+        HAREBALL = "Wolfgang is not afraid to eat! Gulp...",
+        YOTR_DECOR_1_ITEM = "Wolfgang will find good place for rabbit light.",
+        YOTR_DECOR_2_ITEM = "Wolfgang will find good place for rabbit light.",             
     },
 
     DESCRIBE_GENERIC = "What is this thing?",

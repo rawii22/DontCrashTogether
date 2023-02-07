@@ -435,6 +435,7 @@ local prefabs =
     "palmconetree_normal",
     "palmconetree_tall",
     "pirate_flag_pole",
+	"piratewarningsound",
     "bananabush",
     "monkeytail",
     "dock_tile_registrator",
@@ -442,6 +443,10 @@ local prefabs =
     "dock_woodposts",
     "fx_dock_crackle",
     "fx_dock_pop",
+
+    "charlie_stage_post",
+    "stageusher",
+    "statueharp_hedgespawner",
 }
 
 local FISH_DATA = require("prefabs/oceanfishdef")

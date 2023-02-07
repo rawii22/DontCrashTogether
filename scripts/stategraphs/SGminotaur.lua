@@ -354,6 +354,11 @@ local states =
 
             local chest = SpawnPrefab("minotaurchestspawner")
             chest.Transform:SetPosition(inst.Transform:GetWorldPosition())
+            for i = 1, 8 do
+                if chest:PutBackOnGround(TILE_SCALE * i) then
+                    break
+                end
+            end
             chest.minotaur = inst
 
             inst:AddTag("NOCLICK")
@@ -440,7 +445,6 @@ local states =
         
         onenter = function(inst)
             inst.hasrammed = true
-            inst.components.timer:StartTimer("leapattack_cooldown", 15)
             inst.components.locomotor:Stop()
             inst.AnimState:PlayAnimation("jump_atk_pre")
             inst.sg.statemem.startpos = Vector3(inst.Transform:GetWorldPosition())
@@ -475,6 +479,12 @@ local states =
         tags = {"attack", "busy", "leapattack"},
         
         onenter = function(inst,data)
+			if inst.components.timer:TimerExists("leapattack_cooldown") then
+				inst.components.timer:SetTimeLeft("leapattack_cooldown", TUNING.MINOTAUR_LEAP_CD)
+			else
+				inst.components.timer:StartTimer("leapattack_cooldown", TUNING.MINOTAUR_LEAP_CD)
+			end
+
             inst.sg.statemem.targetpos = data.targetpos
             
             inst.AnimState:PlayAnimation("jump_atk_loop")

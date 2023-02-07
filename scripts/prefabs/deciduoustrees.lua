@@ -1317,7 +1317,11 @@ local function makefn(build, stage, data)
         inst.components.growable:SetStage(stage == 0 and math.random(1, 3) or stage)
         inst.components.growable.loopstages = true
         inst.components.growable.springgrowth = true
+        inst.components.growable.magicgrowable = true
         inst.components.growable:StartGrowing()
+
+        inst:AddComponent("simplemagicgrower")
+        inst.components.simplemagicgrower:SetLastStage(#inst.components.growable.stages)
 
         inst.growfromseed = handler_growfromseed
 
@@ -1360,7 +1364,7 @@ local function makefn(build, stage, data)
             --When POPULATING, season won't be valid yet at this point,
             --but we want this immediate for all later spawns.
             OnInitSeason(inst)
-            inst.AnimState:SetTime(math.random() * 2)
+			inst.AnimState:SetFrame(math.random(inst.AnimState:GetCurrentAnimationNumFrames()) - 1)
             if data == "burnt" then
                 OnBurnt(inst, true)
             else

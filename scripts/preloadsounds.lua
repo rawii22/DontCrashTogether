@@ -82,6 +82,9 @@ local MainSounds =
     "yotb_2021.fev",
     "yotb_2021.fsb",
 
+    "yotr_2023.fev",
+    "yotr_2023.fsb",
+
     "hookline_2.fev",
     "hookline_2.fsb",
 
@@ -174,6 +177,19 @@ local MainSounds =
 
     "summerevent2022.fev",
     "summerevent2022.fsb",
+
+    "wickerbottom_rework.fev",
+    "wickerbottom_rework.fsb",
+    
+    --"skin_sfx.fev",
+    --"skin_sfx.fsb",
+
+    "stageplay_set.fev",
+    "stageplay_set.fsb",
+    "stageplay_set_music.fsb",
+
+    "maxwell_rework.fev",
+    "maxwell_rework.fsb",
 }
 
 function PreloadSoundList(list)

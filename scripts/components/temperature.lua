@@ -177,7 +177,11 @@ end
 
 function Temperature:GetDebugString()
 	local winter, summer = self:GetInsulation()
-    return string.format("%2.2fC at %2.2f (delta: %2.2f) (modifiers: %2.2f) (insulation: %d, %d)", self.current, self.rate, self.delta, self.totalmodifiers, winter, summer)
+	local str = string.format("%2.2fC at %2.2f (delta: %2.2f) (modifiers: %2.2f) (insulation: %d, %d)", self.current, self.rate, self.delta, self.totalmodifiers, winter, summer)
+	if self.inst.sleepingbag ~= nil and self.inst.sleepingbag.components.sleepingbag.ambient_temp then
+		str = str .. string.format(" (sleepingbag %2.2f)", self.inst.sleepingbag.components.sleepingbag.ambient_temp)
+	end
+    return str
 end
 
 function Temperature:IsFreezing()
@@ -283,23 +287,32 @@ function Temperature:OnUpdate(dt, applyhealthdelta)
     local ambient_temperature = TheWorld.state.temperature
 
     local owner = self.inst.components.inventoryitem ~= nil and self.inst.components.inventoryitem.owner or nil
+    local inside_pocket_container = owner ~= nil and owner:HasTag("pocketdimension_container")
     if owner ~= nil and owner:HasTag("fridge") and not owner:HasTag("nocool") then
         -- Inside a fridge, excluding icepack ("nocool")
         -- Don't cool it below freezing unless ambient temperature is below freezing
         mintemp = math.max(mintemp, math.min(0, ambient_temperature))
         self.rate = owner:HasTag("lowcool") and -.5 * TUNING.WARM_DEGREES_PER_SEC or -TUNING.WARM_DEGREES_PER_SEC
     else
-        -- Prepare to figure out the temperature where we are standing
-        local x, y, z = self.inst.Transform:GetWorldPosition()
-        local ents = self.usespawnlight and
-            TheSim:FindEntities(x, y, z, ZERO_DISTANCE, nil, self.ignoreheatertags, UPDATE_SPAWNLIGHT_ONEOF_TAGS) or
-            TheSim:FindEntities(x, y, z, ZERO_DISTANCE, UPDATE_NOSPAWNLIGHT_MUST_TAGS, self.ignoreheatertags)
-        if self.usespawnlight and #ents > 0 then
-            for i, v in ipairs(ents) do
-                if v.components.heater == nil and v:HasTag("spawnlight") then
-                    ambient_temperature = math.clamp(ambient_temperature, 10, TUNING.OVERHEAT_TEMP - 20)
-                    table.remove(ents, i)
-                    break
+		local sleepingbag_ambient_temp = self.inst.sleepingbag ~= nil and self.inst.sleepingbag.components.sleepingbag.ambient_temp
+		if sleepingbag_ambient_temp then
+            ambient_temperature = sleepingbag_ambient_temp
+		end
+
+        local ents
+        if not inside_pocket_container then
+            -- Prepare to figure out the temperature where we are standing
+            local x, y, z = self.inst.Transform:GetWorldPosition()
+            ents = self.usespawnlight and
+                TheSim:FindEntities(x, y, z, ZERO_DISTANCE, nil, self.ignoreheatertags, UPDATE_SPAWNLIGHT_ONEOF_TAGS) or
+                TheSim:FindEntities(x, y, z, ZERO_DISTANCE, UPDATE_NOSPAWNLIGHT_MUST_TAGS, self.ignoreheatertags)
+            if self.usespawnlight and #ents > 0 then
+                for i, v in ipairs(ents) do
+                    if v.components.heater == nil and v:HasTag("spawnlight") then
+                        ambient_temperature = math.clamp(ambient_temperature, 10, TUNING.OVERHEAT_TEMP - 20)
+                        table.remove(ents, i)
+                        break
+                    end
                 end
             end
         end
@@ -309,7 +322,6 @@ function Temperature:OnUpdate(dt, applyhealthdelta)
             ambient_temperature = math.min(ambient_temperature,  self.overheattemp - 5)
         end
 
-        ambient_temperature = ambient_temperature
         self.delta = (ambient_temperature + self.totalmodifiers + self:GetMoisturePenalty()) - self.current
         --print(self.delta + self.current, "initial target")
 
@@ -367,33 +379,34 @@ function Temperature:OnUpdate(dt, applyhealthdelta)
         end
 
         --print(self.delta + self.current, "after shelter")
+        if not inside_pocket_container then
+            for i, v in ipairs(ents) do
+                if v ~= self.inst and
+                    not v:IsInLimbo() and
+                    v.components.heater ~= nil and
+                    (v.components.heater:IsExothermic() or v.components.heater:IsEndothermic()) then
 
-        for i, v in ipairs(ents) do
-            if v ~= self.inst and
-                not v:IsInLimbo() and
-                v.components.heater ~= nil and
-                (v.components.heater:IsExothermic() or v.components.heater:IsEndothermic()) then
-
-                local heat = v.components.heater:GetHeat(self.inst)
-                if heat ~= nil then
-                    -- This produces a gentle falloff from 1 to zero.
-                    local heatfactor = 1 - self.inst:GetDistanceSqToInst(v) / ZERO_DISTSQ
-                    if self.inst:GetIsWet() then
-                        heatfactor = heatfactor * TUNING.WET_HEAT_FACTOR_PENALTY
-                    end
-
-                    if v.components.heater:IsExothermic() then
-                        -- heating heatfactor is relative to 0 (freezing)
-                        local warmingtemp = heat * heatfactor
-                        if warmingtemp > self.current then
-                            self.delta = self.delta + warmingtemp - self.current
+                    local heat = v.components.heater:GetHeat(self.inst)
+                    if heat ~= nil then
+                        -- This produces a gentle falloff from 1 to zero.
+                        local heatfactor = 1 - self.inst:GetDistanceSqToInst(v) / ZERO_DISTSQ
+                        if self.inst:GetIsWet() then
+                            heatfactor = heatfactor * TUNING.WET_HEAT_FACTOR_PENALTY
                         end
-                        self.externalheaterpower = self.externalheaterpower + warmingtemp
-                    else--if v.components.heater:IsEndothermic() then
-                        -- cooling heatfactor is relative to overheattemp
-                        local coolingtemp = (heat - self.overheattemp) * heatfactor + self.overheattemp
-                        if coolingtemp < self.current then
-                            self.delta = self.delta + coolingtemp - self.current
+
+                        if v.components.heater:IsExothermic() then
+                            -- heating heatfactor is relative to 0 (freezing)
+                            local warmingtemp = heat * heatfactor
+                            if warmingtemp > self.current then
+                                self.delta = self.delta + warmingtemp - self.current
+                            end
+                            self.externalheaterpower = self.externalheaterpower + warmingtemp
+                        else--if v.components.heater:IsEndothermic() then
+                            -- cooling heatfactor is relative to overheattemp
+                            local coolingtemp = (heat - self.overheattemp) * heatfactor + self.overheattemp
+                            if coolingtemp < self.current then
+                                self.delta = self.delta + coolingtemp - self.current
+                            end
                         end
                     end
                 end

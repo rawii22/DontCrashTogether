@@ -171,7 +171,7 @@ function SetSkinsOnAnim( anim_state, prefab, base_skin, clothing_names, monkey_c
 				elseif skintype == "powerup" and CLOTHING[name].symbol_overrides_powerup then
 					src_symbols = CLOTHING[name].symbol_overrides_powerup
 				
-				--wurt
+				--wanda
 				elseif skintype == "old_skin" and CLOTHING[name].symbol_overrides_old then
 					src_symbols = CLOTHING[name].symbol_overrides_old
 
@@ -261,7 +261,11 @@ function SetSkinsOnAnim( anim_state, prefab, base_skin, clothing_names, monkey_c
 
 				if CLOTHING[name].symbol_hides then
 					for _,sym in pairs(CLOTHING[name].symbol_hides) do
-						anim_state:HideSymbol(sym)
+						if sym == "arm_upper_skin" and not allow_arms then
+							--don't hide arm_upper_skin if we're not allowed to show the arms, otherwise we'll be hiding the
+						else
+							anim_state:HideSymbol(sym)
+						end
 					end
 				end
 				if CLOTHING[name].symbol_in_base_hides then
@@ -271,14 +275,22 @@ function SetSkinsOnAnim( anim_state, prefab, base_skin, clothing_names, monkey_c
 						end
 					end
 				end
+				for _, sym in pairs(symbols_to_use_base) do -- Force these to show in case any of them were hidden.
+					anim_state:ShowSymbol(sym)
+				end
+				if CLOTHING[name].symbol_shows then
+					for _,sym in pairs(CLOTHING[name].symbol_shows) do
+						anim_state:ShowSymbol(sym)
+					end
+				end
 			end
 		end
-
+		
 		for _, sym in pairs(monkey_pieces) do
 			anim_state:ShowSymbol(sym)
 			anim_state:OverrideSymbol( sym, "wonkey", sym )
 			if sym == "foot" then
-				feet_cuff_size = 1
+				feet_cuff_size = 3
 			end
 		end
 
@@ -324,10 +336,16 @@ function SetSkinsOnAnim( anim_state, prefab, base_skin, clothing_names, monkey_c
 			anim_state:HideSymbol("skirt")
 		end
 
-		--deal with leg boots
+		--deal with leg boots (yes, we're using the leg_build as the skinname. Sometime we override the build, but the base skin "should" have the same definition)
 		local use_leg_boot = leg_build and CLOTHING[leg_build] and CLOTHING[leg_build].has_leg_boot
 		if leg_build == foot_build and use_leg_boot then
-			anim_state:OverrideSkinSymbol("leg", leg_build, "leg_boot" )
+			local boot_symbol = "leg_boot"
+			if CLOTHING[leg_build].symbol_overrides_by_character ~= nil then
+				local alt_symbols = CLOTHING[leg_build].symbol_overrides_by_character[prefab] or CLOTHING[leg_build].symbol_overrides_by_character["default"] 
+				boot_symbol = alt_symbols["leg_boot"] or "leg_boot"
+			end
+
+			anim_state:OverrideSkinSymbol("leg", leg_build, boot_symbol )
 		end
 
 		--deal with foot nubs
@@ -351,6 +369,9 @@ function SetSkinsOnAnim( anim_state, prefab, base_skin, clothing_names, monkey_c
 		if tuck_torso == "untucked" or (tuck_torso == "untucked_wide" and wide) then
 			--print("torso over the skirt")
 			anim_state:SetSymbolExchange( "skirt", "torso" )
+		elseif tuck_torso == "pelvis_skirt" then
+			--print("torso_pelvis over the skirt")
+			anim_state:SetSymbolExchange( "skirt", "torso_pelvis" )
 		end
 		if legs_cuff_size > feet_cuff_size then
 			--if inst.user ~= "KU_MikeBell" then --mike always tucks his pants into all shoes, including high heels...
@@ -406,6 +427,9 @@ function Skinner:SetSkinMode(skintype, default_build)
 	end
 
 	SetSkinsOnAnim( self.inst.AnimState, self.inst.prefab, base_skin, self.clothing, self.monkey_curse, skintype, default_build )
+	if self.base_change_cb ~= nil then
+		self.base_change_cb()
+	end
 
 	self.inst.Network:SetPlayerSkin( self.skin_name or "", self.clothing["body"] or "", self.clothing["hand"] or "", self.clothing["legs"] or "", self.clothing["feet"] or "" )
 end
@@ -525,6 +549,29 @@ end
 
 function Skinner:ClearClothing(type)
 	_InternalSetClothing(self, type, "", true)
+end
+
+function Skinner:CopySkinsFromPlayer(player)
+	-- NOTES(JBK): This assumes things please be careful.
+	local onto = self.inst
+
+	-- Grab skins and validate with AnimState.
+	local skins = player.components.skinner:GetClothing()
+	onto.AnimState:AssignItemSkins(player.userid, skins.base or "", skins.body or "", skins.hand or "", skins.legs or "", skins.feet or "")
+
+	-- Grab details used to apply.
+	local monkey_curse = player.components.skinner:GetMonkeyCurse()
+	local skin_mode = player.components.skinner:GetSkinMode()
+
+	-- For legacy mod support, this part is like this.
+	local skindata = GetSkinData(skins.base)
+	local base_skin = player.prefab --.. "_none"
+	if skindata.skins ~= nil then
+		base_skin = skindata.skins[skin_mode] or base_skin
+	end
+
+	-- Paste it and hope nothing has went wrong.
+	SetSkinsOnAnim(onto.AnimState, player.prefab, base_skin, skins, monkey_curse, skin_mode, player.prefab)
 end
 
 function Skinner:OnSave()

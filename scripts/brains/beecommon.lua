@@ -13,20 +13,23 @@ local function OnAttacked(inst, data)
     local attacker = data and data.attacker
     inst.components.combat:SetTarget(attacker)
     local targetshares = MAX_TARGET_SHARES
-    if inst.components.homeseeker and inst.components.homeseeker.home then
-        local home = inst.components.homeseeker.home
-        if home and home.components.childspawner then
-            targetshares = targetshares - home.components.childspawner.childreninside
-            home.components.childspawner:ReleaseAllChildren(attacker, "killerbee")
+    if inst.components.combat:HasTarget() then
+        if inst.components.homeseeker and inst.components.homeseeker.home then
+            local home = inst.components.homeseeker.home
+            if home and home.components.childspawner then
+                targetshares = targetshares - home.components.childspawner.childreninside
+                home.components.childspawner:ReleaseAllChildren(attacker, "killerbee")
+            end
         end
     end
+    local iscompanion = inst:HasTag("companion")
     inst.components.combat:ShareTarget(attacker, SHARE_TARGET_DIST, function(dude)
         if inst.components.homeseeker and dude.components.homeseeker then  --don't bring bees from other hives
             if dude.components.homeseeker.home and dude.components.homeseeker.home ~= inst.components.homeseeker.home then
                 return false
             end
         end
-        return dude:HasTag("bee") and not (dude:IsInLimbo() or dude.components.health:IsDead() or dude:HasTag("epic"))
+        return dude:HasTag("bee") and (iscompanion == dude:HasTag("companion")) and not (dude:IsInLimbo() or dude.components.health:IsDead() or dude:HasTag("epic"))
     end, targetshares)
 end
 

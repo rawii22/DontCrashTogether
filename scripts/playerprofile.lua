@@ -30,6 +30,7 @@ local PlayerProfile = Class(function(self)
         self.persistdata.volume_ambient = 7
         self.persistdata.volume_sfx = 7
         self.persistdata.volume_music = 7
+		self.persistdata.volume_muteonfocuslost = false
         self.persistdata.HUDSize = 5
         self.persistdata.CraftingMenuSize = 5
         self.persistdata.CraftingMenuNumPinPages = 3
@@ -50,6 +51,7 @@ local PlayerProfile = Class(function(self)
 		self.persistdata.threaded_renderer = true
 		self.persistdata.bloom = true
 		self.persistdata.distortion = true
+		self.persistdata.distortion_modifier = 1
 		self.persistdata.dynamic_tree_shadows = true
 		self.persistdata.autopause = true
 		self.persistdata.consoleautopause = true
@@ -79,6 +81,7 @@ function PlayerProfile:Reset()
         self.persistdata.volume_ambient = 7
         self.persistdata.volume_sfx = 7
         self.persistdata.volume_music = 7
+		self.persistdata.volume_muteonfocuslost = false
         self.persistdata.HUDSize = 5
         self.persistdata.CraftingMenuSize = 5
         self.persistdata.CraftingMenuNumPinPages = 3
@@ -99,6 +102,7 @@ function PlayerProfile:Reset()
 		self.persistdata.threaded_renderer = true
 		self.persistdata.bloom = true
 		self.persistdata.distortion = true
+		self.persistdata.distortion_modifier = 1
 		self.persistdata.dynamic_tree_shadows = true
 		self.persistdata.autopause = true
 		self.persistdata.consoleautopause = true
@@ -129,6 +133,7 @@ function PlayerProfile:SoftReset()
         self.persistdata.volume_ambient = 7
         self.persistdata.volume_sfx = 7
         self.persistdata.volume_music = 7
+		self.persistdata.volume_muteonfocuslost = false
         self.persistdata.HUDSize = 5
         self.persistdata.CraftingMenuSize = 5
         self.persistdata.CraftingMenuNumPinPages = 3
@@ -498,6 +503,15 @@ function PlayerProfile:SetVolume(ambient, sfx, music)
 	end
 end
 
+function PlayerProfile:SetMuteOnFocusLost(value)
+	if USE_SETTINGS_FILE then
+		TheSim:SetSetting("audio", "volume_muteonfocuslost", tostring(value))
+	else
+		self:SetValue("volume_muteonfocuslost", value)
+		self.dirty = true
+	end
+end
+
 function PlayerProfile:SetScreenFlash(value)
  	if USE_SETTINGS_FILE then
 		TheSim:SetSetting("graphics", "screenflash", tostring(value))
@@ -648,6 +662,23 @@ function PlayerProfile:GetDistortionEnabled()
 	else
 		return self:GetValue("distortion") ~= false
 	end
+end
+
+function PlayerProfile:SetDistortionModifier(modifier)
+	if USE_SETTINGS_FILE then
+	   TheSim:SetSetting("graphics", "distortion_modifier", tostring(modifier))
+   else
+	   self:SetValue("distortion_modifier", modifier)
+	   self.dirty = true
+   end
+end
+
+function PlayerProfile:GetDistortionModifier()
+	if USE_SETTINGS_FILE then
+	   return tonumber(TheSim:GetSetting("graphics", "distortion_modifier") or 0.75)
+   else
+	   return tonumber(self:GetValue("distortion_modifier") or 0.75)
+   end
 end
 
 function PlayerProfile:SetScreenShakeEnabled(enabled)
@@ -1348,6 +1379,14 @@ function PlayerProfile:GetVolume()
 	end
 end
 
+function PlayerProfile:GetMuteOnFocusLost()
+	if USE_SETTINGS_FILE then
+		return TheSim:GetSetting("audio", "volume_muteonfocuslost") == "true"
+	else
+		return GetValueOrDefault(self.persistdata.volume_muteonfocuslost, false)
+	end
+end
+
 
 function PlayerProfile:SetRenderQuality(quality)
 	self:SetValue("render_quality", quality)
@@ -1498,6 +1537,7 @@ function PlayerProfile:Set(str, callback, minimal_load)
                 self.persistdata.volume_ambient = 7
                 self.persistdata.volume_sfx = 7
                 self.persistdata.volume_music = 7
+				self.persistdata.volume_muteonfocuslost = false
                 self.persistdata.HUDSize = 5
                 self.persistdata.CraftingMenuSize = 5
                 self.persistdata.CraftingMenuNumPinPages = 3
@@ -1527,7 +1567,7 @@ function PlayerProfile:Set(str, callback, minimal_load)
 
 		if TheFrontEnd then
 			local bloom_enabled = GetValueOrDefault( self.persistdata.bloom, true )
-			local distortion_enabled = GetValueOrDefault( self.persistdata.distortion, true )
+			local distortion_modifier = GetValueOrDefault( self.persistdata.distortion_modifier, 0.75 )
 
  	        if USE_SETTINGS_FILE then
 				-- Copy over old settings
@@ -1535,7 +1575,8 @@ function PlayerProfile:Set(str, callback, minimal_load)
 					print("Copying render settings from profile to settings.ini")
 
 					self:SetBloomEnabled(bloom_enabled)
-					self:SetDistortionEnabled(distortion_enabled)
+					self:SetDistortionEnabled(distortion_modifier>0)
+					self:SetDistortionModifier(distortion_modifier)
 					self:SetHUDSize(self.persistdata.HUDSize)
 					self.persistdata.bloom = nil
 					self.persistdata.distortion = nil
@@ -1543,12 +1584,12 @@ function PlayerProfile:Set(str, callback, minimal_load)
 					self.dirty = true
 				else
 					bloom_enabled = self:GetBloomEnabled()
-					distortion_enabled = self:GetDistortionEnabled()
+					distortion_modifier = self:GetDistortionModifier()
 				end
 			end
 			print("bloom_enabled",bloom_enabled)
 			PostProcessor:SetBloomEnabled( bloom_enabled )
-			PostProcessor:SetDistortionEnabled( distortion_enabled )
+			PostProcessor:SetDistortionEnabled( distortion_modifier>0 )
 
 			EnableShadeRenderer( self:GetDynamicTreeShadowsEnabled() )
 		end

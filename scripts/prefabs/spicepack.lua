@@ -27,6 +27,12 @@ local function onunequip(inst, owner)
     end
 end
 
+local function onequiptomodel(inst, owner)
+    if inst.components.container ~= nil then
+        inst.components.container:Close(owner)
+    end
+end
+
 local function onburnt(inst)
     if inst.components.container ~= nil then
         inst.components.container:DropEverything()
@@ -73,6 +79,8 @@ local function fn()
 
     inst.foleysound = "dontstarve/movement/foley/backpack"
 
+    MakeInventoryFloatable(inst, "small", 0.15, 0.85)
+
     inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
@@ -88,6 +96,7 @@ local function fn()
     inst.components.equippable.equipslot = EQUIPSLOTS.BODY
     inst.components.equippable:SetOnEquip(onequip)
     inst.components.equippable:SetOnUnequip(onunequip)
+    inst.components.equippable:SetOnEquipToModel(onequiptomodel)
 
     inst:AddComponent("container")
     inst.components.container:WidgetSetup("spicepack")

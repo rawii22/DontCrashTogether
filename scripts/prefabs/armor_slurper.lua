@@ -21,6 +21,14 @@ local function onunequip(inst, owner)
     inst.components.fueled:StopConsuming()
 end
 
+local function onequiptomodel(inst, owner, from_ground)
+    if owner.components.hunger ~= nil then
+        owner.components.hunger.burnratemodifiers:RemoveModifier(inst)
+    end
+
+    inst.components.fueled:StopConsuming()
+end
+
 local function fn()
     local inst = CreateEntity()
 
@@ -36,6 +44,9 @@ local function fn()
 
     inst:AddTag("fur")
     inst:AddTag("ruins")
+
+	--shadowlevel (from shadowlevel component) added to pristine state for optimization
+	inst:AddTag("shadowlevel")
 
     inst.foleysound = "dontstarve/movement/foley/fur"
 
@@ -63,6 +74,10 @@ local function fn()
 
     inst.components.equippable:SetOnEquip(onequip)
     inst.components.equippable:SetOnUnequip(onunequip)
+    inst.components.equippable:SetOnEquipToModel(onequiptomodel)
+
+	inst:AddComponent("shadowlevel")
+	inst.components.shadowlevel:SetDefaultLevel(TUNING.ARMORSLURPER_SHADOW_LEVEL)
 
     MakeHauntableLaunch(inst)
 

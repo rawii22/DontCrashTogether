@@ -64,6 +64,8 @@ return{
 			KITCOON_HIDEANDSEEK_NOT_ENOUGH_HIDERS = "Need more scratchy fluffies to play!",
 			KITCOON_HIDEANDSEEK_NOT_ENOUGH_HIDING_SPOTS = "Hmm, no good hidey spots here.",
 			KITCOON_HIDEANDSEEK_ONE_GAME_PER_DAY = "Glurgh. Bored of this game.",
+            MANNEQUIN_EQUIPSWAPFAILED = "Not supposed to put that there.",
+            PILLOWFIGHT_NO_HANDPILLOW = "WAIT!! Forgot pillow!",
 		},
 		OPEN_CRAFTING =
 		{
@@ -98,8 +100,19 @@ return{
         --wickerbottom specific action
 --fallback to speech_wilson.lua         READ =
 --fallback to speech_wilson.lua         {
---fallback to speech_wilson.lua             GENERIC = "only_used_by_wickerbottom",
---fallback to speech_wilson.lua             NOBIRDS = "only_used_by_wickerbottom",
+--fallback to speech_wilson.lua             GENERIC = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOWATERNEARBY = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             TOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             WAYTOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOFIRES =       "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOSILVICULTURE = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOHORTICULTURE = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOTENTACLEGROUND = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOSLEEPTARGETS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             TOOMANYBEES = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOMOONINCAVES = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             ALREADYFULLMOON = "only_used_by_waxwell_and_wicker",
 --fallback to speech_wilson.lua         },
 
         GIVE =
@@ -372,6 +385,16 @@ return{
         {
             DOER_ISNT_MODULE_OWNER = "Glurph. You boring!",
         },
+
+		CAST_SPELLBOOK =
+		{
+--fallback to speech_wilson.lua 			NO_TOPHAT = "only_used_by_waxwell",
+		},
+
+		CASTAOE =
+		{
+--fallback to speech_wilson.lua 			NO_MAX_SANITY = "only_used_by_waxwell",
+		},
     },
 
 	ANNOUNCE_CANNOT_BUILD =
@@ -392,6 +415,14 @@ return{
     --waxwell and wickerbottom specific strings
 --fallback to speech_wilson.lua     ANNOUNCE_TOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
 --fallback to speech_wilson.lua     ANNOUNCE_WAYTOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua     ANNOUNCE_NOWATERNEARBY = "only_used_by_waxwell_and_wicker",
+
+	--waxwell specific
+--fallback to speech_wilson.lua 	ANNOUNCE_SHADOWLEVEL_ITEM = "only_used_by_waxwell",
+--fallback to speech_wilson.lua 	ANNOUNCE_EQUIP_SHADOWLEVEL_T1 = "only_used_by_waxwell",
+--fallback to speech_wilson.lua 	ANNOUNCE_EQUIP_SHADOWLEVEL_T2 = "only_used_by_waxwell",
+--fallback to speech_wilson.lua 	ANNOUNCE_EQUIP_SHADOWLEVEL_T3 = "only_used_by_waxwell",
+--fallback to speech_wilson.lua 	ANNOUNCE_EQUIP_SHADOWLEVEL_T4 = "only_used_by_waxwell",
 
     --wolfgang specific
 --fallback to speech_wilson.lua     ANNOUNCE_NORMALTOMIGHTY = "only_used_by_wolfang",
@@ -455,6 +486,8 @@ return{
 --fallback to speech_wilson.lua         SAME_OLD_5 = "only_used_by_warly",
 --fallback to speech_wilson.lua 		TASTY = "only_used_by_warly",
     },
+
+	ANNOUNCE_FOODMEMORY = "only_used_by_warly",
 
     ANNOUNCE_ENCUMBERED =
     {
@@ -575,6 +608,7 @@ return{
     ANNOUNCE_REVIVED_FROM_CORPSE = "G-glurp... that was scary.",
 
     ANNOUNCE_FLARE_SEEN = "Fire in sky??",
+    ANNOUNCE_MEGA_FLARE_SEEN = "Grrr... what that big scary fire in sky?!",
     ANNOUNCE_OCEAN_SILHOUETTE_INCOMING = "Someone coming?",
 
     --willow specific
@@ -704,6 +738,19 @@ return{
         BOOK_GARDENING = "So many hard words...",
 		BOOK_SILVICULTURE = "Is whole story about trees? Me know about trees!",
 		BOOK_HORTICULTURE = "So many hard words...",
+
+        BOOK_FISH = "Is best book! Has fishies in it!",
+        BOOK_FIRE = "Glurp, fire scary!",
+        BOOK_WEB = "Hey Webby-boy! Me learning all the Spiderfolk secrets!",
+        BOOK_TEMPERATURE = "The... m-measure of th... theer-mole energy...",
+        BOOK_LIGHT = "Heeyyy, these words different!",
+        BOOK_RAIN = "Can tell rain what to do? Wanna try!!",
+        BOOK_MOON = "Huh. Moon actually kinda boring.",
+        BOOK_BEES = "Aww... no honey inside...",
+
+        BOOK_HORTICULTURE_UPGRADED = "M-maybe will find easier book...",
+        BOOK_RESEARCH_STATION = "It really hard to read, but feel smart holding it, florp!",
+        BOOK_LIGHT_UPGRADED = "There more than one kind of words to learn?! Glurgh...",
     },
     ANNOUNCE_WEAK_RAT = "It not look so good...",
 
@@ -829,6 +876,12 @@ return{
 
     ANNOUNCE_PIRATES_ARRIVE = "Sound like somebody having fun over there! Wanna see!",
 
+--fallback to speech_wilson.lua     ANNOUNCE_BOOK_MOON_DAYTIME = "only_used_by_waxwell_and_wicker",
+
+    ANNOUNCE_OFF_SCRIPT = "Hee-hee, you messed up play!",
+
+    ANNOUNCE_COZY_SLEEP = "Aww, was having such good dream...",
+
 	BATTLECRY =
 	{
 		GENERIC = "Not scared of you, florp!",
@@ -900,6 +953,11 @@ return{
         BERNIE_ACTIVE = "Wanna play with it!",
         BERNIE_BIG = "Fun toy, flurp!",
 
+		BOOKSTATION =
+		{
+			GENERIC = "Glurgh. Why put books up so high?!",
+			BURNT = "D-didn't do it, promise!! Please don't be sad, Wicker-lady...",
+		},
         BOOK_BIRDS = "Read this one, Wicker-lady!",
         BOOK_TENTACLES = "Remind me of home, florp.",
         BOOK_GARDENING = "A... appled...? (Sigh)",
@@ -907,6 +965,21 @@ return{
 		BOOK_HORTICULTURE = "What does bridge have to do with plants, florp?",
         BOOK_SLEEP = "Want bedtime story!",
         BOOK_BRIMSTONE = "Where Wicker-lady? Want to know what happen next!",
+
+        BOOK_FISH = "Tell me fishy story!",
+        BOOK_FIRE = "What this one about?",
+        BOOK_WEB = "It about Spiderfolk? Why no book about Mermfolk?!",
+        BOOK_TEMPERATURE = "Tem... per... atoor?",
+        BOOK_LIGHT = "Huh? What that say?",
+        BOOK_RAIN = "What a ritual?",
+        BOOK_MOON = "Oooh, moon stuff!",
+        BOOK_BEES = "Wicker-lady! Wanna read about honey! ...Please.",
+        
+        BOOK_HORTICULTURE_UPGRADED = "Extra-ended? It look more like extra added.",
+        BOOK_RESEARCH_STATION = "Glurp... that one look extra full of words...",
+        BOOK_LIGHT_UPGRADED = "Oooh, this look fancy.",
+
+        FIREPEN = "Wicker-lady say no touch. But maybe she not looking...",
 
         PLAYER =
         {
@@ -1399,7 +1472,19 @@ return{
 
         TURF_SHELLBEACH = "Ground bit.",
 
+		TURF_RUINSBRICK = "Ground bit.",
+		TURF_RUINSBRICK_GLOW = "Ground bit.",
+		TURF_RUINSTILES = "Ground bit.",
+		TURF_RUINSTILES_GLOW = "Ground bit.",
+		TURF_RUINSTRIM = "Ground bit.",
+		TURF_RUINSTRIM_GLOW = "Ground bit.",
+
         TURF_MONKEY_GROUND = "Ground bit.",
+
+        TURF_CARPETFLOOR2 = "Fuzzy ground.",
+        TURF_MOSAIC_GREY = "Ground bit.",
+        TURF_MOSAIC_RED = "Ground bit.",
+        TURF_MOSAIC_BLUE = "Ground bit.",
 
 		POWCAKE = "Gives tummy-ache, but... smell so good...",
         CAVE_ENTRANCE = "There rocks in the way.",
@@ -1583,6 +1668,10 @@ return{
             RARE = "Look really complicated, florp.",
         },
         SKETCH = "Oooh, picture!",
+		COOKINGRECIPECARD = 
+		{
+			GENERIC = "Glurgh... can't read it!",
+		},
 		BLUE_CAP = "Good for belly, bad for head.",
 		BLUE_CAP_COOKED = "It smell different...",
 		BLUE_MUSHROOM =
@@ -1607,6 +1696,7 @@ return{
 		BUZZARD = "Pretty bird!",
 
 		SHADOWDIGGER = "He use the bad magic!!",
+        SHADOWDANCER = "Grrr! What it doing? Why it move like that?!",
 
 		CACTUS =
 		{
@@ -1699,6 +1789,7 @@ return{
         CHESSPIECE_BEEFALO = "It just rock, real thing better.",
 		CHESSPIECE_KITCOON = "Aww, they having a nap.",
 		CHESSPIECE_CATCOON = "It pretty good statue, has dead butterfly!",
+        CHESSPIECE_MANRABBIT = "Glurgh. Bunnyman get statue before Mermfolk?!",
         CHESSPIECE_GUARDIANPHASE3 = "Glorp! Oh, it not real.",
         CHESSPIECE_EYEOFTERROR = "Oh no... got dried out, glorp...",
         CHESSPIECE_TWINSOFTERROR = "Ha ha, they just rocks now!",
@@ -1768,6 +1859,7 @@ return{
 		},
         GOGGLESHAT = "Feel silly, flurp.",
         DESERTHAT = "Hate desert, but this help a bit.",
+        ANTLIONHAT = "Get rid of dumb grass and stuff, make room for more swamp!",
 		DEVTOOL = "Like this!",
 		DEVTOOL_NODEV = "Can't do it, flurt.",
 		DIRTPILE = "Somebody in there?",
@@ -2793,6 +2885,34 @@ return{
         },
         BEEFALO_GROOMER_ITEM = "Buildy pieces.",
 
+        YOTR_RABBITSHRINE =
+        {
+            GENERIC = "Gimme stuff, big rabbit head!",
+            EMPTY = "Rabbit want carrot?",
+            BURNT = "Uh oh...",
+        },
+
+        NIGHTCAPHAT = "Sleepy-time hat.",
+
+        YOTR_FOOD1 = "Grrr, will gobble you up, rabbit! Hee-hee.",
+        YOTR_FOOD2 = "Yummy!",
+        YOTR_FOOD3 = "That really okay for eating?",
+        YOTR_FOOD4 = "Not sharing!",
+
+        YOTR_TOKEN = "Hee-hee-hee... SMACK!",
+
+        COZY_BUNNYMAN = "Hey! What they doing up here?",
+
+        HANDPILLOW_BEEFALOWOOL = "Blegh, it full of hair!",
+        HANDPILLOW_KELP = "Ahh, slimy and nice!",
+        HANDPILLOW_PETALS = "Stinky ugly pillow!",
+        HANDPILLOW_STEELWOOL = "It good fighting pillow, nice and scratchy!",
+
+        BODYPILLOW_BEEFALOWOOL = "Blegh, it full of hair!",
+        BODYPILLOW_KELP = "Ahh, slimy and nice!",
+        BODYPILLOW_PETALS = "Stinky ugly pillow!",
+        BODYPILLOW_STEELWOOL = "Glurgh! Itchy!!",
+
 		BISHOP_CHARGE_HIT = "GLOP!",
 		TRUNKVEST_SUMMER = "Wearing a nose!",
 		TRUNKVEST_WINTER = "Cozy...",
@@ -2850,7 +2970,11 @@ return{
 		WATERMELON = "Gimme!!",
 		WATERMELON_COOKED = "Roasty melon.",
 		WATERMELONHAT = "Think me like fa-shun, florp!",
-		WAXWELLJOURNAL = "...Don't like stories in that book.",
+		WAXWELLJOURNAL =
+		{
+			GENERIC = "...Don't like stories in that book.",
+--fallback to speech_wilson.lua 			NEEDSFUEL = "only_used_by_waxwell",
+		},
 		WETGOOP = "Usually like wet goopy things...",
         WHIP = "Whi-chaaa!!",
 		WINTERHAT = "It look cozy!",
@@ -3379,6 +3503,7 @@ return{
         ICEBERG_MELTED = "All melty!", --unimplemented
 
         MINIFLARE = "Sparky!",
+        MEGAFLARE = "Make big angry sparks in sky.",
 
 		MOON_FISSURE =
 		{
@@ -4470,6 +4595,13 @@ return{
 
         SCANDATA = "Glurgh... can Wicker-lady read it?",
 
+		-- QOL 2022
+		JUSTEGGS = "Blegh!",
+		VEGGIEOMLET = "Glurgh, eggy goop all over it!",
+		TALLEGGS = "Nuh-uh.",
+		BEEFALOFEED = "Big fuzzy! Have sticks for you!",
+		BEEFALOTREAT = "Mmmm, look yummy and crunchy!",
+
         -- Pirates
         BOAT_ROTATOR = "Wanna make boat spin faster! Faster!!",
         BOAT_ROTATOR_KIT = "It boat stuff.",
@@ -4544,8 +4676,73 @@ return{
         PIRATE_STASH = "Found it! Mine!!",
         STASH_MAP = "It show where stuff hiding? Gonna get it first, florp!",
 
-
         BANANAJUICE = "It sweet and slurpy, florp!",
+
+        FENCE_ROTATOR = "Spinny pokey stick!",
+
+        CHARLIE_STAGE_POST = "Hmm, that look important, florp.",
+        CHARLIE_LECTURN = "Act out make-believe stories? Wanna try!!",
+
+        CHARLIE_HECKLER = "Hey! No make fun of scale-less, that job mine!",
+
+        PLAYBILL_THE_DOLL = "Too many words to remember, florp.",
+        STATUEHARP_HEDGESPAWNER = "It look broken. Didn't do it!",
+        HEDGEHOUND = "Sneaky doggy! Bad!",
+        HEDGEHOUND_BUSH = "Glurgh, it full of ugly flowers.",
+
+        MASK_DOLLHAT = "Look like scale-less disguise.",
+        MASK_DOLLBROKENHAT = "Look like scale-less disguise.",
+        MASK_DOLLREPAIREDHAT = "Look like scale-less disguise.",
+        MASK_BLACKSMITHHAT = "Look like scale-less disguise.",
+        MASK_MIRRORHAT = "Look like scale-less disguise.",
+        MASK_QUEENHAT = "Look like scale-less disguise.",
+        MASK_KINGHAT = "Look like scale-less disguise.",
+        MASK_TREEHAT = "Look like scale-less disguise.",
+        MASK_FOOLHAT = "Look like scale-less disguise.",
+
+        COSTUME_DOLL_BODY = "Blegh, it stink like flowers, florp!",
+        COSTUME_QUEEN_BODY = "Blegh, it stink like flowers, florp!",
+        COSTUME_KING_BODY = "Blegh, it stink like flowers, florp!",
+        COSTUME_BLACKSMITH_BODY = "Blegh, it stink like flowers, florp!",
+        COSTUME_MIRROR_BODY = "Blegh, it stink like flowers, florp!",
+        COSTUME_TREE_BODY = "Blegh, it stink like flowers, florp!",
+        COSTUME_FOOL_BODY = "Blegh, it stink like flowers, florp!",
+
+        STAGEUSHER =
+        {
+            STANDING = "Leeme alone, flort!!",
+            SITTING = "Something... weird...",
+        },
+        SEWING_MANNEQUIN =
+        {
+            GENERIC = "Quit staring, flort!",
+            BURNT = "Good. Won't stare anymore, florp.",
+        },
+
+		-- Waxwell
+		MAGICIAN_CHEST = "Magic hidey-place.",
+		TOPHAT_MAGICIAN = "Glurgh, fancy hat got all gloopy.",
+
+        -- Year of the Rabbit
+        YOTR_FIGHTRING_KIT = "We allowed to hit things? Yay!!",
+        YOTR_FIGHTRING_BELL =
+        {
+            GENERIC = "Hee-hee! Who wanna fight!?",
+            PLAYING = "Me next, me next!!",
+        },
+
+        YOTR_DECOR_1 = {
+            GENERAL = "Ugly light statue.",
+            OUT = "Where light? Bunnyman not doing job!",
+        },
+        YOTR_DECOR_2 = {
+            GENERAL = "Ugly light statue.",
+            OUT = "Where light? Bunnyman not doing job!",
+        },
+
+        HAREBALL = "Glurgh, Bunnyman spit-up!",
+        YOTR_DECOR_1_ITEM = "Mermfolk light would be better.",
+        YOTR_DECOR_2_ITEM = "Mermfolk light would be better.",             
     },
 
     DESCRIBE_GENERIC = "What that?",

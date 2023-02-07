@@ -90,6 +90,8 @@ end
 --[[ shadowchester ]]
 --------------------------------------------------------------------------
 
+--Deprecated; keep definition for dragonflychest, minotaurchest, mods,
+--and also for legacy save data
 params.shadowchester =
 {
     widget =
@@ -109,6 +111,15 @@ for y = 2.5, -0.5, -1 do
     end
 end
 
+params.shadow_container = deepcopy(params.shadowchester)
+params.shadow_container.widget.animbank = "ui_portal_shadow_3x4"
+params.shadow_container.widget.animbuild = "ui_portal_shadow_3x4"
+params.shadow_container.widget.animloop = true
+
+function params.shadow_container.itemtestfn(container, item, slot)
+    return not item:HasTag("irreplaceable")
+end
+
 --------------------------------------------------------------------------
 --[[ hutch ]]
 --------------------------------------------------------------------------
@@ -125,7 +136,7 @@ params.wobysmall =
     widget =
     {
         slotpos = {},
-        animbank = "ui_chester_shadow_3x4",
+        animbank = "ui_woby_3x3",
         animbuild = "ui_woby_3x3",
         pos = Vector3(0, 200, 0),
         side_align_tip = 160,
@@ -180,7 +191,6 @@ params.yotb_sewingmachine =
 }
 
 function params.yotb_sewingmachine.itemtestfn(container, item, slot)
-    --TODO: check if we actually accept the item
     return item:HasTag("yotb_pattern_fragment")
 end
 
@@ -458,6 +468,7 @@ end
 
 params.winter_twiggytree = params.winter_tree
 params.winter_deciduoustree = params.winter_tree
+params.winter_palmconetree = params.winter_tree
 
 --------------------------------------------------------------------------
 --[[ sisturn ]]
@@ -691,7 +702,6 @@ end
 
 params.pandoraschest = params.treasurechest
 params.skullchest = params.treasurechest
-params.minotaurchest = params.treasurechest
 params.terrariumchest = params.treasurechest
 params.sunkenchest = params.treasurechest
 
@@ -699,7 +709,39 @@ params.quagmire_safe = deepcopy(params.treasurechest)
 params.quagmire_safe.widget.animbank = "quagmire_ui_chest_3x3"
 params.quagmire_safe.widget.animbuild = "quagmire_ui_chest_3x3"
 
+--------------------------------------------------------------------------
+--[[ dragonflychest ]]
+--------------------------------------------------------------------------
+
 params.dragonflychest = params.shadowchester
+params.minotaurchest = params.shadowchester
+
+--------------------------------------------------------------------------
+--[[ antlionhat ]]
+--------------------------------------------------------------------------
+
+params.antlionhat =
+{
+    widget =
+    {
+        slotpos = {
+            Vector3(0, 2, 0),
+        },
+        slotbg =
+        {
+            { image = "turf_slot.tex", atlas = "images/hud2.xml" },
+        },
+        animbank = "ui_antlionhat_1x1",
+        animbuild = "ui_antlionhat_1x1",
+        pos = Vector3(106, 40, 0),
+    },
+    type = "hand_inv",
+    excludefromcrafting = true,
+}
+
+function params.antlionhat.itemtestfn(container, item, slot)
+    return item:HasTag("groundtile") and item.tile
+end
 
 --------------------------------------------------------------------------
 --[[ fish_box ]]
@@ -710,8 +752,8 @@ params.fish_box =
     widget =
     {
         slotpos = {},
-        animbank = "ui_fish_box_3x4",
-        animbuild = "ui_fish_box_3x4",
+        animbank = "ui_fish_box_5x4",
+        animbuild = "ui_fish_box_5x4",
         pos = Vector3(0, 220, 0),
         side_align_tip = 160,
     },
@@ -719,7 +761,7 @@ params.fish_box =
 }
 
 for y = 2.5, -0.5, -1 do
-    for x = 0, 2 do
+    for x = -1, 3 do
         table.insert(params.fish_box.widget.slotpos, Vector3(75 * x - 75 * 2 + 75, 75 * y - 75 * 2 + 75, 0))
     end
 end
@@ -1041,6 +1083,34 @@ params.ocean_trawler =
 
 function params.ocean_trawler.itemtestfn(container, item, slot)
     return item:HasTag("cookable") or item:HasTag("oceanfish")
+end
+
+--------------------------------------------------------------------------
+--[[ bookstation ]]
+--------------------------------------------------------------------------
+
+params.bookstation =
+{
+    widget =
+    {
+        slotpos = {},
+        animbank = "ui_bookstation_4x5",
+        animbuild = "ui_bookstation_4x5",
+        pos = Vector3(0, 280, 0),
+        side_align_tip = 160,
+    },
+    type = "chest",
+}
+
+for y = 0, 4 do
+    table.insert(params.bookstation.widget.slotpos, Vector3(-114      , (-77 * y) + 37 - (y * 2), 0))
+    table.insert(params.bookstation.widget.slotpos, Vector3(-114 + 75 , (-77 * y) + 37 - (y * 2), 0))
+    table.insert(params.bookstation.widget.slotpos, Vector3(-114 + 150, (-77 * y) + 37 - (y * 2), 0))
+    table.insert(params.bookstation.widget.slotpos, Vector3(-114 + 225, (-77 * y) + 37 - (y * 2), 0))
+end
+
+function params.bookstation.itemtestfn(container, item, slot)
+    return item:HasTag("bookcabinet_item")
 end
 
 --------------------------------------------------------------------------

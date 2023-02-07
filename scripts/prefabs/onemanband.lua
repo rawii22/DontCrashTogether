@@ -112,6 +112,14 @@ local function onunequip(inst, owner)
     band_disable(inst)
 end
 
+local function onequiptomodel(inst, owner)
+    if owner then
+        inst.components.fueled:StopConsuming()
+    end
+
+    band_disable(inst)
+end
+
 local function fn()
     local inst = CreateEntity()
 
@@ -123,6 +131,9 @@ local function fn()
     MakeInventoryPhysics(inst)
 
     inst:AddTag("band")
+
+	--shadowlevel (from shadowlevel component) added to pristine state for optimization
+	inst:AddTag("shadowlevel")
 
     inst.AnimState:SetBank("onemanband")
     inst.AnimState:SetBuild("armor_onemanband")
@@ -156,6 +167,10 @@ local function fn()
 
     inst.components.equippable:SetOnEquip(onequip)
     inst.components.equippable:SetOnUnequip(onunequip)
+    inst.components.equippable:SetOnEquipToModel(onequiptomodel)
+
+	inst:AddComponent("shadowlevel")
+	inst.components.shadowlevel:SetDefaultLevel(TUNING.ONEMANBAND_SHADOW_LEVEL)
 
     inst:AddComponent("leader")
 

@@ -302,6 +302,7 @@ local function SetNormalPig(inst)
 
     inst.components.combat:SetDefaultDamage(TUNING.PIG_DAMAGE)
     inst.components.combat:SetAttackPeriod(TUNING.PIG_ATTACK_PERIOD)
+    inst.components.combat:SetNoAggroTags(nil)
     inst.components.combat:SetKeepTargetFunction(NormalKeepTargetFn)
     inst.components.locomotor.runspeed = TUNING.PIG_RUN_SPEED
     inst.components.locomotor.walkspeed = TUNING.PIG_WALK_SPEED
@@ -349,7 +350,7 @@ local function GuardRetargetFn(inst)
         if not TheWorld.state.isday and home ~= nil and home.components.burnable ~= nil and home.components.burnable:IsBurning() then
             local lightThief = FindEntity(
                 home,
-                home.components.burnable:GetLargestLightRadius(),
+                home.components.burnable:GetLargestLightRadius() or 4,
                 function(guy)
                     return guy:IsInLight()
                         and not (defenseTarget.components.trader ~= nil and defenseTarget.components.trader:IsTryingToTradeWithMe(guy))
@@ -413,6 +414,7 @@ local function SetGuardPig(inst)
     inst.components.health:SetMaxHealth(TUNING.PIG_GUARD_HEALTH)
     inst.components.combat:SetDefaultDamage(TUNING.PIG_GUARD_DAMAGE)
     inst.components.combat:SetAttackPeriod(TUNING.PIG_GUARD_ATTACK_PERIOD)
+    inst.components.combat:SetNoAggroTags(RETARGET_GUARD_CANT_TAGS)
     inst.components.combat:SetKeepTargetFunction(GuardKeepTargetFn)
     inst.components.combat:SetRetargetFunction(1, GuardRetargetFn)
     inst.components.combat:SetTarget(nil)
@@ -513,6 +515,7 @@ local function SetWerePig(inst)
 
     inst.components.health:SetMaxHealth(TUNING.WEREPIG_HEALTH)
     inst.components.combat:SetTarget(nil)
+    inst.components.combat:SetNoAggroTags(WEREPIG_RETARGET_CANT_TAGS)
     inst.components.combat:SetRetargetFunction(3, WerepigRetargetFn)
     inst.components.combat:SetKeepTargetFunction(WerepigKeepTargetFn)
 
@@ -776,6 +779,7 @@ local function OnMoonPetrify(inst)
         local x, y, z = inst.Transform:GetWorldPosition()
         local rot = inst.Transform:GetRotation()
         local name = inst.components.named.name
+        inst.components.inventory:DropEverything()
         inst:Remove()
         local gargoyle = SpawnPrefab(gargoyles[math.random(#gargoyles)])
         gargoyle.components.named:SetName(name)
@@ -787,6 +791,7 @@ end
 
 local function OnMoonTransformed(inst, data)
     inst.components.named:SetName(data.old.components.named.name)
+    data.old.components.inventory:TransferInventory(inst)
     inst.sg:GoToState("howl")
 end
 
@@ -818,6 +823,7 @@ local function moon()
 
     inst.components.health:SetMaxHealth(TUNING.WEREPIG_HEALTH)
     inst.components.combat:SetTarget(nil)
+    inst.components.combat:SetNoAggroTags(MOONPIG_RETARGET_CANT_TAGS)
     inst.components.combat:SetRetargetFunction(3, MoonpigRetargetFn)
     inst.components.combat:SetKeepTargetFunction(MoonpigKeepTargetFn)
 

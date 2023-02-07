@@ -3,7 +3,6 @@ require "behaviours/runaway"
 require "behaviours/wander"
 require "behaviours/doaction"
 require "behaviours/avoidlight"
-require "behaviours/panic"
 require "behaviours/attackwall"
 require "behaviours/useshield"
 
@@ -85,14 +84,13 @@ function SpiderBrain:OnStart()
 
     local pre_nodes = PriorityNode({
         BrainCommon.PanicWhenScared(self.inst, .3),
-        WhileNode(function() return self.inst.components.hauntable and self.inst.components.hauntable.panic end, "PanicHaunted", Panic(self.inst)),
-        WhileNode(function() return self.inst.components.health.takingfiredamage end, "OnFire", Panic(self.inst)),
+		BrainCommon.PanicTrigger(self.inst),
     })
 
     local post_nodes = PriorityNode({
         DoAction(self.inst, function() return InvestigateAction(self.inst) end ),
             
-        WhileNode(function() return TheWorld.state.iscaveday and not self.inst.summoned end, "IsDay",
+        WhileNode(function() return (TheWorld.state.iscaveday or self.inst._quaking) and not self.inst.summoned end, "IsDay",
                 DoAction(self.inst, function() return GoHomeAction(self.inst) end ) ),
         
         FaceEntity(self.inst, GetTraderFn, KeepTraderFn),

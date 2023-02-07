@@ -59,7 +59,7 @@ end
 function Mast:OnRemoveEntity()
 	local mast_sinking
 
-	if self.boat ~= nil and self.sink_fx ~= nil then
+	if self.sink_fx ~= nil and (self.boat_death or self.boat ~= nil) then
 		mast_sinking = SpawnPrefab(self.sink_fx)
     else
         mast_sinking = SpawnPrefab("collapse_small")
@@ -70,9 +70,7 @@ function Mast:OnRemoveEntity()
 		mast_sinking.Transform:SetPosition(x_pos, y_pos, z_pos)
 	end
 
-    if self ~= nil then
-        self:SetBoat(nil)
-    end
+	self:SetBoat(nil)
 end
 
 function Mast:SetReveseDeploy(set)
@@ -123,6 +121,9 @@ function Mast:SetBoat(boat)
         boat.components.boatphysics:AddMast(self)
         self.inst:ListenForEvent("onremove", self.OnBoatRemoved, boat)
         self.inst:ListenForEvent("death", self.OnBoatDeath, boat)
+		self.inst:RemoveTag("rotatableobject")
+	else
+		self.inst:AddTag("rotatableobject")
     end
 end
 
@@ -133,6 +134,7 @@ end
 
 function Mast:OnDeath()
 	if self.inst:IsValid() then
+		self.boat_death = true
 	    self.inst.SoundEmitter:KillSound("boat_movement")
         self:SetBoat(nil)
 	end
@@ -155,8 +157,7 @@ end
 function Mast:GetCurrentFurlUnits()
     local total_strength = 0
     for furler,strength in pairs(self.furlers) do
-        local active_time = TUNING.BOAT.MAST.HEAVABLE_ACTIVE_FRAME/30
-        if furler.AnimState:IsCurrentAnimation("pull_small_loop") or (furler.AnimState:IsCurrentAnimation("pull_big_loop") and furler.AnimState:GetCurrentAnimationTime() < active_time) then
+		if furler.AnimState:IsCurrentAnimation("pull_small_loop") or (furler.AnimState:IsCurrentAnimation("pull_big_loop") and furler.AnimState:GetCurrentAnimationFrame() < TUNING.BOAT.MAST.HEAVABLE_ACTIVE_FRAME) then
             total_strength = total_strength + strength
         end
     end

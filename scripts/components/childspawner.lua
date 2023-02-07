@@ -544,8 +544,11 @@ function ChildSpawner:DoQueuedSpawn()
 end
 
 function ChildSpawner:SpawnChild(target, prefab, radius)
+    if target and target.components.health and target.components.health:IsInvincible() then
+        return nil
+    end
     if not self:CanSpawn() then
-        return
+        return nil
     end
 
     local child = self:DoSpawnChild(target, prefab or self.childname, radius)
@@ -661,12 +664,19 @@ function ChildSpawner:OnChildKilled(child)
     end
 end
 
-function ChildSpawner:ReleaseAllChildren(target, prefab)
+function ChildSpawner:ReleaseAllChildren(target, prefab, radius)
+    --if target and target.components.health and target.components.health:IsInvincible() then
+	if target and target.components.health and target.components.health.invincible then
+		--health:IsInvincible() includes things with stategraph tag "temp_invincible"
+		--but those are like brief i-frames, and we should not skip for that
+        return
+    end
+
 	local failures = 0 -- prevent infinate loops when SpawnChild fails to spawn its child
     local children_released = {}
 
 	while self:CanSpawn() and failures < 3 do
-        local new_child = self:SpawnChild(target, prefab)
+        local new_child = self:SpawnChild(target, prefab, radius)
 
         if new_child == nil then
             failures = failures + 1
@@ -679,7 +689,7 @@ function ChildSpawner:ReleaseAllChildren(target, prefab)
 	failures = 0
 	self:UpdateMaxEmergencyCommit()
 	while self:CanEmergencySpawn() and failures < 3 do
-        local new_child = self:SpawnEmergencyChild(target, prefab)
+        local new_child = self:SpawnEmergencyChild(target, prefab, radius)
         if new_child == nil then
             failures = failures + 1
         else

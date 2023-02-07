@@ -14,6 +14,9 @@ local function FinalOffsetNegative1(inst)
     inst.AnimState:SetFinalOffset(-1)
 end
 
+local function UsePointFiltering(inst)
+	inst.AnimState:UsePointFiltering(true)
+end
 
 local function GroundOrientation(inst)
     inst.AnimState:SetOrientation(ANIM_ORIENTATION.OnGround)
@@ -454,6 +457,7 @@ local fx =
         build = "statue_ruins_fx",
         anim = "transform_nightmare",
         tintalpha = 0.6,
+		fn = UsePointFiltering,
     },
     {
         name = "statue_transition_2",
@@ -483,12 +487,21 @@ local fx =
         tintalpha = 0.6,
     },
     {
-        name = "shadow_despawn",
+        name = "cavehole_flick_warn",
+        bank = "attune_fx",
+        build = "attune_fx",
+        anim = "attune_in",
+        tint = Vector3(0, 0, 0),
+        tintalpha = 0.8,
+    },
+    {
+        name = "cavehole_flick",
         bank = "statue_ruins_fx",
         build = "statue_ruins_fx",
         anim = "transform_nightmare",
         sound = "dontstarve/maxwell/shadowmax_despawn",
-        tintalpha = 0.6,
+        tintalpha = 0.8,
+		fn = UsePointFiltering,
     },
     {
         name = "mole_move_fx",
@@ -500,14 +513,6 @@ local fx =
             return GetString(viewer, "DESCRIBE", { "MOLE", "UNDERGROUND" })
         end,
     },
-    --[[{
-        name = "sparklefx",
-        bank = "sparklefx",
-        build = "sparklefx",
-        anim = "sparkle",
-        sound = "dontstarve/common/chest_positive",
-        tintalpha = 0.6,
-    },]]
     {
         name = "chester_transform_fx",
         bank = "die_fx",
@@ -1269,6 +1274,12 @@ local fx =
         build = "redpouch",
         anim = "unwrap",
     },
+    {
+        name = "redpouch_yotr_unwrap",
+        bank = "redpouch_yotr",
+        build = "redpouch_yotr",
+        anim = "unwrap",
+    },    
     {
         name = "yotc_seedpacket_unwrap",
         bank = "bundle",
@@ -2288,39 +2299,6 @@ local fx =
         nofaced = true,
         fn = FinalOffsetNegative1,
     },
-    {
-        name = "mighty_gym_bell_fail_fx",
-        bank = "mighty_gym",
-        build = "mighty_gym",
-        anim = "gym_bell_fx",
-        nofaced = true,
-        fn = function(inst)
-            inst.AnimState:SetMultColour(1,0,0,1)
-            inst.AnimState:SetFinalOffset(1)
-        end,
-    },
-    {
-        name = "mighty_gym_bell_perfect_fx",
-        bank = "mighty_gym",
-        build = "mighty_gym",
-        anim = "gym_bell_fx",
-        nofaced = true,
-        fn = function(inst)
-            inst.AnimState:SetMultColour(1,1,1,1)
-            inst.AnimState:SetFinalOffset(1)
-        end,
-    },
-    {
-        name = "mighty_gym_bell_succeed_fx",
-        bank = "mighty_gym",
-        build = "mighty_gym",
-        anim = "gym_bell_fx",
-        nofaced = true,
-        fn = function(inst)
-            inst.AnimState:SetMultColour(1,1,0,1)
-            inst.AnimState:SetFinalOffset(1)
-        end,
-    },
 
     {
         name = "minotaur_blood1",
@@ -2419,7 +2397,6 @@ local fx =
         bank = "boat_grass",
         build = "boat_grass",
         anim = "erode",
-        animqueue = true,
         fn = function(inst)
             inst.AnimState:SetScale(0.75,0.75,0.75)
             inst.AnimState:SetSortOrder(ANIM_SORT_ORDER.OCEAN_BOAT)
@@ -2434,17 +2411,18 @@ local fx =
         bank = "boat_grass",
         build = "boat_grass",
         anim = "erode_water",
-        animqueue = true,
         fn = function(inst)
             inst.AnimState:SetScale(0.75,0.75,0.75)
             inst.AnimState:SetSortOrder(ANIM_SORT_ORDER.OCEAN_BOAT)
             inst.AnimState:SetFinalOffset(1)
             inst.AnimState:SetOrientation(ANIM_ORIENTATION.OnGround)
             inst.AnimState:SetLayer(LAYER_BACKGROUND)
-            inst.alpha = 1
-            inst:DoPeriodicTask(1/30*FRAMES, function(i)
-                inst.alpha = math.max(0,inst.alpha - (1/30))
-               inst.AnimState:SetMultColour(inst.alpha,inst.alpha,inst.alpha,inst.alpha)
+            local length = 18
+            local alpha = 1
+            local delta = 1 / length
+            local task = inst:DoPeriodicTask(0, function(inst)
+                alpha = math.max(0, alpha - delta)
+                inst.AnimState:SetMultColour(1, 1, 1, alpha)
             end)
         end,
         nofaced = true,
@@ -2516,7 +2494,7 @@ local fx =
         bank = "fx_dock_crackleandpop",
         build = "fx_dock_crackleandpop",
         anim = "pop",
-        sound = "monkeyisland/dock/break",
+        sound = "monkeyisland/dock/break2",
     },
 
     {
@@ -2544,6 +2522,193 @@ local fx =
         bank = "palmcone_leaf_fx_short",
         build = "palmcone_leaf_fx_short",
         anim = "chop",
+    },
+
+    {
+        name =  "fx_book_moon",
+        bank =  "fx_book_moon",
+        build = "fx_book_moon",
+        anim =  "play_fx",
+        sound = "wickerbottom_rework/book_spells/moon",
+    },
+
+    {
+        name =  "fx_book_moon_mount",
+        bank =  "fx_book_moon",
+        build = "fx_book_moon",
+        anim =  "play_fx_mount",
+        sixfaced = true,
+        sound = "wickerbottom_rework/book_spells/moon",
+    },
+
+    {
+        name =  "fx_book_research_station",
+        bank =  "fx_book_research_station",
+        build = "fx_book_research_station",
+        anim =  "play_fx",
+        sound = "wickerbottom_rework/book_spells/researchstation",
+    },
+
+    {
+        name =  "fx_book_research_station_mount",
+        bank =  "fx_book_research_station",
+        build = "fx_book_research_station",
+        anim =  "play_fx_mount",
+        sixfaced = true,
+        sound = "wickerbottom_rework/book_spells/researchstation",
+    },
+
+    {
+        name =  "fx_book_temperature",
+        bank =  "fx_book_temperature",
+        build = "fx_book_temperature",
+        anim =  "play_fx",
+        sound = "wickerbottom_rework/book_spells/temp",
+    },
+
+    {
+        name =  "fx_book_temperature_mount",
+        bank =  "fx_book_temperature",
+        build = "fx_book_temperature",
+        anim =  "play_fx_mount",
+        sixfaced = true,
+        sound = "wickerbottom_rework/book_spells/temp",
+    },
+
+    {
+        name =  "fx_book_bees",
+        bank =  "fx_book_bees",
+        build = "fx_book_bees",
+        anim =  "play_fx",
+        sound = "wickerbottom_rework/book_spells/bees",
+    },
+
+    {
+        name =  "fx_book_fire",
+        bank =  "fx_book_fire",
+        build = "fx_book_fire",
+        anim =  "play_fx",
+        sound = "wickerbottom_rework/book_spells/fire",
+    },
+
+    {
+        name =  "fx_book_fire_mount",
+        bank =  "fx_book_fire",
+        build = "fx_book_fire",
+        anim =  "play_fx_mount",
+        sixfaced = true,
+        sound = "wickerbottom_rework/book_spells/fire",
+    },
+
+    {
+        name =  "fx_book_light",
+        bank =  "fx_book_light",
+        build = "fx_book_light",
+        anim =  "play_fx",
+        sound = "wickerbottom_rework/book_spells/light",
+    },
+
+    {
+        name =  "fx_book_light_upgraded",
+        bank =  "fx_book_light_upgraded",
+        build = "fx_book_light_upgraded",
+        anim =  "play_fx",
+        sound = "wickerbottom_rework/book_spells/light_upgrade",
+    },
+
+    {
+        name =  "fx_book_birds",
+        bank =  "fx_book_birds",
+        build = "fx_book_birds",
+        anim =  "play_fx",
+        sound = "wickerbottom_rework/book_spells/birds",
+    },
+
+    {
+        name =  "fx_book_birds_mount",
+        bank =  "fx_book_birds",
+        build = "fx_book_birds",
+        anim =  "play_fx_mount",
+        sixfaced = true,
+        sound = "wickerbottom_rework/book_spells/birds",
+    },
+
+    {
+        name =  "fx_book_sleep",
+        bank =  "fx_book_sleep",
+        build = "fx_book_sleep",
+        anim =  "play_fx",
+        sound = "wickerbottom_rework/book_spells/sleep",
+    },
+
+    {
+        name =  "fx_book_sleep_mount",
+        bank =  "fx_book_sleep",
+        build = "fx_book_sleep",
+        anim =  "play_fx_mount",
+        sixfaced = true,
+        sound = "wickerbottom_rework/book_spells/sleep",
+    },
+
+    {
+        name =  "fx_book_rain",
+        bank =  "fx_book_rain",
+        build = "fx_book_rain",
+        anim =  "play_fx",
+        sound = "wickerbottom_rework/book_spells/rain",
+    },
+
+    {
+        name =  "fx_book_rain_mount",
+        bank =  "fx_book_rain",
+        build = "fx_book_rain",
+        anim =  "play_fx_mount",
+        sixfaced = true,
+        sound = "wickerbottom_rework/book_spells/rain",
+    },
+
+    {
+        name =  "fx_book_fish",
+        bank =  "fx_book_fish",
+        build = "fx_book_fish",
+        anim =  "play_fx",
+        sound = "wickerbottom_rework/book_spells/fish",
+        fn = function(inst)
+            GroundOrientation(inst)
+            --inst.AnimState:SetOrientation(ANIM_ORIENTATION.OnGround)
+            inst.AnimState:SetSortOrder(ANIM_SORT_ORDER.OCEAN_BOAT_BUMPERS)
+            local length = 30
+            local alpha = 1
+            local delta = 1 / length
+            inst:DoPeriodicTask(0, function(i)
+                alpha = math.max(0, alpha - delta)
+                inst.AnimState:SetMultColour(1, 1, 1, alpha)
+            end, 0.75)
+        end
+    },
+
+    {
+        name =  "fence_rotator_fx",
+        bank =  "fence_rotator_fx",
+        build = "fence_rotator_fx",
+        anim =  "idle",
+        sound = "wickerbottom_rework/fence_rotator/use",
+        fn = FinalOffset1,
+    },
+
+    {
+        name = "turf_smoke_fx",
+        bank = "turf_smoke_fx",
+        build = "turf_smoke_fx",
+        anim = "fx",
+    },
+    {
+        name = "pillowfight_confetti_fx",
+        bank = "pillowfight_confetti",
+        build = "pillowfight_confetti",
+        anim = "out",
+        fn = FinalOffsetNegative1,
+        sound = "summerevent/cannon/fire1",
     },
 }
 
@@ -2581,15 +2746,16 @@ for j = 0, 3, 3 do
     end
 end
 
-local shot_types = {"rocks", "gold", "marble", "thulecite", "freeze", "slow", "poop", "trinket_1"}
+local shot_types = {"rock", "gold", "marble", "thulecite", "freeze", "slow", "poop", "trinket_1"}
 for _, shot_type in ipairs(shot_types) do
     table.insert(fx, {
         name = "slingshotammo_hitfx_"..shot_type,
         bank = "slingshotammo",
         build = "slingshotammo",
         anim = "used",
+        sound = "dontstarve/characters/walter/slingshot/"..shot_type,
         fn = function(inst)
-			if shot_type ~= "rocks" then
+			if shot_type ~= "rock" then
 		        inst.AnimState:OverrideSymbol("rock", "slingshotammo", shot_type)
 			end
 		    inst.AnimState:SetFinalOffset(3)

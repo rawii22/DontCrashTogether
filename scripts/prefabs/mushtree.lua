@@ -469,7 +469,7 @@ local function maketree(name, data, state)
 
         local color = .5 + math.random() * .5
         inst.AnimState:SetMultColour(color, color, color, 1)
-        inst.AnimState:SetTime(math.random() * 2)
+		inst.AnimState:SetFrame(math.random(inst.AnimState:GetCurrentAnimationNumFrames()) - 1)
 
         MakeMediumPropagator(inst)
         MakeLargeBurnable(inst)
@@ -499,7 +499,12 @@ local function maketree(name, data, state)
         inst.components.growable:SetStage(math.random(3))
         inst.components.growable.loopstages = true
         inst.components.growable.growonly = true
+        inst.components.growable.magicgrowable = true
         inst.components.growable:StartGrowing()
+
+        inst:AddComponent("simplemagicgrower")
+        inst.components.simplemagicgrower:SetLastStage(#inst.components.growable.stages-1)
+
 
         inst:AddComponent("plantregrowth")
         inst.components.plantregrowth:SetRegrowthRate(TUNING.MUSHTREE_REGROWTH.OFFSPRING_TIME)

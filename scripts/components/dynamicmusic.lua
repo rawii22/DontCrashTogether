@@ -143,6 +143,10 @@ local BUSYTHEMES = {
     FARMING = 10,
 	CARNIVAL_AMBIENT = 11,
 	CARNIVAL_MINIGAME = 12,
+    STAGEPLAY_HAPPY = 13,
+    STAGEPLAY_MYSTERIOUS = 14,
+    STAGEPLAY_DRAMATIC = 15,
+    PILLOWFIGHT = 16,
 }
 
 --------------------------------------------------------------------------
@@ -359,13 +363,41 @@ local function StartFarming(player)
 	StartBusyTheme(player, BUSYTHEMES.FARMING, "farming/music/farming", 15)
 end
 
-local function StartCarnivalMustic(player, is_game_active)
+local function StartCarnivalMusic(player, is_game_active)
 	if _dangertask ~= nil or _pirates_near ~= nil or (_busytask ~= nil and _busytheme == BUSYTHEMES.CARNIVAL_MINIGAME and not is_game_active) then
 		return
 	end
 
 	local theme = is_game_active and BUSYTHEMES.CARNIVAL_MINIGAME or BUSYTHEMES.CARNIVAL_AMBIENT
 	StartBusyTheme(player, theme, theme == BUSYTHEMES.CARNIVAL_MINIGAME and "summerevent/music/2" or "summerevent/music/1", 2)
+end
+
+local function StartStageplayMusic(player, mood_index)
+    if _dangertask ~= nil or _pirates_near ~= nil or mood_index == nil or mood_index < 1 then
+        return
+    end
+
+    local theme, sound = nil, nil
+    if mood_index == 1 then
+        theme = BUSYTHEMES.STAGEPLAY_HAPPY
+        sound = "stageplay_set/bgm_moods/music_happy"
+    elseif mood_index == 2 then
+        theme = BUSYTHEMES.STAGEPLAY_MYSTERIOUS
+        sound = "stageplay_set/bgm_moods/music_mysterious"
+    elseif mood_index == 3 then
+        theme = BUSYTHEMES.STAGEPLAY_DRAMATIC
+        sound = "stageplay_set/bgm_moods/music_drama"
+    end
+
+    StartBusyTheme(player, theme, sound, 2)
+end
+
+local function StartPillowFightMusic(player)
+    if _dangertask or _pirates_near then
+        return
+    end
+
+    StartBusyTheme(player, BUSYTHEMES.PILLOWFIGHT, "yotr_2023/common/music_pillowfight", 2)
 end
 
 local function ExtendBusy()
@@ -422,7 +454,7 @@ end
 
 local function StartPirates(player)
     if not _pirates_near then
-        _pirates_near = player:DoPeriodicTask(0.1,function()  UpdatePirates(player) end)
+        _pirates_near = player:DoPeriodicTask(0.1, UpdatePirates)
     end
 end
 
@@ -606,7 +638,9 @@ local function StartPlayerListeners(player)
     inst:ListenForEvent("playpiratesmusic", StartPirates, player)
     inst:ListenForEvent("playfarmingmusic", StartFarming, player)
     inst:ListenForEvent("hasinspirationbuff", OnHasInspirationBuff, player)
-    inst:ListenForEvent("playcarnivalmusic", StartCarnivalMustic, player)
+    inst:ListenForEvent("playcarnivalmusic", StartCarnivalMusic, player)
+    inst:ListenForEvent("stageplaymusic", StartStageplayMusic, player)
+    inst:ListenForEvent("playpillowfightmusic", StartPillowFightMusic, player)
 end
 
 local function StopPlayerListeners(player)
@@ -622,10 +656,12 @@ local function StopPlayerListeners(player)
     inst:RemoveEventCallback("playracemusic", StartRacing, player)
     inst:RemoveEventCallback("playhermitmusic", StartHermit, player)
     inst:RemoveEventCallback("playtrainingmusic", StartTraining, player)
-    inst:RemoveEventCallback("playpiratesmusic", StartPirates, player)    
+    inst:RemoveEventCallback("playpiratesmusic", StartPirates, player)
     inst:RemoveEventCallback("playfarmingmusic", StartFarming, player)
     inst:RemoveEventCallback("hasinspirationbuff", OnHasInspirationBuff, player)
-    inst:RemoveEventCallback("playcarnivalmusic", StartCarnivalMustic, player)
+    inst:RemoveEventCallback("playcarnivalmusic", StartCarnivalMusic, player)
+    inst:RemoveEventCallback("stageplaymusic", StartStageplayMusic, player)
+    inst:RemoveEventCallback("playpillowfightmusic", StartPillowFightMusic, player)
 end
 
 local function OnPhase(inst, phase)

@@ -29,7 +29,7 @@ local function RemoveHudIndicator(inst)  -- client code
 end
 
 local function SetupHudIndicator(inst) -- client code
-	ThePlayer.HUD:AddTargetIndicator(inst, {image = "miniflare.tex"})
+	ThePlayer.HUD:AddTargetIndicator(inst, {image = "avatar_miniflare.tex"})
 	inst:DoTaskInTime(TUNING.MINIFLARE.HUD_INDICATOR_TIME, RemoveHudIndicator)
 	inst:ListenForEvent("onremove", RemoveHudIndicator)
 end
@@ -180,6 +180,8 @@ local function flare_fn()
     inst.AnimState:PlayAnimation("idle")
 
     MakeInventoryFloatable(inst, "large", nil, {0.65, 0.4, 0.65})
+
+    inst:AddTag("donotautopick")
 
     inst.entity:SetPristine()
     if not TheWorld.ismastersim then

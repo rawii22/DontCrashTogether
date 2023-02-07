@@ -82,6 +82,8 @@ end
 
 local WALKABLEPLATFORM_TAGS = {"walkableplatform"}
 
+local AREAATTACK_EXCLUDETAGS = { "cookiecutter", "INLIMBO", "invisible", "noattack", "flight", "playerghost", "shadow", "shadowchesspiece", "shadowcreature" }
+
 local states =
 {
     State{
@@ -208,7 +210,9 @@ local states =
 			end),
 			TimeEvent(16*FRAMES, function(inst)
 				local boat = inst:GetCurrentPlatform()
-				inst.SoundEmitter:PlaySound(boat.sounds.thunk)
+				if boat then
+					inst.SoundEmitter:PlaySound(boat.sounds.thunk)
+				end
 			end),
 		},
     },
@@ -428,7 +432,7 @@ local states =
 			end),
 
 			TimeEvent(15*FRAMES, function(inst)
-                inst.components.combat:DoAreaAttack(inst, TUNING.COOKIECUTTER.JUMP_ATTACK_RADIUS, nil, nil, nil, { "cookiecutter", "INLIMBO", "invisible", "noattack", "flight", "playerghost", "shadow", "shadowchesspiece", "shadowcreature" })
+                inst.components.combat:DoAreaAttack(inst, TUNING.COOKIECUTTER.JUMP_ATTACK_RADIUS, nil, nil, nil, AREAATTACK_EXCLUDETAGS)
 			end),
         },
 
@@ -494,13 +498,13 @@ local states =
         events =
         {
             EventHandler("animover", function(inst)
-				inst.sg.statemem.notinterupted = true
+				inst.sg.statemem.not_interrupted = true
 				inst.sg:GoToState("drill")
 			end),
         },
 
 		onexit = function(inst)
-			SetSortOrderIsInWater(inst, not inst.sg.statemem.notinterupted)
+			SetSortOrderIsInWater(inst, not inst.sg.statemem.not_interrupted)
 			RestoreCollidesWith(inst)
 		end,
     },
@@ -620,7 +624,7 @@ local states =
 				inst.SoundEmitter:PlaySound("saltydog/creatures/cookiecutter/attack")
 			end),
 			TimeEvent(25*FRAMES, function(inst)
-                inst.components.combat:DoAreaAttack(inst, TUNING.COOKIECUTTER.ATTACK_RADIUS, nil, nil, nil, { "cookiecutter", "INLIMBO", "invisible", "noattack", "flight", "playerghost", "shadow", "shadowchesspiece", "shadowcreature" })
+                inst.components.combat:DoAreaAttack(inst, TUNING.COOKIECUTTER.ATTACK_RADIUS, nil, nil, nil, AREAATTACK_EXCLUDETAGS)
 			end),
 			TimeEvent(27*FRAMES, function(inst)
 				inst.SoundEmitter:PlaySound("saltydog/creatures/cookiecutter/attack")

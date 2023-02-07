@@ -25,8 +25,7 @@ local assets =
     Asset("PKGREF", "images/names_gold_cn_random.tex"),
 
     -- Asset("ANIM", "anim/portrait_frame.zip"), -- Not currently used, but likely to come back
-    Asset("ANIM", "anim/spiral_bg.zip"),
-
+    
     Asset("ANIM", "anim/frames_comp.zip"),
 
     Asset("ANIM", "anim/frozen.zip"),
@@ -56,6 +55,7 @@ end
 local prefabs =
 {
     "sounddebugicon",
+    "entityproxy",
 
     "minimap",
     "evergreen",
@@ -242,15 +242,20 @@ local prefabs =
 	"kitcoon_moon",
 	"kitcoon_yot",
 
+	"cookingrecipecard",
+
     -- Pirates
     "monkeyhut",
 }
 
-for k, v in pairs(require("prefabs/farm_plant_defs").PLANT_DEFS) do
+for _, v in pairs(require("prefabs/farm_plant_defs").PLANT_DEFS) do
 	table.insert(prefabs, v.prefab)
 end
-for k, v in pairs(require("prefabs/weed_defs").WEED_DEFS) do
+for _, v in pairs(require("prefabs/weed_defs").WEED_DEFS) do
 	table.insert(prefabs, v.prefab)
+end
+for _, v in pairs(require("prefabs/pocketdimensioncontainer_defs").POCKETDIMENSIONCONTAINER_DEFS) do
+    table.insert(prefabs, v.prefab)
 end
 
 --------------------------------------------------------------------------
@@ -340,6 +345,14 @@ local function CreateTilePhysics(inst)
             0.25, 128
         )
     end
+end
+
+local function SetPocketDimensionContainer(world, name, containerinst)
+    world.PocketDimensionContainers[name] = containerinst
+end
+
+local function GetPocketDimensionContainer(world, name)
+    return world.PocketDimensionContainers[name]
 end
 
 --------------------------------------------------------------------------
@@ -457,6 +470,8 @@ function MakeWorld(name, customprefabs, customassets, common_postinit, master_po
             )
         end
 
+        inst:AddComponent("worldsettings")
+
         --Initialize lua world state
         inst:AddComponent("worldstate")
         inst.state = inst.components.worldstate.data
@@ -528,6 +543,10 @@ function MakeWorld(name, customprefabs, customassets, common_postinit, master_po
         inst.game_data_task = nil
 
         inst:ListenForEvent("ms_playerspawn", OnPlayerSpawn)
+
+        inst.PocketDimensionContainers = {}
+        inst.SetPocketDimensionContainer = SetPocketDimensionContainer
+        inst.GetPocketDimensionContainer = GetPocketDimensionContainer
 
         return inst
     end

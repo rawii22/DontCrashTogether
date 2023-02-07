@@ -23,6 +23,8 @@ local player_emotes_to_choose = {
 	wolfgang = { wimpy_skin = "idle_wolfgang_skinny", normal_skin = "idle_wolfgang", mighty_skin = "idle_wolfgang_mighty" },
     wx78 = "idle_wx",
 	wonkey = "idle_wonkey",
+	wickerbottom = "idle_wickerbottom",
+	waxwell = function() return math.random() < .7 and "idle_waxwell" or "idle2_waxwell" end, -- Keep odds in sync with SGwilson!
 }
 
 local emote_min_time = 6
@@ -169,11 +171,16 @@ function SkinsPuppet:DoIdleEmote()
 			elseif self.prefabname == "wanda" then
 				self.override_build = "player_idles_wanda"
 				self.animstate:AddOverrideBuild(self.override_build)
+			elseif self.prefabname == "waxwell" then
+				self.override_build = "player_idles_waxwell"
+				self.animstate:AddOverrideBuild(self.override_build)
 			elseif self.prefabname == "wonkey" then
 				-- Do no special handling.
 			end
 
 			if self.prefabname == "wormwood" and not self.animstate:CompareSymbolBuilds("hand", "hand_idle_wormwood") then
+				--don't do player anim
+			elseif self.prefabname == "wickerbottom" and not self.animstate:CompareSymbolBuilds("hand", "hand_wickerbottom") then
 				--don't do player anim
 			else
 				local emote_anim = nil
@@ -185,6 +192,10 @@ function SkinsPuppet:DoIdleEmote()
 					emote_anim = player_emotes_to_choose["wolfgang"][skin_mode]
 				else
 					emote_anim = player_emotes_to_choose[self.prefabname]
+				end
+
+				if type(emote_anim) == "function" then
+					emote_anim = emote_anim()
 				end
 
 				self:DoEmote( emote_anim, false, true, self.item_equip)

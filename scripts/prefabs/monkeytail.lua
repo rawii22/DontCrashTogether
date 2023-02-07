@@ -79,7 +79,7 @@ local function fn()
     inst.entity:AddMiniMapEntity()
     inst.entity:AddNetwork()
 
-    inst.MiniMapEntity:SetIcon("monkeytails.png")
+    inst.MiniMapEntity:SetIcon("monkeytail.png")
     
     inst:AddTag("plant")
     inst:AddTag("silviculture") -- for silviculture book
@@ -97,7 +97,7 @@ local function fn()
     end
 
     ------------------------------------------------------------------------
-    inst.AnimState:SetTime(math.random() * 2)
+	inst.AnimState:SetFrame(math.random(inst.AnimState:GetCurrentAnimationNumFrames()) - 1)
     local color = 0.75 + math.random() * 0.25
     inst.AnimState:SetMultColour(color, color, color, 1)
 

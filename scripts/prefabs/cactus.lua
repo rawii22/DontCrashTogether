@@ -21,7 +21,7 @@ local function onpickedfn(inst, picker)
     inst.AnimState:PushAnimation("empty", true)
 
     if picker ~= nil then
-        if picker.components.combat ~= nil and not (picker.components.inventory ~= nil and picker.components.inventory:EquipHasTag("bramble_resistant")) then
+        if picker.components.combat ~= nil and not (picker.components.inventory ~= nil and picker.components.inventory:EquipHasTag("bramble_resistant")) and not picker:HasTag("shadowminion") then
             picker.components.combat:GetAttacked(inst, TUNING.CACTUS_DAMAGE)
             picker:PushEvent("thorns")
         end
@@ -104,7 +104,7 @@ local function MakeCactus(name)
             return inst
         end
 
-        inst.AnimState:SetTime(math.random() * 2)
+		inst.AnimState:SetFrame(math.random(inst.AnimState:GetCurrentAnimationNumFrames()) - 1)
 
         inst:AddComponent("pickable")
         inst.components.pickable.picksound = "dontstarve/wilson/harvest_sticks"

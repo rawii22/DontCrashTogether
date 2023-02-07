@@ -79,11 +79,11 @@ local function CreateBase(isnew)
     inst.AnimState:SetLayer(LAYER_BACKGROUND)
     inst.AnimState:SetSortOrder(3)
     inst.AnimState:SetFinalOffset(3)
-    inst.AnimState:SetMultColour(.5, .45, .45, .6)
+    inst.AnimState:SetMultColour(.5/.6, .45/.6, .45/.6, .6)
 
     if isnew then
         inst.AnimState:PlayAnimation("sporecloud_base_pre")
-        inst.AnimState:SetTime(12 * FRAMES)
+		inst.AnimState:SetFrame(12)
         inst.AnimState:PushAnimation("sporecloud_base_idle", false)
     else
         inst.AnimState:PlayAnimation("sporecloud_base_idle")

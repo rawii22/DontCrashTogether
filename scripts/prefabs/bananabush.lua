@@ -108,6 +108,7 @@ local function OnPicked(inst, picker)
             inst.AnimState:PushAnimation("idle_empty")
 
             inst.components.growable:SetStage(1)
+            inst.components.growable:StartGrowing()
         end
     end
 end
@@ -156,7 +157,7 @@ local function fn()
 
     MakeSmallObstaclePhysics(inst, .1)
 
-    inst:AddTag("bush")
+    inst:AddTag("bananabush")
     inst:AddTag("plant")
 
     inst.MiniMapEntity:SetIcon("bananabush.png")
@@ -187,6 +188,7 @@ local function fn()
     inst.components.pickable:SetMakeEmptyFn(MakeEmpty)
     inst.components.pickable:SetMakeBarrenFn(MakeBarren)
     inst.components.pickable:SetOnRegenFn(OnRegen)
+    inst.components.pickable.canbepicked = false
 
     --------------------------------------------------------------------------
     inst:AddComponent("growable")
@@ -196,6 +198,9 @@ local function fn()
     inst.components.growable.springgrowth = true
     inst.components.growable:StartGrowing()
     inst.components.growable.magicgrowable = true
+
+    inst:AddComponent("simplemagicgrower")
+    inst.components.simplemagicgrower:SetLastStage(#inst.components.growable.stages)
 
     --------------------------------------------------------------------------
     if not GetGameModeProperty("disable_transplanting") then

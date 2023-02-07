@@ -245,29 +245,36 @@ EntityScript = Class(function(self, entity)
 end)
 
 function EntityScript:GetSaveRecord()
-    local record = nil
+	local record =
+	{
+		prefab = self.prefab,
+		--id = self.GUID,
+	}
 
-    if self.entity:HasTag("player") then
-        record = {
-            prefab = self.prefab,
-            --id = self.GUID,
-            age = self.Network:GetPlayerAge(),
-        }
+	local x, y, z = self.Transform:GetWorldPosition()
+
+	if self.temp_save_platform_pos or self.entity:HasTag("player") then
+		record.age = self.Network:GetPlayerAge()
 
 		--if ThePlayer == self then
 		--	record.crafting_menu = TheCraftingMenuProfile:SerializeLocalClientSessionData()
 		--end
 
         local platform = self:GetCurrentPlatform()
+		if self._snapshot_platform ~= nil then
+			if platform == nil and self._snapshot_platform == TheWorld.Map:GetPlatformAtPoint(x, z) then
+				--V2C: During RestoreSnapshotUserSession, players aren't attached to platforms correctly.
+				--     This is quick hack to fix that for now.
+				platform = self._snapshot_platform
+			end
+			self._snapshot_platform = nil
+		end
         if platform then
-            local px, py, pz = platform.Transform:GetWorldPosition()
-            local x, y, z = self.Transform:GetWorldPosition()
+			local rx, ry, rz = platform.entity:WorldToLocalSpace(x, y, z)
 
-            local rx, ry, rz = x - px, y - py, z - pz
-
-            --Qnan hunting
-			if rx ~= rx or ry ~= ry or rz ~= rz then
-				print("EntityScript:GetSaveRecord error saving position: ", self.prefab, rx, ry, rz, ":", x, y, z, ":", px, py, pz)
+            -- NaN and +/-inf hunting
+			if isbadnumber(rx) or isbadnumber(ry) or isbadnumber(rz) then
+				print("EntityScript:GetSaveRecord error saving position: ", self.prefab, rx, ry, rz, ":", x, y, z, ":", platform)
 				if CONFIGURATION ~= "PRODUCTION" then
 					error("EntityScript:GetSaveRecord qnan error")
 				end
@@ -278,21 +285,15 @@ function EntityScript:GetSaveRecord()
 
             record.rx = rx and math.floor(rx*1000)/1000 or 0
             record.rz = rz and math.floor(rz*1000)/1000 or 0
-            if ry ~= 0 then
-                record.ry = ry and math.floor(ry*1000)/1000 or 0
+			if ry and ry ~= 0 then
+				ry = math.floor(ry*1000)/1000
+				record.ry = ry ~= 0 and ry or nil
             end
         end
-    else
-        record = {
-            prefab = self.prefab,
-            --id = self.GUID,
-        }
     end
 
-    local x, y, z = self.Transform:GetWorldPosition()
-
-    --Qnan hunting
-	if x ~= x or y ~= y or z ~= z then
+    -- NaN and +/-inf hunting
+	if isbadnumber(x) or isbadnumber(y) or isbadnumber(z) then
 		print("EntityScript:GetSaveRecord error saving position: ", self.prefab, x, y, z)
 		if CONFIGURATION ~= "PRODUCTION" then
 			error("EntityScript:GetSaveRecord qnan error")
@@ -303,8 +304,9 @@ function EntityScript:GetSaveRecord()
     record.x = x and math.floor(x*1000)/1000 or 0
     record.z = z and math.floor(z*1000)/1000 or 0
     --y is often 0 in our game, so be selective.
-    if y ~= 0 then
-        record.y = y and math.floor(y*1000)/1000 or 0
+	if y and y ~= 0 then
+		y = math.floor(y*1000)/1000
+		record.y = y ~= 0 and y or nil
     end
 
     record.skinname = self.skinname
@@ -324,10 +326,6 @@ end
 
 function EntityScript:Show()
     self.entity:Show(false)
-end
-
-function EntityScript:IsOnWater()
-    return not self:GetCurrentPlatform() and not TheWorld.Map:IsVisualGroundAtPoint(self.Transform:GetWorldPosition())
 end
 
 function EntityScript:IsInLimbo()
@@ -597,7 +595,9 @@ function EntityScript:AddComponent(name)
     end
 
     local cmp = LoadComponent(name)
-    assert(cmp, "component ".. name .. " does not exist!")
+	if not cmp then
+	    error("component ".. name .. " does not exist!")
+	end
 
     self:ReplicateComponent(name)
 
@@ -612,6 +612,8 @@ function EntityScript:AddComponent(name)
     end
 
     self:RegisterComponentActions(name)
+
+	return loadedcmp
 end
 
 function EntityScript:RemoveComponent(name)
@@ -1186,7 +1188,9 @@ function EntityScript:GetAngleToPoint(x, y, z)
         x, y, z = x:Get()
     end    
     local x1, y1, z1 = self.Transform:GetWorldPosition()
-    return math.atan2(z1 - z, x - x1) / DEGREES
+	return x1 == x and z1 == z
+		and self.Transform:GetRotation()
+		or math.atan2(z1 - z, x - x1) / DEGREES
 end
 
 function EntityScript:GetPositionAdjacentTo(target, distance)
@@ -1253,6 +1257,9 @@ function EntityScript:FaceAwayFromPoint(dest, force)
         return
     end
     local x, y, z = self.Transform:GetWorldPosition()
+	if x == dest.x and z == dest.z then
+		return
+	end
     self.Transform:SetRotation(math.atan2(z - dest.z, dest.x - x) / DEGREES + 180)
 end
 
@@ -1370,6 +1377,9 @@ function EntityScript:PreviewBufferedAction(bufferedaction)
 
     if bufferedaction.action == ACTIONS.WALKTO then
         self.bufferedaction = nil
+	elseif bufferedaction.options.instant then
+		self.bufferedaction = bufferedaction
+		self:PerformPreviewBufferedAction()
     elseif self.sg ~= nil then
         self.bufferedaction = bufferedaction
         if not self.sg:PreviewAction(bufferedaction) then
@@ -1418,7 +1428,7 @@ function EntityScript:PushBufferedAction(bufferedaction)
         self:PushEvent("performaction", { action = bufferedaction })
         bufferedaction:Succeed()
         self.bufferedaction = nil
-    elseif bufferedaction.action.instant then
+	elseif bufferedaction.action.instant or bufferedaction.options.instant then
         if bufferedaction.target ~= nil and bufferedaction.target.Transform ~= nil and (self.sg == nil or self.sg:HasStateTag("canrotate")) then
             self:FacePoint(bufferedaction.target.Transform:GetWorldPosition())
         end
@@ -1606,6 +1616,9 @@ function EntityScript:IsOnOcean(allow_boats)
     return TheWorld.Map:IsOceanAtPoint(x, y, z, allow_boats)
 end
 
+--deprecated
+EntityScript.IsOnWater = EntityScript.IsOnOcean
+
 function EntityScript:GetCurrentPlatform()
     if TheWorld.ismastersim then
         if self.parent then
@@ -1660,18 +1673,26 @@ function EntityScript:GetCurrentTileType()
     --print (string.format("(%d+%d, %d+%d), (%2.2f, %2.2f), %d", tx, x_off, ty, y_off, xpercent, ypercent, actual_tile))
 end
 
-function EntityScript:PutBackOnGround()
+-- NOTES(JBK): This function will return true if the entity is now on valid ground, false if it could not find a suitable location.
+function EntityScript:PutBackOnGround(radius)
+    radius = radius or 8
 	local x, y, z = self.Transform:GetWorldPosition()
-    if not TheWorld.Map:IsPassableAtPoint(x, y, z, true) then
-        local dest = FindNearbyLand(self:GetPosition(), 8) or FindNearbyOcean(self:GetPosition(), 8)
+    if TheWorld.Map:IsPassableAtPoint(x, y, z, true) then
+        return true
+    else
+        local pt = Point(x, y, z)
+        local dest = FindNearbyLand(pt, radius) or FindNearbyOcean(pt, radius)
         if dest ~= nil then
             if self.Physics ~= nil then
                 self.Physics:Teleport(dest:Get())
+                return true
             elseif self.Transform ~= nil then
                 self.Transform:SetPosition(dest:Get())
+                return true
             end
         end
     end
+    return false
 end
 
 function EntityScript:GetPersistData()

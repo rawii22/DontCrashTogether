@@ -187,7 +187,7 @@ local function MakeBundle(name, onesize, variations, loot, tossloot, setupdata, 
         inst.AnimState:PlayAnimation("idle"..suffix)
 
         if doer ~= nil and doer.SoundEmitter ~= nil then
-            doer.SoundEmitter:PlaySound("dontstarve/common/together/packaged")
+            doer.SoundEmitter:PlaySound(inst.skin_wrap_sound or "dontstarve/common/together/packaged")
         end
     end
 
@@ -219,7 +219,7 @@ local function MakeBundle(name, onesize, variations, loot, tossloot, setupdata, 
             SpawnPrefab(name.."_unwrap").Transform:SetPosition(pos:Get())
         end
         if doer ~= nil and doer.SoundEmitter ~= nil then
-            doer.SoundEmitter:PlaySound("dontstarve/common/together/packaged")
+            doer.SoundEmitter:PlaySound(inst.skin_wrap_sound or "dontstarve/common/together/packaged")
         end
         inst:Remove()
     end
@@ -367,6 +367,16 @@ local redpouch_yotb =
 }
 
 local redpouch_yot_catcoon =
+{
+    master_postinit = function(inst, setupdata)
+        inst.wet_prefix = STRINGS.WET_PREFIX.POUCH
+    end,
+    common_postinit = function(inst, setupdata)
+        inst:SetPrefabNameOverride("redpouch")
+    end,
+}
+
+local redpouch_yotr =
 {
     master_postinit = function(inst, setupdata)
         inst.wet_prefix = STRINGS.WET_PREFIX.POUCH
@@ -550,6 +560,7 @@ return MakeContainer("bundle_container", "ui_bundle_2x2"),
     MakeBundle("redpouch_yotc", false, nil, nil, true, redpouch_yotc),
     MakeBundle("redpouch_yotb", false, nil, nil, true, redpouch_yotb),
     MakeBundle("redpouch_yot_catcoon", false, nil, nil, true, redpouch_yot_catcoon),
+    MakeBundle("redpouch_yotr",        false, nil, nil, true, redpouch_yotr),
 	MakeBundle("yotc_seedpacket", true, nil, nil, true, yotc_seedpacket),
 	MakeBundle("yotc_seedpacket_rare", true, nil, nil, true, yotc_seedpacket_rare),
 	MakeBundle("carnival_seedpacket", true, nil, nil, true, carnival_seedpacket),

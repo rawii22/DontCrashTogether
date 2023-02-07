@@ -212,7 +212,9 @@ local function OnDeath(inst, data)
 end
 
 local function OnAlphaChanged(inst, alpha, most_alpha)
-    inst._ripples.AnimState:OverrideMultColour(alpha, alpha, alpha, alpha)
+    if inst._ripples ~= nil and inst._ripples:IsValid() then
+        inst._ripples.AnimState:OverrideMultColour(1, 1, 1, alpha)
+    end
 end
 
 local function OnAttackOther(inst)
@@ -258,6 +260,21 @@ local function ExchangeWithTerrorBeak(inst)
     end
 end
 
+local function CLIENT_ShadowSubmissive_HostileToPlayerTest(inst, player)
+	if player:HasTag("shadowdominance") then
+		return false
+	end
+	local combat = inst.replica.combat
+	if combat ~= nil and combat:GetTarget() == player then
+		return true
+	end
+	local sanity = player.replica.sanity
+	if sanity ~= nil and sanity:IsCrazy() then
+		return true
+	end
+	return false
+end
+
 local function fn()
     local inst = CreateEntity()
 
@@ -280,22 +297,33 @@ local function fn()
     inst:AddTag("notraptrigger")
     inst:AddTag("ignorewalkableplatforms")
 
+	--shadowsubmissive (from shadowsubmissive component) added to pristine state for optimization
+	inst:AddTag("shadowsubmissive")
+
     inst.AnimState:SetBank("oceanhorror")
     inst.AnimState:SetBuild("shadow_oceanhorror")
     inst.AnimState:PlayAnimation("idle_loop", true)
     inst.AnimState:SetMultColour(1, 1, 1, .5)
 
-    inst._ripples = SpawnPrefab("oceanhorror_ripples")
-    inst._ripples.entity:SetParent(inst.entity)
+    if not TheNet:IsDedicated() then
+        -- this is purely view related
+        inst:AddComponent("transparentonsanity")
+    end
 
-    -- this is purely view related
-    inst:AddComponent("transparentonsanity")
-    inst.components.transparentonsanity.onalphachangedfn = OnAlphaChanged
+	inst.HostileToPlayerTest = CLIENT_ShadowSubmissive_HostileToPlayerTest
 
     inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
         return inst
+    end
+
+    inst._ripples = SpawnPrefab("oceanhorror_ripples")
+    inst._ripples.entity:SetParent(inst.entity)
+
+    if inst.components.transparentonsanity ~= nil then
+        inst.components.transparentonsanity.onalphachangedfn = OnAlphaChanged
+        inst.components.transparentonsanity:ForceUpdate()
     end
 
     inst.persists = false
@@ -353,12 +381,21 @@ local function fn()
     return inst
 end
 
+local function OnRipplesReplicated(inst)
+    local parent = inst.entity:GetParent()
+    if parent ~= nil and parent.prefab == "oceanhorror" and parent.components.transparentonsanity ~= nil then
+        parent._ripples = inst
+        parent.components.transparentonsanity.onalphachangedfn = OnAlphaChanged
+        parent.components.transparentonsanity:ForceUpdate()
+    end
+end
+
 local function ripplesfn()
     local inst = CreateEntity()
 
     inst.entity:AddTransform()
-    --[[Non-networked entity]]
     inst.entity:AddAnimState()
+    inst.entity:AddNetwork()
 
     inst.AnimState:SetBank("oceanhorror")
     inst.AnimState:SetBuild("shadow_oceanhorror")
@@ -371,9 +408,12 @@ local function ripplesfn()
 
     inst.entity:SetPristine()
 
-    -- if not TheWorld.ismastersim then
-    --     return inst
-    -- end
+    if not TheWorld.ismastersim then
+        inst.OnEntityReplicated = OnRipplesReplicated
+        return inst
+    end
+
+    inst.persists = false
 
     return inst
 end

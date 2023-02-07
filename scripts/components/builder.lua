@@ -21,6 +21,7 @@ local function metafn()
 	}
     for i, v in ipairs(TechTree.BONUS_TECH) do
         t[string.lower(v).."_bonus"] = function(self, bonus) self.inst.replica.builder:SetTechBonus(string.lower(v), bonus) end
+        t[string.lower(v).."_tempbonus"] = function(self, bonus) self.inst.replica.builder:SetTempTechBonus(string.lower(v), (bonus or 0)) end
     end
 	return t
 end
@@ -30,7 +31,9 @@ local Builder = Class(function(self, inst)
 
     self.recipes = {}
     self.station_recipes = {}
-    self.accessible_tech_trees = deepcopy(TECH.NONE)
+    self.accessible_tech_trees = TechTree.Create()
+    self.accessible_tech_trees_no_temp = TechTree.Create()
+	self.old_accessible_tech_trees = {}
     self.inst:StartUpdatingComponent(self)
     self.current_prototyper = nil
     self.buffered_builds = {}
@@ -40,6 +43,7 @@ local Builder = Class(function(self, inst)
     end
     self.ingredientmod = 1
     --self.last_hungry_build = nil
+    --self.last_hungry_build_pt = nil
 
     self.freebuildmode = false
 
@@ -69,13 +73,25 @@ function Builder:ActivateCurrentResearchMachine(recipe)
     end
 end
 
+local function CheckHungryDistance(inst, last_hungry_build_pt)
+    return inst:GetDistanceSqToPoint(last_hungry_build_pt) > TUNING.HUNGRY_BUILDER_RESET_DISTANCE_SQ
+end
+
 function Builder:OnSave()
     local hungrytime = self.last_hungry_build ~= nil and math.ceil(GetTime() - self.last_hungry_build) or math.huge
+    hungrytime = hungrytime < TUNING.HUNGRY_BUILDER_RESET_TIME and hungrytime or nil
+    local hungrypt = self.last_hungry_build_pt and not CheckHungryDistance(self.inst, self.last_hungry_build_pt) and {x=self.last_hungry_build_pt.x, y=self.last_hungry_build_pt.y, z=self.last_hungry_build_pt.z} or nil
+
+    local tempbonuses = self:GetTempTechBonuses()
+
     return
     {
         buffered_builds = self.buffered_builds,
         recipes = self.recipes,
-        hungrytime = hungrytime < TUNING.HUNGRY_BUILDER_RESET_TIME and hungrytime or nil,
+        hungrytime = hungrytime,
+        hungrypt = hungrypt,
+        tempbonuses = tempbonuses,
+        temptechbonus_count = self.temptechbonus_count,
     }
 end
 
@@ -99,6 +115,14 @@ function Builder:OnLoad(data)
 
     if data.hungrytime ~= nil then
         self.last_hungry_build = GetTime() - data.hungrytime
+    end
+    if data.hungrypt then
+        self.last_hungry_build_pt = Point(data.hungrypt.x, data.hungrypt.y, data.hungrypt.z)
+    end
+
+    if data.tempbonuses then
+        self:GiveTempTechBonus(data.tempbonuses)
+        self.temptechbonus_count = data.temptechbonus_count
     end
 end
 
@@ -138,8 +162,68 @@ function Builder:GetTechBonuses()
 	local bonus = {}
     for i, v in ipairs(TechTree.BONUS_TECH) do
         bonus[v] = self[string.lower(v).."_bonus"] or nil
+        
+        local tempbonus = self[string.lower(v).."_tempbonus"]
+        if tempbonus ~= nil then
+            if bonus[v] ~= nil then
+                bonus[v] = bonus[v] + tempbonus
+            else
+                bonus[v] = tempbonus
+            end
+        end
     end
+
 	return bonus
+end
+
+function Builder:GetTempTechBonuses()
+    local bonus = {}
+    for i, v in ipairs(TechTree.BONUS_TECH) do
+        
+        local tempbonus = self[string.lower(v).."_tempbonus"]
+        if tempbonus ~= nil then
+            bonus[v] = tempbonus
+        end
+    end
+
+	return bonus
+end
+
+function Builder:GiveTempTechBonus(tech)
+    for k, v in pairs(tech) do
+        self[string.lower(k).."_tempbonus"] = v
+    end
+
+    if self.temptechbonus_count ~= nil then
+        self.temptechbonus_count = self.temptechbonus_count + 1
+    else
+        self.temptechbonus_count = 1
+    end
+end
+
+function Builder:ConsumeTempTechBonuses()
+	if self.temptechbonus_count == nil then
+		--we should NOT reach here normally; only assert in dev branch though!
+		assert(BRANCH ~= "dev")
+        return
+    end
+
+    self.temptechbonus_count = self.temptechbonus_count - 1
+    if self.temptechbonus_count < 1 then
+        for i, v in ipairs(TechTree.BONUS_TECH) do
+            if self[string.lower(v).."_tempbonus"] ~= nil then
+                self[string.lower(v).."_tempbonus"] = nil
+            end
+        end
+
+        self.temptechbonus_count = nil
+    end
+end
+
+local function CopyTechTrees(src, dest)
+	for i, v in ipairs(TechTree.AVAILABLE_TECH) do
+		dest[v] = src[v] or 0
+	end
 end
 
 local PROTOTYPER_TAGS = { "prototyper" }
@@ -165,7 +249,7 @@ function Builder:EvaluateTechTrees()
 		ents = TheSim:FindEntities(pos.x, pos.y, pos.z, TUNING.RESEARCH_MACHINE_DIST, PROTOTYPER_TAGS, self.exclude_tags)
 	end
 
-    local old_accessible_tech_trees = deepcopy(self.accessible_tech_trees or TECH.NONE)
+	CopyTechTrees(self.accessible_tech_trees, self.old_accessible_tech_trees)
     local old_station_recipes = self.station_recipes
     local old_prototyper = self.current_prototyper
     self.current_prototyper = nil
@@ -177,7 +261,9 @@ function Builder:EvaluateTechTrees()
             if not prototyper_active then
                 --activate the first machine in the list. This will be the one you're closest to.
                 v.components.prototyper:TurnOn(self.inst)
-                self.accessible_tech_trees = v.components.prototyper:GetTechTrees()
+
+				--prototyper:GetTrees() returns a deepcopy, which we no longer want
+				CopyTechTrees(v.components.prototyper.trees, self.accessible_tech_trees)
 
                 if v.components.craftingstation ~= nil then
                     local recs = v.components.craftingstation:GetRecipes(self.inst)
@@ -212,13 +298,18 @@ function Builder:EvaluateTechTrees()
     end
 
     --add any character specific bonuses to your current tech levels.
+	CopyTechTrees(self.accessible_tech_trees, self.accessible_tech_trees_no_temp)
     if not prototyper_active then
         for i, v in ipairs(TechTree.AVAILABLE_TECH) do
-            self.accessible_tech_trees[v] = self[string.lower(v).."_bonus"] or 0
+            self.accessible_tech_trees_no_temp[v] = (self[string.lower(v).."_bonus"] or 0)
+            self.accessible_tech_trees[v] = (self[string.lower(v).."_tempbonus"] or 0) + (self[string.lower(v).."_bonus"] or 0)
         end
     else
 		for i, v in ipairs(TechTree.BONUS_TECH) do
-			self.accessible_tech_trees[v] = self.accessible_tech_trees[v] + (self[string.lower(v).."_bonus"] or 0)
+            self.accessible_tech_trees_no_temp[v] = self.accessible_tech_trees_no_temp[v] + (self[string.lower(v).."_bonus"] or 0)
+			self.accessible_tech_trees[v] = self.accessible_tech_trees[v] + 
+                                            (self[string.lower(v).."_tempbonus"] or 0) + 
+                                            (self[string.lower(v).."_bonus"] or 0)
 		end
 	end
 
@@ -248,20 +339,21 @@ function Builder:EvaluateTechTrees()
     end
 
     if not trees_changed then
-        for k, v in pairs(old_accessible_tech_trees) do
+        for k, v in pairs(self.old_accessible_tech_trees) do
             if v ~= self.accessible_tech_trees[k] then
                 trees_changed = true
                 break
             end
         end
-        if not trees_changed then
+		--V2C: not required anymore; both trees should have the same keys now
+        --[[if not trees_changed then
             for k, v in pairs(self.accessible_tech_trees) do
-                if v ~= old_accessible_tech_trees[k] then
+                if v ~= self.old_accessible_tech_trees[k] then
                     trees_changed = true
                     break
                 end
             end
-        end
+        end]]
     end
 
     if trees_changed then
@@ -342,18 +434,22 @@ function Builder:GetIngredients(recname)
     local recipe = AllRecipes[recname]
     if recipe then
         local ingredients = {}
+		local discounted = false
         for k,v in pairs(recipe.ingredients) do
 			if v.amount > 0 then
 				local amt = math.max(1, RoundBiasedUp(v.amount * self.ingredientmod))
 				local items = self.inst.components.inventory:GetCraftingIngredient(v.type, amt)
 				ingredients[v.type] = items
+				if amt < v.amount then
+					discounted = true
+				end
 			end
         end
-        return ingredients
+        return ingredients, discounted
     end
 end
 
-function Builder:RemoveIngredients(ingredients, recname)
+function Builder:RemoveIngredients(ingredients, recname, discounted)
 	if self.freebuildmode then
 		return
 	end
@@ -397,7 +493,7 @@ function Builder:RemoveIngredients(ingredients, recname)
             end
         end
     end
-    self.inst:PushEvent("consumeingredients")
+    self.inst:PushEvent("consumeingredients", { discounted = discounted })
 end
 
 function Builder:HasCharacterIngredient(ingredient)
@@ -437,7 +533,7 @@ function Builder:HasTechIngredient(ingredient)
 end
 
 function Builder:MakeRecipe(recipe, pt, rot, skin, onsuccess)
-    if recipe ~= nil then
+    if recipe ~= nil and not self.inst.sg:HasStateTag("drowning") then -- TODO(JBK): Check if "drowning" can be replaced with "busy" instead with no side effects.
         self.inst:PushEvent("makerecipe", { recipe = recipe })
         if self:IsBuildBuffered(recipe.name) or self:HasIngredients(recipe) then
             self.inst.components.locomotor:Stop()
@@ -502,18 +598,24 @@ function Builder:DoBuild(recname, pt, rotation, skin)
 
         if self.inst:HasTag("hungrybuilder") and not self.inst.sg:HasStateTag("slowaction") and not self.inst.sg:HasStateTag("giving") then
             local t = GetTime()
-            if self.last_hungry_build == nil or t > self.last_hungry_build + TUNING.HUNGRY_BUILDER_RESET_TIME then
+            local hasTimeExpired = self.last_hungry_build == nil or t > self.last_hungry_build + TUNING.HUNGRY_BUILDER_RESET_TIME
+            local hasPlayerMoved = self.last_hungry_build_pt == nil or CheckHungryDistance(self.inst, self.last_hungry_build_pt)
+            if hasTimeExpired and hasPlayerMoved then
+                self.inst.sg.mem.dohungryfastbuildtalk = true
                 self.inst.components.hunger:DoDelta(TUNING.HUNGRY_BUILDER_DELTA)
                 self.inst:PushEvent("hungrybuild")
+            else
+                self.inst.sg.mem.dohungryfastbuildtalk = nil
             end
             self.last_hungry_build = t
+            self.last_hungry_build_pt = self.inst:GetPosition()
         end
 
         self.inst:PushEvent("refreshcrafting")
 
 		if recipe.manufactured then
-			local materials = self:GetIngredients(recname)
-			self:RemoveIngredients(materials, recname)
+			local materials, discounted = self:GetIngredients(recname)
+			self:RemoveIngredients(materials, recname, discounted)
 			   -- its up to the prototyper to implement onactivate and handle spawning the prefab
 		   return true
 		end
@@ -524,7 +626,7 @@ function Builder:DoBuild(recname, pt, rotation, skin)
 
             if prod.components.inventoryitem ~= nil then
                 if self.inst.components.inventory ~= nil then
-					local materials = self:GetIngredients(recname)
+					local materials, discounted = self:GetIngredients(recname)
 
 					local wetlevel = self:GetIngredientWetness(materials)
 					if wetlevel > 0 and prod.components.inventoryitem ~= nil then
@@ -535,7 +637,7 @@ function Builder:DoBuild(recname, pt, rotation, skin)
 						prod:onPreBuilt(self.inst, materials, recipe)
 					end
 
-					self:RemoveIngredients(materials, recname)
+					self:RemoveIngredients(materials, recname, discounted)
 
                     --self.inst.components.inventory:GiveItem(prod)
                     self.inst:PushEvent("builditem", { item = prod, recipe = recipe, skin = skin, prototyper = self.current_prototyper })
@@ -595,8 +697,8 @@ function Builder:DoBuild(recname, pt, rotation, skin)
                 end
             else
 				if not is_buffered_build then -- items that have intermediate build items (like statues)
-					local materials = self:GetIngredients(recname)
-					self:RemoveIngredients(materials, recname)
+					local materials, discounted = self:GetIngredients(recname)
+					self:RemoveIngredients(materials, recname, discounted)
 				end
 
                 local spawn_pos = pt
@@ -634,7 +736,7 @@ function Builder:DoBuild(recname, pt, rotation, skin)
     end
 end
 
-function Builder:KnowsRecipe(recipe)
+function Builder:KnowsRecipe(recipe, ignore_tempbonus)
     if type(recipe) == "string" then
 		recipe = GetValidRecipe(recipe)
 	end
@@ -652,10 +754,17 @@ function Builder:KnowsRecipe(recipe)
 
     local has_tech = true
     for i, v in ipairs(TechTree.AVAILABLE_TECH) do
-        if recipe.level[v] > (self[string.lower(v).."_bonus"] or 0) then
-            return false
+        if ignore_tempbonus then
+            if recipe.level[v] > (self[string.lower(v).."_bonus"] or 0) then
+                return false
+            end
+        else
+            if recipe.level[v] > ((self[string.lower(v).."_bonus"] or 0) + (self[string.lower(v).."_tempbonus"] or 0)) then
+                return false
+            end
         end
     end
+
     return true
 end
 
@@ -712,14 +821,30 @@ end
 function Builder:MakeRecipeFromMenu(recipe, skin)
     if self:HasIngredients(recipe) then
 		if recipe.placer == nil then
+			--Need to determine this NOW before calling async MakeRecipe
+			local knows_no_temp = self:KnowsRecipe(recipe, true)
+			local canproto_no_temp = CanPrototypeRecipe(recipe.level, self.accessible_tech_trees_no_temp)
+			local canlearn = self:CanLearn(recipe.name)
+			local usingtempbonus = not knows_no_temp and not canproto_no_temp
+
 			if self:KnowsRecipe(recipe) then
                 self:MakeRecipe(recipe, nil, nil, ValidateRecipeSkinRequest(self.inst.userid, recipe.product, skin),
                     function()
+						if usingtempbonus then
+							self:ConsumeTempTechBonuses()
+						end
+
                         if self.freebuildmode then
                             --V2C: free-build should still trigger prototyping
                             if not table.contains(self.recipes, recipe.name) and CanPrototypeRecipe(recipe.level, self.accessible_tech_trees) then
                                 self:ActivateCurrentResearchMachine(recipe)
                             end
+						elseif not knows_no_temp and canproto_no_temp and canlearn then
+							--assert(not usingtempbonus) --sanity check
+							--V2C: for recipes known through temp bonus buff,
+							--     but can be prototyped without consuming it
+							self:ActivateCurrentResearchMachine(recipe)
+							self:UnlockRecipe(recipe.name)
                         elseif not recipe.nounlock then
                             --V2C: for recipes known through tech bonus, still
                             --     want to unlock in case we reroll characters
@@ -727,11 +852,15 @@ function Builder:MakeRecipeFromMenu(recipe, skin)
 						else
 							self:ActivateCurrentResearchMachine(recipe)
                         end
+
                     end
                 )
-			elseif CanPrototypeRecipe(recipe.level, self.accessible_tech_trees) and self:CanLearn(recipe.name) then
+			elseif canlearn and CanPrototypeRecipe(recipe.level, self.accessible_tech_trees) then
 				self:MakeRecipe(recipe, nil, nil, ValidateRecipeSkinRequest(self.inst.userid, recipe.product, skin),
 					function()
+						if usingtempbonus then
+							self:ConsumeTempTechBonuses()
+						end
 						self:ActivateCurrentResearchMachine(recipe)
 						self:UnlockRecipe(recipe.name)
 					end
@@ -742,14 +871,30 @@ function Builder:MakeRecipeFromMenu(recipe, skin)
 		for i, ing in ipairs(recipe.ingredients) do
 			local ing_recipe = GetValidRecipe(ing.type)
 			if ing_recipe ~= nil and not self.inst.components.inventory:Has(ing.type, math.max(1, RoundBiasedUp(ing.amount * self.ingredientmod)), true) and self:HasIngredients(ing_recipe) then
+				--Need to determine this NOW before calling async MakeRecipe
+				local knows_no_temp = self:KnowsRecipe(ing_recipe, true)
+				local canproto_no_temp = CanPrototypeRecipe(ing_recipe.level, self.accessible_tech_trees_no_temp)
+				local canlearn = self:CanLearn(ing_recipe.name)
+				local usingtempbonus = not knows_no_temp and not canproto_no_temp
+
 				if self:KnowsRecipe(ing_recipe) then
 					self:MakeRecipe(ing_recipe, nil, nil, ValidateRecipeSkinRequest(self.inst.userid, ing_recipe.product, nil),
 						function()
+							if usingtempbonus then
+								self:ConsumeTempTechBonuses()
+							end
+
 							if self.freebuildmode then
 								--V2C: free-build should still trigger prototyping
 								if not table.contains(self.recipes, ing_recipe.name) and CanPrototypeRecipe(ing_recipe.level, self.accessible_tech_trees) then
 									self:ActivateCurrentResearchMachine(ing_recipe)
 								end
+							elseif not knows_no_temp and canproto_no_temp and canlearn then
+								--assert(not usingtempbonus) --sanity check
+								--V2C: for recipes known through temp bonus buff,
+								--     but can be prototyped without consuming it
+								self:ActivateCurrentResearchMachine(ing_recipe)
+								self:UnlockRecipe(ing_recipe.name)
 							elseif not ing_recipe.nounlock then
 								--V2C: for recipes known through tech bonus, still
 								--     want to unlock in case we reroll characters
@@ -759,9 +904,12 @@ function Builder:MakeRecipeFromMenu(recipe, skin)
 							end
 						end
 					)
-				elseif CanPrototypeRecipe(ing_recipe.level, self.accessible_tech_trees) and self:CanLearn(ing_recipe.name) then
+				elseif canlearn and CanPrototypeRecipe(ing_recipe.level, self.accessible_tech_trees) then
 					self:MakeRecipe(ing_recipe, nil, nil, ValidateRecipeSkinRequest(self.inst.userid, ing_recipe.product, nil),
 						function()
+							if usingtempbonus then
+								self:ConsumeTempTechBonuses()
+							end
 							self:ActivateCurrentResearchMachine(ing_recipe)
 							self:UnlockRecipe(ing_recipe.name)
 						end
@@ -785,7 +933,16 @@ end
 function Builder:BufferBuild(recname)
     local recipe = GetValidRecipe(recname)
     if recipe ~= nil and recipe.placer ~= nil and not self:IsBuildBuffered(recname) and self:HasIngredients(recipe) then
+		local knows_no_temp = self:KnowsRecipe(recipe, true)
+		local canproto_no_temp = CanPrototypeRecipe(recipe.level, self.accessible_tech_trees_no_temp)
+		local canlearn = self:CanLearn(recname)
+		local usingtempbonus = not knows_no_temp and not canproto_no_temp
+
         if self:KnowsRecipe(recipe) then
+			if usingtempbonus then
+				self:ConsumeTempTechBonuses()
+			end
+
             if self.freebuildmode then
                 --V2C: free-build should still trigger prototyping
                 if not table.contains(self.recipes, recname) and CanPrototypeRecipe(recipe.level, self.accessible_tech_trees) then
@@ -793,20 +950,29 @@ function Builder:BufferBuild(recname)
 					--			built, such as when building a Fire Pit near a Science Machine or Mad Science Lab.
                     self:ActivateCurrentResearchMachine(recipe)
                 end
+			elseif not knows_no_temp and canproto_no_temp and canlearn then
+				--assert(not usingtempbonus) --sanity check
+				--V2C: for recipes known through temp bonus buff,
+				--     but can be prototyped without consuming it
+				self:ActivateCurrentResearchMachine(recipe)
+				self:UnlockRecipe(recname)
             elseif not recipe.nounlock then
                 --V2C: for recipes known through tech bonus, still
                 --     want to unlock in case we reroll characters
                 self:AddRecipe(recname)
             end
-        elseif CanPrototypeRecipe(recipe.level, self.accessible_tech_trees) and self:CanLearn(recname) then
-                self:ActivateCurrentResearchMachine(recipe)
-                self:UnlockRecipe(recname)
-            else
-                return
-            end
+		elseif canlearn and CanPrototypeRecipe(recipe.level, self.accessible_tech_trees) then
+			if usingtempbonus then
+				self:ConsumeTempTechBonuses()
+			end
+			self:ActivateCurrentResearchMachine(recipe)
+			self:UnlockRecipe(recname)
+		else
+			return
+		end
 
-        local materials = self:GetIngredients(recname)
-        self:RemoveIngredients(materials, recname)
+        local materials, discounted = self:GetIngredients(recname)
+        self:RemoveIngredients(materials, recname, discounted)
         self.buffered_builds[recname] = true
         self.inst.replica.builder:SetIsBuildBuffered(recname, true)
     end

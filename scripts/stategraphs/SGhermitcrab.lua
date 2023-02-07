@@ -1247,16 +1247,7 @@ local states =
         {
             TimeEvent(7 * FRAMES, function(inst)
                 if inst.sg.statemem.action ~= nil then
-                    local target = inst.sg.statemem.action.target
-                    if target ~= nil and target:IsValid() then
-                        local frozen = target:HasTag("frozen")
-                        local moonglass = target:HasTag("moonglass")
-                        if target.Transform ~= nil then
-                            local mine_fx = (frozen and "mining_ice_fx") or (moonglass and "mining_moonglass_fx") or "mining_fx"
-                            SpawnPrefab(mine_fx).Transform:SetPosition(target.Transform:GetWorldPosition())
-                        end
-                        inst.SoundEmitter:PlaySound((frozen and "dontstarve_DLC001/common/iceboulder_hit") or (moonglass and "turnoftides/common/together/moon_glass/mine") or "dontstarve/wilson/use_pick_rock")
-                    end
+                    PlayMiningFX(inst, inst.sg.statemem.action.target)
                 end
                 inst:PerformBufferedAction()
             end),
@@ -2434,7 +2425,7 @@ local states =
                     inst.components.npc_talker:Say(inst.sg.statemem.str)
                 else
                     inst.AnimState:ClearOverrideBuild(inst.sg.statemem.target_build)
-                    inst.AnimState:SetTime(51 * FRAMES)
+					inst.AnimState:SetFrame(51)
                 end
                 inst:ClearBufferedAction()
             end),
@@ -2523,7 +2514,7 @@ local states =
             --inst.components.combat:SetTarget(target)
             --inst.components.combat:StartAttack()
             inst.components.locomotor:Stop()
-            local cooldown =  1 -- math.max(inst.components.combat.min_attack_period + .5 * FRAMES, 11 * FRAMES)
+            local cooldown =  1 -- math.max(inst.components.combat.min_attack_period, 11 * FRAMES)
 
             inst.AnimState:PlayAnimation("throw")
 
@@ -2718,8 +2709,7 @@ local states =
                 inst.AnimState:PlayAnimation(anim, true)
             end
 
-            --V2C: adding half a frame time so it rounds up
-            inst.sg:SetTimeout(inst.AnimState:GetCurrentAnimationLength() + .5 * FRAMES)
+            inst.sg:SetTimeout(inst.AnimState:GetCurrentAnimationLength())
         end,
 
         onupdate = function(inst)
@@ -2900,8 +2890,7 @@ local states =
                 inst.AnimState:PlayAnimation(anim, true)
             end
 
-            --V2C: adding half a frame time so it rounds up
-            inst.sg:SetTimeout(inst.AnimState:GetCurrentAnimationLength() + .5 * FRAMES)
+            inst.sg:SetTimeout(inst.AnimState:GetCurrentAnimationLength())
         end,
 
         onupdate = function(inst)
@@ -3130,7 +3119,7 @@ local states =
             DoHurtSound(inst)
 
             --V2C: some of the woodie's were-transforms have shorter hit anims
-            local stun_frames = math.min(math.floor(inst.AnimState:GetCurrentAnimationLength() / FRAMES + .5), frozen and 10 or 6)
+			local stun_frames = math.min(inst.AnimState:GetCurrentAnimationNumFrames(), frozen and 10 or 6)
             inst.sg:SetTimeout(stun_frames * FRAMES)
         end,
 

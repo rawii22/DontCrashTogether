@@ -62,7 +62,7 @@ local function MakeFx(t)
         if t.tint ~= nil then
             inst.AnimState:SetMultColour(t.tint.x, t.tint.y, t.tint.z, t.tintalpha or 1)
         elseif t.tintalpha ~= nil then
-            inst.AnimState:SetMultColour(t.tintalpha, t.tintalpha, t.tintalpha, t.tintalpha)
+            inst.AnimState:SetMultColour(1, 1, 1, t.tintalpha)
         end
         --print(inst.AnimState:GetMultColour())
         if t.transform ~= nil then
@@ -104,6 +104,10 @@ local function MakeFx(t)
             else
                 t.fn(inst)
             end
+        end
+
+        if TheWorld then
+            TheWorld:PushEvent("fx_spawned", inst)
         end
     end
 

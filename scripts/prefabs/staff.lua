@@ -353,11 +353,8 @@ end
 
 local TELEPORT_MUST_TAGS = { "locomotor" }
 local TELEPORT_CANT_TAGS = { "playerghost", "INLIMBO" }
-local function teleport_func(inst, target)
-    local caster = inst.components.inventoryitem.owner or target
-    if target == nil then
-        target = caster
-    end
+local function teleport_func(inst, target, pos, caster)
+	target = target or caster
 
     local x, y, z = target.Transform:GetWorldPosition()
 	local target_in_ocean = target.components.locomotor ~= nil and target.components.locomotor:IsAquatic()
@@ -403,10 +400,24 @@ local function NoHoles(pt)
     return not TheWorld.Map:IsGroundTargetBlocked(pt)
 end
 
+local BLINKFOCUS_MUST_TAGS = { "blinkfocus" }
+
 local function blinkstaff_reticuletargetfn()
     local player = ThePlayer
-    local rotation = player.Transform:GetRotation() * DEGREES
+    local rotation = player.Transform:GetRotation()
     local pos = player:GetPosition()
+    local ents = TheSim:FindEntities(pos.x, pos.y, pos.z, TUNING.CONTROLLER_BLINKFOCUS_DISTANCE, BLINKFOCUS_MUST_TAGS)
+    for _, v in ipairs(ents) do
+        local epos = v:GetPosition()
+        if distsq(pos, epos) > TUNING.CONTROLLER_BLINKFOCUS_DISTANCESQ_MIN then
+            local angletoepos = player:GetAngleToPoint(epos)
+            local angleto = math.abs(anglediff(rotation, angletoepos))
+            if angleto < TUNING.CONTROLLER_BLINKFOCUS_ANGLE then
+                return epos
+            end
+        end
+    end
+    rotation = rotation * DEGREES
     for r = 13, 1, -1 do
         local numtries = 2 * PI * r
         local offset = FindWalkableOffset(pos, rotation, r, numtries, false, true, NoHoles)
@@ -688,7 +699,7 @@ local function onunequip_skinned(inst, owner)
     onunequip(inst, owner)
 end
 
-local function commonfn(colour, tags, hasskin)
+local function commonfn(colour, tags, hasskin, hasshadowlevel)
     local inst = CreateEntity()
 
     inst.entity:AddTransform()
@@ -707,6 +718,11 @@ local function commonfn(colour, tags, hasskin)
             inst:AddTag(v)
         end
     end
+
+	if hasshadowlevel then
+		--shadowlevel (from shadowlevel component) added to pristine state for optimization
+		inst:AddTag("shadowlevel")
+	end
 
     local floater_swap_data =
     {
@@ -757,6 +773,11 @@ local function commonfn(colour, tags, hasskin)
         inst.components.equippable:SetOnUnequip(onunequip)
     end
 
+	if hasshadowlevel then
+		inst:AddComponent("shadowlevel")
+		inst.components.shadowlevel:SetDefaultLevel(TUNING.STAFF_SHADOW_LEVEL)
+	end
+
     return inst
 end
 
@@ -764,7 +785,7 @@ end
 
 local function red()
     --weapon (from weapon component) added to pristine state for optimization
-    local inst = commonfn("red", { "firestaff", "weapon", "rangedweapon", "rangedlighter" }, true)
+	local inst = commonfn("red", { "firestaff", "weapon", "rangedweapon", "rangedlighter" }, true, true)
 
     inst.projectiledelay = FRAMES
 
@@ -799,7 +820,7 @@ end
 
 local function blue()
     --weapon (from weapon component) added to pristine state for optimization
-    local inst = commonfn("blue", { "icestaff", "weapon", "rangedweapon", "extinguisher" }, true)
+	local inst = commonfn("blue", { "icestaff", "weapon", "rangedweapon", "extinguisher" }, true, true)
 
     inst.projectiledelay = FRAMES
 
@@ -825,7 +846,7 @@ local function blue()
 end
 
 local function purple()
-    local inst = commonfn("purple", { "nopunch" }, true)
+	local inst = commonfn("purple", { "nopunch" }, true, true)
 
     if not TheWorld.ismastersim then
         return inst
@@ -849,7 +870,7 @@ local function purple()
 end
 
 local function yellow()
-    local inst = commonfn("yellow", { "nopunch", "allow_action_on_impassable" }, true)
+	local inst = commonfn("yellow", { "nopunch", "allow_action_on_impassable" }, true, true)
 
     inst:AddComponent("reticule")
     inst.components.reticule.targetfn = light_reticuletargetfn
@@ -887,7 +908,7 @@ local function yellow()
 end
 
 local function green()
-    local inst = commonfn("green", { "nopunch" }, true)
+	local inst = commonfn("green", { "nopunch" }, true, true)
 
     if not TheWorld.ismastersim then
         return inst
@@ -909,7 +930,8 @@ local function green()
 end
 
 local function orange()
-    local inst = commonfn("orange", { "nopunch" }, true)
+    --weapon (from weapon component) added to pristine state for optimization
+	local inst = commonfn("orange", { "weapon" }, true, true)
 
     inst:AddComponent("reticule")
     inst.components.reticule.targetfn = blinkstaff_reticuletargetfn
@@ -926,10 +948,14 @@ local function orange()
     inst.components.blinkstaff:SetFX("sand_puff_large_front", "sand_puff_large_back")
     inst.components.blinkstaff.onblinkfn = onblink
 
+    inst:AddComponent("weapon")
+    inst.components.weapon:SetDamage(TUNING.CANE_DAMAGE) -- NOTES(JBK): This item is created from a cane it should do cane damage.
+
     inst.components.equippable.walkspeedmult = TUNING.CANE_SPEED_MULT
 
     inst.components.finiteuses:SetMaxUses(TUNING.ORANGESTAFF_USES)
     inst.components.finiteuses:SetUses(TUNING.ORANGESTAFF_USES)
+    inst.components.finiteuses:SetIgnoreCombatDurabilityLoss(true)
 
     MakeHauntableLaunch(inst)
     AddHauntableCustomReaction(inst, onhauntorange, true, false, true)
@@ -938,7 +964,7 @@ local function orange()
 end
 
 local function opal()
-    local inst = commonfn("opal", { "nopunch", "allow_action_on_impassable" }, true)
+	local inst = commonfn("opal", { "nopunch", "allow_action_on_impassable" }, true, false)
 
     inst:AddComponent("reticule")
     inst.components.reticule.targetfn = light_reticuletargetfn

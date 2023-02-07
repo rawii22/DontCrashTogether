@@ -1,9 +1,22 @@
+local function onfiniteuses(self)
+    local repairable = self.inst.components.repairable
+    if repairable then
+        repairable:SetFiniteUsesRepairable(self.current < self.total)
+    end
+end
+
 local FiniteUses = Class(function(self, inst)
     self.inst = inst
     self.total = 100
     self.current = 100
     self.consumption = {}
-end)
+    self.ignorecombatdurabilityloss = false
+end,
+nil,
+{
+    current = onfiniteuses,
+    total = onfiniteuses,
+})
 
 function FiniteUses:OnRemoveFromEntity()
 	self.inst:RemoveTag("usesdepleted")
@@ -17,8 +30,12 @@ function FiniteUses:GetDebugString()
     return string.format("%.2f/%d", self.current, self.total)
 end
 
+function FiniteUses:SetDoesNotStartFull(enabled) -- NOTES(JBK): Removes the assumption that the item starts at 100% uses by default for saving.
+    self.doesnotstartfull = enabled
+end
+
 function FiniteUses:OnSave()
-    if self.current ~= self.total then
+    if self.current ~= self.total or self.doesnotstartfull then
         return { uses = self.current }
     end
 end
@@ -58,6 +75,14 @@ function FiniteUses:Use(num)
     self:SetUses(self.current - (num or 1))
 end
 
+function FiniteUses:IgnoresCombatDurabilityLoss()
+    return self.ignorecombatdurabilityloss
+end
+
+function FiniteUses:SetIgnoreCombatDurabilityLoss(value)
+    self.ignorecombatdurabilityloss = value
+end
+
 function FiniteUses:OnUsedAsItem(action, doer, target)
     local uses = self.consumption[action]
     if uses ~= nil then
@@ -83,6 +108,10 @@ end
 
 function FiniteUses:SetOnFinished(fn)
     self.onfinished = fn
+end
+
+function FiniteUses:Repair(repairvalue)
+    self:SetUses(math.min(self.current + repairvalue, self.total))
 end
 
 return FiniteUses

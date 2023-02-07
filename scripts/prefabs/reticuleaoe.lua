@@ -21,7 +21,7 @@ local function UpdatePing(inst, s0, s1, t0, duration, multcolour, addcolour)
     local s = Lerp(s0, s1, k)
     local c = Lerp(1, 0, k)
     inst.Transform:SetScale(s, s, s)
-    inst.AnimState:SetMultColour(c * multcolour[1], c * multcolour[2], c * multcolour[3], c * multcolour[4])
+    inst.AnimState:SetMultColour(multcolour[1], multcolour[2], multcolour[3], c * multcolour[4])
 
     k = math.min(FLASH_TIME, t) / FLASH_TIME
     c = math.max(0, 1 - k * k)
@@ -160,7 +160,7 @@ local function OnUpdateTargetFade(inst, r, g, b, a)
         k = (FADE_FRAMES * 2 + 1 - inst._fade:value()) / FADE_FRAMES
     end
 
-    inst.AnimState:OverrideMultColour(r * k, g * k, b * k, a * k)
+    inst.AnimState:OverrideMultColour(r, g, b, a * k)
 
     if inst._fade:value() == FADE_FRAMES then
         inst._fadetask:Cancel()
@@ -202,9 +202,9 @@ local function MakeTarget(name, anim, colour)
         inst.AnimState:PlayAnimation(anim)
         inst.AnimState:SetOrientation(ANIM_ORIENTATION.OnGround)
         inst.AnimState:SetLayer(LAYER_BACKGROUND)
-        inst.AnimState:SetSortOrder(1)
+        inst.AnimState:SetSortOrder(3)--1) --was 1 in forge
         inst.AnimState:SetScale(SCALE, SCALE)
-        inst.AnimState:OverrideMultColour(0, 0, 0, 0)
+        inst.AnimState:OverrideMultColour(1, 1, 1, 0)
 
         inst._fade = net_smallbyte(inst.GUID, name.."._fade", "fadedirty")
         inst._fadetask = inst:DoPeriodicTask(FRAMES, OnUpdateTargetFade, nil, unpack(colour))
@@ -230,11 +230,19 @@ end
 return MakeReticule("reticuleaoe", "idle"),
     MakeReticule("reticuleaoesmall", "idle_small"),
     MakeReticule("reticuleaoesummon", "idle_summon"),
+	MakeReticule("reticuleaoe_1_6", "idle_1_6"),
+	MakeReticule("reticuleaoe_1d2_12", "idle_1d2_12"),
+	--ping scales to grow radius by .2 (or .1 of inner ring for summons)
     MakePing("reticuleaoeping", "idle", 1.05),
     MakePing("reticuleaoesmallping", "idle_small", 1.1),
-    MakePing("reticuleaoesummonping", "idle_summon", 1.025),
+    MakePing("reticuleaoesummonping", "idle_summon", 1.0667),
+	MakePing("reticuleaoeping_1_6", "idle_1_6", 1.1),
+	MakePing("reticuleaoeping_1d2_12", "idle_1d2_12", 1.08333),
     MakeTarget("reticuleaoehostiletarget", "idle_target", { 1, .25, 0, 1 }),
     MakeTarget("reticuleaoefriendlytarget", "idle_target", { 0, 1, .25, 1 }),
     MakeTarget("reticuleaoecctarget", "idle_target", { .3, .5, .2, 1 }),
     MakeTarget("reticuleaoesmallhostiletarget", "idle_small_target", { 1, .25, 0, 1 }),
-    MakeTarget("reticuleaoesummontarget", "idle_summon_target", { .3, .5, .2, 1 })
+    MakeTarget("reticuleaoesummontarget", "idle_summon_target", { .3, .5, .2, 1 }),
+	MakeTarget("reticuleaoesummontarget_1", "idle_target_1", { .3, .5, .2, 1 }),
+	MakeTarget("reticuleaoesummontarget_1d2", "idle_target_1d2", { .3, .5, .2, 1 }),
+	MakeTarget("reticuleaoeshadowtarget_6", "idle_target_6", { .1, .1, .1, 1 })

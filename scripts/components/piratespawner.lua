@@ -16,8 +16,18 @@ local SourceModifierList = require("util/sourcemodifierlist")
 --[[ Constants ]]
 --------------------------------------------------------------------------
 
+local function shouldremoveitem(inst)
+	return not inst.components.inventoryitem.canbepickedup
+		or not inst.components.inventoryitem.cangoincontainer
+		or inst.components.inventoryitem.canonlygoinpocket
+		or inst:HasTag("personal_possession")
+		or inst:HasTag("cursed")
+end
+
 local function processloot(inst, stash)
-    if inst:HasTag("personal_possession") then
+	if inst:HasTag("irreplaceable") then
+		return
+	elseif shouldremoveitem(inst) then
         inst:Remove()
         return
     end
@@ -37,11 +47,15 @@ local function stashloot(inst)
         processloot(inst,stash)
     elseif inst.components.inventory then
         local function checkitem(item)
-            if item and item:HasTag("personal_possession") then
-                item:Remove()
-            elseif item then 
-                inst.components.inventory:DropItem(item, true)
-                processloot(item, stash)
+            if item then
+				if inst:HasTag("irreplaceable") then
+					inst.components.inventory:DropItem(item, true)
+				elseif shouldremoveitem(item) then
+                    item:Remove()
+                else
+                    inst.components.inventory:DropItem(item, true)
+                    processloot(item, stash)
+                end
             end
         end
         inst.components.inventory:ForEachItem(checkitem)
@@ -59,44 +73,36 @@ local function hitbycannon(boat, data)
     end
 end
 
-local CANT_TAGS = {"INLIMBO"}
-
 local function setpirateboat(boat)
-
     boat:AddComponent("boatcrew")
-
     boat:AddComponent("vanish_on_sleep")
-    boat.components.vanish_on_sleep.vanishfn = function(inst)
-        --local ents = boat.components.walkableplatform:GetEntitiesOnPlatform()
-        local x,y,z = inst.Transform:GetWorldPosition()
-
-        -- Drop items out of containers first.
-        local ents = TheSim:FindEntities(x,y,z, inst.components.walkableplatform.platform_radius, nil, CANT_TAGS)
-        for _, ent in ipairs(ents) do
-            --print("Drop:", ent)
-            if ent.components.container then
-                ent.components.container:DropEverything(Vector3(x,y,z))
-            end
-        end
-
-        -- Try to stash what can be stashed.
-        ents = TheSim:FindEntities(x,y,z, inst.components.walkableplatform.platform_radius, nil, CANT_TAGS)
-        for _, ent in ipairs(ents) do
-            --print("Stash:", ent)
-            stashloot(ent)
-        end
-
-        -- Remove anything that's left.
-        ents = TheSim:FindEntities(x,y,z, inst.components.walkableplatform.platform_radius)
-        for _, ent in ipairs(ents) do
-            if ent.components.health then
-                --print("Kill:", ent)
-                ent.components.health:Kill()
-            else
-                --print("Remove:", ent)
-                ent:Remove()
-            end
-        end
+	boat.components.vanish_on_sleep.vanishfn = function(boat)
+		if boat.components.walkableplatform ~= nil then
+			for ent in pairs(boat.components.walkableplatform:GetEntitiesOnPlatform()) do
+				local container = ent.components.container
+				if container ~= nil then
+					for i = 1, container.numslots do
+						local item = container.slots[i]
+						if item ~= nil then
+							--V2C: DropItem(item) does not drop whole stack
+							--container:DropItem(item)
+							container:DropItemBySlot(i)
+							stashloot(item)
+						end
+					end
+				end
+				if ent.components.inventoryitem ~= nil then
+					stashloot(ent)
+				elseif ent:HasTag("pirate") then
+					stashloot(ent)
+					ent:Remove()
+				elseif ent.components.health ~= nil then
+					ent.components.health:Kill()
+				else
+					ent:Remove()
+				end
+			end
+		end
     end
     boat:ListenForEvent("spawnnewboatleak", hitbycannon)
 end
@@ -195,6 +201,7 @@ local function GetAveragePlayerAgeInDays()
     return sum > 0 and sum / #_activeplayers or 0
 end
 
+
 local function getnextmonkeytime()
     local days = GetAveragePlayerAgeInDays()
     local mult = 1
@@ -239,6 +246,12 @@ end)
 
 local RANGE = 40 -- distance from player to spawn the flotsam.  should be 5 more than wanted
 local SHORTRANGE = 5 -- radius that must be clear for flotsam to appear
+
+local function DoAnnouncePirates(player)
+	if not (player.components.health:IsDead() or player:HasTag("playerghost")) and player.entity:IsVisible() then 
+		player.components.talker:Say(GetString(player, "ANNOUNCE_PIRATES_ARRIVE"))
+	end
+end
 
 local function spawnpirateship(pt)
     local shipdata = {}
@@ -304,23 +317,23 @@ local function spawnpirateship(pt)
         monkey.components.inventory:GiveItem(cutless)
         monkey.components.inventory:Equip(cutless)
 
-
         local hat = SpawnPrefab("monkey_smallhat")
         hat:AddTag("personal_possession")
         monkey.components.inventory:GiveItem(hat)
         monkey.components.inventory:Equip(hat)
     end
 
-    local players = FindPlayersInRange(pt.x, pt.y, pt.z,  RANGE, true)
-    for i,player in ipairs(players)do
-        player:DoTaskInTime(0.6, 
-            function() 
-                if player:IsValid() and not player.components.health:IsDead() then 
-                    player.components.talker:Say(  GetString(player, "ANNOUNCE_PIRATES_ARRIVE") ) 
-                end
-            end)
-        player.SoundEmitter:PlaySound("monkeyisland/primemate/announce")
-    end
+	for i, v in ipairs(AllPlayers) do
+		if not (v.components.health:IsDead() or v:HasTag("playerghost")) and v.entity:IsVisible() then
+			local vboat = v:GetCurrentPlatform()
+			local vrange = RANGE + (vboat ~= nil and vboat.components.walkableplatform ~= nil and vboat.components.walkableplatform.platform_radius or 0)
+			-- <= since we spawn at exactly RANGE
+			if v:GetDistanceSqToPoint(pt) <= vrange * vrange then
+				v:DoTaskInTime(.6, DoAnnouncePirates)
+			end
+		end
+	end
+	SpawnPrefab("piratewarningsound").Transform:SetPosition(pt:Get())
 
     return shipdata
 end
@@ -369,6 +382,42 @@ local function SpawnPiratesForPlayer(player)
 
     return spawnedPirates
 end
+
+local MUST_BOAT = {"boat"}
+
+local function onmegaflaredetonation(world,data)
+    if data.sourcept and not TheWorld.Map:IsVisualGroundAtPoint(data.sourcept.x,data.sourcept.y,data.sourcept.z) then
+        if math.random() < 0.6 then
+            self.inst:DoTaskInTime(5 + (math.random()* 20),
+                function()
+
+                    local ents = TheSim:FindEntities(data.sourcept.x, data.sourcept.y, data.sourcept.z, 40, MUST_BOAT)
+                    local pirates = false
+                    for i, ent in ipairs(ents)do
+                        if ent and ent.components.boatcrew then
+                            pirates = true
+                            break
+                        end
+                    end
+                    if not pirates then
+                        local players = FindPlayersInRange(data.sourcept.x, data.sourcept.y, data.sourcept.z, 35)
+
+                        if #players > 0 then
+                            for i, player in ipairs(players) do
+                                if player:GetCurrentPlatform() then
+                                    SpawnPiratesForPlayer(player)
+                                    break
+                                end
+                            end
+                        end
+                    end
+
+                end)
+        end
+    end
+end
+
+self.inst:ListenForEvent("megaflare_detonated",onmegaflaredetonation,TheWorld)
 
 --------------------------------------------------------------------------
 --[[ Private event handlers ]]
@@ -645,12 +694,9 @@ function self:OnUpdate(dt)
             v.piratesnear = nil
         end
     end
-
 end
 
-
 function self:LongUpdate(dt)
-
     self:OnUpdate(dt)
 end
 

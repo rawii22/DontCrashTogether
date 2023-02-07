@@ -460,20 +460,21 @@ function MergeKeyValueList(...)
 end
 
 function SubtractMapKeys(base, subtract)
-    local ret = {}
-    for k,v in pairs(base) do
-        if subtract[k] ~= nil then
-            if type(subtract[k]) == "table" then
-                local subtable = SubtractMapKeys(v, subtract[k])
-                if GetTableSize(subtable) > 0 then
-                    ret[k] = subtable
-                end
-            elseif subtract[k] == nil then
-                ret[k] = v
-            end
-        end
-    end
-    return ret
+	local ret = {}
+	for k, v in pairs(base) do
+		local subtract_v = subtract[k]
+		if subtract_v == nil then
+			--no subtract entry => keep key+value in ret table
+			ret[k] = v
+		elseif type(subtract_v) == "table" and type(v) == "table" then
+			local subtable = SubtractMapKeys(v, subtract_v)
+			if next(subtable) ~= nil then
+				ret[k] = subtable
+			end
+		end
+		--otherwise, subtract entry exists => drop key+value from ret table
+	end
+	return ret
 end
 
 -- Adds 'addition' to the end of 'orig', 'mult' times.
@@ -911,6 +912,27 @@ function deepcopy(object)
     return _copy(object)
 end
 
+local function _copynometa(object, lookup_table)
+	if type(object) ~= "table" then
+		return object
+	elseif getmetatable(object) ~= nil then
+		return tostring(object)
+	elseif lookup_table[object] then
+		return lookup_table[object]
+	end
+
+	local new_table = {}
+	lookup_table[object] = new_table
+	for k, v in pairs(object) do
+		new_table[_copynometa(k, lookup_table)] = _copynometa(v, lookup_table)
+	end
+	return new_table
+end
+
+function deepcopynometa(object)
+	return _copynometa(object, {})
+end
+
 -- http://lua-users.org/wiki/CopyTable
 function shallowcopy(orig, dest)
     local copy
@@ -1091,9 +1113,10 @@ DynamicPosition = Class(function(self, pt, walkable_platform)
 	if pt ~= nil then
 		self.walkable_platform = walkable_platform or TheWorld.Map:GetPlatformAtPoint(pt.x, pt.z)
 		if self.walkable_platform ~= nil then
-			self.local_pt = pt - self.walkable_platform:GetPosition()
+			self.local_pt = Vector3(self.walkable_platform.entity:WorldToLocalSpace(pt:Get()))
 		else
-			self.local_pt = pt
+			--V2C: Make copy, saving ref to input Vector can be error prone
+			self.local_pt = Vector3(pt:Get())
 		end
 	end
 end)
@@ -1112,16 +1135,12 @@ end
 function DynamicPosition:GetPosition()
 	if self.walkable_platform ~= nil then
 		if self.walkable_platform:IsValid() then
-			local x, y, z = self.walkable_platform.Transform:GetWorldPosition()
-			return Vector3(x + self.local_pt.x, y + self.local_pt.y, z + self.local_pt.z)
-		else
-			self.walkable_platform = nil
-			self.local_pt = nil
+			return Vector3(self.walkable_platform.entity:LocalToWorldSpace(self.local_pt:Get()))
 		end
-	elseif self.local_pt ~= nil then
-	    return self.local_pt
+		self.walkable_platform = nil
+		self.local_pt = nil
 	end
-    return nil
+	return self.local_pt
 end
 
 -----------------------------------------------------------------

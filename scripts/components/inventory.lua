@@ -46,6 +46,7 @@ local Inventory = Class(function(self, inst)
     self.acceptsstacks = true
     self.ignorescangoincontainer = false
     self.opencontainers = {}
+	self.opencontainerproxies = {}
 
     self.dropondeath = true
     inst:ListenForEvent("death", OnDeath)
@@ -100,24 +101,71 @@ function Inventory:TransferInventory(receiver)
 
     local inv = receiver.components.inventory
 
+    -- NOTES(JBK): Weapons that are given to specific entities to use have the "nosteal" tag but also do not persist.
+    --             The tag can not be used because of Wanda watches for this TransferInventory function to work.
+    --             The restriction that specific entities that have these unique weapons must also make them not persist.
     for k,v in pairs(self.itemslots) do
-        inv:GiveItem(self:RemoveItemBySlot(k))
+        local item = self:RemoveItemBySlot(k)
+        if item and item.persists then
+            inv:GiveItem(item)
+        end
     end
 
     for k,v in pairs(self.equipslots) do
-		if inv.equipslots ~= nil then
-            local equip = self:Unequip(k)
-            if equip and equip.components.equippable and equip.components.equippable:IsRestricted(receiver) then
-                inv:GiveItem(equip) 
+        local equip = self:Unequip(k)
+        if equip and equip.persists then
+            if inv.equipslots ~= nil then
+                if equip.components.equippable and equip.components.equippable:IsRestricted(receiver) then
+                    inv:GiveItem(equip) 
+                else
+                    inv:Equip(equip)
+                end
             else
-                inv:Equip(equip)
+                inv:GiveItem(equip) 
             end
-		else
-			inv:GiveItem(self:Unequip(k)) 
-		end
+        end
     end
 
-    receiver.components.inventory:GiveActiveItem(self:GetActiveItem())
+    local activeitem = self:GetActiveItem()
+    if activeitem and activeitem.persists then
+        receiver.components.inventory:GiveActiveItem(activeitem)
+    end
+end
+
+function Inventory:SwapEquipment(other, equipslot_to_swap)
+    if other == nil then
+        return false
+    end
+
+    local other_inventory = other.components.inventory
+    if other_inventory == nil or other_inventory.equipslots == nil then
+        return false
+    end
+
+    for _, equipslot in pairs(EQUIPSLOTS) do
+        if equipslot_to_swap == nil or equipslot_to_swap == equipslot then
+            local my_equipitem = self:Unequip(equipslot)
+            local ot_equipitem = other_inventory:Unequip(equipslot)
+
+            if my_equipitem ~= nil then
+                if my_equipitem.components.equippable and not my_equipitem.components.equippable:IsRestricted(other) then
+                    other_inventory:Equip(my_equipitem)
+                else
+                    other_inventory:GiveItem(my_equipitem)
+                end
+            end
+
+            if ot_equipitem ~= nil then
+                if ot_equipitem.components.equippable and not ot_equipitem.components.equippable:IsRestricted(other) then
+                    self:Equip(ot_equipitem)
+                else
+                    self:GiveItem(ot_equipitem)
+                end
+            end
+        end
+    end
+
+    return true
 end
 
 function Inventory:OnSave()
@@ -243,8 +291,8 @@ function Inventory:DropActiveItem()
 	return active_item
 end
 
-function Inventory:ReturnActiveActionItem(item)
-    if item ~= nil and item == self.activeitem and self.inst.bufferedaction ~= nil then
+function Inventory:ReturnActiveActionItem(item, instant)
+    if item ~= nil and item == self.activeitem and (self.inst.bufferedaction ~= nil) == not instant then
         --Hacks for altering normal inventory:GiveItem() behaviour
         self.ignorefull = true
         self.ignoreoverflow = true
@@ -252,19 +300,29 @@ function Inventory:ReturnActiveActionItem(item)
         if self:GiveItem(item) then
             self:SetActiveItem(nil)
 
-            --Super hacks...
-            if item == self.inst.bufferedaction.invobject then
-                self.inst.bufferedaction.doerownsobject = item.components.inventoryitem:IsHeldBy(self.inst)
-            end
-            if item == self.inst.bufferedaction.target then
-                self.inst.bufferedaction.initialtargetowner = item.components.inventoryitem.owner
-            end
+			if not instant then
+				--Super hacks...
+				if item == self.inst.bufferedaction.invobject then
+					self.inst.bufferedaction.doerownsobject = item.components.inventoryitem:IsHeldBy(self.inst)
+				end
+				if item == self.inst.bufferedaction.target then
+					self.inst.bufferedaction.initialtargetowner = item.components.inventoryitem.owner
+				end
+			end
         end
 
         --Hacks for altering normal inventory:GiveItem() behaviour
         self.ignorefull = false
         self.ignoreoverflow = false
     end
+end
+
+function Inventory:HasAnyEquipment()
+    for k, v in pairs(self.equipslots) do
+        return true
+    end
+
+    return false
 end
 
 function Inventory:IsWearingArmor()
@@ -543,10 +601,6 @@ function Inventory:DropItem(item, wholestack, randomdir, pos)
         dropped.prevcontainer = nil
         dropped.prevslot = nil
 
-        if dropped:HasTag("personal_possession") then
-            dropped:RemoveTag("personal_possession")
-        end
-
         self.inst:PushEvent("dropitem", { item = dropped })
     end
 
@@ -569,6 +623,16 @@ end
 
 function Inventory:GetItemInSlot(slot)
     return self.itemslots[slot]
+end
+
+function Inventory:GetFirstItemInAnySlot()
+    for k = 1, self.maxslots do
+        local item = self.itemslots[k]
+        if item then
+            return item
+        end
+    end
+    return nil
 end
 
 function Inventory:IsFull()
@@ -853,11 +917,9 @@ function Inventory:GiveItem(inst, slot, src_pos)
         return false
     end
 
-    if not (self.isloading or self.silentfull) and self.maxslots > 0 then
-        self.inst:PushEvent("inventoryfull", { item = inst })
-    end
-
     --can't hold it!
+    local returnvalue = false
+    local shouldwisecrack = true
     if self.activeitem == nil and
         self.maxslots > 0 and
         not inst.components.inventoryitem.canonlygoinpocket and
@@ -866,7 +928,7 @@ function Inventory:GiveItem(inst, slot, src_pos)
 
         inst.components.inventoryitem:OnPutInInventory(self.inst)
         self:SetActiveItem(inst)
-        return true
+        returnvalue = true
     elseif self.HandleLeftoversFn ~= nil then
 		self.HandleLeftoversFn(self.inst, inst)
 	else
@@ -876,11 +938,18 @@ function Inventory:GiveItem(inst, slot, src_pos)
             self.activeitem.prefab == inst.prefab and
             not self.activeitem.components.stackable:IsFull()
             then
-            self.activeitem.components.stackable:Put(inst, Vector3(inst.Transform:GetWorldPosition()))
+            self.activeitem.components.stackable:Put(inst, Vector3(self.inst.Transform:GetWorldPosition()))
+            self.inst:PushEvent("gotnewitem", { item = inst, toactiveitem = true, })
+            returnvalue = true
+            shouldwisecrack = false
         else
             self:DropItem(inst, true, true)
         end
     end
+    if shouldwisecrack and not (self.isloading or self.silentfull) and self.maxslots > 0 then
+        self.inst:PushEvent("inventoryfull", { item = inst })
+    end
+    return returnvalue
 end
 
 function Inventory:Unequip(equipslot, slip)
@@ -916,7 +985,7 @@ function Inventory:SetActiveItem(item)
     end
 end
 
-function Inventory:Equip(item, old_to_active)
+function Inventory:Equip(item, old_to_active, no_animation)
     if item == nil or item.components.equippable == nil or not item:IsValid() or item.components.equippable:IsRestricted(self.inst) or (self.noheavylifting and item:HasTag("heavy")) then
         return
     end
@@ -1007,7 +1076,7 @@ function Inventory:Equip(item, old_to_active)
             self.heavylifting = item:HasTag("heavy")
         end
 
-        self.inst:PushEvent("equip", { item = item, eslot = eslot })
+        self.inst:PushEvent("equip", { item = item, eslot = eslot, no_animation = no_animation })
         if METRICS_ENABLED and item.prefab ~= nil then
             ProfileStatsAdd("equip_"..item.prefab)
         end
@@ -1092,10 +1161,14 @@ function Inventory:GetOverflowContainer()
         or nil
 end
 
-function Inventory:Has(item, amount, checkallcontainers) --Note(Peter): We don't care about v.skinname for inventory Has requests.
+--Note(Peter): We don't care about v.skinname for inventory Has requests.
+function Inventory:Has(item, amount, checkallcontainers)
+	--V2C: this is the current assumption, so make it explicit
+	local iscrafting = checkallcontainers
+
     local num_found = 0
     for k, v in pairs(self.itemslots) do
-        if v and v.prefab == item then
+		if v and v.prefab == item and not (iscrafting and v:HasTag("nocrafting")) then
             if v.components.stackable ~= nil then
                 num_found = num_found + v.components.stackable:StackSize()
             else
@@ -1104,7 +1177,7 @@ function Inventory:Has(item, amount, checkallcontainers) --Note(Peter): We don't
         end
     end
 
-    if self.activeitem and self.activeitem.prefab == item then
+	if self.activeitem ~= nil and self.activeitem.prefab == item and not (iscrafting and self.activeitem:HasTag("nocrafting")) then
         if self.activeitem.components.stackable ~= nil then
             num_found = num_found + self.activeitem.components.stackable:StackSize()
         else
@@ -1114,7 +1187,7 @@ function Inventory:Has(item, amount, checkallcontainers) --Note(Peter): We don't
 
     local overflow = self:GetOverflowContainer()
     if overflow ~= nil then
-        local overflow_enough, overflow_found = overflow:Has(item, amount)
+		local overflow_enough, overflow_found = overflow:Has(item, amount, iscrafting)
         num_found = num_found + overflow_found
     end
 
@@ -1124,7 +1197,7 @@ function Inventory:Has(item, amount, checkallcontainers) --Note(Peter): We don't
         for container_inst in pairs(containers) do
             local container = container_inst.components.container or container_inst.components.inventory
             if container and container ~= overflow and not container.excludefromcrafting then
-                local container_enough, container_found = container:Has(item, amount)
+				local container_enough, container_found = container:Has(item, amount, iscrafting)
                 num_found = num_found + container_found
             end
         end
@@ -1160,6 +1233,29 @@ function Inventory:HasItemWithTag(tag, amount)
     end
 
     return num_found >= amount, num_found
+end
+
+function Inventory:GetItemsWithTag(tag)
+    local items = {}
+    for k, v in pairs(self.itemslots) do
+        if v and v:HasTag(tag) then
+            table.insert(items, v)
+        end
+    end
+
+    if self.activeitem and self.activeitem:HasTag(tag) then
+        table.insert(items, self.active_item)
+    end
+
+    local overflow = self:GetOverflowContainer()
+    if overflow ~= nil then
+        local overflow_items = overflow:GetItemsWithTag(tag)
+        for _, item in ipairs(overflow_items) do
+            table.insert(items, item)
+        end
+    end
+
+    return items
 end
 
 function Inventory:GetItemByName(item, amount, checkallcontainers) --Note(Peter): We don't care about v.skinname for inventory GetItemByName requests.
@@ -1256,7 +1352,7 @@ function Inventory:GetCraftingIngredient(item, amount)
     local items = {}
     for i = 1, self.maxslots do
         local v = self.itemslots[i]
-        if v and v.prefab == item then
+		if v ~= nil and v.prefab == item and not v:HasTag("nocrafting") then
             table.insert(items, {
                 item = v,
                 stacksize = GetStackSize(v),
@@ -1284,7 +1380,7 @@ function Inventory:GetCraftingIngredient(item, amount)
         end
     end
 
-    if self.activeitem and self.activeitem.prefab == item then
+	if self.activeitem ~= nil and self.activeitem.prefab == item and not self.activeitem:HasTag("nocrafting") then
         crafting_items[self.activeitem] = math.min(GetStackSize(self.activeitem), amount - total_num_found)
     end
 
@@ -1372,7 +1468,7 @@ function Inventory:DropEverythingWithTag(tag)
 end
 
 function Inventory:DropEverything(ondeath, keepequip)
-    if self.inst:HasTag("player") and not GetGameModeProperty("ghost_enabled") and not GetGameModeProperty("revivable_corpse") then
+    if self.inst:HasTag("player") and not GetGhostEnabled() and not GetGameModeProperty("revivable_corpse") then
         -- NOTES(JBK): This is for items like Wanda's watches that normally stick inside the inventory but Wilderness mode will force the player to reroll so drop everything.
         ondeath = false
     end
@@ -1516,7 +1612,7 @@ function Inventory:Hide()
 
     for k, v in pairs(self.opencontainers) do
         if k ~= overflow then
-            k.components.container:Close()
+			k.components.container:Close(self.inst)
         end
     end
 
@@ -1540,11 +1636,11 @@ function Inventory:Close(keepactiveitem)
 
     local overflow = self:GetOverflowContainer()
     if overflow ~= nil then
-        overflow:Close()
+		overflow:Close(self.inst)
     end
 
     for k, v in pairs(self.opencontainers) do
-        k.components.container:Close()
+		k.components.container:Close(self.inst)
     end
 
     if self.inst.HUD ~= nil then
@@ -1553,6 +1649,14 @@ function Inventory:Close(keepactiveitem)
 
     self.isopen = false
     self.isvisible = false
+end
+
+function Inventory:CloseAllChestContainers()
+	for k in pairs(self.opencontainers) do
+		if k.components.container.type == "chest" then
+			k.components.container:Close(self.inst)
+		end
+	end
 end
 
 --------------------------------------------------------------------------
@@ -1690,10 +1794,11 @@ function Inventory:UseItemFromInvTile(item, actioncode, mod_name)
         end
         ClearClientRequestedAction()
 
-        if #actions <= 0 then
+		local act = actions[1]
+		if act == nil then
             return
-        elseif actioncode == nil or (actions[1].action.code == actioncode and actions[1].action.mod_name == mod_name) then
-            self.inst.components.locomotor:PushAction(actions[1], true)
+        elseif actioncode == nil or (act.action.code == actioncode and act.action.mod_name == mod_name) then
+           	self.inst.components.locomotor:PushAction(act, true)
         --elseif mod_name ~= nil then
             --print("Remote use inventory item failed: "..tostring(ACTION_MOD_IDS[mod_name][actioncode]))
         --else
@@ -1776,7 +1881,11 @@ function Inventory:ControllerUseItemOnSceneFromInvTile(item, target, actioncode,
         elseif item.components.inventoryitem:GetGrandOwner() ~= self.inst then
             --V2C: This is now invalid as playercontroller will now send this
             --     case to the proper call to move items between controllers.
-        elseif actioncode == nil or target == nil or CanEntitySeeTarget(self.inst, target) then
+		elseif actioncode == nil
+			or target == nil
+			or CanEntitySeeTarget(self.inst, target)
+			or (target:HasTag("pocketdimension_container") and self.inst:HasTag("usingmagiciantool"))
+			then
             act = self.inst.components.playercontroller:GetItemUseAction(item, target)
         end
         ClearClientRequestedAction()
@@ -1808,8 +1917,22 @@ function Inventory:DropItemFromInvTile(item, single)
         self.inst.components.playercontroller ~= nil then
         local buffaction = BufferedAction(self.inst, nil, ACTIONS.DROP, item, self.inst.components.playercontroller:GetRemotePredictPosition() or self.inst:GetPosition())
         buffaction.options.wholestack = not (single and item.components.stackable ~= nil and item.components.stackable:IsStack())
+		buffaction.options.instant = self.inst.sg ~= nil and self.inst.sg:HasStateTag("overridelocomote")
         self.inst.components.locomotor:PushAction(buffaction, true)
     end
+end
+
+function Inventory:CastSpellBookFromInv(item, spell_id)
+	if not self.inst.sg:HasStateTag("busy") and
+		self:CanAccessItem(item) and
+		item.components.spellbook ~= nil and
+		self.inst.components.playercontroller ~= nil then
+		if spell_id ~= nil then
+			item.components.spellbook:SelectSpell(spell_id)
+		end
+		local buffaction = BufferedAction(self.inst, nil, ACTIONS.CAST_SPELLBOOK, item)
+		self.inst.components.locomotor:PushAction(buffaction, true)
+	end
 end
 
 function Inventory:EquipActiveItem()
@@ -1986,6 +2109,14 @@ end
 
 function Inventory:TransferComponent(newinst)
     self:TransferInventory(newinst)
+end
+
+function Inventory:GetOpenContainerProxyFor(master)
+	for k in pairs(self.opencontainerproxies) do
+		if k.components.container_proxy:GetMaster() == master then
+			return k
+		end
+	end
 end
 
 return Inventory

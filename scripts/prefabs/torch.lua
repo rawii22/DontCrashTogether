@@ -34,6 +34,9 @@ local function onequip(inst, owner)
             fx.entity:AddFollower()
             fx.Follower:FollowSymbol(owner.GUID, "swap_object", fx.fx_offset_x or 0, fx.fx_offset, 0)
             fx:AttachLightTo(owner)
+            if fx.AssignSkinData ~= nil then
+                fx:AssignSkinData(inst)
+            end
 
             table.insert(inst.fires, fx)
         end
@@ -57,6 +60,18 @@ local function onunequip(inst, owner)
     inst.components.burnable:Extinguish()
     owner.AnimState:Hide("ARM_carry")
     owner.AnimState:Show("ARM_normal")
+end
+
+local function onequiptomodel(inst, owner, from_ground)
+    if inst.fires ~= nil then
+        for i, fx in ipairs(inst.fires) do
+            fx:Remove()
+        end
+        inst.fires = nil
+        owner.SoundEmitter:PlaySound("dontstarve/common/fireOut")
+    end
+
+    inst.components.burnable:Extinguish()
 end
 
 local function onpocket(inst, owner)
@@ -173,6 +188,7 @@ local function fn()
     inst.components.equippable:SetOnPocket(onpocket)
     inst.components.equippable:SetOnEquip(onequip)
     inst.components.equippable:SetOnUnequip(onunequip)
+    inst.components.equippable:SetOnEquipToModel(onequiptomodel)
 
     -----------------------------------
 

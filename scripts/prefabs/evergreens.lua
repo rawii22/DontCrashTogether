@@ -867,7 +867,11 @@ local function tree(name, build, stage, data)
         inst.components.growable:SetStage(stage == 0 and math.random(1, 3) or stage)
         inst.components.growable.loopstages = true
         inst.components.growable.springgrowth = true
+        inst.components.growable.magicgrowable = true
         inst.components.growable:StartGrowing()
+
+        inst:AddComponent("simplemagicgrower")
+        inst.components.simplemagicgrower:SetLastStage(#inst.components.growable.stages - 1)
 
         inst.growfromseed = handler_growfromseed
 
@@ -931,7 +935,7 @@ local function tree(name, build, stage, data)
             inst.AnimState:PlayAnimation(inst.anims.stump)
             inst.MiniMapEntity:SetIcon(build == "twiggy" and "twiggy_stump.png" or "evergreen_stump.png")
         else
-            inst.AnimState:SetTime(math.random() * 2)
+			inst.AnimState:SetFrame(math.random(inst.AnimState:GetCurrentAnimationNumFrames()) - 1)
             if data == "burnt" then
                 OnBurnt(inst)
             end

@@ -124,8 +124,17 @@ local function ExtraPourWaterDist(doer, dest, bufferedaction)
     return 1.5
 end
 
+local function ArriveAnywhere()
+    return true
+end
+
 global("CLIENT_REQUESTED_ACTION")
 CLIENT_REQUESTED_ACTION = nil
+
+-- NOTES(JBK): This is used to translate normal actions the player could do in the game but done on the map instead.
+--             The amount of actions will be limited with how limiting the map itself is.
+global("ACTIONS_MAP_REMAP")
+ACTIONS_MAP_REMAP = {}
 
 function SetClientRequestedAction(actioncode, mod_name)
     if mod_name then
@@ -181,11 +190,13 @@ Action = Class(function(self, data, instant, rmb, distance, ghost_valid, ghost_e
     self.show_tile_placer_fn = data.show_tile_placer_fn
 	self.theme_music = data.theme_music
 	self.theme_music_fn = data.theme_music_fn -- client side function
-    self.pre_action_cb = data.pre_action_cb -- runs and client and server
+    self.pre_action_cb = data.pre_action_cb -- runs on client and server
     self.invalid_hold_action = data.invalid_hold_action
 
     self.show_primary_input_left = data.show_primary_input_left
     self.show_secondary_input_right = data.show_secondary_input_right
+
+    self.map_action = data.map_action -- Should only be handled from the map and has action translations.
 end)
 
 -- NOTE: High priority is intended to be a shortcut flag for actions that we expect to always dominate if they are available.
@@ -198,13 +209,13 @@ ACTIONS =
     READ = Action({ mount_valid=true }),
     DROP = Action({ priority=-1, mount_valid=true, encumbered_valid=true, is_relative_to_platform=true, extra_arrive_dist=ExtraDropDist }),
     TRAVEL = Action(),
-    CHOP = Action(),
-    ATTACK = Action({priority=2, canforce=true, mount_valid=true }), -- No custom range check, attack already handles that
+	CHOP = Action({ distance=1.75, invalid_hold_action=true }),
+	ATTACK = Action({priority=2, canforce=true, mount_valid=true, invalid_hold_action=true }), -- No custom range check, attack already handles that
     EAT = Action({ mount_valid=true }),
     PICK = Action({ canforce=true, rangecheckfn=DefaultRangeCheck, extra_arrive_dist=ExtraPickupRange, mount_valid = true }),
     PICKUP = Action({ priority=1, extra_arrive_dist=ExtraPickupRange, mount_valid=true }),
-    MINE = Action(),
-    DIG = Action({ rmb=true }),
+	MINE = Action({ invalid_hold_action=true }),
+	DIG = Action({ rmb=true, invalid_hold_action=true }),
     GIVE = Action({ mount_valid=true, canforce=true, rangecheckfn=DefaultRangeCheck }),
     GIVETOPLAYER = Action({ priority=3, canforce=true, rangecheckfn=DefaultRangeCheck }),
     GIVEALLTOPLAYER = Action({ priority=3, canforce=true, rangecheckfn=DefaultRangeCheck }),
@@ -261,7 +272,7 @@ ACTIONS =
     SMOTHER = Action({ priority=1, mount_valid=true }),
     MANUALEXTINGUISH = Action({ priority=1 }),
     LAYEGG = Action(),
-    HAMMER = Action({ priority=3 }),
+	HAMMER = Action({ priority=3, invalid_hold_action=true }),
     TERRAFORM = Action({ tile_placer="gridplacer" }),
     JUMPIN = Action({ ghost_valid=true, encumbered_valid=true }),
     TELEPORT = Action({ rmb=true, distance=2 }),
@@ -286,6 +297,7 @@ ACTIONS =
     CASTSPELL = Action({ priority=-1, rmb=true, distance=20, mount_valid=true }),
 	CAST_POCKETWATCH = Action({ priority=-1, rmb=true, mount_valid=true }), -- to actually use the mounted action, the pocket watch will need the pocketwatch_mountedcast tag
     BLINK = Action({ priority=HIGH_ACTION_PRIORITY, rmb=true, distance=36, mount_valid=true }),
+    BLINK_MAP = Action({ priority=HIGH_ACTION_PRIORITY, customarrivecheck=ArriveAnywhere, rmb=true, mount_valid=true, map_action=true, }),
     COMBINESTACK = Action({ mount_valid=true, extra_arrive_dist=ExtraPickupRange }),
     TOGGLE_DEPLOY_MODE = Action({ priority=HIGH_ACTION_PRIORITY, instant=true }),
     SUMMONGUARDIAN = Action({ rmb=false, distance=5 }),
@@ -300,6 +312,7 @@ ACTIONS =
     CATPLAYGROUND = Action({ rmb=false, distance=1 }),
     CATPLAYAIR = Action({ rmb=false, distance=2 }),
     FAN = Action({ rmb=true, mount_valid=true }),
+    ERASE_PAPER = Action({ rmb=true, mount_valid=true }),
     DRAW = Action(),
     BUNDLE = Action({ rmb=true, priority=2 }),
     BUNDLESTORE = Action({ instant=true }),
@@ -319,6 +332,7 @@ ACTIONS =
     CASTUNSUMMON = Action({ mount_valid=true, distance=math.huge }),
 	COMMUNEWITHSUMMONED = Action({ rmb=true, mount_valid=true }),
     TELLSTORY = Action({ rmb=true, distance=3 }),
+    PERFORM = Action({ rmb=true, distance=1.5, invalid_hold_action=true }),
 
     TOSS = Action({priority=1, rmb=true, distance=8, mount_valid=true }),
     NUZZLE = Action(),
@@ -340,7 +354,7 @@ ACTIONS =
 	REMOVE_FROM_TROPHYSCALE = Action(),
 	CYCLE = Action({ rmb=true, priority=2 }),
 
-    CASTAOE = Action({ priority=HIGH_ACTION_PRIORITY, rmb=true, distance=8 }),
+	CASTAOE = Action({ priority=HIGH_ACTION_PRIORITY, rmb=true, mount_valid=true, distance=8, invalid_hold_action=true }),
 
 	HALLOWEENMOONMUTATE = Action({ priority=-1 }),
 
@@ -367,23 +381,23 @@ ACTIONS =
     WATER_TOSS = Action({ priority=3, rmb=true, customarrivecheck=CheckOceanFishingCastRange, is_relative_to_platform=true, disable_platform_hopping=true}),
 
     -- boats
-    RAISE_SAIL = Action({ distance=1.25 }),
-    LOWER_SAIL = Action({ distance=1.25 }),
-    LOWER_SAIL_BOOST = Action({ distance=1.25 }),
-    LOWER_SAIL_FAIL = Action({ distance=1.25, do_not_locomote=true }),
-    RAISE_ANCHOR = Action({ distance=2.5 }),
-    LOWER_ANCHOR = Action({ distance=2.5 }),
-    EXTEND_PLANK = Action({ distance=2.5 }),
-    RETRACT_PLANK = Action({ distance=2.5 }),
-    ABANDON_SHIP = Action({ distance=2.5, priority=4 }),
-    MOUNT_PLANK = Action({ distance=0.5 }),
+    RAISE_SAIL = Action({ distance=1.25, invalid_hold_action = true }),
+    LOWER_SAIL = Action({ distance=1.25, invalid_hold_action = true }),
+    LOWER_SAIL_BOOST = Action({ distance=1.25, invalid_hold_action = true }),
+    LOWER_SAIL_FAIL = Action({ distance=1.25, do_not_locomote=true, invalid_hold_action = true }),
+    RAISE_ANCHOR = Action({ distance=2.5, invalid_hold_action = true }),
+    LOWER_ANCHOR = Action({ distance=2.5, invalid_hold_action = true }),
+    EXTEND_PLANK = Action({ distance=2.5, invalid_hold_action = true }),
+    RETRACT_PLANK = Action({ distance=2.5, invalid_hold_action = true }),
+    ABANDON_SHIP = Action({ distance=2.5, priority=4, invalid_hold_action = true }),
+    MOUNT_PLANK = Action({ distance=0.5, invalid_hold_action = true }),
     DISMOUNT_PLANK = Action({ distance=2.5 }),
-    REPAIR_LEAK = Action({ distance=2.5 }),
-    STEER_BOAT = Action({ distance=0.1 }),
+    REPAIR_LEAK = Action({ distance=2.5, invalid_hold_action = true }),
+    STEER_BOAT = Action({ distance=0.1, invalid_hold_action = true }),
     SET_HEADING = Action({distance=9999, do_not_locomote=true}),
     STOP_STEERING_BOAT = Action({ instant = true }),
     CAST_NET = Action({ priority=HIGH_ACTION_PRIORITY, rmb=true, distance=12, mount_valid=true, disable_platform_hopping=true }),
-    ROW_FAIL = Action({customarrivecheck=function() return true end, disable_platform_hopping=true, skip_locomotor_facing=true, invalid_hold_action = true}),
+    ROW_FAIL = Action({customarrivecheck=ArriveAnywhere, disable_platform_hopping=true, skip_locomotor_facing=true, invalid_hold_action = true}),
     ROW = Action({priority=3, customarrivecheck=CheckRowRange, is_relative_to_platform=true, disable_platform_hopping=true, invalid_hold_action = true}),
     ROW_CONTROLLER = Action({priority=3, is_relative_to_platform=true, disable_platform_hopping=true, do_not_locomote=true, invalid_hold_action = true}),
     BOARDPLATFORM = Action({ customarrivecheck=CheckIsOnPlatform }),
@@ -460,10 +474,19 @@ ACTIONS =
 
     -- WX78
     APPLYMODULE = Action({ mount_valid=true }),
-    APPLYMODULE_FAIL = Action({ mount_valid=true }),
+	APPLYMODULE_FAIL = Action({ mount_valid=true, instant = true }),
     REMOVEMODULES = Action({ mount_valid=true }),
-    REMOVEMODULES_FAIL = Action({ mount_valid=true }),
+	REMOVEMODULES_FAIL = Action({ mount_valid=true, instant = true }),
     CHARGE_FROM = Action({ mount_valid=false }),
+
+    ROTATE_FENCE = Action({ rmb=true }),
+
+	-- MAXWELL
+	USEMAGICTOOL = Action({ mount_valid = true, priority = 1 }),
+	STOPUSINGMAGICTOOL = Action({ mount_valid = true, priority = 2, distance = math.huge, do_not_locomote = true }),
+	USESPELLBOOK = Action({ instant = true, mount_valid = true }),
+	CLOSESPELLBOOK = Action({ instant = true, mount_valid = true }),
+	CAST_SPELLBOOK = Action({ mount_valid = true }),
 }
 
 ACTIONS_BY_ACTION_CODE = {}
@@ -695,9 +718,25 @@ end
 
 ACTIONS.RUMMAGE.fn = function(act)
     local targ = act.target or act.invobject
+    if targ == nil then
+        return
+    end
+
+	local proxy
+	if targ.components.container_proxy ~= nil then
+		local master = targ.components.container_proxy:GetMaster()
+		if master ~= nil then
+			proxy = targ
+			targ = master
+		end
+	end
 
     if targ ~= nil and targ.components.container ~= nil then
-        if targ.components.container:IsOpenedBy(act.doer) then
+        if proxy ~= nil and proxy.components.container_proxy:IsOpenedBy(act.doer) then
+            proxy.components.container_proxy:Close(act.doer)
+            act.doer:PushEvent("closecontainer", { container = targ })
+            return true
+        elseif proxy == nil and targ.components.container:IsOpenedBy(act.doer) then
             targ.components.container:Close(act.doer)
             act.doer:PushEvent("closecontainer", { container = targ })
             return true
@@ -707,11 +746,17 @@ ACTIONS.RUMMAGE.fn = function(act)
             --return false, "NOTPROCHEF"
         elseif not targ.components.container:IsOpenedBy(act.doer) and not targ.components.container:CanOpen() then
             return false, "INUSE"
-        elseif targ.components.container.canbeopened then
+        elseif targ.components.container.canbeopened and (proxy == nil or proxy.components.container_proxy:CanBeOpened()) then
             local owner = targ.components.inventoryitem ~= nil and targ.components.inventoryitem:GetGrandOwner() or nil
             if owner ~= nil and (targ.components.quagmire_stewer ~= nil or targ.components.container.droponopen) then
                 if owner == act.doer then
                     owner.components.inventory:DropItem(targ, true, true)
+				elseif owner:HasTag("pocketdimension_container") then
+					--V2C: skipped IsOpenedBy(act.doer) check because magician's top hat
+					--     closes when performing actions, but it's pretty safe to assume
+					--     this action is valid.
+					local x, y, z = (act.doer.components.inventory ~= nil and act.doer.components.inventory:GetOpenContainerProxyFor(owner) or act.doer).Transform:GetWorldPosition()
+					owner.components.container:DropItemAt(targ, x, y, z)
                 elseif owner.components.container ~= nil and owner.components.container:IsOpenedBy(act.doer) then
                     owner.components.container:DropItem(targ)
                 else
@@ -720,9 +765,13 @@ ACTIONS.RUMMAGE.fn = function(act)
                 end
             end
             --Silent fail for opening containers in the dark
-            if CanEntitySeeTarget(act.doer, targ) then
+            if owner == act.doer or CanEntitySeeTarget(act.doer, proxy or targ) then
                 act.doer:PushEvent("opencontainer", { container = targ })
-                targ.components.container:Open(act.doer)
+                if proxy ~= nil then
+                    proxy.components.container_proxy:Open(act.doer)
+                else
+                    targ.components.container:Open(act.doer)
+                end
             end
             return true
         end
@@ -731,13 +780,18 @@ end
 
 ACTIONS.RUMMAGE.strfn = function(act)
     local targ = act.target or act.invobject
-    return targ ~= nil
-        and (   targ.replica.container ~= nil and
-                targ.replica.container:IsOpenedBy(act.doer) and
-                "CLOSE" or
-                (act.target ~= nil and act.target:HasTag("decoratable") and "DECORATE")
-            )
-        or nil
+    if targ == nil then
+        return
+    elseif targ.components.container_proxy ~= nil then --exists on clients too
+        if targ.components.container_proxy:IsOpenedBy(act.doer) then
+            return "CLOSE"
+        end
+    elseif targ.replica.container ~= nil then
+        if targ.replica.container:IsOpenedBy(act.doer) then
+            return "CLOSE"
+        end
+    end
+    return act.target ~= nil and act.target:HasTag("decoratable") and "DECORATE" or nil
 end
 
 ACTIONS.DROP.fn = function(act)
@@ -773,8 +827,10 @@ ACTIONS.LOOKAT.fn = function(act)
 		if targ.components.inspectable ~= nil then
 			local desc, text_filter_context, original_author = targ.components.inspectable:GetDescription(act.doer)
 			if desc ~= nil then
-				if act.doer.components.playercontroller == nil or
-					not act.doer.components.playercontroller.directwalking then
+				if not (
+					(act.doer.components.playercontroller ~= nil and act.doer.components.playercontroller.directwalking) or
+					(act.doer.sg ~= nil and act.doer.sg:HasStateTag("overridelocomote"))
+				) then
 					act.doer.components.locomotor:Stop()
 				end
 				if act.doer.components.talker ~= nil then
@@ -790,7 +846,8 @@ ACTIONS.READ.fn = function(act)
     local targ = act.target or act.invobject
     if targ ~= nil and act.doer ~= nil then
 		if targ.components.book ~= nil and act.doer.components.reader ~= nil then
-	        return act.doer.components.reader:Read(targ)
+            local success, reason = act.doer.components.reader:Read(targ)
+	        return success, reason
 		elseif targ.components.simplebook ~= nil then
 			targ.components.simplebook:Read(act.doer)
 			return true
@@ -1015,6 +1072,13 @@ ACTIONS.TELLSTORY.fn = function(act)
 	if act.doer.components.storyteller ~= nil then
 		return act.doer.components.storyteller:TellStory(act.target or act.invobject)
 	end
+end
+
+ACTIONS.PERFORM.fn = function(act)
+    if (act.doer ~= nil and act.doer.components.stageactor ~= nil)
+            and (act.target ~= nil and act.target.components.stageactingprop ~= nil) then
+        return act.target.components.stageactingprop:DoPerformance(act.doer)
+    end
 end
 
 ACTIONS.BAIT.fn = function(act)
@@ -1347,8 +1411,11 @@ ACTIONS.COOK.fn = function(act)
             return false
         end
 
-        if ingredient.components.health ~= nil and ingredient.components.combat ~= nil then
-            act.doer:PushEvent("killed", { victim = ingredient })
+        if ingredient.components.health ~= nil then
+            act.doer:PushEvent("murdered", { victim = ingredient, stackmult = 1 }) -- NOTES(JBK): Cooking something alive.
+            if ingredient.components.combat ~= nil then
+                act.doer:PushEvent("killed", { victim = ingredient })
+            end
         end
 
         local product = act.target.components.cooker:CookItem(ingredient, act.doer)
@@ -1552,8 +1619,10 @@ end
 
 ACTIONS.GIVE.fn = function(act)
     if act.target ~= nil then
-
-        if act.target.components.ghostlyelixirable ~= nil and act.invobject.components.ghostlyelixir ~= nil then
+        if act.target:HasTag("playbill_lecturn") and act.invobject.components.playbill then
+            act.target.components.playbill_lecturn:SwapPlayBill(act.invobject, act.doer)
+            return true
+        elseif act.target.components.ghostlyelixirable ~= nil and act.invobject.components.ghostlyelixir ~= nil then
             return act.invobject.components.ghostlyelixir:Apply(act.doer, act.target)
         elseif act.target.components.trader ~= nil then
             local able, reason = act.target.components.trader:AbleToAccept(act.invobject, act.doer)
@@ -1676,6 +1745,16 @@ ACTIONS.STORE.fn = function(act)
         end
     end
     --
+
+	local proxy
+	if target.components.container_proxy ~= nil then
+		local master = target.components.container_proxy:GetMaster()
+		if master ~= nil then
+			proxy = target
+			target = master
+		end
+	end
+
     if target.components.container ~= nil and act.invobject.components.inventoryitem ~= nil and act.doer.components.inventory ~= nil then
         if target:HasTag("mastercookware") and not act.doer:HasTag("masterchef") then
             return false, "NOTMASTERCHEF"
@@ -1715,7 +1794,11 @@ ACTIONS.STORE.fn = function(act)
                 forcedrop.components.inventory:DropItem(target, true, true)
             end
             if forceopen or target.components.inventoryitem == nil then
-                target.components.container:Open(act.doer)
+                if proxy ~= nil then
+                    proxy.components.container_proxy:Open(act.doer)
+                else
+                    target.components.container:Open(act.doer)
+                end
             end
 
             if not target.components.container:GiveItem(item, targetslot, nil, false) then
@@ -1828,7 +1911,7 @@ ACTIONS.LIGHT.fn = function(act)
         if act.doer ~= nil then
             act.doer:PushEvent("onstartedfire", { target = act.target })
         end
-        act.invobject.components.lighter:Light(act.target)
+        act.invobject.components.lighter:Light(act.target, act.doer)
         return true
     end
 end
@@ -2183,6 +2266,11 @@ ACTIONS.MURDER.fn = function(act)
         end
 
         local stacksize = murdered.components.stackable ~= nil and murdered.components.stackable:StackSize() or 1
+
+        -- NOTES(JBK): Push the events before spawning any giving any loot.
+        act.doer:PushEvent("murdered", { victim = murdered, stackmult = stacksize })
+        act.doer:PushEvent("killed", { victim = murdered, stackmult = stacksize })
+
         if murdered.components.lootdropper ~= nil then
             murdered.causeofdeath = act.doer
             local pos = Vector3(x, y, z)
@@ -2201,10 +2289,7 @@ ACTIONS.MURDER.fn = function(act)
             murdered.components.inventory:TransferInventory(act.doer)
         end
 
-        act.doer:PushEvent("murdered", { victim = murdered, stackmult = stacksize })
-        act.doer:PushEvent("killed", { victim = murdered, stackmult = stacksize })
         murdered:Remove()
-
         return true
     end
 end
@@ -2300,7 +2385,13 @@ ACTIONS.USEITEM.fn = function(act)
         act.invobject.components.useableitem:CanInteract() and
         act.doer.components.inventory ~= nil and
         act.doer.components.inventory:IsOpenedBy(act.doer) then
-        return act.invobject.components.useableitem:StartUsingItem()
+		--V2C: kinda hack since USEITEM is instant action, and the useableitem will
+		--     liklely force state change (bad!) instead.
+		act.doer.sg.statemem.is_going_to_action_state = true
+		local ret = act.invobject.components.useableitem:StartUsingItem()
+		--And clear it now in case no state change happened
+		act.doer.sg.statemem.is_going_to_action_state = nil
+		return ret
     end
 end
 
@@ -2364,13 +2455,22 @@ ACTIONS.CASTSPELL.fn = function(act)
     local staff = act.invobject or act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
 	local act_pos = act:GetActionPoint()
     if staff and staff.components.spellcaster and staff.components.spellcaster:CanCast(act.doer, act.target, act_pos) then
-        staff.components.spellcaster:CastSpell(act.target, act_pos)
+		staff.components.spellcaster:CastSpell(act.target, act_pos, act.doer)
         return true
     end
 end
 
+local function TryToSoulhop(act, act_pos, consumeall)
+    return act.doer ~= nil
+    and act.doer.sg ~= nil
+    and act.doer.sg.currentstate.name == "portal_jumpin_pre"
+    and act_pos ~= nil
+    and act.doer.TryToPortalHop ~= nil
+    and act.doer:TryToPortalHop(act.distancecount, consumeall)
+end
+
 ACTIONS.BLINK.strfn = function(act)
-    return act.invobject == nil and act.doer ~= nil and act.doer:HasTag("soulstealer") and "SOUL" or nil
+    return act.invobject == nil and act.doer ~= nil and act.doer:HasTag("soulstealer") and ((act.doer._freesoulhop_counter or 0) > 0 and "FREESOUL" or "SOUL") or nil
 end
 
 ACTIONS.BLINK.fn = function(act)
@@ -2379,16 +2479,85 @@ ACTIONS.BLINK.fn = function(act)
         if act.invobject.components.blinkstaff ~= nil then
             return act.invobject.components.blinkstaff:Blink(act_pos, act.doer)
         end
-    elseif act.doer ~= nil
-        and act.doer.sg ~= nil
-        and act.doer.sg.currentstate.name == "portal_jumpin_pre"
-        and act_pos ~= nil
-        and act.doer.components.inventory ~= nil
-        and act.doer.components.inventory:Has("wortox_soul", 1) then
-        act.doer.components.inventory:ConsumeByName("wortox_soul", 1)
-        act.doer.sg:GoToState("portal_jumpin", act_pos)
+    elseif TryToSoulhop(act, act_pos) then
+        act.doer.sg:GoToState("portal_jumpin", {dest = act_pos,})
         return true
     end
+end
+
+ACTIONS.BLINK_MAP.stroverridefn = function(act)
+    return act.invobject == nil and act.doer ~= nil and act.doer:HasTag("soulstealer") and subfmt(STRINGS.ACTIONS.BLINK_MAP.SOUL, { souls = act.distancecount, }) or nil
+end
+
+local function ActionCanMapSoulhop(act)
+    if act.invobject == nil and act.doer and act.doer.CanSoulhop then
+        return act.doer:CanSoulhop(act.distancecount)
+    end
+    return false
+end
+
+ACTIONS.BLINK_MAP.fn = function(act)
+    -- NOTES(JBK): This only supports soul hopping for now due to the theoretical infinite range.
+	local act_pos = act:GetActionPoint()
+    if ActionCanMapSoulhop(act) and TryToSoulhop(act, act_pos, true) then
+        act.doer.sg:GoToState("portal_jumpin", {dest = act_pos, from_map = true,})
+        return true
+    end
+end
+
+local BLINK_MAP_MUST = { "CLASSIFIED", "globalmapicon", "fogrevealer" }
+ACTIONS_MAP_REMAP[ACTIONS.BLINK.code] = function(act, targetpos)
+    local doer = act.doer
+    if doer == nil then
+        return nil
+    end
+    local aimassisted = false
+    local distoverride = nil
+    if not TheWorld.Map:IsVisualGroundAtPoint(targetpos.x, targetpos.y, targetpos.z) then
+        -- NOTES(JBK): No map tile at the cursor but the area might contain a boat that has a maprevealer component around it.
+        -- First find a globalmapicon near here and look for if it is from a fogrevealer and assume it is on landable terrain.
+        local ents = TheSim:FindEntities(targetpos.x, targetpos.y, targetpos.z, PLAYER_REVEAL_RADIUS * 0.4, BLINK_MAP_MUST)
+        local revealer = nil
+        local MAX_WALKABLE_PLATFORM_DIAMETERSQ = TUNING.MAX_WALKABLE_PLATFORM_RADIUS * TUNING.MAX_WALKABLE_PLATFORM_RADIUS * 4 -- Diameter.
+        for _, v in ipairs(ents) do
+            if doer:GetDistanceSqToInst(v) > MAX_WALKABLE_PLATFORM_DIAMETERSQ then -- Ignore close boats because the range for aim assist is huge.
+                revealer = v
+                break
+            end
+        end
+        if revealer == nil then
+            return nil
+        end
+        -- NOTES(JBK): Ocuvigils are normally placed at the edge of the boat and can result in the teleportee being pushed out of the boat boundary.
+        -- The server will make the adjustments to the target position without the client being able to know so we force the original distance to be an override.
+        targetpos.x, targetpos.y, targetpos.z = revealer.Transform:GetWorldPosition()
+        distoverride = act.pos:GetPosition():Dist(targetpos)
+        if revealer._target ~= nil then
+            -- Server only code.
+            local boat = revealer._target:GetCurrentPlatform()
+            if boat == nil then
+                -- This should not happen but in case it does fail the act to not teleport onto water.
+                return nil
+            end
+            targetpos.x, targetpos.y, targetpos.z = boat.Transform:GetWorldPosition()
+        end
+        aimassisted = true
+    end
+    local dist = distoverride or act.pos:GetPosition():Dist(targetpos)
+    local act_remap = BufferedAction(doer, nil, ACTIONS.BLINK_MAP, act.invobject, targetpos)
+    local dist_mod = ((doer._freesoulhop_counter or 0) * (TUNING.WORTOX_FREEHOP_HOPSPERSOUL - 1)) * act.distance
+    local dist_perhop = (act.distance * TUNING.WORTOX_FREEHOP_HOPSPERSOUL * TUNING.WORTOX_MAPHOP_DISTANCE_SCALER)
+    local dist_souls = (dist + dist_mod) / dist_perhop
+    act_remap.maxsouls = TUNING.WORTOX_MAX_SOULS
+    act_remap.distancemod = dist_mod
+    act_remap.distanceperhop = dist_perhop
+    act_remap.distancefloat = dist_souls
+    act_remap.distancecount = math.clamp(math.ceil(dist_souls), 1, act_remap.maxsouls)
+    act_remap.aimassisted = aimassisted
+    if not ActionCanMapSoulhop(act_remap) then
+        return nil
+    end
+    return act_remap
 end
 
 ACTIONS.CASTSUMMON.fn = function(act)
@@ -2447,18 +2616,18 @@ end
 ACTIONS.MAKEMOLEHILL.fn = function(act)
     if act.doer then
         if act.doer.prefab == "mole" then
-        local molehill = SpawnPrefab("molehill")
-        molehill.Transform:SetPosition(act.doer.Transform:GetWorldPosition())
-        molehill:AdoptChild(act.doer)
-        act.doer.needs_home_time = nil
-        return true
+			local molehill = SpawnPrefab("molehill")
+			molehill.Transform:SetPosition(act.doer.Transform:GetWorldPosition())
+			molehill:AdoptChild(act.doer)
+			act.doer.needs_home_time = nil
+			return true
         elseif act.doer.prefab == "molebat" then
             local molebathill = SpawnPrefab("molebathill")
             molebathill.Transform:SetPosition(act.doer.Transform:GetWorldPosition())
             molebathill:AdoptChild(act.doer)
             return true
-    end
-end
+		end
+	end
 end
 
 ACTIONS.MOLEPEEK.fn = function(act)
@@ -2615,6 +2784,18 @@ ACTIONS.CATPLAYAIR.fn = function(act)
         end
         act.doer.last_play_air_time = GetTime()
         return true
+    end
+end
+
+ACTIONS.ERASE_PAPER.fn = function(act)
+    if act.invobject and act.target
+        and act.invobject.components.erasablepaper
+		and act.target.components.papereraser
+		and not act.target:HasTag("fire")
+        and not act.target:HasTag("burnt")
+		then
+		
+        return act.target.components.papereraser:DoErase(act.invobject, act.doer)
     end
 end
 
@@ -3043,6 +3224,10 @@ ACTIONS.APPLYCONSTRUCTION.fn = function(act)
     end
 end
 
+ACTIONS.CASTAOE.stroverridefn = function(act)
+	return act.invobject ~= nil and act.invobject.components.spellbook ~= nil and act.invobject.components.spellbook:GetSpellName() or nil
+end
+
 ACTIONS.CASTAOE.strfn = function(act)
     return act.invobject ~= nil and string.upper(act.invobject.prefab) or nil
 end
@@ -3050,8 +3235,7 @@ end
 ACTIONS.CASTAOE.fn = function(act)
 	local act_pos = act:GetActionPoint()
     if act.invobject ~= nil and act.invobject.components.aoespell ~= nil and act.invobject.components.aoespell:CanCast(act.doer, act_pos) then
-        act.invobject.components.aoespell:CastSpell(act.doer, act_pos)
-        return true
+		return act.invobject.components.aoespell:CastSpell(act.doer, act_pos)
     end
 end
 
@@ -3090,7 +3274,7 @@ end
 ACTIONS.HALLOWEENMOONMUTATE.fn = function(act)
 	if act.invobject ~= nil and act.invobject.components.halloweenpotionmoon ~= nil then
 		if act.target == nil
-			or (not act.target:HasTag("flying") and not TheWorld.Map:IsPassableAtPoint(act.target.Transform:GetWorldPosition()))
+			--or (not act.target:HasTag("flying") and not TheWorld.Map:IsPassableAtPoint(act.target.Transform:GetWorldPosition()))
 			or (act.target.components.burnable ~= nil and (act.target.components.burnable:IsBurning() or act.target.components.burnable:IsSmoldering()))
 			or (act.target.components.freezable ~= nil and act.target.components.freezable:IsFrozen()) then
 
@@ -3403,6 +3587,12 @@ ACTIONS.REPAIR_LEAK.fn = function(act)
 	end
 end
 
+ACTIONS.STEER_BOAT.pre_action_cb = function(act)
+	if act.doer.HUD ~= nil then
+		act.doer.HUD:CloseSpellWheel()
+	end
+end
+
 ACTIONS.STEER_BOAT.fn = function(act)
 	if act.target ~= nil
 		and (act.target.components.steeringwheel ~= nil and act.target.components.steeringwheel.sailor == nil)
@@ -3510,20 +3700,23 @@ ACTIONS.BOAT_MAGNET_BEACON_TURN_OFF.fn = function(act)
     return true
 end
 
+local function IsBoatCannonAmmo(item)
+	return item.projectileprefab ~= nil and item:HasTag("boatcannon_ammo")
+end
+
 ACTIONS.BOAT_CANNON_LOAD_AMMO.fn = function(act)
     if act.target.components.boatcannon ~= nil and not act.target.components.boatcannon:IsAmmoLoaded() and act.doer.components.inventory ~= nil then
-
         local activeitem = act.doer.components.inventory:GetActiveItem()
-        local ammo = activeitem
+		local ammo
+		if activeitem == nil then
+			-- Not holding an item, so we must be right-clicking to reload.
+			ammo = act.doer.components.inventory:FindItem(IsBoatCannonAmmo)
+		elseif IsBoatCannonAmmo(activeitem) then
+			ammo = activeitem
+		end
 
-        -- Not holding an item, so we must be right-clicking to reload.
-        if activeitem == nil then
-            ammo = act.doer.components.inventory:FindItem(function(item)
-                return item:HasTag("boatcannon_ammo")
-            end)
-        end
-
-        if ammo ~= nil and act.target.components.boatcannon:LoadAmmo(ammo, act.doer) then
+		if ammo ~= nil then
+			act.target.components.boatcannon:LoadAmmo(ammo.projectileprefab)
             local removeditem = act.doer.components.inventory:RemoveItem(ammo, false, true)
             removeditem:Remove()
             act.doer.components.talker:Say(GetDescription(act.doer, act.target, "AMMOLOADED"))
@@ -3534,6 +3727,12 @@ ACTIONS.BOAT_CANNON_LOAD_AMMO.fn = function(act)
         end
 	end
     return true
+end
+
+ACTIONS.BOAT_CANNON_START_AIMING.pre_action_cb = function(act)
+	if act.doer.HUD ~= nil then
+		act.doer.HUD:CloseSpellWheel()
+	end
 end
 
 ACTIONS.BOAT_CANNON_START_AIMING.fn = function(act)
@@ -4210,6 +4409,9 @@ ACTIONS.APPLYMODULE.fn = function(act)
 end
 
 ACTIONS.APPLYMODULE_FAIL.fn = function(act)
+	if act.doer.components.talker ~= nil then
+		act.doer.components.talker:Say(GetActionFailString(act.doer, "APPLYMODULE", "NOTENOUGHSLOTS"))
+	end
     return true
 end
 
@@ -4237,6 +4439,9 @@ ACTIONS.REMOVEMODULES.fn = function(act)
 end
 
 ACTIONS.REMOVEMODULES_FAIL.fn = function(act)
+	if act.doer.components.talker ~= nil then
+		act.doer.components.talker:Say(GetActionFailString(act.doer, "REMOVEMODULES", "NO_MODULES"))
+	end
     return true
 end
 
@@ -4251,4 +4456,84 @@ ACTIONS.CHARGE_FROM.fn = function(act)
     else
         return false
     end
+end
+
+ACTIONS.ROTATE_FENCE.fn = function(act)
+    if act.invobject ~= nil then
+        local fencerotator = act.invobject.components.fencerotator
+        if fencerotator then
+            fencerotator:Rotate(act.target, TUNING.FENCE_DEFAULT_ROTATION)
+            return true
+        end
+    end
+
+    return false
+end
+
+ACTIONS.USEMAGICTOOL.fn = function(act)
+	if act.doer.components.magician ~= nil then
+		return act.doer.components.magician:StartUsingTool(act.invobject)
+	end
+	return false
+end
+
+ACTIONS.STOPUSINGMAGICTOOL.fn = function(act)
+	if act.doer.components.magician ~= nil then
+		act.doer.components.magician:StopUsing()
+	end
+	return true
+end
+
+ACTIONS.USESPELLBOOK.pre_action_cb = function(act)
+	if act.doer.HUD ~= nil and act.invobject ~= nil and act.invobject.components.spellbook ~= nil then
+		local inventory = act.doer.replica.inventory
+		if inventory:GetActiveItem() ~= act.invobject then
+			inventory:ReturnActiveItem()
+		end
+		if not act.invobject:HasTag("fueldepleted") and act.doer.components.playercontroller ~= nil and act.doer.components.playercontroller:IsEnabled() then
+			act.invobject.components.spellbook:OpenSpellBook(act.doer)
+			if act.doer.sg ~= nil and act.doer.sg:HasStateTag("overridelocomote") then
+				act.doer.sg.currentstate:HandleEvent(act.doer.sg, "locomote")
+			end
+		end
+	end
+end
+
+ACTIONS.USESPELLBOOK.fn = function(act)
+	if act.doer.components.inventory ~= nil then
+		act.doer.components.inventory:ReturnActiveActionItem(act.invobject, true)
+		if act.doer.sg:HasStateTag("overridelocomote") then
+			act.doer.sg.currentstate:HandleEvent(act.doer.sg, "locomote")
+		end
+		act.doer.components.inventory:CloseAllChestContainers()
+	end
+	if act.doer.components.steeringwheeluser ~= nil then
+		act.doer.components.steeringwheeluser:SetSteeringWheel(nil)
+	end
+	if act.doer.components.boatcannonuser ~= nil then
+		act.doer.components.boatcannonuser:SetCannon(nil)
+	end
+	return not (act.invobject.components.fueled ~= nil and act.invobject.components.fueled:IsEmpty())
+end
+
+ACTIONS.CLOSESPELLBOOK.pre_action_cb = function(act)
+	if act.doer.HUD ~= nil and act.doer.HUD:GetCurrentOpenSpellBook() == act.invobject then
+		act.doer.HUD:CloseSpellWheel()
+	end
+end
+
+ACTIONS.CLOSESPELLBOOK.fn = function(act)
+	return true
+end
+
+ACTIONS.CAST_SPELLBOOK.fn = function(act)
+	if act.doer.components.inventory ~= nil then
+		act.doer.components.inventory:ReturnActiveActionItem(act.invobject)
+	end
+	if act.invobject.components.inventoryitem ~= nil and
+		act.invobject.components.inventoryitem:GetGrandOwner() == act.doer and
+		act.invobject.components.spellbook ~= nil
+		then
+		return act.invobject.components.spellbook:CastSpell(act.doer)
+	end
 end

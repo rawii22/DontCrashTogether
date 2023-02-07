@@ -36,7 +36,7 @@ local KitcoonPuppet = require "widgets/kitcoonpuppet"
 local SHOW_DST_DEBUG_HOST_JOIN = BRANCH == "dev"
 local SHOW_QUICKJOIN = false
 
-local IS_BETA = BRANCH == "staging" or BRANCH == "dev"
+local IS_BETA = BRANCH == "staging" --or BRANCH == "dev"
 local IS_DEV_BUILD = BRANCH == "dev"
 
 local function PlayBannerSound(inst, self, sound)
@@ -89,7 +89,7 @@ local function MakeMoonstormBanner(self, banner_root, anim)
     anim_wagstaff:GetAnimState():PlayAnimation("loop_w2", true)
     anim_wagstaff:SetScale(.667)
     anim_wagstaff:GetAnimState():SetErosionParams(1, 0, -1.0)
-    anim_wagstaff:GetAnimState():SetMultColour(0.9, 0.9, 0.9, 0.9)
+    anim_wagstaff:GetAnimState():SetMultColour(1, 1, 1, 0.9)
 
     local wagstaff_erosion_min = 0.02 -- Not 0 so there's always a little bit of influence on the alpha from the lines
     local wagstaff_erosion_max = 1.2 -- Overshoots 1.2 to get more stable alpha lines when close to fully faded out
@@ -187,6 +187,13 @@ local function MakeYOTCatcoonBanner(self, banner_root, anim)
     anim:GetAnimState():PlayAnimation("loop", true)
 end
 
+local function MakeYOTRBanner(self, banner_root, anim)
+    anim:GetAnimState():SetBuild("dst_menu_yotr")
+    anim:GetAnimState():SetBank ("dst_menu_yotr")
+    anim:SetScale(.667)
+    anim:GetAnimState():PlayAnimation("loop", true)
+end
+
 local function MakeHallowedNightsBanner(self, banner_root, anim)
     anim:GetAnimState():SetBuild("dst_menu_halloween2")
     anim:GetAnimState():SetBank ("dst_menu_halloween2")
@@ -276,9 +283,42 @@ local function MakeWX78Banner(self, banner_root, anim)
     anim:SetScale(.667)
 end
 
+local function MakeWickerbottomBanner(self, banner_root, anim)
+    anim:GetAnimState():SetBuild("dst_menu_wickerbottom")
+    anim:GetAnimState():SetBank ("dst_menu_wickerbottom")
+    anim:GetAnimState():PlayAnimation("loop", true)
+    anim:SetScale(.667)
+end
+
 local function MakePiratesBanner(self, banner_root, anim)
     anim:GetAnimState():SetBuild("dst_menu_pirates")
     anim:GetAnimState():SetBank("dst_menu_pirates")
+    anim:GetAnimState():PlayAnimation("loop", true)
+    anim:SetScale(.667)
+end
+
+local function MakeDramaBanner(self, banner_root, anim)
+    local anim_bg = banner_root:AddChild(UIAnim())
+    anim_bg:GetAnimState():SetBuild("dst_menu_charlie2")
+    anim_bg:GetAnimState():SetBank("dst_menu_charlie2")
+    anim_bg:GetAnimState():PlayAnimation("loop_bg", true)
+    anim_bg:SetScale(0.667)
+    anim_bg:MoveToBack()
+
+	if IsSpecialEventActive(SPECIAL_EVENTS.HALLOWED_NIGHTS) then
+		anim:GetAnimState():SetBuild("dst_menu_charlie_halloween")
+		anim:GetAnimState():SetBank ("dst_menu_charlie_halloween")
+	else
+		anim:GetAnimState():SetBuild("dst_menu_charlie")
+		anim:GetAnimState():SetBank ("dst_menu_charlie")
+	end
+    anim:GetAnimState():PlayAnimation("loop", true)
+    anim:SetScale(0.667)
+end
+
+local function MakeWaxwellBanner(self, banner_root, anim)
+    anim:GetAnimState():SetBuild("dst_menu_waxwell")
+    anim:GetAnimState():SetBank("dst_menu_waxwell")
     anim:GetAnimState():PlayAnimation("loop", true)
     anim:SetScale(.667)
 end
@@ -332,18 +372,25 @@ function MakeBanner(self)
 
 	if IS_BETA then
 		title_str = STRINGS.UI.MAINSCREEN.MAINBANNER_BETA_TITLE
-        MakePiratesBanner(self, banner_root, anim)
+        
+        MakeWaxwellBanner(self, banner_root, anim)
+
+    elseif IsSpecialEventActive(SPECIAL_EVENTS.YOTR) then
+        MakeYOTRBanner(self, banner_root, anim)
 	elseif IsSpecialEventActive(SPECIAL_EVENTS.YOTC) then
         MakeYOTCBanner(self, banner_root, anim)
 	elseif IsSpecialEventActive(SPECIAL_EVENTS.YOT_CATCOON) then
         MakeYOTCatcoonBanner(self, banner_root, anim)
 	elseif IsSpecialEventActive(SPECIAL_EVENTS.HALLOWED_NIGHTS) then
-        MakeHallowedNightsBanner(self, banner_root, anim)
+		MakeDramaBanner(self, banner_root, anim)
+        --MakeHallowedNightsBanner(self, banner_root, anim)
 	elseif IsSpecialEventActive(SPECIAL_EVENTS.CARNIVAL) then
         MakeCawnivalBanner(self, banner_root, anim)
 	else
+		MakeWaxwellBanner(self, banner_root, anim)
+        --MakeDramaBanner(self, banner_root, anim)
         --MakeDefaultBanner(self, banner_root, anim)
-        MakePiratesBanner(self, banner_root, anim)
+        --MakePiratesBanner(self, banner_root, anim)
         --MakeWX78Banner(self, banner_root, anim)
         --[[
 		local cur_time = os.time()
@@ -387,36 +434,55 @@ local function MakeWX78BannerFront(self, banner_front, anim)
     anim:SetScale(0.667)
 end
 
+local function MakeDramaBannerFront(self, banner_front, anim)
+	if IsSpecialEventActive(SPECIAL_EVENTS.HALLOWED_NIGHTS) then
+		anim:GetAnimState():SetBuild("dst_menu_charlie_halloween")
+		anim:GetAnimState():SetBank ("dst_menu_charlie_halloween")
+	else
+		anim:GetAnimState():SetBuild("dst_menu_charlie")
+		anim:GetAnimState():SetBank ("dst_menu_charlie")
+	end
+    anim:GetAnimState():PlayAnimation("overlay", true)
+    anim:SetScale(0.667)
+end
+
 -- For drawing things in front of the MOTD panels
 local function MakeBannerFront(self)
     if IS_BETA then
-        --[[
         local banner_front = Widget("banner_front")
         banner_front:SetPosition(0, 0)
+        banner_front:SetClickable(false)
         local anim = banner_front:AddChild(UIAnim())
 
-        MakeWX78BannerFront(self, banner_front, anim)
+        MakeDramaBannerFront(self, banner_front, anim)
 
         return banner_front
-        ]]
+
     elseif IsSpecialEventActive(SPECIAL_EVENTS.YOTC) then
         return nil
     elseif IsSpecialEventActive(SPECIAL_EVENTS.YOT_CATCOON) then
         return nil
     elseif IsSpecialEventActive(SPECIAL_EVENTS.HALLOWED_NIGHTS) then
-        return nil
+        local banner_front = Widget("banner_front")
+        banner_front:SetPosition(0, 0)
+        banner_front:SetClickable(false)
+        local anim = banner_front:AddChild(UIAnim())
+
+        MakeDramaBannerFront(self, banner_front, anim)
+
+        return banner_front
+
     elseif IsSpecialEventActive(SPECIAL_EVENTS.CARNIVAL) then
         return nil
     else
-        --[[
-        local banner_front = Widget("banner_front")
+        --[[local banner_front = Widget("banner_front")
         banner_front:SetPosition(0, 0)
         local anim = banner_front:AddChild(UIAnim())
 
-        MakeWX78BannerFront(self, banner_front, anim)
+        MakeWickerbottomBannerFront(self, banner_front, anim)
         
-        return banner_front
-        ]]
+        return banner_front]]
+        return nil
     end
 end
 
@@ -440,8 +506,14 @@ local MultiplayerMainScreen = Class(Screen, function(self, prev_screen, profile,
 end)
 
 function MultiplayerMainScreen:GotoShop( filter_info )
-	if not TheInventory:HasSupportForOfflineSkins() and (TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode()) then
-		TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.MAINSCREEN.OFFLINE, STRINGS.UI.MAINSCREEN.ITEMCOLLECTION_DISABLE,
+	if (TheFrontEnd:GetIsOfflineMode() or not TheNet:IsOnlineMode()) then
+		local error_message
+		if TheInventory:HasSupportForOfflineSkins() then
+			error_message = STRINGS.UI.MAINSCREEN.STORE_DISABLE
+		else
+			error_message = STRINGS.UI.MAINSCREEN.ITEMCOLLECTION_DISABLE
+		end
+		TheFrontEnd:PushScreen(PopupDialogScreen(STRINGS.UI.MAINSCREEN.OFFLINE, error_message, 
 			{
 				{text=STRINGS.UI.FESTIVALEVENTSCREEN.OFFLINE_POPUP_LOGIN, cb = function()
 						SimReset()
@@ -506,7 +578,8 @@ function MultiplayerMainScreen:DoInit()
     self.onlinestatus = self.fixed_root:AddChild(OnlineStatus( true ))
 
     --TODO(Peter) put the snowflakes back in after 2021
-	--[[if IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) then
+	--[
+    if IsSpecialEventActive(SPECIAL_EVENTS.WINTERS_FEAST) then
 		self.banner_snowfall = self.banner_root:AddChild(TEMPLATES.old.Snowfall(-.39 * RESOLUTION_Y, .35, 3, 15))
 		self.banner_snowfall:SetVAnchor(ANCHOR_TOP)
 		self.banner_snowfall:SetHAnchor(ANCHOR_MIDDLE)
@@ -516,7 +589,8 @@ function MultiplayerMainScreen:DoInit()
 		self.snowfall:SetVAnchor(ANCHOR_TOP)
 		self.snowfall:SetHAnchor(ANCHOR_MIDDLE)
 		self.snowfall:SetScaleMode(SCALEMODE_PROPORTIONAL)
-	end]]
+	end
+    --]
 
     ----------------------------------------------------------
 	-- new MOTD

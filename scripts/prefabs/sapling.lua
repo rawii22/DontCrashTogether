@@ -1,14 +1,14 @@
 local assets =
 {
     Asset("ANIM", "anim/sapling.zip"),
-    Asset("ANIM", "anim/sapling_diseased_build.zip"),
+    Asset("PKGREF", "anim/sapling_diseased_build.zip"),
     Asset("SOUND", "sound/common.fsb"),
 }
 
 local moon_assets =
 {
     Asset("ANIM", "anim/sapling_moon.zip"),
-    Asset("ANIM", "anim/sapling_diseased_moon.zip"),
+    Asset("PKGREF", "anim/sapling_diseased_moon.zip"),
     Asset("SOUND", "sound/common.fsb"),
 }
 
@@ -120,7 +120,7 @@ local function sapling_common(inst, is_moon)
         return inst
     end
 
-    inst.AnimState:SetTime(math.random() * 2)
+	inst.AnimState:SetFrame(math.random(inst.AnimState:GetCurrentAnimationNumFrames()) - 1)
 
     inst:AddComponent("pickable")
     inst.components.pickable.picksound = "dontstarve/wilson/harvest_sticks"
