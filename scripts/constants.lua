@@ -6,6 +6,7 @@ local IS_BETA = BRANCH == "staging" --or BRANCH == "dev"
 PI = math.pi
 PI2 = PI*2
 TWOPI = PI2
+SQRT2 = math.sqrt(2)
 DEGREES = PI/180
 RADIANS = 180/PI
 FRAMES = 1/30
@@ -15,6 +16,8 @@ RESOLUTION_X = 1280
 RESOLUTION_Y = 720
 
 PLAYER_REVEAL_RADIUS = 30.0 -- NOTES(JBK): Keep in sync with MiniMapRenderer.cpp!
+PLAYER_CAMERA_SEE_DISTANCE = 40.0 -- NOTES(JBK): Based off of an approximation of the maximum default camera distance before seeing clouds and is the screen diagonal.
+PLAYER_CAMERA_SEE_DISTANCE_SQ = PLAYER_CAMERA_SEE_DISTANCE * PLAYER_CAMERA_SEE_DISTANCE -- Helper.
 
 MAX_FE_SCALE = 3 --Default if you don't call SetMaxPropUpscale
 MAX_HUD_SCALE = 1.25
@@ -186,6 +189,8 @@ CONTROL_INV_13 = 79
 CONTROL_INV_14 = 80
 CONTROL_INV_15 = 81
 
+CONTROL_START_EMOJI = 82
+
 CONTROL_CUSTOM_START = 100
 
 XBOX_CONTROLLER_ID = 17
@@ -351,6 +356,7 @@ ROG_CHARACTERLIST =
 }
 
 --When adding new characters with alternate states, be sure to update skinsutils.lua function GetSkinModes.
+-- NOTES(JBK): Keep this up to date with LOOKUP_LIST in scrapbookpartitions.lua
 DST_CHARACTERLIST =
 {
     "wilson",
@@ -564,6 +570,7 @@ EQUIPSLOTS =
     HANDS = "hands",
     HEAD = "head",
     BODY = "body",
+    BEARD = "beard",
 }
 
 ITEMTAG =
@@ -752,7 +759,7 @@ SPECIAL_EVENTS =
     YOT_CATCOON = "year_of_the_catcoon",
     YOTR = "year_of_the_bunnyman",
 }
-WORLD_SPECIAL_EVENT = SPECIAL_EVENTS.YOTR
+WORLD_SPECIAL_EVENT = SPECIAL_EVENTS.WINTERS_FEAST
 --WORLD_SPECIAL_EVENT = IS_BETA and SPECIAL_EVENTS.NONE or SPECIAL_EVENTS.YOTR
 WORLD_EXTRA_EVENTS = {}
 
@@ -1044,7 +1051,12 @@ end
 FE_MUSIC =
     (FESTIVAL_EVENT_MUSIC[WORLD_FESTIVAL_EVENT] ~= nil and FESTIVAL_EVENT_MUSIC[WORLD_FESTIVAL_EVENT].sound) or
     (SPECIAL_EVENT_MUSIC[WORLD_SPECIAL_EVENT] ~= nil and SPECIAL_EVENT_MUSIC[WORLD_SPECIAL_EVENT].sound) or
-    "dontstarve/music/music_FE_maxwell"
+    "dontstarve/music/music_FE_riftsthree"
+    --"dontstarve/music/music_FE_survivorsguideone"
+    --"dontstarve/music/music_FE_shadowrift"
+    --"dontstarve/music/music_FE_lunarrift"
+    --"dontstarve/music/music_FE_daywalker"
+    --"dontstarve/music/music_FE_maxwell"
     --"dontstarve/music/music_FE_charliestage"
     --"dontstarve/music/music_FE_wickerbottom"
     --"dontstarve/music/music_FE"
@@ -1141,6 +1153,14 @@ TECH =
 
     ROBOTMODULECRAFT_ONE = { ROBOTMODULECRAFT = 1 },
     BOOKCRAFT_ONE = { BOOKCRAFT = 1 },
+
+	LUNARFORGING_ONE = { LUNARFORGING = 1 },
+	LUNARFORGING_TWO = { LUNARFORGING = 2 },
+
+	SHADOWFORGING_ONE = { SHADOWFORGING = 1 },
+	SHADOWFORGING_TWO = { SHADOWFORGING = 2 },
+
+    CARPENTRY_TWO = { CARPENTRY = 2 },
 }
 
 -- See cell_data.h
@@ -1747,6 +1767,14 @@ MATERIALS =
     KELP = "kelp",
     SHELL = "shell",
     NIGHTMARE = "nightmare",
+	DREADSTONE = "dreadstone",
+}
+
+FORGEMATERIALS =
+{
+	LUNARPLANT = "lunarplant",
+	VOIDCLOTH = "voidcloth",
+    WAGPUNKBITS = "wagpunk_bits",
 }
 
 UPGRADETYPES =
@@ -1889,6 +1917,42 @@ TECH_INGREDIENT =
     SCULPTING = "sculpting_material",
 }
 
+-- Identifies which builder tags are from which characters' skill trees,
+-- so that the crafting menu properly identifies that they're locked behind a skill
+-- for your current character.
+TECH_SKILLTREE_BUILDER_TAG_OWNERS =
+{
+    alchemist = "wilson",
+    gem_alchemistI = "wilson",
+    gem_alchemistII = "wilson",
+    gem_alchemistIII = "wilson",
+    ore_alchemistI = "wilson",
+    ore_alchemistII = "wilson",
+    ore_alchemistIII = "wilson",
+    ick_alchemistI = "wilson",
+    ick_alchemistII = "wilson",
+    ick_alchemistIII = "wilson",
+    skill_wilson_allegiance_shadow = "wilson",
+    skill_wilson_allegiance_lunar = "wilson",
+
+    wolfgang_dumbbell_crafting = "wolfgang",
+    wolfgang_coach = "wolfgang",
+
+    woodcarver1 = "woodie",
+    woodcarver2 = "woodie",
+    woodcarver3 = "woodie",
+
+    syrupcrafter = "wormwood",
+    saplingcrafter = "wormwood",
+    berrybushcrafter = "wormwood",
+    juicyberrybushcrafter = "wormwood",
+    reedscrafter = "wormwood",
+    lureplantcrafter = "wormwood",
+    carratcrafter = "wormwood",
+    lightfliercrafter = "wormwood",
+    fruitdragoncrafter = "wormwood",
+}
+
 -- IngredientMod must be one of the following values
 INGREDIENT_MOD_LOOKUP =
 {
@@ -1918,6 +1982,14 @@ TOOLACTIONS =
     PLAY = true,
     UNSADDLE = true,
 	REACH_HIGH = true,
+	SCYTHE = true,
+}
+
+EQUIPMENTSETNAMES =
+{
+    DREADSTONE = "dreadstone",
+    LUNARPLANT = "lunarplant",
+    VOIDCLOTH = "voidcloth",
 }
 
 -- this is a net_tinybyte on inventoryitem_classified.deploymode
@@ -2439,11 +2511,24 @@ SKIN_TYPES_THAT_RECEIVE_CLOTHING =
 	"NO_BASE",
 }
 
+POSTACTIVATEHANDSHAKE = { -- NOTES(JBK): These are expected to never go backwards and only increment.
+    NONE = 0, -- Initialization purposes.
+    CTS_LOADED = 1, -- Client is ready to receive server state.
+    STC_SENDINGSTATE = 2, -- Server is sending what it knows.
+    READY = 3, -- Client is in a good sync state. Must be the end.
+}
+
 STORM_TYPES =
 {
     NONE = 0,
     SANDSTORM = 1,
     MOONSTORM = 2,
+}
+
+HUNT_ACTIONS = {
+    SUCCESS = 0,
+    PROP = 1,
+    SLEEP = 2,
 }
 
 LOADING_SCREEN_TIP_OPTIONS =
@@ -2507,6 +2592,31 @@ LOADING_SCREEN_CONTROL_TIP_KEYS =
     TIP_PLAYER_STATUS = { playerstatus = CONTROL_SHOW_PLAYER_STATUS },
     TIP_INVENTORY_SLOTS = { inv_0 = CONTROL_INV_10, inv_9 = CONTROL_INV_9 },
 }
+
+SCRAPBOOK_CATS = {
+    "creature",
+    "item",
+    "food",
+    "giant",
+    "thing",
+    "POI",
+}
+
+SPECIAL_SCRAPBOOK_PAGES_LOOKUP =
+{
+    --[[
+    {
+        name = "ID",
+        entries = { "entry1", "entry2", "..." },
+    },
+    ]]
+}
+
+SPECIAL_SCRAPBOOK_PAGES = {}
+
+for i, data in ipairs(SPECIAL_SCRAPBOOK_PAGES_LOOKUP) do
+    SPECIAL_SCRAPBOOK_PAGES[data.name] = i
+end
 
 -- When using a controller or on console, some control IDs are different than on non-console, but use the same tips.
 LOADING_SCREEN_CONTROLLER_ID_LOOKUP =

@@ -19,11 +19,20 @@ local function setflowertype(inst, name)
     if inst.animname == nil or (name ~= nil and inst.animname ~= name) then
         if inst.animname == ROSE_NAME then
             inst:RemoveTag("thorny")
+
+            inst._isrose:set(false)
+            inst:OnIsRoseDirty()
         end
+
         inst.animname = name or (math.random() < ROSE_CHANCE and ROSE_NAME or names[math.random(#names)])
+
         inst.AnimState:PlayAnimation(inst.animname)
+
         if inst.animname == ROSE_NAME then
             inst:AddTag("thorny")
+
+            inst._isrose:set(true)
+            inst:OnIsRoseDirty()
         end
     end
 end
@@ -52,10 +61,6 @@ local function onpickedfn(inst, picker)
             picker.components.combat:GetAttacked(inst, TUNING.ROSE_DAMAGE)
             picker:PushEvent("thorns")
         end
-    end
-
-    if not inst.planted then
-        TheWorld:PushEvent("beginregrowth", inst)
     end
 
     TheWorld:PushEvent("plantkilled", { doer = picker, pos = pos }) --this event is pushed in other places too
@@ -91,15 +96,17 @@ local function OnIsCaveDay(inst, isday)
     end
 end
 
-local function OnBurnt(inst)
-	if not inst.planted then
-		TheWorld:PushEvent("beginregrowth", inst)
-	end
-    DefaultBurntFn(inst)
+local function CheckForPlanted(inst)
+    if not inst.planted then
+        AddToRegrowthManager(inst)
+    end
 end
 
+local function OnIsRoseDirty(inst)
+    inst.scrapbook_proxy = inst._isrose:value() and "flower_rose" or nil
+end
 
-local function fn()
+local function commonfn(isplanted)
     local inst = CreateEntity()
 
     inst.entity:AddTransform()
@@ -109,13 +116,20 @@ local function fn()
     inst.AnimState:SetBank("flowers")
     inst.AnimState:SetBuild("flowers")
     inst.AnimState:SetRayTestOnBB(true)
+    inst.scrapbook_anim = "f1"
 
     inst:AddTag("flower")
     inst:AddTag("cattoy")
 
+    inst.OnIsRoseDirty = OnIsRoseDirty
+
+    inst._isrose = net_bool(inst.GUID, "flower._isrose", "isrosedirty")
+
     inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
+        inst:ListenForEvent("isrosedirty", inst.OnIsRoseDirty)
+
         return inst
     end
 
@@ -137,8 +151,9 @@ local function fn()
     --inst.components.transformer.transformPrefab = "flower_evil"
 
     MakeSmallBurnable(inst)
-    inst.components.burnable:SetOnBurntFn(OnBurnt)
-
+    if not isplanted then -- This will be true during load but it will be false and cut down on runtime.
+        inst:DoTaskInTime(0, CheckForPlanted)
+    end
     MakeSmallPropagator(inst)
 
 	inst:AddComponent("halloweenmoonmutable")
@@ -160,10 +175,20 @@ local function fn()
     return inst
 end
 
+function plainfn()
+    -- NOTES(JBK): This is here to stop TheSim from appearing in the commonfn callback.
+    return commonfn()
+end
+
 function rosefn()
-    local inst = fn()
+    local inst = commonfn()
 
     inst:SetPrefabName("flower")
+    inst.scrapbook_anim = "rose"
+    inst.scrapbook_damage = TUNING.ROSE_DAMAGE
+    inst.scrapbook_speechname = "FLOWER"
+
+    inst.scrapbook_proxy = "flower_rose"
 
     if not TheWorld.ismastersim then
         return inst
@@ -175,7 +200,7 @@ function rosefn()
 end
 
 function plantedflowerfn()
-    local inst = fn()
+    local inst = commonfn(true)
 
     inst:SetPrefabName("flower")
 
@@ -188,6 +213,6 @@ function plantedflowerfn()
     return inst
 end
 
-return Prefab("flower", fn, assets, prefabs),
+return Prefab("flower", plainfn, assets, prefabs),
        Prefab("flower_rose", rosefn, assets, prefabs),
        Prefab("planted_flower", plantedflowerfn, assets, prefabs)

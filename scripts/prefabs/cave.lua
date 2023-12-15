@@ -67,6 +67,7 @@ local prefabs =
     "minotaur",
     "spider_dropper",
     "caverain",
+    "caveacidrain",
     "dropperweb",
     "hutch",
     "toadstool_cap",
@@ -85,6 +86,7 @@ local prefabs =
     "chessjunk",
     "pandoraschest",
     "sacred_chest",
+    "pond_cave",
 
     -- GROTTO
     "archive_centipede",
@@ -126,6 +128,20 @@ local prefabs =
 	"retrofitted_grotterwar_spawnpoint",
 	"retrofitted_grotterwar_homepoint",
  --   "wall_ruins_2",
+
+    --
+    "daywalkerspawningground",
+
+    -- From riftspawner
+    --"lunarrift_portal",
+    "shadowrift_portal",
+    -- From shadowthrallmanager
+    "miasma_cloud",
+    --"dreadstone_stack",
+	"shadowthrall_hands",
+	"shadowthrall_horns",
+	"shadowthrall_wings",
+	"ruins_shadeling",
 }
 
 local monsters =
@@ -251,6 +267,7 @@ local function master_postinit(inst)
     end
 
     --cave specifics
+	inst:AddComponent("daywalkerspawner")
     inst:AddComponent("hounded")
     inst.components.hounded:SetSpawnData(wormspawn)
 	inst.components.hounded.max_thieved_spawn_per_thief = 1
@@ -260,6 +277,12 @@ local function master_postinit(inst)
 
     -- Archive
     inst:AddComponent("archivemanager")
+
+    -- Rift
+    inst:AddComponent("riftspawner")
+    inst:AddComponent("miasmamanager")
+    inst:AddComponent("shadowthrallmanager")
+	inst:AddComponent("ruinsshadelingspawner")
 
     return inst
 end

@@ -14,7 +14,7 @@ assert(TheWorld.ismastersim, "Beargerspawner should not exist on client")
 --[[ Private constants ]]
 --------------------------------------------------------------------------
 
-local HASSLER_SPAWN_DIST = 40
+local HASSLER_SPAWN_DIST = PLAYER_CAMERA_SEE_DISTANCE
 local BEARGER_TIMERNAME = "bearger_timetospawn"
 
 --------------------------------------------------------------------------
@@ -125,6 +125,11 @@ local function ReleaseHassler(targetPlayer)
         print("Not spawning bearger - already at maximum number")
         return nil
     end
+	local mutant = TheSim:FindFirstEntityWithTag("bearger_blocker")
+	if mutant ~= nil then
+		--Not spawning bearger - mutant exists
+		return nil
+	end
 
     local spawn_pt = GetSpawnPoint(targetPlayer:GetPosition())
     if spawn_pt ~= nil then

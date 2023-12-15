@@ -30,6 +30,7 @@ local prefabs =
     "crabking_chip_med",
     "crabking_chip_low",
     "moon_altar_cosmic",
+    "moon_altar_crown",
     "hermit_cracked_pearl",
     "chesspiece_crabking_sketch",
     "trident_blueprint",
@@ -470,6 +471,9 @@ local function removearm(inst,armpos)
 end
 
 local function spawnarm(inst,armpos, fx)
+    if inst.arms == nil then -- This happens when the Crab King goes into entity sleep we should not continue spawning arms.
+        return
+    end
 
     local clawsnum = TUNING.CRABKING_BASE_CLAWS + (math.floor(inst.countgems(inst).green/2))
 
@@ -802,10 +806,13 @@ local function fn()
     inst:AddTag("largecreature")
     inst:AddTag("gemsocket")
     inst:AddTag("birdblocker")
+    inst:AddTag("lunar_aligned")
 
     inst.AnimState:PlayAnimation("inert", true)
 
     inst.entity:SetPristine()
+
+    inst.scrapbook_removedeps = { "moon_altar_cosmic" }
 
     inst.spawnchunk = spawnchunk
 
@@ -817,6 +824,9 @@ local function fn()
     if not TheWorld.ismastersim then
         return inst
     end
+
+    inst.scrapbook_maxhealth = { TUNING.CRABKING_HEALTH, TUNING.CRABKING_HEALTH + (25 * TUNING.CRABKING_HEALTH_BONUS) }
+    inst.scrapbook_damage = 0
 
     ------------------------------------------
 

@@ -451,17 +451,22 @@ function ItemExplorer:DoShopForDefaultItem(default_item_key)
 end
 
 function ItemExplorer:_LaunchCommerce()
+    if self.launched_commerce then
+        print("Already launched commerce before?")
+        return
+    end
+    self.launched_commerce = true
     local item_key = self.last_interaction_target.item_key
     if WillUnravelBreakRestrictedCharacter( item_key ) then
         local data = GetSkinData(item_key)
         local character = data.base_prefab
         local body = subfmt(STRINGS.UI.BARTERSCREEN.UNRAVEL_WARNING_RESTRICTED_BODY, {character=STRINGS.CHARACTER_NAMES[character]})
 
-		local scr = PopupDialogScreen(
+		local scr; scr = PopupDialogScreen(
 			STRINGS.UI.BARTERSCREEN.UNRAVEL_WARNING_TITLE,
 			body,
-			{{ text = STRINGS.UI.BARTERSCREEN.OK, cb = function() TheFrontEnd:PopScreen() self:_DoCommerce(item_key) end },
-			 { text = STRINGS.UI.BARTERSCREEN.CANCEL, cb = function() TheFrontEnd:PopScreen() end }})
+			{{ text = STRINGS.UI.BARTERSCREEN.OK, cb = function() self:_DoCommerce(item_key) TheFrontEnd:PopScreen(scr) end },
+			 { text = STRINGS.UI.BARTERSCREEN.CANCEL, cb = function() TheFrontEnd:PopScreen(scr) self.launched_commerce = nil end }})
 		scr.owned_by_wardrobe = true
 		TheFrontEnd:PushScreen(scr)
 		return
@@ -469,11 +474,11 @@ function ItemExplorer:_LaunchCommerce()
         local _, reward_item = IsItemInCollection(item_key)
         local body = subfmt(STRINGS.UI.BARTERSCREEN.UNRAVEL_WARNING_BODY, {ensemble_name=STRINGS.SET_NAMES[reward_item], reward_name=GetSkinName(reward_item)})
 
-		local scr = PopupDialogScreen(
+		local scr; scr = PopupDialogScreen(
 			STRINGS.UI.BARTERSCREEN.UNRAVEL_WARNING_TITLE,
 			body,
-			{{ text = STRINGS.UI.BARTERSCREEN.OK, cb = function() TheFrontEnd:PopScreen() self:_DoCommerce(item_key) end },
-			 { text = STRINGS.UI.BARTERSCREEN.CANCEL, cb = function() TheFrontEnd:PopScreen() end }})
+			{{ text = STRINGS.UI.BARTERSCREEN.OK, cb = function() self:_DoCommerce(item_key) TheFrontEnd:PopScreen(scr) end },
+			 { text = STRINGS.UI.BARTERSCREEN.CANCEL, cb = function() TheFrontEnd:PopScreen(scr) self.launched_commerce = nil end }})
 		scr.owned_by_wardrobe = true
 		TheFrontEnd:PushScreen(scr)
 		return
@@ -487,6 +492,7 @@ function ItemExplorer:_DoCommerce(item_key)
     local cached_data = self.last_interaction_target --we need to cache the last_interaction_target as it may have been nil'd on the refresh when the screen becomes active again
 
     local barter_screen = BarterScreen(self.scroll_list.context.user_profile, self, item_key, is_buying, cached_data.owned_count, function()
+        self.launched_commerce = nil
         -- We completed a barter and now our screens contain old inventory data.
         if not is_buying and cached_data.owned_count <= 1 then
             -- Selling our last one. Fake a click to turn it off. We can't click the widget because the interaction target may not be on screen (and thus not in a widget).

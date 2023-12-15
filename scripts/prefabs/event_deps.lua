@@ -69,8 +69,10 @@ local SPECIAL_EVENT_DEPS =
         {
             assets =
             {
-				Asset("ANIM", "anim/dst_menu_charlie_halloween.zip"),
-				Asset("ANIM", "anim/dst_menu_charlie2.zip"),
+                Asset("ANIM", "anim/dst_menu_rift3.zip"),
+                Asset("ANIM", "anim/dst_menu_rift3_bg.zip"),
+				Asset("PKGREF", "anim/dst_menu_charlie_halloween.zip"),
+				Asset("PKGREF", "anim/dst_menu_charlie2.zip"),
                 Asset("PKGREF", "anim/dst_menu_halloween2.zip"),
                 Asset("PKGREF", "anim/dst_menu_halloween.zip"),
                 Asset("PKGREF", "anim/dst_menu_wurt.zip"),
@@ -85,8 +87,9 @@ local SPECIAL_EVENT_DEPS =
         {
             assets =
             {
-                Asset("ANIM", "anim/dst_menu_waxwell.zip"),
-
+                Asset("ANIM", "anim/dst_menu_rift3.zip"),
+                Asset("ANIM", "anim/dst_menu_rift3_bg.zip"),
+                Asset("PKGREF", "anim/dst_menu_waxwell.zip"),
 	            Asset("PKGREF", "anim/dst_menu_feast.zip"),
                 Asset("PKGREF", "anim/dst_menu_feast_bg.zip"),
                 Asset("PKGREF", "sound/music_frontend_winters_feast.fsb"),
@@ -218,7 +221,15 @@ local SPECIAL_EVENT_DEPS =
         {
             assets =
             {
-                Asset("ANIM", "anim/dst_menu_waxwell.zip"),
+                Asset("ANIM", "anim/dst_menu_rift3.zip"),
+                Asset("ANIM", "anim/dst_menu_rift3_bg.zip"),
+                Asset("PKGREF", "anim/dst_menu_meta2_cotl.zip"),
+                Asset("PKGREF", "anim/dst_menu_meta2.zip"),
+                Asset("PKGREF", "anim/dst_menu_rift2.zip"),
+                Asset("PKGREF", "anim/dst_menu_lunarrifts.zip"),
+
+                Asset("PKGREF", "anim/dst_menu_wilson.zip"),
+                Asset("PKGREF", "anim/dst_menu_waxwell.zip"),
 
                 Asset("PKGREF", "anim/dst_menu_v2.zip"),
                 Asset("PKGREF", "anim/dst_menu_v2_bg.zip"),

@@ -65,6 +65,41 @@ end
 
 CRAFTING_FILTERS.CHARACTER.recipes =
 {
+	-- Wilson
+	"transmute_log",
+	"transmute_twigs",
+	"transmute_flint",
+	"transmute_rocks",
+
+	"transmute_bluegem",
+	"transmute_redgem",
+	"transmute_purplegem",
+	"transmute_orangegem",
+	"transmute_yellowgem",
+	"transmute_greengem",
+	"transmute_opalpreciousgem",
+
+	"transmute_meat",
+	"transmute_smallmeat",
+	"transmute_goldnugget",
+	"transmute_nitre",
+	"transmute_marble",
+	"transmute_cutstone",
+	"transmute_moonrocknugget",
+
+	"transmute_beardhair",
+	"transmute_beefalowool",
+	"transmute_boneshard",
+	"transmute_houndstooth",
+	"transmute_poop",
+
+	"transmute_horrorfuel",
+	"transmute_dreadstone",
+	"transmute_nightmarefuel",
+
+	"transmute_purebrilliance",
+	"transmute_moonglass_charged",
+
 	-- Willow
 	"lighter",
 	"bernie_inactive",
@@ -96,6 +131,10 @@ CRAFTING_FILTERS.CHARACTER.recipes =
 	"wereitem_goose",
 	"wereitem_beaver",
 	"wereitem_moose",
+	"leif_idol",
+	"woodie_boards",
+	"woodcarvedhat",
+	"walking_stick",
 
 	-- Wathgrithr / Wigfrid
 	"spear_wathgrithr",
@@ -126,6 +165,11 @@ CRAFTING_FILTERS.CHARACTER.recipes =
 	"dumbbell_golden",
 	"dumbbell_marble",
 	"dumbbell_gem",
+
+	"dumbbell_heat",
+	"dumbbell_redgem",
+	"dumbbell_bluegem",
+	"wolfgang_whistle",
 
 	-- Wickerbottom
 	"bookstation",
@@ -180,6 +224,18 @@ CRAFTING_FILTERS.CHARACTER.recipes =
 	"livinglog",
 	"armor_bramble",
 	"trap_bramble",
+    "lunarplant_wormwoodhat",
+    "armor_lunarplant_wormwood",
+    "wormwood_sapling",
+    "wormwood_berrybush",
+    "wormwood_berrybush2",
+    "wormwood_juicyberrybush",
+    "wormwood_reeds",
+	"wormwood_lureplant",
+	"ipecacsyrup",
+	"wormwood_carrat",
+	"wormwood_lightflier",
+	"wormwood_fruitdragon",
 
 	-- Wanda
 	"pocketwatch_dismantler",
@@ -258,6 +314,7 @@ CRAFTING_FILTERS.CRAFTING_STATION.recipes =
 	"armorruins",
 	"ruins_bat",
 	"eyeturret_item",
+    "shadow_forge_kit",
 	"blueprint_craftingset_ruins_builder",
 	"blueprint_craftingset_ruinsglow_builder",
 
@@ -267,6 +324,7 @@ CRAFTING_FILTERS.CRAFTING_STATION.recipes =
 	----CELESTIAL----
 	"moonrockidol",
 	"multiplayer_portal_moonrock_constr_plans",
+	"lunar_forge_kit",
 
 	----MOON_ALTAR-----
 	"moonglassaxe",
@@ -276,6 +334,27 @@ CRAFTING_FILTERS.CRAFTING_STATION.recipes =
 	"bathbomb",
 	"chesspiece_butterfly_sketch",
 	"chesspiece_moon_sketch",
+
+	----LUNAR_FORGE----
+	"armor_lunarplant",
+	"lunarplanthat",
+	"bomb_lunarplant",
+	"staff_lunarplant",
+	"sword_lunarplant",
+	"pickaxe_lunarplant",
+	"shovel_lunarplant",
+	"lunarplant_kit",
+
+	"beargerfur_sack",
+	"deerclopseyeball_sentryward_kit",
+	"houndstooth_blowpipe",
+
+	----SHADOW_FORGE----
+	"armor_voidcloth",
+	"voidclothhat",
+	"voidcloth_umbrella",
+	"voidcloth_scythe",
+	"voidcloth_kit",
 
 	-- Hermit Crab
 	"hermitshop_hermit_bundle_shells",
@@ -353,6 +432,10 @@ CRAFTING_FILTERS.CRAFTING_STATION.recipes =
 	"chesspiece_kitcoon_builder",
 	"chesspiece_catcoon_builder",
 	"chesspiece_manrabbit_builder",
+	"chesspiece_daywalker_builder",
+	"chesspiece_deerclops_mutated_builder",
+	"chesspiece_warg_mutated_builder",
+	"chesspiece_bearger_mutated_builder",
 
 	-- wintersfeastoven
 	"wintercooking_berrysauce",
@@ -513,9 +596,11 @@ CRAFTING_FILTERS.TOOLS.recipes =
 	"bugnet",
 	"razor",
 	"compass",
+	"walking_stick",
 	"cane",
 	"sewing_kit",
 	"sewing_tape",
+	"wagpunkbits_kit",
 	"miniflare",
 	"megaflare",
 	"wateringcan",
@@ -548,6 +633,7 @@ CRAFTING_FILTERS.LIGHT.recipes =
 	"torch",
 	"campfire",
 	"firepit",
+	"cotl_tabernacle_level1",
 	"coldfire",
 	"coldfirepit",
 	"pumpkin_lantern",
@@ -576,6 +662,7 @@ CRAFTING_FILTERS.PROTOTYPERS.recipes =
 	"researchlab3",
 	"sculptingtable",
 	"turfcraftingstation",
+	"carpentry_station",
 
 	"madscience_lab",
 	"wintersfeastoven",
@@ -649,10 +736,15 @@ CRAFTING_FILTERS.ARMOUR.recipes =
 	"armordragonfly",
 	"armor_sanity",
 	"armormarble",
+	"woodcarvedhat",
 	"footballhat",
 	"wathgrithrhat",
 	"cookiecutterhat",
 	"beehat",
+	"armordreadstone",
+	"dreadstonehat",
+	"armorwagpunk",
+	"wagpunkhat",
 }
 
 CRAFTING_FILTERS.CLOTHING.recipes =
@@ -698,6 +790,7 @@ CRAFTING_FILTERS.CLOTHING.recipes =
 	"trunkvest_winter",
 	"reflectivevest",
 	"hawaiianshirt",
+	"walking_stick",
 	"cane",
 	"beargervest",
 	"eyebrellahat",
@@ -744,6 +837,7 @@ CRAFTING_FILTERS.COOKING.recipes =
 	"meatrack",
 	"campfire",
 	"firepit",
+	"cotl_tabernacle_level1",
 	"icebox",
 	"saltbox",
 	"icepack",
@@ -891,6 +985,7 @@ CRAFTING_FILTERS.STRUCTURES.recipes =
 	"researchlab3",
 	"sculptingtable",
 	"turfcraftingstation",
+	"carpentry_station",
 
 	"cookpot",
 	"meatrack",
@@ -924,6 +1019,9 @@ CRAFTING_FILTERS.STRUCTURES.recipes =
 	"firesuppressor",
 	"moondial",
 	"archive_resonator_item",
+	"punchingbag",
+	"punchingbag_lunar",
+	"punchingbag_shadow",
 
 	"tent",
 	"portabletent_item",
@@ -951,11 +1049,14 @@ CRAFTING_FILTERS.STRUCTURES.recipes =
 	"wall_wood_item",
 	"wall_stone_item",
 	"wall_moonrock_item",
+	"wall_dreadstone_item",
 
 	"homesign",
 	"arrowsign_post",
 	"minisign_item",
 
+	"support_pillar_scaffold",
+	"support_pillar_dreadstone_scaffold",
 }
 
 CRAFTING_FILTERS.MAGIC.recipes =
@@ -965,6 +1066,7 @@ CRAFTING_FILTERS.MAGIC.recipes =
 	"wereitem_goose",
 	"wereitem_beaver",
 	"wereitem_moose",
+	"leif_idol",
 	"tophat_magician",
 	"magician_chest",
 	"waxwelljournal",
@@ -977,6 +1079,8 @@ CRAFTING_FILTERS.MAGIC.recipes =
 	"nightlight",
 	"armor_sanity",
 	"nightsword",
+	"armordreadstone",
+	"dreadstonehat",
 	"batbat",
 	"armorslurper",
 	"antlionhat",
@@ -992,6 +1096,8 @@ CRAFTING_FILTERS.MAGIC.recipes =
 	"moondial",
 	"townportal",
 	"nightmarefuel",
+	"punchingbag_lunar",
+	"punchingbag_shadow",
 }
 
 CRAFTING_FILTERS.RIDING.recipes =
@@ -1010,6 +1116,7 @@ CRAFTING_FILTERS.WINTER.recipes =
 {
 	"campfire",
 	"firepit",
+	"cotl_tabernacle_level1",
 	"dragonflyfurnace",
 	"heatrock",
     "wx78module_heat",
@@ -1114,6 +1221,7 @@ CRAFTING_FILTERS.DECOR.recipes =
 	"wall_wood_item",
 	"wall_stone_item",
 	"wall_moonrock_item",
+	"wall_dreadstone_item",
 
 	"pirate_flag_pole",
     "dock_kit",
@@ -1122,7 +1230,9 @@ CRAFTING_FILTERS.DECOR.recipes =
     "sewing_mannequin",
 
 	"turf_road",
+	"turf_cotl_brick",
 	"turf_woodfloor",
+	"turf_cotl_gold",
 	"turf_checkerfloor",
 	"turf_carpetfloor",
 	"turf_carpetfloor2",
@@ -1156,6 +1266,7 @@ CRAFTING_FILTERS.DECOR.recipes =
 	"turf_fungus",
 	"turf_fungus_red",
 	"turf_fungus_green",
+	"turf_beard_rug",	
 
 	"ruinsrelic_plate",
 	"ruinsrelic_chipbowl",
@@ -1165,6 +1276,19 @@ CRAFTING_FILTERS.DECOR.recipes =
 	"ruinsrelic_table",
 
 	"chesspiece_anchor_sketch",
+
+	"phonograph",
+	"record",
+
+	"wood_chair",
+	"wood_stool",
+	"wood_table_round",
+	"wood_table_square",
+    "decor_centerpiece",
+	"decor_lamp",
+	"decor_flowervase",
+	"decor_pictureframe",
+	"decor_portraitframe",
 }
 
 

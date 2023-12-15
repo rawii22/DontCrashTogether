@@ -177,6 +177,7 @@ local function fn()
 	inst:AddTag("NOBLOCK")
 	inst:AddTag("extinguisher") -- to put out nightlights
 	inst:AddTag("soulless") -- no wortox souls
+	inst:AddTag("lunar_aligned")
 
     inst.Transform:SetFourFaced()
     inst.Transform:SetScale(0.8, 0.8, 0.8)
@@ -209,6 +210,8 @@ local function fn()
 		inst.components.transparentonsanity.onalphachangedfn = SetHeadAlpha
 		inst.components.transparentonsanity:ForceUpdate()
 	end
+
+	inst.scrapbook_inspectonseen = true
 
     inst.entity:SetPristine()
 

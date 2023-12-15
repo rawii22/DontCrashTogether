@@ -16,14 +16,12 @@ local prefabs =
 {
     "twigs",
     "dug_sapling",
-    "spoiled_food",
 }
 
 local moon_prefabs =
 {
     "twigs",
     "dug_sapling_moon",
-    "spoiled_food",
 }
 
 local function ontransplantfn(inst)
@@ -93,6 +91,18 @@ local function moonconversionoverridefn(inst)
 	return inst, nil
 end
 
+local function OnSave(inst, data)
+    data.was_herd = inst.components.herdmember and true or nil
+end
+
+local function OnPreLoad(inst, data)
+    if data and data.was_herd then
+        if TheWorld.components.lunarthrall_plantspawner then
+            TheWorld.components.lunarthrall_plantspawner:setHerdsOnPlantable(inst)
+        end
+    end    
+end
+
 local function sapling_common(inst, is_moon)
     inst.entity:AddTransform()
     inst.entity:AddAnimState()
@@ -110,6 +120,7 @@ local function sapling_common(inst, is_moon)
     inst:AddTag("plant")
     inst:AddTag("renewable")
 	inst:AddTag("silviculture") -- for silviculture book
+    inst:AddTag("lunarplant_target")
 
     --witherable (from witherable component) added to pristine state for optimization
     inst:AddTag("witherable")
@@ -151,6 +162,9 @@ local function sapling_common(inst, is_moon)
     MakeHauntableIgnite(inst)
     ---------------------
     inst._is_moon = is_moon
+
+    inst.OnSave = OnSave
+    inst.OnPreLoad = OnPreLoad
 
     if TheNet:GetServerGameMode() == "quagmire" then
         event_server_data("quagmire", "prefabs/sapling").master_postinit(inst)

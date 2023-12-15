@@ -29,7 +29,7 @@ local function onpickedfn(inst, picker)
         if inst.has_flower then
             -- You get a cactus flower, yay.
             local loot = SpawnPrefab("cactus_flower")
-            loot.components.inventoryitem:InheritMoisture(TheWorld.state.wetness, TheWorld.state.iswet)
+			loot.components.inventoryitem:InheritWorldWetnessAtTarget(inst)
             if picker.components.inventory ~= nil then
                 picker.components.inventory:GiveItem(loot, nil, inst:GetPosition())
             else
@@ -69,11 +69,6 @@ local function OnEntityWake(inst)
         inst.AnimState:PlayAnimation("empty", true)
         inst.has_flower = false
     end
-end
-
-local function OnBurnt(inst)
-	TheWorld:PushEvent("beginregrowth", inst)
-    DefaultBurntFn(inst)
 end
 
 local function MakeCactus(name)
@@ -118,7 +113,7 @@ local function MakeCactus(name)
         inst:AddComponent("inspectable")
 
         MakeLargeBurnable(inst)
-        inst.components.burnable:SetOnBurntFn(OnBurnt)
+        AddToRegrowthManager(inst)
         MakeMediumPropagator(inst)
 
         inst.OnEntityWake = OnEntityWake

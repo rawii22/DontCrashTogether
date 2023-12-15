@@ -45,6 +45,11 @@ local assets =
 	Asset("IMAGE", "images/waterfall_mask.tex"),
 	Asset("IMAGE", "levels/textures/waterfall_noise1.tex"),
 	Asset("IMAGE", "levels/textures/waterfall_noise2.tex"),
+
+    Asset("SCRIPT", "scripts/prefabs/rift_portal_defs.lua"),
+
+    Asset("ANIM", "anim/poi_marker.zip"),
+    Asset("ANIM", "anim/poi_stand.zip"),    
 }
 
 
@@ -209,6 +214,8 @@ local prefabs =
     "constructionsite_classified",
 
     "dummytarget",
+    "dummytarget_lunar",
+    "dummytarget_shadow",
     "float_fx_front",
     "float_fx_back",
 
@@ -246,6 +253,10 @@ local prefabs =
 
     -- Pirates
     "monkeyhut",
+
+	-- Planar
+	"planar_hit_fx",
+	"planar_resist_fx",
 }
 
 for _, v in pairs(require("prefabs/farm_plant_defs").PLANT_DEFS) do

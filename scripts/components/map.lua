@@ -67,6 +67,11 @@ function Map:IsAboveGroundAtPoint(x, y, z, allow_water)
     return valid_water_tile or TileGroupManager:IsLandTile(tile)
 end
 
+function Map:IsLandTileAtPoint(x, y, z)
+    local tile = self:GetTileAtPoint(x, y, z)
+    return TileGroupManager:IsLandTile(tile)
+end
+
 function Map:IsOceanTileAtPoint(x, y, z)
     local tile = self:GetTileAtPoint(x, y, z)
     return TileGroupManager:IsOceanTile(tile)
@@ -440,6 +445,40 @@ function Map:IsSurroundedByWater(x, y, z, radius)
     return true
 end
 
+function Map:IsSurroundedByLand(x, y, z, radius)
+    radius = radius + 1 --add 1 to radius for map overhang, way cheaper than doing an IsVisualGround test
+    local num_edge_points = math.ceil((radius*2) / 4) - 1
+
+    --test the corners first
+    if not self:IsLandTileAtPoint(x + radius, y, z + radius) then return false end
+    if not self:IsLandTileAtPoint(x - radius, y, z + radius) then return false end
+    if not self:IsLandTileAtPoint(x + radius, y, z - radius) then return false end
+    if not self:IsLandTileAtPoint(x - radius, y, z - radius) then return false end
+
+    --if the radius is less than 1(2 after the +1), it won't have any edges to test and we can end the testing here.
+    if num_edge_points == 0 then return true end
+
+    local dist = (radius*2) / (num_edge_points + 1)
+    --test the edges next
+    for i = 1, num_edge_points do
+        local idist = dist * i
+        if not self:IsLandTileAtPoint(x - radius + idist, y, z + radius) then return false end
+        if not self:IsLandTileAtPoint(x - radius + idist, y, z - radius) then return false end
+        if not self:IsLandTileAtPoint(x - radius, y, z - radius + idist) then return false end
+        if not self:IsLandTileAtPoint(x + radius, y, z - radius + idist) then return false end
+    end
+
+    --test interior points last
+    for i = 1, num_edge_points do
+        local idist = dist * i
+        for j = 1, num_edge_points do
+            local jdist = dist * j
+            if not self:IsLandTileAtPoint(x - radius + idist, y, z - radius + jdist) then return false end
+        end
+    end
+    return true
+end
+
 function Map:GetNearestPointOnWater(x, z, radius, iterations)
     local test_increment = radius / iterations
 
@@ -498,17 +537,32 @@ function Map:GetPlatformAtPoint(pos_x, pos_y, pos_z, extra_radius)
     return nil
 end
 
+function Map:FindRandomPointWithFilter(max_tries, filterfn)
+    local w, h = self:GetSize()
+    w = w/2 * TILE_SCALE
+    h = h/2 * TILE_SCALE
+    -- NOTES(JBK): w and h are now half width and half height sample from -w and +w
+    while (max_tries > 0) do
+        max_tries = max_tries - 1
+        local x, z = (2 * math.random() - 1) * w, (2 * math.random() - 1) * h
+        if filterfn == nil or filterfn(self, x, 0, z) then
+            return Vector3(x, 0, z)
+        end
+    end
+    return nil
+end
+
 function Map:FindRandomPointInOcean(max_tries)
-	local w, h = self:GetSize()
-	w = (w - w/2) * TILE_SCALE
-	h = (h - h/2) * TILE_SCALE
-	while (max_tries > 0) do
-		max_tries = max_tries - 1
-		local x, z = math.random() * w, math.random() * h
-        if self:IsOceanAtPoint(x, 0, z)	then
-			return Vector3(x, 0, z)
-		end
-	end
+    return self:FindRandomPointWithFilter(max_tries, self.IsOceanAtPoint)
+end
+
+function Map:FindRandomPointOnLand(max_tries)
+    return self:FindRandomPointWithFilter(max_tries, self.IsLandTileAtPoint)
+end
+
+function Map:GetTopologyIDAtPoint(x, y, z)
+	local node_index = self:GetNodeIdAtPoint(x, y, z)
+    return TheWorld.topology.ids[node_index], node_index
 end
 
 function Map:FindNodeAtPoint(x, y, z)
@@ -522,6 +576,22 @@ function Map:NodeAtPointHasTag(x, y, z, tag)
 	local node_index = self:GetNodeIdAtPoint(x, y, z)
 	local node = TheWorld.topology.nodes[node_index]
 	return node ~= nil and node.tags ~= nil and table.contains(node.tags, tag)
+end
+
+function Map:GetRandomPointClustersForNodePrefix(prefixes, countpernode)
+    local ret = {}
+
+    local topology = TheWorld.topology
+    for id, name in ipairs(topology.ids) do
+        for _, prefix in ipairs(prefixes) do
+            if name:sub(1, #prefix) == prefix then
+                local area =  topology.nodes[id]
+                table.insert(ret, {self:GetRandomPointsForSite(area.x, area.y, area.poly, countpernode)})
+            end
+        end
+    end
+
+    return ret
 end
 
 local function FindVisualNodeAtPoint_TestArea(map, pt_x, pt_z, on_land, r)
@@ -573,4 +643,196 @@ function Map:CanCastAtPoint(pt, alwayspassable, allowwater, deployradius)
 		return deployradius == nil or deployradius <= 0 or self:IsDeployPointClear(pt, nil, deployradius, nil, nil, nil, CAST_DEPLOY_IGNORE_TAGS)
 	end
 	return false
+end
+
+function Map:IsTileLandNoDocks(tile)
+    return TileGroupManager:IsLandTile(tile) and tile ~= WORLD_TILES.MONKEY_DOCK
+end
+
+function Map:IsAboveGroundInSquare(x, y, z, r, filterfn)
+    r = r or 1
+    for dx = -r, r do
+        for dz = -r, r do
+            if filterfn then
+                -- New logic allows for tile based filtering.
+                local tile = self:GetTileAtPoint(x + dx * TILE_SCALE, y, z + dz * TILE_SCALE)
+                if not filterfn(self, tile) then
+                    return false
+                end
+            else
+                -- Old logic assumes point based filtering with no ocean tiles but allows docks.
+                if not self:IsAboveGroundAtPoint(x + dx * TILE_SCALE, y, z + dz * TILE_SCALE, false) then
+                    return false
+                end
+            end
+        end
+    end
+    return true
+end
+
+local GOOD_ARENA_SQUARE_SIZE = 6
+local GOODARENAPOINTS_CACHE_SIZE_MIN = 50 -- 50 points are good enough for a good placement strategy.
+local GOODARENAPOINTS_CACHE_SIZE_MAX = 100 -- Do not exceed hard limit for memory's sake.
+local GOODARENAPOINTS_ITERATIONS_PER_TICK = 20
+local GOODARENAPOINTS_TIME_PER_TICK = 0.1
+local GOODARENAPOINTS_SIZE_INTERVAL = 50 -- Tiles to go by per interval.
+local GoodArenaPoints = {}
+local GoodArenaPoints_Count = 0
+function Map:StartFindingGoodArenaPoints()
+    self:StopFindingGoodArenaPoints()
+
+    local w, h = self:GetSize()
+    w = w * TILE_SCALE / 2
+    h = h * TILE_SCALE / 2
+    local check_pt = Vector3(-w, 0, -h)
+    local check_iter_scale = GOODARENAPOINTS_SIZE_INTERVAL * TILE_SCALE
+    local check_pt_offset = Vector3(0, 0, 0)
+
+    local function DoIteration()
+        --print("DoIteration", GoodArenaPoints_Count, check_pt_offset.x, check_pt_offset.z, check_pt.x, check_pt.z)
+        for i = 1, GOODARENAPOINTS_ITERATIONS_PER_TICK do
+            -- Check.
+            if not self:CheckForBadThingsInArena(check_pt) then
+                GoodArenaPoints_Count = GoodArenaPoints_Count + 1
+                GoodArenaPoints[GoodArenaPoints_Count] = Vector3(check_pt:Get()) -- Copy.
+                --local id, index = self:GetTopologyIDAtPoint(check_pt:Get())
+                --local r = (
+                --    id:find("BigBatCave") or id:find("RockyLand") or id:find("SpillagmiteCaverns") or id:find("LichenLand") or
+                --    id:find("BlueForest") or id:find("RedForest") or id:find("GreenForest")
+                --) and true or false
+                --if r then
+                --    SpawnPrefab("bluemooneye").Transform:SetPosition(check_pt:Get())
+                --end
+                if GoodArenaPoints_Count >= GOODARENAPOINTS_CACHE_SIZE_MAX then
+                    self:StopFindingGoodArenaPoints()
+                end
+            end
+
+            -- Iterate.
+            check_pt.x = check_pt.x + check_iter_scale
+            if check_pt.x > w then
+                check_pt.x = -w + check_pt_offset.x
+                check_pt.z = check_pt.z + check_iter_scale
+                if check_pt.z > h then
+                    check_pt.z = -h + check_pt_offset.z
+                    -- Restart whole grid scan happened here get a new offset.
+                    check_pt_offset.x = math.random() * check_iter_scale
+                    check_pt_offset.z = math.random() * check_iter_scale
+                    if GoodArenaPoints_Count >= GOODARENAPOINTS_CACHE_SIZE_MIN then
+                        -- We have at least the cache size from one scan stop finding more.
+                        self:StopFindingGoodArenaPoints()
+                    end
+                end
+            end
+        end
+    end
+    TheWorld._GoodArenaPoints_Task = TheWorld:DoPeriodicTask(GOODARENAPOINTS_TIME_PER_TICK, DoIteration)
+end
+function Map:StopFindingGoodArenaPoints()
+    if TheWorld._GoodArenaPoints_Task ~= nil then
+        TheWorld._GoodArenaPoints_Task:Cancel()
+        TheWorld._GoodArenaPoints_Task = nil
+    end
+end
+function Map:ClearGoodArenaPoints()
+    GoodArenaPoints = {}
+    GoodArenaPoints_Count = 0
+end
+function Map:GetGoodArenaPoints()
+    return GoodArenaPoints, GoodArenaPoints_Count
+end
+
+
+local BADARENA_CANT_TAGS = {"tree", "boulder", "spiderden", "okayforarena"}
+local BADARENA_ONEOF_TAGS = {"structure", "blocker", "plant", "antlion_sinkhole_blocker"}
+local IS_CLEAR_AREA_RADIUS = TILE_SCALE * GOOD_ARENA_SQUARE_SIZE
+local NO_PLAYER_RADIUS = 35
+function Map:CheckForBadThingsInArena(pt, badthingsatspawnpoints)
+    local x, y, z = pt.x, pt.y, pt.z
+    if self:IsAboveGroundInSquare(x, y, z, GOOD_ARENA_SQUARE_SIZE, self.IsTileLandNoDocks) and not IsAnyPlayerInRange(x, y, z, NO_PLAYER_RADIUS) then
+        local badthings = TheSim:FindEntities(x, y, z, IS_CLEAR_AREA_RADIUS, nil, BADARENA_CANT_TAGS, BADARENA_ONEOF_TAGS)
+        local badthingscount = #badthings
+        for _, v in ipairs(badthings) do
+            if (v.components.pickable == nil or not v.components.pickable.transplanted) and v:HasTag("plant") then
+                badthingscount = badthingscount - 1
+            end
+        end
+        if badthingsatspawnpoints then
+            badthingsatspawnpoints[pt] = badthingscount
+        end
+        if badthingscount == 0 then
+            return false -- No bad things are here.
+        end
+    end
+    return true -- Bad things are here.
+end
+function Map:FindBestSpawningPointForArena(CustomAllowTest, perfect_only, spawnpoints)
+    if not spawnpoints then
+        -- If spawnpoints is nil use the cached good points as reference.
+        spawnpoints = GoodArenaPoints
+        -- Shuffle the points around randomly.
+        shuffleArray(GoodArenaPoints)
+    end
+
+
+    local badthingsatspawnpoints = {}
+    local x, y, z
+    local spawnpointscount = #spawnpoints
+    if spawnpointscount == 0 then
+        return nil, nil, nil -- No point.
+    end
+
+    -- Perfect test for an ideal arena.
+    for i, v in ipairs(spawnpoints) do
+        x, y, z = v.x, v.y, v.z
+        if CustomAllowTest(self, x, y, z) and not self:CheckForBadThingsInArena(v, badthingsatspawnpoints) then
+            return x, y, z -- No bad things nearby and roomy for tiles very good point.
+        end
+    end
+
+    if perfect_only then
+        if spawnpoints == GoodArenaPoints then
+            -- There are no good arena points for what called this so let us try to make more good ones for the cache.
+            self:ClearGoodArenaPoints()
+            self:StartFindingGoodArenaPoints()
+        end
+        return nil, nil, nil
+    end
+
+    -- Try a best case if structures are okay to get.
+    local best_count = 999999
+    for v, badthingscount in pairs(badthingsatspawnpoints) do
+        if badthingscount < best_count then
+            best_count = badthingscount
+            return v.x, v.y, v.z
+        end
+    end
+
+
+    -- Try to find something ground available.
+    local pt = spawnpoints[math.random(spawnpointscount)]
+    x, y, z = pt.x, pt.y, pt.z
+
+    local function IsValidSpawningPoint_Bridge(pt)
+        return self:IsAboveGroundInSquare(pt.x, pt.y, pt.z, GOOD_ARENA_SQUARE_SIZE, self.IsTileLandNoDocks)
+    end
+    
+    for r = 5, 15, 5 do
+        local offset = FindWalkableOffset(pt, math.random() * TWOPI, r, 8, false, false, IsValidSpawningPoint_Bridge)
+        if offset ~= nil then
+            x = x + offset.x
+            z = z + offset.z
+            return x, y, z -- Do not care for amount of structures but it is roomy for tiles.
+        end
+    end
+
+    if not x then
+        if spawnpoints == GoodArenaPoints then
+            -- There are no good arena points for what called this so let us try to make more good ones for the cache.
+            self:ClearGoodArenaPoints()
+            self:StartFindingGoodArenaPoints()
+        end
+    end
+
+    return x, y, z
 end

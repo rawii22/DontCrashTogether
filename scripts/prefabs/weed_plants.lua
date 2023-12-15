@@ -419,7 +419,10 @@ local function GetDisplayName(inst)
 	local registry_key = inst:GetPlantRegistryKey()
 	local research_stage = inst:GetResearchStage()
 
-	return not ThePlantRegistry:KnowsPlantName(registry_key, plantregistryinfo, research_stage) and STRINGS.NAMES.FARM_PLANT_UNKNOWN
+    local player_is_farmplantidentifier = (ThePlayer ~= nil and ThePlayer:HasTag("farmplantidentifier"))
+	local knows_plant_name = (player_is_farmplantidentifier or ThePlantRegistry:KnowsPlantName(registry_key, plantregistryinfo, research_stage))
+
+	return (not knows_plant_name and STRINGS.NAMES.FARM_PLANT_UNKNOWN)
 		or nil
 end
 
@@ -506,6 +509,7 @@ local function MakeWeed(weed_def)
 		inst:AddTag("plantresearchable")
 		inst:AddTag("weedplantstress")
 		inst:AddTag("tendable_farmplant") -- for farmplanttendable component
+
 		if weed_def.extra_tags ~= nil then
 			for k, v in ipairs(weed_def.extra_tags) do
 				inst:AddTag(v)
@@ -529,6 +533,9 @@ local function MakeWeed(weed_def)
         if not TheWorld.ismastersim then
             return inst
         end
+
+		inst.scrapbook_overridedata= {"soil01", "farm_soil", "soil01"}
+		inst.scrapbook_anim = "crop_full"
 
 		inst.UpdateResearchStage = UpdateResearchStage
 
