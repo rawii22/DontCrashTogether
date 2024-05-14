@@ -85,7 +85,7 @@ return{
             NO_RACERS = "Can't start yet! Need veggie rats!",
         },
 
-		DISMANTLE =
+		DISMANTLE = 
 		{
 			COOKING = "Wait, it making food!",
 			INUSE = "Gotta wait.",
@@ -523,6 +523,7 @@ return{
 	ANNOUNCE_HIGHRESEARCH = "Head feels so full of smarts, florp!",
 	ANNOUNCE_HOUNDS = "Glurp... doggies coming...",
 	ANNOUNCE_WORMS = "Glurt?",
+    ANNOUNCE_ACIDBATS = "Don't like.",
 	ANNOUNCE_HUNGRY = "Want food!",
 	ANNOUNCE_HUNT_BEAST_NEARBY = "Where these footprints go?",
 	ANNOUNCE_HUNT_LOST_TRAIL = "No more prints, flort.",
@@ -904,6 +905,8 @@ return{
 
     ANNOUNCE_CHAIR_ON_FIRE = "This not fine!!",
 
+    ANNOUNCE_HEALINGSALVE_ACIDBUFF_DONE = "Uh oh... better stay out of stingy rain, florp.",
+
     ANNOUNCE_COACH = 
     {
         "only_used_by_wolfgang",
@@ -926,6 +929,10 @@ return{
         "only_used_by_wolfang",
         "only_used_by_wolfang",
     },
+
+    ANNOUNCE_YOTD_NOBOATS = "Gotta get closer to start, florp!",
+    ANNOUNCE_YOTD_NOCHECKPOINTS = "Hey! Race not even set up yet!!",
+    ANNOUNCE_YOTD_NOTENOUGHBOATS = "Glurgh. No room for anybody else to race.",
 
 	BATTLECRY =
 	{
@@ -1441,18 +1448,25 @@ return{
         {
             GENERIC = "It grow so big!",
             BLOOM = "Something falling off it.",
+            ACIDCOVERED = "Smell... different. Still tasty?",
         },
         MUSHTREE_MEDIUM =
         {
             GENERIC = "Look kinda tasty, florp.",
             BLOOM = "Pretty!",
+            ACIDCOVERED = "Smell... different. Still tasty?",
         },
         MUSHTREE_SMALL =
         {
             GENERIC = "Short and stumpy.",
             BLOOM = "Floaty lights!",
+            ACIDCOVERED = "Smell... different. Still tasty?",
         },
-        MUSHTREE_TALL_WEBBED = "This one claimed by Spiderfolk.",
+        MUSHTREE_TALL_WEBBED =
+        {
+            GENERIC = "This one claimed by Spiderfolk.",
+            ACIDCOVERED = "Smell... different. Still tasty?",
+        },
         SPORE_TALL =
         {
             GENERIC = "Pretty!",
@@ -1841,9 +1855,9 @@ return{
         CHESSPIECE_EYEOFTERROR = "Oh no... got dried out, glorp...",
         CHESSPIECE_TWINSOFTERROR = "Ha ha, they just rocks now!",
         CHESSPIECE_DAYWALKER = "Grrr... why we have nasty Pig statue?!",
-        CHESSPIECE_DEERCLOPS_MUTATED = "Bye bye deer. No more eye pokey",
-        CHESSPIECE_WARG_MUTATED = "Poor doggy. Not so bad",
-        CHESSPIECE_BEARGER_MUTATED = "Remember bad teddy",
+        CHESSPIECE_DEERCLOPS_MUTATED = "Bye bye deer. No more eye pokey.",
+        CHESSPIECE_WARG_MUTATED = "Poor doggy. Not so bad.",
+        CHESSPIECE_BEARGER_MUTATED = "Remember bad teddy.",
 
         CHESSJUNK1 = "It all broken.",
         CHESSJUNK2 = "Didn't do it!!",
@@ -1932,7 +1946,11 @@ return{
 		DRAGONFLY = "Scaled-folk shouldn't fight, florp!",
 		ARMORDRAGONFLY = "More scales!!",
 		DRAGON_SCALES = "Pretty...",
-		DRAGONFLYCHEST = "Like look of this box, florpt.",
+		DRAGONFLYCHEST =
+		{
+			GENERIC = "Like look of this box, florpt.",
+            UPGRADED_STACKSIZE = "Could fit a whole me inside, florp!",
+		},
 		DRAGONFLYFURNACE =
 		{
 			HAMMERED = "Broke it...",
@@ -2582,6 +2600,7 @@ return{
 		SILK = "Spiderfolk loogies!",
 		SKELETON = "It dead.",
 		SCORCHED_SKELETON = "Got too close to campfire, florp.",
+        SKELETON_NOTPLAYER = "Glorpt. Can't tell if Mermfolk or Pigfolk...",
 		SKULLCHEST = "Maybe something good inside!", --removed
 		SMALLBIRD =
 		{
@@ -2698,8 +2717,11 @@ return{
 		{
 			GENERIC = "Oooooh, box for things!",
 			BURNT = "Noooo!",
+            UPGRADED_STACKSIZE = "Big box for things!",
 		},
 		TREASURECHEST_TRAP = "Treasure!",
+        CHESTUPGRADE_STACKSIZE = "Make boxes bigger? Glurgh. More fun to leave stuff on ground.", -- Describes the kit upgrade item.
+		COLLAPSEDCHEST = "Didn't do it!!",
 		SACRED_CHEST =
 		{
 			GENERIC = "Wonder what inside?",
@@ -2998,6 +3020,8 @@ return{
 		WALL_MOONROCK_ITEM = "Tough rocks.",
 		WALL_DREADSTONE = "Pretty wall!",
 		WALL_DREADSTONE_ITEM = "Will be good wall, florp.",
+        WALL_SCRAP = "Pretty wall, flort!",
+        WALL_SCRAP_ITEM = "Make pretty wall, flort!",
 		FENCE = "Keep out nasty Pigfolk, florp.",
         FENCE_ITEM = "For building fence!",
         FENCE_GATE = "Oooh smart, put door in fence.",
@@ -4108,6 +4132,7 @@ return{
         DUSTMERINGUE = "Throw it on floor, then don't have to eat it.",
 
         SHROOMCAKE = "It best cake ever!",
+        SHROOMBAIT = "Nope.",
 
         NIGHTMAREGROWTH = "Glurp... something bad happening!",
 
@@ -4838,6 +4863,12 @@ return{
 			GENERIC = "Heehee, stinky Pig all locked up!",
 			EXPOSED = "Rock too hard for breaking, florp.",
 		},
+		DAYWALKER2 =
+		{
+			GENERIC = "I don't like him.",
+			BURIED = "No, thank you. Flort!",
+			HOSTILE = "See? Never trust a stinky Pig.",
+		},
 		ARMORDREADSTONE = "So pretty... it mine!",
 		DREADSTONEHAT = "It real good for headbutting, flort!",
 
@@ -5053,6 +5084,64 @@ return{
 
         EMBERLIGHT = "Pretty...",
         WILLOW_EMBER = "only_used_by_willow",
+
+        -- Year of the Dragon
+        YOTD_DRAGONSHRINE =
+        {
+            GENERIC = "Gimme stuff!",
+            EMPTY = "Want burny stuff? Say \"please\"!",
+            BURNT = "Maybe it like it that way?",
+        },
+
+        DRAGONBOAT_KIT = "Gonna be best boat. Because it mine!",
+        DRAGONBOAT_PACK = "My boat, all mine!",
+
+        BOATRACE_CHECKPOINT = "It show the way!",
+        BOATRACE_CHECKPOINT_THROWABLE_DEPLOYKIT = "Gonna put it in best spot. Not telling where.",
+        BOATRACE_START = "This the start place.",
+        BOATRACE_START_THROWABLE_DEPLOYKIT = "Hurry up, wanna start race!!",
+
+        BOATRACE_PRIMEMATE = "You gonna lose! Nyeeeehhh!!",
+        BOATRACE_SPECTATOR_DRAGONLING = "Gonna win, just watch, florp!",
+
+        YOTD_STEERINGWHEEL = "Me steer, me steer!",
+        YOTD_STEERINGWHEEL_ITEM = "This go on boat?",
+        YOTD_OAR = "Gonna have claws just as big one day, you gonna see!",
+        YOTD_ANCHOR = "Carful not to hurt any fishies on way down, florp!",
+        YOTD_ANCHOR_ITEM = "Can make boat-stopper!",
+        MAST_YOTD = "Everything better with scales.",
+        MAST_YOTD_ITEM = "Pieces for boat thing.",
+        BOAT_BUMPER_YOTD = "Grrr! Boat gonna bite you!",
+        BOAT_BUMPER_YOTD_KIT = "Gonna decorate boat, florp.",
+        BOATRACE_SEASTACK = "Glorp! Don't hit boat!",
+        BOATRACE_SEASTACK_THROWABLE_DEPLOYKIT = "Don't worry, won't throw in front of your boat! (Hee-hee...)",
+        BOATRACE_SEASTACK_MONKEY = "Glorp! Don't hit boat!",
+        BOATRACE_SEASTACK_MONKEY_THROWABLE_DEPLOYKIT = "Don't worry, won't throw in front of your boat! (Hee-hee...)",
+        MASTUPGRADE_LAMP_YOTD = "Have pretty glowy eyes.",
+        MASTUPGRADE_LAMP_ITEM_YOTD = "Tall boat light!",
+        WALKINGPLANK_YOTD = "Ooooh, fancy jumpy board!",
+        CHESSPIECE_YOTD = "Why it not start? Wanna race again!",
+
+        -- Rifts / Meta QoL
+
+        HEALINGSALVE_ACID = "Slimy!",
+
+        BEESWAX_SPRAY = "Glurgh... stink spray!",
+        WAXED_PLANT = "Plant gonna be stuck like that forever?", -- Used for all waxed plants, from farm plants to trees.
+
+        STORAGE_ROBOT = {
+            GENERIC = "Clean mess, baby Ironfolk!",
+            BROKEN = "Didn't break baby Ironfolk. Found like that.",
+        },
+
+        SCRAP_MONOCLEHAT = "Can see everything!",
+        SCRAPHAT = "Blegh, still smell like nasty Pigman!",
+
+        FENCE_JUNK = "Made of bunch of metal bits.",
+        JUNK_PILE = "If anything good in there, it mine!",
+        JUNK_PILE_BIG = "Glurp... look like it gonna fall!",
+
+        ARMOR_LUNARPLANT_HUSK = "Plant's killing shirt!",
     },
 
     DESCRIBE_GENERIC = "What that?",

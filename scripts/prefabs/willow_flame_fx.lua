@@ -36,11 +36,18 @@ local throwfirelevels =
 
 local CLOSERANGE = 1
 
-local TARGETS_MUST = {"_health"}
-local TARGETS_ONEOF = { "hostile", "_combat" }
-local TARGETS_CANT = { "INLIMBO", "flight", "player", "invisible", "noattack", "notarget" }
+local TARGETS_MUST = { "_health", "_combat" }
+local TARGETS_CANT = { "INLIMBO", "invisible", "noattack", "notarget", "flight" }
 
-local FLAME_MUST = {"willow_shadow_flame"}
+local function TargetIsHostile(isplayer, source, target)
+	if source.HostileTest then
+		return source:HostileTest(target)
+	elseif isplayer and target.HostileToPlayerTest then
+		return target:HostileToPlayerTest(source)
+	else
+		return target:HasTag("hostile")
+	end
+end
 
 local function settarget(inst,target,life,source)
     local maxdeflect = 30
@@ -54,35 +61,59 @@ local function settarget(inst,target,life,source)
 
 			if not (source and source.components.combat and source:IsValid()) then
 				target = nil
-				inst.shadow_ember_target = nil
 			elseif target == nil or not source.components.combat:CanTarget(target) then
 				target = nil
-                inst.shadow_ember_target = nil
+
+				local isplayer = source:HasTag("player")
 
 				local x, y, z = inst.Transform:GetWorldPosition()
-				local ents = TheSim:FindEntities(x, y, z, 20, TARGETS_MUST, TARGETS_CANT, TARGETS_ONEOF)
+				local ents = TheSim:FindEntities(x, y, z, 20, TARGETS_MUST, TARGETS_CANT)
+
                 if #ents > 0 then
-					local targets = {}
-					local flameents = TheSim:FindEntities(x, y, z, 20, FLAME_MUST)
-					for i, flame in ipairs(flameents) do
-						if flame.shadow_ember_target then
-							targets[flame.shadow_ember_target] = true
+					--mimic playercontroller attack targeting
+                    for i=#ents, 1, -1 do
+                        local ent = ents[i]
+						if not source.components.combat:CanTarget(ent) or
+							source.components.combat:IsAlly(ent)
+						then
+							table.remove(ents, i)
+						elseif isplayer and ent.HostileToPlayerTest and ent.components.shadowsubmissive and not ent:HostileToPlayerTest(source) then
+							--shadowsubmissive needs to ignore TargetIs() test,
+							--since they have you targeted even when not hostile
+							table.remove(ents, i)
+						elseif not ent.components.combat:TargetIs(source) then
+							if not TargetIsHostile(isplayer, source, ent) then
+								table.remove(ents, i)
+							elseif ent.components.follower then
+								local leader = ent.components.follower:GetLeader()
+								if leader and leader:HasTag("player") and not leader.components.combat:TargetIs(source) then
+									table.remove(ents, i)
+								end
+							end
 						end
-					end
+                    end
+				end
+
+                if #ents > 0 then
+
+                    local anglediffs = {}
+
+                    local lowestdiff = nil
+                    local lowestent = nil
 
 					for i, ent in ipairs(ents) do
-						if not targets[ent] and
-							(	ent:HasTag("hostile") or
-								(ent.components.combat and ent.components.combat:TargetIs(source))
-							) and
-							not (ent.components.follower and ent.components.follower:GetLeader() == source) and
-							source.components.combat:CanTarget(ent)
-                        then
-							target = ent
-							inst.shadow_ember_target = target
-							break
-                        end
+
+                        local ex,ey,ez = ent.Transform:GetWorldPosition()
+                        local diff = math.abs(inst:GetAngleToPoint(ex,ey,ez) - inst.Transform:GetRotation())
+                        if diff > 180 then diff = math.abs(diff - 360) end
+
+                        if not lowestdiff or lowestdiff > diff then
+                            lowestdiff = diff
+                            lowestent = ent
+                        end                        
                     end
+
+                    target = lowestent
                 end
             end
 
@@ -181,10 +212,10 @@ local function shadowfn()
     inst.components.firefx:SetLevel(math.random(1,4))
 
     inst:AddComponent("weapon")
-    inst.components.weapon:SetDamage(TUNING.WILLOW_LUNAR_FIRE_DAMAGE * 2)
+    inst.components.weapon:SetDamage(TUNING.WILLOW_LUNAR_FIRE_DAMAGE * 3)
 
     inst:AddComponent("planardamage")
-    inst.components.planardamage:SetBaseDamage(TUNING.WILLOW_LUNAR_FIRE_PLANAR_DAMAGE * 2)
+    inst.components.planardamage:SetBaseDamage(TUNING.WILLOW_LUNAR_FIRE_PLANAR_DAMAGE * 3)
 
 
     inst:AddComponent("damagetypebonus")

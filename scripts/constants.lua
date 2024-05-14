@@ -11,6 +11,7 @@ DEGREES = PI/180
 RADIANS = 180/PI
 FRAMES = 1/30
 TILE_SCALE = 4
+MAXUINT = 4294967295
 
 RESOLUTION_X = 1280
 RESOLUTION_Y = 720
@@ -192,6 +193,18 @@ CONTROL_INV_14 = 80
 CONTROL_INV_15 = 81
 
 CONTROL_START_EMOJI = 82
+
+-- extra menu controls that should have been above but it's too late to add them now
+CONTROL_MENU_BACK = 83
+CONTROL_MENU_START = 84
+CONTROL_MENU_L2 = 85
+CONTROL_MENU_R2 = 86
+
+CONTROL_OPEN_COMMAND_WHEEL = 87
+
+-- controller targetting
+CONTROL_TARGET_LOCK = 88
+CONTROL_TARGET_CYCLE = 89
 
 CONTROL_CUSTOM_START = 100
 
@@ -763,8 +776,9 @@ SPECIAL_EVENTS =
     YOTB = "year_of_the_beefalo",
     YOT_CATCOON = "year_of_the_catcoon",
     YOTR = "year_of_the_bunnyman",
+    YOTD = "year_of_the_dragonfly",
 }
-WORLD_SPECIAL_EVENT = SPECIAL_EVENTS.WINTERS_FEAST
+WORLD_SPECIAL_EVENT = SPECIAL_EVENTS.NONE
 --WORLD_SPECIAL_EVENT = IS_BETA and SPECIAL_EVENTS.NONE or SPECIAL_EVENTS.YOTR
 WORLD_EXTRA_EVENTS = {}
 
@@ -792,6 +806,7 @@ IS_YEAR_OF_THE_SPECIAL_EVENTS =
     [SPECIAL_EVENTS.YOTB] = true,
 	[SPECIAL_EVENTS.YOT_CATCOON] = true,
     [SPECIAL_EVENTS.YOTR] = true,
+    [SPECIAL_EVENTS.YOTD] = true,
 }
 
 
@@ -866,6 +881,13 @@ SPECIAL_EVENT_MUSIC =
     {
         bank = "music_frontend_yotg.fsb",
         sound = "dontstarve/music/music_FE_yotg",
+    },
+
+    --year of the dragonfly
+    [SPECIAL_EVENTS.YOTD] =
+    {
+        bank = "music.fsb",
+        sound = "dontstarve/music/music_FE_boatrace",
     },
 
 	-- crow carnival
@@ -1056,7 +1078,8 @@ end
 FE_MUSIC =
     (FESTIVAL_EVENT_MUSIC[WORLD_FESTIVAL_EVENT] ~= nil and FESTIVAL_EVENT_MUSIC[WORLD_FESTIVAL_EVENT].sound) or
     (SPECIAL_EVENT_MUSIC[WORLD_SPECIAL_EVENT] ~= nil and SPECIAL_EVENT_MUSIC[WORLD_SPECIAL_EVENT].sound) or
-    "dontstarve/music/music_FE_riftsthree"
+    "dontstarve/music/music_FE_junkyardhog"
+    --"dontstarve/music/music_FE_riftsthree"
     --"dontstarve/music/music_FE_survivorsguideone"
     --"dontstarve/music/music_FE_shadowrift"
     --"dontstarve/music/music_FE_lunarrift"
@@ -1072,6 +1095,22 @@ FE_MUSIC =
     --"dontstarve/music/music_FE_wanda"
     --"terraria1/common/music_main_eot"
 
+
+---------------------------------------------------------
+-- Pickup sounds for in game events.
+PICKUPSOUNDS = {
+    ["wood"] = "aqol/new_test/wood",
+    ["gem"] = "aqol/new_test/gem",
+    ["cloth"] = "aqol/new_test/cloth",
+    ["metal"] = "aqol/new_test/metal",
+    ["rock"] = "aqol/new_test/rock",
+    ["vegetation_firm"] = "aqol/new_test/vegetation_firm",
+    ["vegetation_grassy"] = "aqol/new_test/vegetation_grassy",    
+    ["squidgy"] = "aqol/new_test/squidgy",
+    ["grainy"] = "aqol/new_test/grainy",
+    ["DEFAULT_FALLBACK"] = "dontstarve/HUD/collect_resource",
+	["NONE"] = nil, --reserved
+}
 
 ---------------------------------------------------------
 NUM_HALLOWEENCANDY = 14
@@ -1121,6 +1160,7 @@ TECH =
     BEEFOFFERING_THREE = { BEEFOFFERING = 3 },
     CATCOONOFFERING_THREE = { CATCOONOFFERING = 3 },
     RABBITOFFERING_THREE = { RABBITOFFERING = 3 },
+    DRAGONOFFERING_THREE = { DRAGONOFFERING = 3 },
 
     MADSCIENCE_ONE = { MADSCIENCE = 1 },
 	CARNIVAL_PRIZESHOP_ONE = { CARNIVAL_PRIZESHOP = 1 },
@@ -1151,6 +1191,7 @@ TECH =
     YOTB = { SCIENCE = 10 }, -- ApplySpecialEvent() will change this from lost to 0
     YOT_CATCOON = { SCIENCE = 10 }, -- ApplySpecialEvent() will change this from lost to 0
     YOTR = { SCIENCE = 10 }, -- ApplySpecialEvent() will change this from lost to 0
+    YOTD = { SCIENCE = 10 }, -- ApplySpecialEvent() will change this from lost to 0
 
     LOST = { MAGIC = 10, SCIENCE = 10, ANCIENT = 10 },
 
@@ -1790,6 +1831,7 @@ UPGRADETYPES =
     WATERPLANT = "waterplant",
     MAST = "mast",
     SPEAR_LIGHTNING = "spear_lightning",
+    CHEST = "chest",
 }
 
 LOCKTYPE =
@@ -1817,6 +1859,18 @@ OCCUPANTTYPE =
     BIRD = "bird",
 }
 
+VALID_KITCOON_BUILDS = {
+    "kitcoon_forest_build",
+    "kitcoon_savanna_build",
+    "kitcoon_deciduous_build",
+    "kitcoon_marsh_build",
+    "kitcoon_grass_build",
+    "kitcoon_rocky_build",
+    "kitcoon_desert_build",
+    "kitcoon_moon_build",
+    "kitcoon_yot_build", 
+}
+
 FOODTYPE =
 {
     GENERIC = "GENERIC",
@@ -1830,6 +1884,7 @@ FOODTYPE =
     BERRY = "BERRY", --hack for smallbird; berries are actually part of veggie
     RAW = "RAW", -- things which some animals can eat off the ground, but players need to cook
     BURNT = "BURNT", --For lavae.
+    NITRE = "NITRE", -- For acidbats; they are part of elemental.
     ROUGHAGE = "ROUGHAGE",
 	WOOD = "WOOD",
     GOODIES = "GOODIES",
@@ -1959,6 +2014,7 @@ TECH_SKILLTREE_BUILDER_TAG_OWNERS =
     reedscrafter = "wormwood",
     saplingcrafter = "wormwood",
     syrupcrafter = "wormwood",
+    lunarplant_husk_crafter = "wormwood",
 
     battlesongcontainermaker = "wathgrithr",
     battlesonginstantrevivemaker = "wathgrithr",
@@ -2140,6 +2196,33 @@ PLANTREGISTRYUICOLOURS = {
 
 MAX_CHAT_INPUT_LENGTH = 150
 MAX_WRITEABLE_LENGTH = 200
+
+-- Used by exportprefabs to identify which "npcchatflairs" images to recognize.
+DST_NPCCHATTERLIST =
+{
+    "none", -- Default chatter/image name
+
+    "daywalker",
+    "daywalker_scrap",
+    "hermitcrab",
+    "sharkboi",
+    "stalker",
+    "wagstaff",
+}
+
+CHATPRIORITIES =
+{
+    -- Messages sent with priority 0 should never appear in chat history.
+    NOCHAT = 0,
+
+    LOW = 1,
+    HIGH = 2,
+
+    -- Keep this the highest value in the table.
+    -- Do not use this value for any messages, unless
+    -- it is desperately needed to be seen irrelevant of user settings.
+    MAX = 3,
+}
 
 --Bit flags, currently supports up to 8
 --Server may use these for things that clients need to know about
@@ -2650,4 +2733,9 @@ LOADING_SCREEN_CONTROLLER_ID_LOOKUP =
     [CONTROL_ACTION] = CONTROL_CONTROLLER_ACTION,
     [CONTROL_FORCE_INSPECT] = CONTROL_INSPECT,
     [CONTROL_SHOW_PLAYER_STATUS] = CONTROL_MENU_MISC_4,
+}
+
+-- Constants to reduce network overhead.
+CLIENTAUTHORITATIVESETTINGS = {
+    PLATFORMHOPDELAY = 0,
 }

@@ -1303,7 +1303,13 @@ local fx =
         bank = "redpouch_yotr",
         build = "redpouch_yotr",
         anim = "unwrap",
-    },    
+    },
+    {
+        name = "redpouch_yotd_unwrap",
+        bank = "redpouch",
+        build = "redpouch",
+        anim = "unwrap",
+    },
     {
         name = "yotc_seedpacket_unwrap",
         bank = "bundle",
@@ -2870,18 +2876,18 @@ local fx =
         bank = "fire_geyser",
         build = "fire_geyser_fx",
         anim = "pre",
-    },  
+    },
 
     {
         name = "willow_shadow_fire_explode",
         bank = "deer_fire_charge",
         build = "deer_fire_charge",
-        anim = "blast",        
+        anim = "blast",
         sound = "dontstarve/common/deathpoof",
         tint = Vector3(0, 0, 0, 0.6),
         fn = function(inst)
             inst.Transform:SetScale(1.5,1.5,1.5)
-        end,        
+        end,
     },
 
 ----------------------------------------------------------
@@ -2941,6 +2947,115 @@ local fx =
         build = "fx_dock_crackleandpop",
         anim = "pop",
         sound = "dontstarve_DLC001/common/iceboulder_smash",
+    },
+    {
+        name = "mast_yotd_sink_fx",
+        bank = "mast_01",
+        build = "yotd_boat_mast",
+        anim = "sink",
+    },
+    {
+        name = "boat_bumper_hit_yotd",
+        bank = "boat_bumper",
+        build = "boat_bumper_yotd",
+        anim = "fx_kelp",
+        sound = "dontstarve/characters/woodie/moose/hit",
+    },
+    {
+        name  = "beeswax_spray_fx",
+        bank  = "fx_plant_spray",
+        build = "fx_plant_spray",
+        anim  = "play_fx",
+        sound = "qol1/wax_spray/effect",
+        fn    = function(inst)
+            inst.AnimState:SetFinalOffset(3)
+
+            local scale = 1.3
+            inst.AnimState:SetScale(scale, scale, scale)
+        end,
+    },
+	{
+		name = "junk_break_fx",
+		bank = "scrapball",
+		build = "scrapball",
+		anim = "scrap_destruction_1",
+		sound = "qol1/daywalker_scrappy/pile_destroy",
+		fn = function(inst)
+			local rnd = math.random(6)
+			if rnd > 3 then
+				rnd = rnd - 3
+				inst.AnimState:SetScale(-1, 1)
+			end
+			if rnd ~= 1 then
+				inst.AnimState:PlayAnimation("scrap_destruction_"..tostring(rnd))
+			end
+			inst.AnimState:SetFinalOffset(1)
+		end,
+	},
+    {
+        name = "chestupgrade_stacksize_fx",
+        bank = "cavein_dust_fx",
+        build = "cavein_dust_fx",
+        anim = "dust_low",
+        sound = "qol1/chest_upgrade/poof",
+        fn = function(inst)
+            inst.entity:AddSoundEmitter()
+            local total_hide_frames = 6 -- NOTES(JBK): Keep in sync with treasurechest.lua! [CUHIDERFRAMES]
+            inst:DoTaskInTime(total_hide_frames * FRAMES, function(inst) inst.SoundEmitter:PlaySound("wolfgang1/mightygym/item_removed") end)
+            inst.AnimState:SetFinalOffset(3)
+            local gmin, gmax = 0.75, 1
+            local bmin, bmax = 1, 0.6
+            local amin, amax = 1, 0
+            local dg = gmax - gmin
+            local db = bmax - bmin
+            local da = amax - amin
+            local r, a = 0.5, 1
+            inst.AnimState:SetMultColour(r, gmin, bmin, amin)
+            local t = 0
+            local length = 48
+            local task = inst:DoPeriodicTask(0, function(inst)
+                t = t + 1
+                local p = math.min(1, t / length)
+                local gc = dg * p + gmin
+                local bc = db * p + bmin
+                local ac = da * math.min(1, math.max(0, t - total_hide_frames) / length) + amin
+                inst.AnimState:SetMultColour(r, gc, bc, ac)
+            end)
+
+        end,
+    },
+    {
+        name = "chestupgrade_stacksize_taller_fx",
+        bank = "cavein_dust_fx",
+        build = "cavein_dust_fx",
+        anim = "dust_low",
+        sound = "qol1/chest_upgrade/poof",
+        fn = function(inst)
+            inst.entity:AddSoundEmitter()
+            inst.AnimState:SetScale(1, 1.3) -- NOTES(JBK): An even taller tall chest needs more cover.
+            local total_hide_frames = 6 -- NOTES(JBK): Keep in sync with treasurechest.lua! [CUHIDERFRAMES]
+            inst:DoTaskInTime(total_hide_frames * FRAMES, function(inst) inst.SoundEmitter:PlaySound("wolfgang1/mightygym/item_removed") end)
+            inst.AnimState:SetFinalOffset(3)
+            local gmin, gmax = 0.75, 1
+            local bmin, bmax = 1, 0.6
+            local amin, amax = 1, 0
+            local dg = gmax - gmin
+            local db = bmax - bmin
+            local da = amax - amin
+            local r, a = 0.5, 1
+            inst.AnimState:SetMultColour(r, gmin, bmin, amin)
+            local t = 0
+            local length = 48
+            local task = inst:DoPeriodicTask(0, function(inst)
+                t = t + 1
+                local p = math.min(1, t / length)
+                local gc = dg * p + gmin
+                local bc = db * p + bmin
+                local ac = da * math.min(1, math.max(0, t - total_hide_frames) / length) + amin
+                inst.AnimState:SetMultColour(r, gc, bc, ac)
+            end)
+
+        end,
     },
 }
 

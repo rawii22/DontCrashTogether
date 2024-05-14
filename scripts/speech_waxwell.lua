@@ -85,7 +85,7 @@ return{
             NO_RACERS = "This race seems to be decidedly lacking in racers.",
         },
 
-		DISMANTLE =
+		DISMANTLE = 
 		{
 			COOKING = "I'd rather not lay my hands on a hot stove, thank you very much.",
 			INUSE = "It's occupied.",
@@ -523,6 +523,7 @@ return{
 	ANNOUNCE_HIGHRESEARCH = "My brain swells with power!",
 	ANNOUNCE_HOUNDS = "The hounds are growing restless.",
 	ANNOUNCE_WORMS = "Oh dear. I know what's making that sound.",
+    ANNOUNCE_ACIDBATS = "What now?",
 	ANNOUNCE_HUNGRY = "I am empty inside.",
 	ANNOUNCE_HUNT_BEAST_NEARBY = "I smell dung and beast sweat.",
 	ANNOUNCE_HUNT_LOST_TRAIL = "Drat! It got away.",
@@ -904,6 +905,8 @@ return{
 
     ANNOUNCE_CHAIR_ON_FIRE = "This is fine.",
 
+    ANNOUNCE_HEALINGSALVE_ACIDBUFF_DONE = "I'd better not take a stroll in the acid rain anytime soon.",
+
     ANNOUNCE_COACH = 
     {
         "only_used_by_wolfgang",
@@ -926,6 +929,10 @@ return{
         "only_used_by_wolfgang",
         "only_used_by_wolfgang",
     },
+
+    ANNOUNCE_YOTD_NOBOATS = "Oh, I'm not close enough to the starting point? Well maybe it should come to me!",
+    ANNOUNCE_YOTD_NOCHECKPOINTS = "I think you're forgetting something, pal.",
+    ANNOUNCE_YOTD_NOTENOUGHBOATS = "Perhaps some space should be cleared around the Start Tower.",
 
 	BATTLECRY =
 	{
@@ -1441,18 +1448,25 @@ return{
         {
             GENERIC = "It smells of rot and failure.",
             BLOOM = "It's spawning.",
+            ACIDCOVERED = "Exceptionally disgusting.",
         },
         MUSHTREE_MEDIUM =
         {
             GENERIC = "Where's Waldo?",
             BLOOM = "I hope I'm not standing next to it when it goes off.",
+            ACIDCOVERED = "Exceptionally disgusting.",
         },
         MUSHTREE_SMALL =
         {
             GENERIC = "Ugh, it smells bad.",
             BLOOM = "Oh fine, do what you like.",
+            ACIDCOVERED = "Exceptionally disgusting.",
         },
-        MUSHTREE_TALL_WEBBED = "Could it get any less appealing?",
+        MUSHTREE_TALL_WEBBED =
+        {
+            GENERIC = "Could it get any less appealing?",
+            ACIDCOVERED = "Exceptionally disgusting.",
+        },
         SPORE_TALL =
         {
             GENERIC = "How can a seed be so cheerful?",
@@ -1932,7 +1946,11 @@ return{
 		DRAGONFLY = "A fiery fly.",
 		ARMORDRAGONFLY = "That's some fly mail.",
 		DRAGON_SCALES = "Fiery.",
-		DRAGONFLYCHEST = "Those scales sure are nifty.",
+		DRAGONFLYCHEST =
+		{
+			GENERIC = "Those scales sure are nifty.",
+            UPGRADED_STACKSIZE = "Spacious and stylish.",
+		},
 		DRAGONFLYFURNACE =
 		{
 			HAMMERED = "How undignified.",
@@ -2582,6 +2600,7 @@ return{
 		SILK = "Despite its origin, it could make some fine garments.",
 		SKELETON = "Ha! I remember that one.",
 		SCORCHED_SKELETON = "At least the fire cut down on the smell.",
+        SKELETON_NOTPLAYER = "You're not of much use to me now, are you?",
 		SKULLCHEST = "That chest is calling to me.", --removed
 		SMALLBIRD =
 		{
@@ -2698,8 +2717,11 @@ return{
 		{
 			GENERIC = "A place to store loot.",
 			BURNT = "It won't store anything now.",
+            UPGRADED_STACKSIZE = "A place to store lots of loot.",
 		},
 		TREASURECHEST_TRAP = "Hmmm. Looks suspicious.",
+        CHESTUPGRADE_STACKSIZE = "Hmph. Dress it up with wires and gears, but I know magic when I see it.", -- Describes the kit upgrade item.
+		COLLAPSEDCHEST = "Do you really expect me to dig through that?",
 		SACRED_CHEST =
 		{
 			GENERIC = "A relic best forgotten.",
@@ -2998,6 +3020,8 @@ return{
 		WALL_MOONROCK_ITEM = "Where should I put this?",
 		WALL_DREADSTONE = "Ah. Homey.",
 		WALL_DREADSTONE_ITEM = "I appreciate the finer things.",
+        WALL_SCRAP = "It's crude and tasteless.",
+        WALL_SCRAP_ITEM = "It's crude and tasteless.",
 		FENCE = "My life is one obstacle after another.",
         FENCE_ITEM = "A fence for your pocket.",
         FENCE_GATE = "When one gate closes...",
@@ -4108,6 +4132,7 @@ return{
         DUSTMERINGUE = "I'll pass.",
 
         SHROOMCAKE = "I suppose I've eaten worse.",
+        SHROOMBAIT = "Wilson should try it.",
 
         NIGHTMAREGROWTH = "Charlie... what are you planning?",
 
@@ -4838,6 +4863,12 @@ return{
 			GENERIC = "I can just make out something dark within.",
 			EXPOSED = "That stone would be useful, if only it could be broken.",
 		},
+		DAYWALKER2 =
+		{
+			GENERIC = "Someone needs a bath.",
+			BURIED = "He seems fine to me.",
+			HOSTILE = "What's his problem?",
+		},
 		ARMORDREADSTONE = "Black never goes out of style.",
 		DREADSTONEHAT = "Darkness is never far from my mind.",
 
@@ -5053,6 +5084,64 @@ return{
 
         EMBERLIGHT = "Neat trick.",
         WILLOW_EMBER = "only_used_by_willow",
+
+        -- Year of the Dragon
+        YOTD_DRAGONSHRINE =
+        {
+            GENERIC = "Great.",
+            EMPTY = "Charcoal? How imaginative.",
+            BURNT = "Move along. Show's over.",
+        },
+
+        DRAGONBOAT_KIT = "I'm not the roll-up-your-sleeves type. Ask the handywoman.",
+        DRAGONBOAT_PACK = "Here I am, toiling away for a frivolous diversion.",
+
+        BOATRACE_CHECKPOINT = "Are we there yet?",
+        BOATRACE_CHECKPOINT_THROWABLE_DEPLOYKIT = "Whatever.",
+        BOATRACE_START = "Can I just wait here for everyone to be done?",
+        BOATRACE_START_THROWABLE_DEPLOYKIT = "Wherever.",
+
+        BOATRACE_PRIMEMATE = "Are you supposed to be intimidating?",
+        BOATRACE_SPECTATOR_DRAGONLING = "Enjoying the show, pal?",
+
+        YOTD_STEERINGWHEEL = "That's the place for the person in charge. Me.",
+        YOTD_STEERINGWHEEL_ITEM = "Hard labor? Isn't that Winona's forte?",
+        YOTD_OAR = "Must I?",
+        YOTD_ANCHOR = "Such exquisite craftsmanship. Into the water it goes.",
+        YOTD_ANCHOR_ITEM = "Can't someone else assemble it?",
+        MAST_YOTD = "Those \"wings\" haven't been clipped from a real Dragonfly. A pity.",
+        MAST_YOTD_ITEM = "Do I look like a shipyard laborer?",
+        BOAT_BUMPER_YOTD = "I always thought boats could use more teeth.",
+        BOAT_BUMPER_YOTD_KIT = "Ugh. These menial tasks do not suit me.",
+        BOATRACE_SEASTACK = "Out of my way!",
+        BOATRACE_SEASTACK_THROWABLE_DEPLOYKIT = "A waypoint. Or perhaps a well-timed obstacle...",
+        BOATRACE_SEASTACK_MONKEY = "Hm. Someone's feeling prickly.",
+        BOATRACE_SEASTACK_MONKEY_THROWABLE_DEPLOYKIT = "A waypoint. Or perhaps a well-timed obstacle...",
+        MASTUPGRADE_LAMP_YOTD = "How dare you look down on me!",
+        MASTUPGRADE_LAMP_ITEM_YOTD = "Far more practical than setting a fire on our boat.",
+        WALKINGPLANK_YOTD = "If I must walk the plank I suppose I can do it in style.",
+        CHESSPIECE_YOTD = "Always nice to be reminded of my victories.",
+
+        -- Rifts / Meta QoL
+
+        HEALINGSALVE_ACID = "Must everything in this cursed place be either slimy or smelly or both?",
+
+        BEESWAX_SPRAY = "I'm picking up notes of terror, with a hint of dread.",
+        WAXED_PLANT = "It's frozen with fear.", -- Used for all waxed plants, from farm plants to trees.
+
+        STORAGE_ROBOT = {
+            GENERIC = "Only the laziest person would think up this infernal device.",
+            BROKEN = "People have become so reliant on technology. Rather pathetic.",
+        },
+
+        SCRAP_MONOCLEHAT = "I don't need glasses! Who told you I need glasses?",
+        SCRAPHAT = "Can you really call that pile of refuse a hat?",
+
+        FENCE_JUNK = "Hmph. It'll certainly repel anyone with taste.",
+        JUNK_PILE = "Have I really been reduced to sifting through the trash?",
+        JUNK_PILE_BIG = "One false move could send the whole pile tumbling down.",
+
+        ARMOR_LUNARPLANT_HUSK = "Of course the plant saves the best stuff for himself.",
     },
 
     DESCRIBE_GENERIC = "You tell me.",

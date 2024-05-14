@@ -85,7 +85,7 @@ return{
             NO_RACERS = "Find friends for race",
         },
 
-		DISMANTLE =
+		DISMANTLE = 
 		{
 			COOKING = "Cooking. Wait",
 			INUSE = "Someone else using it",
@@ -523,6 +523,7 @@ return{
 	ANNOUNCE_HIGHRESEARCH = "Smarter now",
 	ANNOUNCE_HOUNDS = "Woofers!",
 	ANNOUNCE_WORMS = "Wigglies are coming",
+    ANNOUNCE_ACIDBATS = "Flying Claws?",
 	ANNOUNCE_HUNGRY = "Need stuff for belly",
 	ANNOUNCE_HUNT_BEAST_NEARBY = "Prints!",
 	ANNOUNCE_HUNT_LOST_TRAIL = "Prints gone",
@@ -908,6 +909,8 @@ return{
 
     ANNOUNCE_CHAIR_ON_FIRE = "This fine",
 
+    ANNOUNCE_HEALINGSALVE_ACIDBUFF_DONE = "Burny Rain is burny again",
+
     ANNOUNCE_COACH = 
     {
         "only_used_by_wolfgang",
@@ -930,6 +933,10 @@ return{
         "only_used_by_wolfang",
         "only_used_by_wolfang",
     },
+
+    ANNOUNCE_YOTD_NOBOATS = "Oh. Too far!",
+    ANNOUNCE_YOTD_NOCHECKPOINTS = "Forgot something",
+    ANNOUNCE_YOTD_NOTENOUGHBOATS = "No room for Floaters",
 
 	BATTLECRY =
 	{
@@ -1445,18 +1452,25 @@ return{
         {
             GENERIC = "Growing nicely",
             BLOOM = "Pretty!",
+            ACIDCOVERED = "Friend smells sour",
         },
         MUSHTREE_MEDIUM =
         {
             GENERIC = "Fun guy",
             BLOOM = "Fancy!",
+            ACIDCOVERED = "Friend smells sour",
         },
         MUSHTREE_SMALL =
         {
             GENERIC = "Hi there!",
             BLOOM = "Looking good",
+            ACIDCOVERED = "Friend smells sour",
         },
-        MUSHTREE_TALL_WEBBED = "It's trapped!",
+        MUSHTREE_TALL_WEBBED =
+        {
+            GENERIC = "It's trapped!",
+            ACIDCOVERED = "Friend smells sour",
+        },
         SPORE_TALL =
         {
             GENERIC = "Where you going?",
@@ -1936,7 +1950,11 @@ return{
 		DRAGONFLY = "Patuey Fly",
 		ARMORDRAGONFLY = "Fire Keeper Outer",
 		DRAGON_SCALES = "Fiery clothes",
-		DRAGONFLYCHEST = "Fire Safe",
+		DRAGONFLYCHEST =
+		{
+			GENERIC = "Fire Safe",
+            UPGRADED_STACKSIZE = "Big Fire Safe",
+		},
 		DRAGONFLYFURNACE =
 		{
 			HAMMERED = "Just stuff now",
@@ -2586,6 +2604,7 @@ return{
 		SILK = "Soft",
 		SKELETON = "Still alive?",
 		SCORCHED_SKELETON = "Oh. Oh no",
+        SKELETON_NOTPLAYER = "Sleeping?",
 		SKULLCHEST = "Stuff inside", --removed
 		SMALLBIRD =
 		{
@@ -2646,7 +2665,7 @@ return{
 		TALLBIRDEGG_CRACKED =
 		{
 			COLD = "Needs warm",
-			GENERIC = "Tweet! ",
+			GENERIC = "Tweet!",
 			HOT = "Too hot!",
 			LONG = "(yawn)",
 			SHORT = "Tweeter coming soon!",
@@ -2702,8 +2721,11 @@ return{
 		{
 			GENERIC = "Stuff!",
 			BURNT = "(sigh)",
+            UPGRADED_STACKSIZE = "More stuff!",
 		},
 		TREASURECHEST_TRAP = "Hmm...",
+        CHESTUPGRADE_STACKSIZE = "Make space streeeetch!", -- Describes the kit upgrade item.
+		COLLAPSEDCHEST = "Box ouchie?",
 		SACRED_CHEST =
 		{
 			GENERIC = "Put stuff in there!",
@@ -3002,6 +3024,8 @@ return{
 		WALL_MOONROCK_ITEM = "For the ground",
 		WALL_DREADSTONE = "Sparkly",
 		WALL_DREADSTONE_ITEM = "For the ground",
+        WALL_SCRAP = "Why wall? All friends welcome",
+        WALL_SCRAP_ITEM = "Why wall? All friends welcome",
 		FENCE = "Made of friends",
         FENCE_ITEM = "Put in ground",
         FENCE_GATE = "Door made of friends",
@@ -4112,6 +4136,7 @@ return{
         DUSTMERINGUE = "Sweep Sweep belly stuff",
 
         SHROOMCAKE = "Squishy",
+        SHROOMBAIT = "Smells like sleepy.",
 
         NIGHTMAREGROWTH = "Bad things",
 
@@ -4842,6 +4867,12 @@ return{
 			GENERIC = "Where you grow from?",
 			EXPOSED = "Where you grow from?",
 		},
+		DAYWALKER2 =
+		{
+			GENERIC = "Nice Twirly Tail?",
+			BURIED = "Twirly Tail stuck again",
+			HOSTILE = "Why always mad?",
+		},
 		ARMORDREADSTONE = "Pretty rock clothes",
 		DREADSTONEHAT = "Rock for head",
 
@@ -5057,6 +5088,64 @@ return{
 
         EMBERLIGHT = "Hot! Hot!!",
         WILLOW_EMBER = "only_used_by_willow",
+
+        -- Year of the Dragon
+        YOTD_DRAGONSHRINE =
+        {
+            GENERIC = "Little house for Patuey Fly",
+            EMPTY = "Needs burnt rock",
+            BURNT = "Patuey Fly likes fire too much",
+        },
+
+        DRAGONBOAT_KIT = "Fancy Floaty!",
+        DRAGONBOAT_PACK = "All the fancy Floaty bits!",
+
+        BOATRACE_CHECKPOINT = "That way!",
+        BOATRACE_CHECKPOINT_THROWABLE_DEPLOYKIT = "Need to plant it on the water",
+        BOATRACE_START = "Start Place",
+        BOATRACE_START_THROWABLE_DEPLOYKIT = "Need to plant it on the water",
+
+        BOATRACE_PRIMEMATE = "Scary Cheeky want to race?",
+        BOATRACE_SPECTATOR_DRAGONLING = "Will try not to splash!",
+
+        YOTD_STEERINGWHEEL = "Shiny wheel",
+        YOTD_STEERINGWHEEL_ITEM = "For pointing Floaty",
+        YOTD_OAR = "Aaah! Oh, is not real.",
+        YOTD_ANCHOR = "Hold onto sea bottom",
+        YOTD_ANCHOR_ITEM = "Heavy...",
+        MAST_YOTD = "Friend is all dressed up",
+        MAST_YOTD_ITEM = "Tall friend for Floater",
+        BOAT_BUMPER_YOTD = "Thank you for keeping Floaty safe!",
+        BOAT_BUMPER_YOTD_KIT = "Will help protect Floaty",
+        BOATRACE_SEASTACK = "Look out!",
+        BOATRACE_SEASTACK_THROWABLE_DEPLOYKIT = "Throw into water! Wheee!",
+        BOATRACE_SEASTACK_MONKEY = "Look out!",
+        BOATRACE_SEASTACK_MONKEY_THROWABLE_DEPLOYKIT = "Throw into water! Wheee!",
+        MASTUPGRADE_LAMP_YOTD = "Glowy friend watching",
+        MASTUPGRADE_LAMP_ITEM_YOTD = "Night light",
+        WALKINGPLANK_YOTD = "Splashy jump spot",
+        CHESSPIECE_YOTD = "Fire! Oh... is rock",
+
+        -- Rifts / Meta QoL
+
+        HEALINGSALVE_ACID = "Gloop! Thanks, slimy friends!",
+
+        BEESWAX_SPRAY = "Scary...",
+        WAXED_PLANT = "Screaming! Friends are screaming!", -- Used for all waxed plants, from farm plants to trees.
+
+        STORAGE_ROBOT = {
+            GENERIC = "Go, Grabby Friend!",
+            BROKEN = "Help! Grabby Friend is hurt!",
+        },
+
+        SCRAP_MONOCLEHAT = "Can see friends far away!",
+        SCRAPHAT = "Big thorny head!",
+
+        FENCE_JUNK = "Friends wearing metal clothes",
+        JUNK_PILE = "Pile of stuff",
+        JUNK_PILE_BIG = "Not safe...",
+
+        ARMOR_LUNARPLANT_HUSK = "Mean and pokey! Not good for hugs",
     },
 
     DESCRIBE_GENERIC = "Friend?",

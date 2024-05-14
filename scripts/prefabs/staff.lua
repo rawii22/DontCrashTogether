@@ -418,34 +418,8 @@ local function NoHoles(pt)
     return not TheWorld.Map:IsGroundTargetBlocked(pt)
 end
 
-local BLINKFOCUS_MUST_TAGS = { "blinkfocus" }
-
 local function blinkstaff_reticuletargetfn()
-    local player = ThePlayer
-    local rotation = player.Transform:GetRotation()
-    local pos = player:GetPosition()
-    local ents = TheSim:FindEntities(pos.x, pos.y, pos.z, TUNING.CONTROLLER_BLINKFOCUS_DISTANCE, BLINKFOCUS_MUST_TAGS)
-    for _, v in ipairs(ents) do
-        local epos = v:GetPosition()
-        if distsq(pos, epos) > TUNING.CONTROLLER_BLINKFOCUS_DISTANCESQ_MIN then
-            local angletoepos = player:GetAngleToPoint(epos)
-            local angleto = math.abs(anglediff(rotation, angletoepos))
-            if angleto < TUNING.CONTROLLER_BLINKFOCUS_ANGLE then
-                return epos
-            end
-        end
-    end
-    rotation = rotation * DEGREES
-    for r = 13, 1, -1 do
-        local numtries = 2 * PI * r
-        local offset = FindWalkableOffset(pos, rotation, r, numtries, false, true, NoHoles, false, true)
-        if offset ~= nil then
-            pos.x = pos.x + offset.x
-            pos.y = 0
-            pos.z = pos.z + offset.z
-            return pos
-        end
-    end
+    return ControllerReticle_Blink_GetPosition(ThePlayer, NoHoles)
 end
 
 local ORANGEHAUNT_MUST_TAGS = { "locomotor" }
@@ -603,7 +577,7 @@ local function destroystructure(staff, target)
     end
 
     if target.components.container ~= nil then
-        target.components.container:DropEverything()
+		target.components.container:DropEverything(nil, true)
     end
 
     if target.components.spawner ~= nil and target.components.spawner:IsOccupied() then
@@ -644,12 +618,14 @@ local function destroystructure(staff, target)
 
     target:PushEvent("ondeconstructstructure", caster)
 
-    if target.components.stackable ~= nil then
-        --if it's stackable we only want to destroy one of them.
-        target.components.stackable:Get():Remove()
-    else
-        target:Remove()
-    end
+	if not target.no_delete_on_deconstruct then
+		if target.components.stackable ~= nil then
+			--if it's stackable we only want to destroy one of them.
+			target.components.stackable:Get():Remove()
+		else
+			target:Remove()
+		end
+	end
 end
 
 local function HasRecipe(guy)

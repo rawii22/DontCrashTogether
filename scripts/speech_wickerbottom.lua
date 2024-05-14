@@ -85,7 +85,7 @@ return{
             NO_RACERS = "I can't gather any data with no subjects.",
         },
 
-		DISMANTLE =
+		DISMANTLE = 
 		{
 			COOKING = "I'm afraid I'll have to wait until it's finished cooking.",
 			INUSE = "It's already in use.",
@@ -523,6 +523,7 @@ return{
 	ANNOUNCE_HIGHRESEARCH = "My my, that was extremely interesting!",
 	ANNOUNCE_HOUNDS = "Something is approaching.",
 	ANNOUNCE_WORMS = "Something nasty intends to rear its head.",
+    ANNOUNCE_ACIDBATS = "What a dreadful noise they make.",
 	ANNOUNCE_HUNGRY = "Librarian needs food.",
 	ANNOUNCE_HUNT_BEAST_NEARBY = "The appearance of this track indicates recent activity.",
 	ANNOUNCE_HUNT_LOST_TRAIL = "The trail is no longer distinguishable.",
@@ -904,6 +905,8 @@ return{
 
     ANNOUNCE_CHAIR_ON_FIRE = "This is unacceptable.",
 
+    ANNOUNCE_HEALINGSALVE_ACIDBUFF_DONE = "I believe my immunity from acidic rainfall has concluded.",
+
     ANNOUNCE_COACH = 
     {
         "only_used_by_wolfgang",
@@ -926,6 +929,10 @@ return{
         "only_used_by_wolfgang",
         "only_used_by_wolfgang",
     },
+
+    ANNOUNCE_YOTD_NOBOATS = "I must be in closer proximity to the starting point before we can begin.",
+    ANNOUNCE_YOTD_NOCHECKPOINTS = "The matter of placing checkpoints seems to have been overlooked.",
+    ANNOUNCE_YOTD_NOTENOUGHBOATS = "I should endeavor to make some space around the starting point.",
 
 	BATTLECRY =
 	{
@@ -1441,18 +1448,25 @@ return{
         {
             GENERIC = "A tree with a fungal parasite.",
             BLOOM = "Apparently it's the breeding season for this species.",
+            ACIDCOVERED = "The acid will expedite the spoilage of the fungal yield.",
         },
         MUSHTREE_MEDIUM =
         {
             GENERIC = "A red variety of Mycena luxaeterna.",
             BLOOM = "The smell is used to ward off predators.",
+            ACIDCOVERED = "The acid will expedite the spoilage of the fungal yield.",
         },
         MUSHTREE_SMALL =
         {
             GENERIC = "My word! A huge Mycena silvaelucens.",
             BLOOM = "The light is caused by a chemical reaction.",
+            ACIDCOVERED = "The acid will expedite the spoilage of the fungal yield.",
         },
-        MUSHTREE_TALL_WEBBED = "This relationship appears symbiotic.",
+        MUSHTREE_TALL_WEBBED =
+        {
+            GENERIC = "This relationship appears symbiotic.",
+            ACIDCOVERED = "The acid will expedite the spoilage of the fungal yield.",
+        },
         SPORE_TALL =
         {
             GENERIC = "A soft blue carrier of genetic information.",
@@ -1932,7 +1946,11 @@ return{
 		DRAGONFLY = "It's some kind of mythical variant of a Diptera.",
 		ARMORDRAGONFLY = "Pyrotechnic armor!",
 		DRAGON_SCALES = "Scales from an insect? Unheard of!",
-		DRAGONFLYCHEST = "Scales! Scales are the winner!",
+		DRAGONFLYCHEST =
+		{
+			GENERIC = "Scales! Scales are the winner!",
+            UPGRADED_STACKSIZE = "A fireproof chest with an impossibly expansive interior.",
+		},
 		DRAGONFLYFURNACE =
 		{
 			HAMMERED = "Hm, that was an interesting choice of alteration.",
@@ -2582,6 +2600,7 @@ return{
 		SILK = "Protein fiber extruded from an arachnid.",
 		SKELETON = "An incredibly well preserved human skeleton.",
 		SCORCHED_SKELETON = "You don't inspire a great deal of confidence, dear.",
+        SKELETON_NOTPLAYER = "Looking at the bone structure, this was clearly not human.",
 		SKULLCHEST = "A container resembling a cranium.", --removed
 		SMALLBIRD =
 		{
@@ -2698,8 +2717,11 @@ return{
 		{
 			GENERIC = "A storage chest.",
 			BURNT = "The charred skeleton of a storage chest.",
+            UPGRADED_STACKSIZE = "A large storage chest.",
 		},
 		TREASURECHEST_TRAP = "Looks suspicious...",
+        CHESTUPGRADE_STACKSIZE = "Increases the capacity of a storage container by a, frankly, absurd degree.", -- Describes the kit upgrade item.
+		COLLAPSEDCHEST = "It would be prudent to rebuild the chest, rather than leave all this lying about.",
 		SACRED_CHEST =
 		{
 			GENERIC = "A small dimension tightly bound in magic.",
@@ -2839,7 +2861,7 @@ return{
             EMPTY = "It needs a sacrifice of meat.",
             BURNT = "No use to me like this.",
 		},
-		PIG_TOKEN = "How did they could achieve such detail using pig hooves?",
+		PIG_TOKEN = "How did they manage to achieve such detail using pig hooves?",
 		PIG_COIN = "A boon from the Pig King.",
 		YOTP_FOOD1 = "A feast fit for a festival!",
 		YOTP_FOOD2 = "Not fit for human consumption.",
@@ -2998,6 +3020,8 @@ return{
 		WALL_MOONROCK_ITEM = "Fits comfortably in my pocket.",
 		WALL_DREADSTONE = "A highly secure wall.",
 		WALL_DREADSTONE_ITEM = "The stone's density makes for an incredibly strong building material.",
+        WALL_SCRAP = "A fine example of recycling.",
+        WALL_SCRAP_ITEM = "A fine example of recycling.",
 		FENCE = "A simply constructed fence.",
         FENCE_ITEM = "All the components for a wooden fence.",
         FENCE_GATE = "That is a wooden gate.",
@@ -4108,6 +4132,7 @@ return{
         DUSTMERINGUE = "Perhaps there's a creature around here that could metabolize this.",
 
         SHROOMCAKE = "I don't believe that qualifies as a \"cake\" dear.",
+        SHROOMBAIT = "This malodorous combination will render unconscious any creature that ingests it.",
 
         NIGHTMAREGROWTH = "These crystalline structures do not appear to be natural.",
 
@@ -4598,7 +4623,7 @@ return{
         EYEOFTERROR_MINI_GROUNDED = "An eyeball... embryo? These creatures are quite perplexing.",
 
         FROZENBANANADAIQUIRI = "This would pair nicely with a short book.",
-        BUNNYSTEW = "Caloric, but nutritious. It smells wonderful, as well. ",
+        BUNNYSTEW = "Caloric, but nutritious. It smells wonderful, as well.",
         MILKYWHITES = "Tunica albuginea oculi, the opaque white covering of the vitreous humor. Also known as disgusting.",
 
         CRITTER_EYEOFTERROR = "Now, I wonder if your nerves are functional, or merely decorative...",
@@ -4838,6 +4863,12 @@ return{
 			GENERIC = "How odd... the marble appears to be encasing something.",
 			EXPOSED = "It will require much greater force than I can muster to break it.",
 		},
+		DAYWALKER2 =
+		{
+			GENERIC = "The creature appears calm for now. Best not aggravate it.",
+			BURIED = "The pitiful beast is pinned beneath this pile of debris.",
+			HOSTILE = "Someone should teach this brute some manners.",
+		},
 		ARMORDREADSTONE = "Extremely durable, and surprisingly lightweight.",
 		DREADSTONEHAT = "Unfortunately, the material seems to have adverse affects on the mind.",
 
@@ -5053,6 +5084,64 @@ return{
 
         EMBERLIGHT = "Nothing like some unnatural fire to warm yourself with on a chilly day.",
         WILLOW_EMBER = "only_used_by_willow",
+
+        -- Year of the Dragon
+        YOTD_DRAGONSHRINE =
+        {
+            GENERIC = "A tribute to a creature with both reptilian and insectoid traits.",
+            EMPTY = "I suspect it requires a tribute of charcoal.",
+            BURNT = "It has expired.",
+        },
+
+        DRAGONBOAT_KIT = "It would make sense to construct this near the water.",
+        DRAGONBOAT_PACK = "Everything I need has been conveniently collected into a singular package.",
+
+        BOATRACE_CHECKPOINT = "This should help us stay on course.",
+        BOATRACE_CHECKPOINT_THROWABLE_DEPLOYKIT = "Its placement must be strategic.",
+        BOATRACE_START = "I do love a good old fashioned boat race.",
+        BOATRACE_START_THROWABLE_DEPLOYKIT = "We must determine the best spot to start and finish the race.",
+
+        BOATRACE_PRIMEMATE = "A shadowy opponent to keep things interesting.",
+        BOATRACE_SPECTATOR_DRAGONLING = "It seems content to watch the proceedings.",
+
+        YOTD_STEERINGWHEEL = "Let us be off, then!",
+        YOTD_STEERINGWHEEL_ITEM = "A necessity should we want to steer our boat.",
+        YOTD_OAR = "It never occurred to me how perfectly paddle-shaped the native Diptera's forearm is.",
+        YOTD_ANCHOR = "One of the more curious uses for gold I've seen yet.",
+        YOTD_ANCHOR_ITEM = "It will allow us to create an anchor for our ships.",
+        MAST_YOTD = "I don't believe those are in fact the wings of a Diptera.",
+        MAST_YOTD_ITEM = "A tool for harnessing the wind's power.",
+        BOAT_BUMPER_YOTD = "The effect is admittedly quite striking.",
+        BOAT_BUMPER_YOTD_KIT = "It would be wise to equip the boat with a protective barrier.",
+        BOATRACE_SEASTACK = "Best to avoid that!",
+        BOATRACE_SEASTACK_THROWABLE_DEPLOYKIT = "I wouldn't dream of using any underhanded tactics to win. I'll exercise caution.",
+        BOATRACE_SEASTACK_MONKEY = "Best to avoid that!",
+        BOATRACE_SEASTACK_MONKEY_THROWABLE_DEPLOYKIT = "I wouldn't dream of using any underhanded tactics to win. I'll exercise caution.",
+        MASTUPGRADE_LAMP_YOTD = "An eclectic design, but no less useful.",
+        MASTUPGRADE_LAMP_ITEM_YOTD = "I'm always in need of a good reading light.",
+        WALKINGPLANK_YOTD = "An escape route I'd rather not take, despite the fine trimmings.",
+        CHESSPIECE_YOTD = "A curious combination; the fire-breathing Diptera and seafaring.",
+
+        -- Rifts / Meta QoL
+
+        HEALINGSALVE_ACID = "This salve is derived from gastropod secretions.",
+
+        BEESWAX_SPRAY = "It has an unpleasantly astringent odor.",
+        WAXED_PLANT = "Perfectly preserved.", -- Used for all waxed plants, from farm plants to trees.
+
+        STORAGE_ROBOT = {
+            GENERIC = "An automated unit for collecting and sorting items.",
+            BROKEN = "This device is in a state of disrepair.",
+        },
+
+        SCRAP_MONOCLEHAT = "It seems to exponentially increase the wearer's field of view.",
+        SCRAPHAT = "Perhaps we might give it a good wash first?",
+
+        FENCE_JUNK = "Unpleasant to the eye, but I suppose practicality outweighs aesthetics.",
+        JUNK_PILE = "I may find something of use within.",
+        JUNK_PILE_BIG = "The danger far outweighs the possibility of discovering anything of value.",
+
+        ARMOR_LUNARPLANT_HUSK = "Plant-based, plant-made, and plant-worn.",
     },
 
     DESCRIBE_GENERIC = "A rare occurrence. I don't know what that is.",

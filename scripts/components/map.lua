@@ -371,8 +371,13 @@ function Map:CanDeployBoatAtPointInWater(pt, inst, mouseover, data)
 
     local entities = TheSim:FindEntities(pt.x, 0, pt.z, TUNING.MAX_WALKABLE_PLATFORM_RADIUS + boat_radius + boat_extra_spacing, WALKABLE_PLATFORM_TAGS)
     for i, v in ipairs(entities) do
-        if v.components.walkableplatform and math.sqrt(v:GetDistanceSqToPoint(pt.x, 0, pt.z)) <= (v.components.walkableplatform.platform_radius + boat_radius + boat_extra_spacing) then
-            return false
+        local v_walkableplatform = v.components.walkableplatform
+        if v_walkableplatform then
+            local distance_to_position = math.sqrt(v:GetDistanceSqToPoint(pt.x, 0, pt.z))
+            local test_distance = (v_walkableplatform.platform_radius + boat_radius + boat_extra_spacing)
+            if distance_to_position <= test_distance then
+                return false
+            end
         end
     end
 
@@ -581,6 +586,21 @@ function Map:NodeAtPointHasTag(x, y, z, tag)
 	local node_index = self:GetNodeIdAtPoint(x, y, z)
 	local node = TheWorld.topology.nodes[node_index]
 	return node ~= nil and node.tags ~= nil and table.contains(node.tags, tag)
+end
+
+function Map:CanAreaTagsHaveAcidRain(tags)
+    return not table.contains(tags, "lunacyarea") and not table.contains(tags, "nocavein")
+end
+
+function Map:CanPointHaveAcidRain(x, y, z)
+    -- Note: If you care about the tile overlap then use FindVisualNodeAtPoint
+    local node_index = self:GetNodeIdAtPoint(x, y, z)
+    local node = TheWorld.topology.nodes[node_index]
+    if node == nil or node.tags == nil then
+        return false
+    end
+
+    return self:CanAreaTagsHaveAcidRain(node.tags)
 end
 
 function Map:GetRandomPointClustersForNodePrefix(prefixes, countpernode)

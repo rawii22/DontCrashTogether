@@ -1207,11 +1207,8 @@ function PlayerController:DoControllerUseItemOnSelfFromInvTile(item)
     if not self.deploy_mode and
         item.replica.inventoryitem:IsDeployable(self.inst) and
         item.replica.inventoryitem:IsGrandOwner(self.inst) then
-		local rider = self.inst.replica.rider
-		if not (rider ~= nil and rider:IsRiding()) then
-			self.deploy_mode = true
-			return
-		end
+		self.deploy_mode = true
+		return
     end
     self.inst.replica.inventory:ControllerUseItemOnSelfFromInvTile(item)
 end
@@ -2225,7 +2222,7 @@ function PlayerController:OnUpdate(dt)
     end
 
 	if self:IsAOETargeting() then
-		if self.reticule.inst:HasTag("fueldepleted") then
+		if not self.reticule.inst:IsValid() or self.reticule.inst:HasTag("fueldepleted") then
 			self:CancelAOETargeting()
 		else
 			local inventoryitem = self.reticule.inst.replica.inventoryitem
@@ -2673,14 +2670,16 @@ local function UpdateControllerAttackTarget(self, dt, x, y, z, dirx, dirz)
     --    return
     --end
 
-    local min_rad = 4
-    local max_rad = math.max(min_rad, combat:GetAttackRangeWithWeapon()) + 3
-    local min_rad_sq = min_rad * min_rad
+    local equipped_item = self.inst.replica.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
+    local forced_rad = equipped_item ~= nil and equipped_item.controller_use_attack_distance or 0
+
+	local min_rad = 3
+	local max_rad = math.max(forced_rad, combat:GetAttackRangeWithWeapon()) + 3.5
     local max_rad_sq = max_rad * max_rad
 
     --see entity_replica.lua for "_combat" tag
 
-	local nearby_ents = TheSim:FindEntities_Registered(x, y, z, max_rad, REGISTERED_CONTROLLER_ATTACK_TARGET_TAGS)
+	local nearby_ents = TheSim:FindEntities_Registered(x, y, z, max_rad + 3, REGISTERED_CONTROLLER_ATTACK_TARGET_TAGS)
     if self.controller_attack_target ~= nil then
         --Note: it may already contain controller_attack_target,
         --      so make sure to handle it only once later
@@ -2710,11 +2709,17 @@ local function UpdateControllerAttackTarget(self, dt, x, y, z, dirx, dirz)
                 local dx, dy, dz = x1 - x, y1 - y, z1 - z
                 local dsq = dx * dx + dy * dy + dz * dz
 
-                if dsq < max_rad_sq and CanEntitySeePoint(self.inst, x1, y1, z1) then
+				--include physics radius for max range check since we don't have (dist - phys_rad) yet
+				local phys_rad = v:GetPhysicsRadius(0)
+				local max_range = max_rad + phys_rad
+
+				if dsq < max_range * max_range and CanEntitySeePoint(self.inst, x1, y1, z1) then
                     local dist = dsq > 0 and math.sqrt(dsq) or 0
                     local dot = dist > 0 and dx / dist * dirx + dz / dist * dirz or 0
-                    if dot > 0 or dist < min_rad then
-                        local score = dot + 1 - .5 * dsq / max_rad_sq
+					if dot > 0 or dist < min_rad + phys_rad then
+						--now calculate score with physics radius subtracted
+						dist = math.max(0, dist - phys_rad)
+						local score = dot + 1 - 0.5 * dist * dist / max_rad_sq
 
                         if isally then
                             score = score * .25
@@ -2810,7 +2815,7 @@ local function UpdateControllerAttackTarget(self, dt, x, y, z, dirx, dirz)
     end
 end
 
-local function UpdateControllerInteractionTarget(self, dt, x, y, z, dirx, dirz)
+local function UpdateControllerInteractionTarget(self, dt, x, y, z, dirx, dirz, heading_angle)
 	local attack_target = self:GetControllerAttackTarget()
 	if self.controller_targeting_lock_target and attack_target then
 		self.controller_target = attack_target
@@ -2849,6 +2854,14 @@ local function UpdateControllerInteractionTarget(self, dt, x, y, z, dirx, dirz)
 
     local equiped_item = self.inst.replica.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
 
+    if equiped_item and equiped_item.controller_should_use_attack_target and self.controller_attack_target ~= nil then
+        if self.controller_target ~= self.controller_attack_target then
+            self.controller_target = self.controller_attack_target
+            self.controller_target_age = 0
+        end
+        return
+    end
+
     --Fishing targets may have large radius, making it hard to target with normal priority
     local fishing = equiped_item ~= nil and equiped_item:HasTag("fishingrod")
 
@@ -2880,6 +2893,8 @@ local function UpdateControllerInteractionTarget(self, dt, x, y, z, dirx, dirz)
 				and (self.inst.sg == nil or self.inst.sg:HasStateTag("moving") or self.inst.sg:HasStateTag("idle") or self.inst.sg:HasStateTag("channeling"))
 				and (self.inst:HasTag("moving") or self.inst:HasTag("idle") or self.inst:HasTag("channeling"))
 
+    local onboat = self.inst:GetCurrentPlatform() ~= nil
+    local anglemax = onboat and TUNING.CONTROLLER_BOATINTERACT_ANGLE or TUNING.CONTROLLER_INTERACT_ANGLE
     for i, v in ipairs(nearby_ents) do
         if v ~= ocean_fishing_target then
 
@@ -2909,65 +2924,73 @@ local function UpdateControllerInteractionTarget(self, dt, x, y, z, dirx, dirz)
                             v == self.controller_attack_target or
                             dx * dirx + dz * dirz > 0))) and
                     CanEntitySeePoint(self.inst, x1, y1, z1) then
-
-                    -- Incorporate the y component after we've performed the inclusion radius test.
-                    -- We wait until now because we might disqualify our controller_target if its transform has a y component,
-                    -- but we still want to use the y component as a tiebreaker for objects at the same x,z position.
-                    dsq = dsq + (dy * dy)
-
-                    local dist = dsq > 0 and math.sqrt(dsq) or 0
-                    local dot = dist > 0 and dx / dist * dirx + dz / dist * dirz or 0
-
-                    --keep the angle component between [0..1]
-                    local angle_component = (dot + 1) / 2
-
-                    --distance doesn't matter when you're really close, and then attenuates down from 1 as you get farther away
-                    local dist_component = dsq < min_rad_sq and 1 or min_rad_sq / dsq
-
-                    --for stuff that's *really* close - ie, just dropped
-                    local add = dsq < .0625 --[[.25 * .25]] and 1 or 0
-
-                    --just a little hysteresis
-                    local mult = v == self.controller_target and not v:HasTag("wall") and 1.5 or 1
-
-                    local score = angle_component * dist_component * mult + add
-
-                    --make it easier to target stuff dropped inside the portal when alive
-                    --make it easier to haunt the portal for resurrection in endless mode
-                    if v:HasTag("portal") then
-                        score = score * (self.inst:HasTag("playerghost") and GetPortalRez() and 1.1 or .9)
+                    local shouldcheck = dsq < 1 -- Do not skip really close entities.
+                    if not shouldcheck then
+                        local epos = v:GetPosition()
+                        local angletoepos = self.inst:GetAngleToPoint(epos)
+                        local angleto = math.abs(anglediff(-heading_angle, angletoepos))
+                        shouldcheck = angleto < anglemax
                     end
+                    if shouldcheck then
+                        -- Incorporate the y component after we've performed the inclusion radius test.
+                        -- We wait until now because we might disqualify our controller_target if its transform has a y component,
+                        -- but we still want to use the y component as a tiebreaker for objects at the same x,z position.
+                        dsq = dsq + (dy * dy)
 
-                    if v:HasTag("hasfurnituredecoritem") then
-                        score = score * 0.5
-                    end
+                        local dist = dsq > 0 and math.sqrt(dsq) or 0
+                        local dot = dist > 0 and dx / dist * dirx + dz / dist * dirz or 0
 
-                    --print(v, angle_component, dist_component, mult, add, score)
+                        --keep the angle component between [0..1]
+                        local angle_component = (dot + 1) / 2
 
-                    if score < target_score or
-                        (   score == target_score and
-                            (   (target ~= nil and not (target.CanMouseThrough ~= nil and target:CanMouseThrough())) or
-                                (v.CanMouseThrough ~= nil and v:CanMouseThrough())
-                            )
-                        ) then
-                        --skip
-                    elseif canexamine and v:HasTag("inspectable") then
-                        target = v
-                        target_score = score
-                    else
-                        --this is kind of expensive, so ideally we don't get here for many objects
-                        local lmb, rmb = self:GetSceneItemControllerAction(v)
-                        if lmb ~= nil or rmb ~= nil then
+                        --distance doesn't matter when you're really close, and then attenuates down from 1 as you get farther away
+                        local dist_component = dsq < min_rad_sq and 1 or min_rad_sq / dsq
+
+                        --for stuff that's *really* close - ie, just dropped
+                        local add = dsq < .0625 --[[.25 * .25]] and 1 or 0
+
+                        --just a little hysteresis
+                        local mult = v == self.controller_target and not v:HasTag("wall") and 1.5 or 1
+
+                        local score = angle_component * dist_component * mult + add
+
+                        --make it easier to target stuff dropped inside the portal when alive
+                        --make it easier to haunt the portal for resurrection in endless mode
+                        if v:HasTag("portal") then
+                            score = score * (self.inst:HasTag("playerghost") and GetPortalRez() and 1.1 or .9)
+                        end
+
+                        if v:HasTag("hasfurnituredecoritem") then
+                            score = score * 0.5
+                        end
+
+                        --print(v, angle_component, dist_component, mult, add, score)
+
+                        if score < target_score or
+                            (   score == target_score and
+                                (   (target ~= nil and not (target.CanMouseThrough ~= nil and target:CanMouseThrough())) or
+                                    (v.CanMouseThrough ~= nil and v:CanMouseThrough())
+                                )
+                            ) then
+                            --skip
+                        elseif canexamine and v:HasTag("inspectable") then
                             target = v
                             target_score = score
                         else
-                            local inv_obj = self:GetCursorInventoryObject()
-							if inv_obj ~= nil then
-								rmb = self:GetItemUseAction(inv_obj, v)
-								if rmb ~= nil and rmb.target == v then
-									target = v
-									target_score = score
-								end
+                            --this is kind of expensive, so ideally we don't get here for many objects
+                            local lmb, rmb = self:GetSceneItemControllerAction(v)
+                            if lmb ~= nil or rmb ~= nil then
+                                target = v
+                                target_score = score
+                            else
+                                local inv_obj = self:GetCursorInventoryObject()
+                                if inv_obj ~= nil then
+                                    rmb = self:GetItemUseAction(inv_obj, v)
+                                    if rmb ~= nil and rmb.target == v then
+                                        target = v
+                                        target_score = score
+                                    end
+                                end
                             end
                         end
                     end
@@ -3023,7 +3046,7 @@ function PlayerController:UpdateControllerTargets(dt)
     local heading_angle = -self.inst.Transform:GetRotation()
     local dirx = math.cos(heading_angle * DEGREES)
     local dirz = math.sin(heading_angle * DEGREES)
-    UpdateControllerInteractionTarget(self, dt, x, y, z, dirx, dirz)
+    UpdateControllerInteractionTarget(self, dt, x, y, z, dirx, dirz, heading_angle)
     UpdateControllerAttackTarget(self, dt, x, y, z, dirx, dirz)
     UpdateControllerConflictingTargets(self)
 end
@@ -3141,7 +3164,7 @@ function PlayerController:OnRemotePredictOverrideLocomote(dir)
 	if self.ismastersim and self.handler == nil and self.inst.sg:HasStateTag("overridelocomote") then
 		if self:IsEnabled() and not self:IsBusy() or self.classified.busyremoteoverridelocomote:value() then
 			if self.inst.sg:HasStateTag("canrotate") then
-				self.inst.Transform:SetRotation(dir)
+				self.locomotor:SetMoveDir(dir)
 			end
 			self.inst:PushEvent("locomote", { dir = dir, remoteoverridelocomote = true })
 		end
@@ -3337,7 +3360,7 @@ function PlayerController:DoPredictWalking(dt)
 					--overshot?
 					self.inst.Transform:SetPosition(pt.x, 0, pt.z)
 				else
-					self.inst.Transform:SetRotation(dir)
+					self.locomotor:SetMoveDir(dir)
 				end
                 --Destination reached, queued (instead of immediate) stop
                 --so that prediction may be resumed before the next frame
@@ -4085,6 +4108,16 @@ function PlayerController:GetMapActions(position)
     return LMBaction, RMBaction
 end
 
+function PlayerController:UpdateActionsToMapActions(position)
+    -- NOTES(JBK): This should be called from a map interface to update the player's current actions to the ones the map has.
+    -- Currently used by mapscreen.
+    local LMBaction, RMBaction = self:GetMapActions(position)
+
+    self.LMBaction, self.RMBaction = LMBaction, RMBaction
+
+    return LMBaction, RMBaction
+end
+
 function PlayerController:OnMapAction(actioncode, position)
     local act = ACTIONS_BY_ACTION_CODE[actioncode]
     if act == nil or not act.map_action then
@@ -4293,19 +4326,16 @@ function PlayerController:GetItemUseAction(active_item, target)
 		return act
 	elseif active_item.replica.inventoryitem:IsDeployable(self.inst) and active_item.replica.inventoryitem:IsGrandOwner(self.inst) then
 		--Deployable item, no item use action generated yet
-		local rider = self.inst.replica.rider
-		if not (rider ~= nil and rider:IsRiding()) then
-			--V2C: When not mounted, use self actions blocked by controller R.Dpad "TOGGLE_DEPLOY_MODE"
-			--     So force it onto L.Dpad instead here
-			--     e.g. Murder/Plant, Eat/Plant
-			act = --[[rmb]] self.inst.components.playeractionpicker:GetInventoryActions(active_item, true)
+		--V2C: When not mounted, use self actions blocked by controller R.Dpad "TOGGLE_DEPLOY_MODE"
+		--     So force it onto L.Dpad instead here
+		--     e.g. Murder/Plant, Eat/Plant
+		act = --[[rmb]] self.inst.components.playeractionpicker:GetInventoryActions(active_item, true)
+		act = act[1] ~= nil and act[1].action ~= ACTIONS.TOGGLE_DEPLOY_MODE and act[1] or act[2]
+		if act == nil then
+			act = --[[lmb]] self.inst.components.playeractionpicker:GetInventoryActions(active_item, false)
 			act = act[1] ~= nil and act[1].action ~= ACTIONS.TOGGLE_DEPLOY_MODE and act[1] or act[2]
-			if act == nil then
-				act = --[[lmb]] self.inst.components.playeractionpicker:GetInventoryActions(active_item, false)
-				act = act[1] ~= nil and act[1].action ~= ACTIONS.TOGGLE_DEPLOY_MODE and act[1] or act[2]
-			end
-			return act ~= nil and act.action ~= ACTIONS.LOOKAT and act or nil
 		end
+		return act ~= nil and act.action ~= ACTIONS.LOOKAT and act or nil
 	end
 end
 
@@ -4511,7 +4541,7 @@ function PlayerController:OnRemoteBufferedAction()
 				if x ~= self.remote_vector.x or z ~= self.remote_vector.z then
 					local dir = math.atan2(z - self.remote_vector.z, self.remote_vector.x - x) * RADIANS
 					if self.inst.sg:HasStateTag("canrotate") then
-						self.inst.Transform:SetRotation(dir)
+						self.locomotor:SetMoveDir(dir)
 					end
 					--Force us to interrupt and go to movement state immediately
 					self.inst.sg:HandleEvent("locomote", { dir = dir, force_idle_state = true }) --force idle state in case this tiny motion was meant to cancel an action

@@ -48,6 +48,12 @@ function LootDropper:AddRandomLoot(prefab, weight)
     self.totalrandomweight = self.totalrandomweight + weight
 end
 
+function LootDropper:ClearRandomLoot()
+    self.randomloot = nil
+    self.totalrandomweight = nil
+    self.numrandomloot = nil
+end
+
 -- This overrides the normal loot table while haunted
 function LootDropper:AddRandomHauntedLoot(prefab, weight)
     if not self.randomhauntedloot then
@@ -340,7 +346,7 @@ function LootDropper:SpawnLootPrefab( lootprefab, pt, linked_skinname, skin_id, 
                 end
             end
 
-        -- here? so we can run a full drop loot?
+            -- here? so we can run a full drop loot?
             self:FlingItem(loot, pt)
 
             loot:PushEvent("on_loot_dropped", {dropper = self.inst})
@@ -348,7 +354,6 @@ function LootDropper:SpawnLootPrefab( lootprefab, pt, linked_skinname, skin_id, 
 
             -- make it smoulder when dropped if the parent was in controlled burn
             if self.inst.components.burnable and self.inst.components.burnable:GetControlledBurn() and loot.components.burnable then
-
                 loot.components.burnable:StartWildfire()
             end
 
@@ -367,7 +372,6 @@ function LootDropper:DropLoot(pt)
 
         local isstructure = self.inst:HasTag("structure")
         for k, v in pairs(prefabs) do
-            
             if TUNING.BURNED_LOOT_OVERRIDES[v] ~= nil then
                 prefabs[k] = TUNING.BURNED_LOOT_OVERRIDES[v]
             elseif PrefabExists(v.."_cooked") then
@@ -379,7 +383,7 @@ function LootDropper:DropLoot(pt)
             --     It *should* ALWAYS return ash based on certain types of
             --     ingredients (wood), but we'll let them have this one :O
             elseif self.inst.components.burnable and self.inst.components.burnable:GetControlledBurn() then
-                -- Leave it be, but we will drop it smouldering.            
+                -- Leave it be, but we will drop it smouldering.
             elseif (not isstructure and not self.inst:HasTag("tree")) or self.inst:HasTag("hive") then -- because trees have specific burnt loot and "hive"s are structures...
                 prefabs[k] = "ash"
             end
