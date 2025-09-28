@@ -1,6 +1,5 @@
 require("class")
 
-local BehaviourTrees = {}
 local StateGraphs = {}
 local Components = {}
 local EventServerFiles = {}
@@ -10,9 +9,7 @@ StopUpdatingComponents = {}
 local ClientSideInventoryImageFlags = {}
 
 local function EntityWatchWorldState(self, var, fn)
-    if self.worldstatewatching == nil then
-        self.worldstatewatching = {}
-    end
+    self.worldstatewatching = self.worldstatewatching or {}
 
     local watcherfns = self.worldstatewatching[var]
     if watcherfns == nil then
@@ -24,19 +21,21 @@ local function EntityWatchWorldState(self, var, fn)
 end
 
 local function EntityStopWatchingWorldState(self, var, fn)
-    if self.worldstatewatching ~= nil then
-        local watcherfns = self.worldstatewatching[var]
-        if watcherfns ~= nil then
-            RemoveByValue(watcherfns, fn)
+    if self.worldstatewatching == nil then
+        return
+    end
 
-            if next(watcherfns) == nil then
-                self.worldstatewatching[var] = nil
-            end
-        end
+    local watcherfns = self.worldstatewatching[var]
+    if watcherfns ~= nil then
+        RemoveByValue(watcherfns, fn)
 
-        if next(self.worldstatewatching) == nil then
-            self.worldstatewatching = nil
+        if next(watcherfns) == nil then
+            self.worldstatewatching[var] = nil
         end
+    end
+
+    if next(self.worldstatewatching) == nil then
+        self.worldstatewatching = nil
     end
 end
 
@@ -95,38 +94,39 @@ local function OnActionComponentsDirty(inst)
 end
 
 local function OnModActionComponentsDirty(inst, modname)
-    if inst.modactioncomponents == nil then
-        inst.modactioncomponents = {}
-    end
+    inst.modactioncomponents = inst.modactioncomponents or {}
     inst.modactioncomponents[modname] = inst.actionreplica.modactioncomponents[modname]:value()
 end
 
 local function SerializeInherentActions(inst)
-    if inst.actionreplica ~= nil then
-        local t = {}
-        if inst.inherentactions ~= nil then
-            local id = 1
-            for k, v in pairs(ACTIONS) do
-                if inst.inherentactions[v] then
-                    table.insert(t, id)
-                end
-                id = id + 1
-            end
-        end
-        inst.actionreplica.inherentactions:set(t)
+    if inst.actionreplica == nil then
+        return
     end
+
+    local t = {}
+    if inst.inherentactions ~= nil then
+        local id = 1
+        for k, v in pairs(ACTIONS) do
+            if inst.inherentactions[v] then
+                table.insert(t, id)
+            end
+            id = id + 1
+        end
+    end
+    inst.actionreplica.inherentactions:set(t)
 end
 
 local function DeserializeInherentActions(inst)
     inst.inherentactions = {}
-    for i, v in ipairs(inst.actionreplica.inherentactions:value()) do
+    for _, v in ipairs(inst.actionreplica.inherentactions:value()) do
         inst.inherentactions[v] = true
     end
+
     if next(inst.inherentactions) == nil then
         inst.inherentactions = nil
     else
         local id = 1
-        for k, v in pairs(ACTIONS) do
+        for _, v in pairs(ACTIONS) do
             if inst.inherentactions[id] then
                 inst.inherentactions[id] = nil
                 inst.inherentactions[v] = true
@@ -139,7 +139,7 @@ end
 local function SerializeAction(action)
     if action ~= nil then
         local id = 1
-        for k, v in pairs(ACTIONS) do
+        for _, v in pairs(ACTIONS) do
             if action == v then
                 return id
             end
@@ -197,8 +197,10 @@ function Entity:AddNetwork()
         inst:ListenForEvent("inherentsceneactiondirty", OnInherentSceneActionDirty)
         inst:ListenForEvent("inherentscenealtactiondirty", OnInherentSceneAltActionDirty)
 
-        for _,modname in pairs(ModManager:GetServerModsNames()) do
-            inst:ListenForEvent("modactioncomponentsdirty"..modname, function(inst) OnModActionComponentsDirty(inst,modname) end)
+        for _, modname in pairs(ModManager:GetServerModsNames()) do
+            inst:ListenForEvent("modactioncomponentsdirty"..modname, function(inst)
+                OnModActionComponentsDirty(inst, modname)
+            end)
         end
     end
 end
@@ -216,6 +218,7 @@ EntityScript = Class(function(self, entity)
     self.lower_components_shadow = {}
     self.GUID = entity:GetGUID()
     self.spawntime = GetTime()
+	self.sleepstatepending = true --haven't received initial sleep state from engine yet
     self.persists = true
     self.inlimbo = false
     self.name = nil
@@ -246,17 +249,12 @@ function EntityScript:GetSaveRecord()
 	local record =
 	{
 		prefab = self.prefab,
-		--id = self.GUID,
 	}
 
 	local x, y, z = self.Transform:GetWorldPosition()
 
 	if self.temp_save_platform_pos or self.entity:HasTag("player") then
 		record.age = self.Network:GetPlayerAge()
-
-		--if ThePlayer == self then
-		--	record.crafting_menu = TheCraftingMenuProfile:SerializeLocalClientSessionData()
-		--end
 
         local platform = self:GetCurrentPlatform()
 		if self._snapshot_platform ~= nil then
@@ -311,7 +309,7 @@ function EntityScript:GetSaveRecord()
     record.skin_id = self.skin_id
     record.alt_skin_ids = self.alt_skin_ids
 
-    local references = nil
+    local references
     record.data, references = self:GetPersistData()
 
     return record, references
@@ -324,6 +322,16 @@ end
 
 function EntityScript:Show()
     self.entity:Show(false)
+end
+
+function EntityScript:StackableSkinHack(target)
+    -- NOTES(JBK): This is a replacement function for old comments that were the following line.
+    -- (this does not work on clients, so we're going to use the AnimState hack instead)
+    if self.AnimState == nil or target.AnimState == nil then
+        return true
+    end
+
+    return self.AnimState:GetSkinBuild() == target.AnimState:GetSkinBuild()
 end
 
 function EntityScript:IsInLimbo()
@@ -342,7 +350,7 @@ function EntityScript:RemoveFromScene()
     self.inlimbo = true
     self.entity:Hide()
 
-    self:StopBrain()
+	self:_DisableBrain_Internal()
 
     if self.sg then
         self.sg:Stop()
@@ -391,10 +399,14 @@ function EntityScript:ReturnToScene()
         self.MiniMapEntity:SetEnabled(true)
     end
 
-    self:RestartBrain()
-
-    if self.sg then
-        self.sg:Start()
+	if self.brainfn or self.sg then
+		local asleep = self:IsAsleep()
+		if self.brainfn and not (asleep or self.sleepstatepending) then
+			self:_EnableBrain_Internal()
+		end
+		if self.sg then
+			self.sg:Start(asleep)
+		end
     end
     self:PushEvent("exitlimbo")
 end
@@ -404,9 +416,7 @@ function EntityScript:__tostring()
 end
 
 function EntityScript:AddInherentAction(act)
-    if self.inherentactions == nil then
-        self.inherentactions = {}
-    end
+    self.inherentactions = self.inherentactions or {}
     self.inherentactions[act] = true
     SerializeInherentActions(self)
 end
@@ -550,6 +560,14 @@ function EntityScript:RemoveTag(tag)
     self.entity:RemoveTag(tag)
 end
 
+function EntityScript:AddOrRemoveTag(tag, condition)
+    if condition then
+        self.entity:AddTag(tag)
+    else
+        self.entity:RemoveTag(tag)
+    end
+end
+
 function EntityScript:HasTag(tag)
     return self.entity:HasTag(tag)
 end
@@ -592,6 +610,16 @@ function EntityScript:AddComponent(name)
     local lower_name = string.lower(name)
     if self.lower_components_shadow[lower_name] ~= nil then
         print("component "..name.." already exists on entity "..tostring(self).."!"..debugstack_oneline(3))
+		local existingcmp = self.components[lower_name]
+		if existingcmp == nil then
+			for k, v in pairs(self.components) do
+				if string.lower(k) == lower_name then
+					existingcmp = v
+					break
+				end
+			end
+		end
+		return existingcmp
     end
 
     local cmp = LoadComponent(name)
@@ -607,7 +635,7 @@ function EntityScript:AddComponent(name)
 
     local postinitfns = ModManager:GetPostInitFns("ComponentPostInit", name)
 
-    for i, fn in ipairs(postinitfns) do
+    for _, fn in ipairs(postinitfns) do
         fn(loadedcmp, self)
     end
 
@@ -673,13 +701,13 @@ function EntityScript:GetAdjectivedName()
             end
         end
         --edible
-        for k, v in pairs(FOODTYPE) do
+        for _, v in pairs(FOODTYPE) do
             if self:HasTag("edible_"..v) then
                 return ConstructAdjectivedName(self, name, STRINGS.WET_PREFIX.FOOD)
             end
         end
         --fuel
-        for k, v in pairs(FUELTYPE) do
+        for _, v in pairs(FUELTYPE) do
             if self:HasTag(v.."_fuel") then
                 return ConstructAdjectivedName(self, name, STRINGS.WET_PREFIX.FUEL)
             end
@@ -688,11 +716,18 @@ function EntityScript:GetAdjectivedName()
 		if self:HasTag("broken") then
 			return ConstructAdjectivedName(self, ConstructAdjectivedName(self, name, STRINGS.WET_PREFIX.GENERIC), STRINGS.BROKENITEM)
 		end
+        --dead creatures
+		if self:HasTag("deadcreature") then
+			return ConstructAdjectivedName(self, ConstructAdjectivedName(self, name, STRINGS.WET_PREFIX.GENERIC), STRINGS.DEADCREATURE)
+		end
         --generic
         return ConstructAdjectivedName(self, name, STRINGS.WET_PREFIX.GENERIC)
 	elseif self:HasTag("broken") then
 		return ConstructAdjectivedName(self, name, STRINGS.BROKENITEM)
+    elseif self:HasTag("deadcreature") then
+        return ConstructAdjectivedName(self, name, STRINGS.DEADCREATURE)
     end
+
     return name
 end
 
@@ -708,19 +743,43 @@ function EntityScript:GetDisplayName()
     return name
 end
 
+--Can NOT be used on clients
+function EntityScript:GetWetMultiplier()
+	if self:HasTag("wet") then
+		return 1
+	elseif self:HasTag("moistureimmunity") then
+        return 0
+	elseif self.components.inventoryitem then --Inventoryitemmoisture can give us percent, but keep it consistent with how it was before, for now......
+        return self.components.inventoryitem:IsWet() and 1 or 0
+	end
+
+	local moisture = self.components.temp_moisture or self.components.moisture --or self.components.inventoryitem 
+	if moisture then
+        return moisture:GetMoisturePercent()
+    else
+        return
+        (
+			(TheWorld.state.iswet and not self:HasTag("rainimmunity")) or
+			(self:HasTag("swimming") and not self:HasTag("likewateroffducksback"))
+        ) and 1 or 0
+    end
+end
+
 --Can be used on clients
 function EntityScript:GetIsWet()
-    if self:HasTag("moistureimmunity") then
+	if self:HasTag("wet") then
+		return true
+	elseif self:HasTag("moistureimmunity") then
         return false
     end
 
     local replica = self.replica.inventoryitem or self.replica.moisture
-    if replica ~= nil then
+    if replica then
         return replica:IsWet()
+    else
+		return (TheWorld.state.iswet and not self:HasTag("rainimmunity"))
+            or (self:HasTag("swimming") and not self:HasTag("likewateroffducksback"))
     end
-	return self:HasTag("wet")
-		or (TheWorld.state.iswet and not self:HasTag("rainimmunity"))
-		or (self:HasTag("swimming") and not self:HasTag("likewateroffducksback"))
 end
 --Can be used on clients
 function EntityScript:IsAcidSizzling()
@@ -742,9 +801,8 @@ function EntityScript:IsAcidSizzling()
 end
 
 function EntityScript:GetSkinBuild()
-    if self.skin_build_name == nil then
-        self.skin_build_name = GetBuildForItem(self.skinname) --cache the build name so we don't need to search for it in the item tables.
-    end
+    -- We cache the build name so we don't need to search for it in the item tables.
+    self.skin_build_name = self.skin_build_name or GetBuildForItem(self.skinname)
     return self.skin_build_name
 end
 
@@ -771,6 +829,17 @@ function EntityScript:SetDeployExtraSpacing(spacing)
         --see components/map.lua
         TheWorld.Map:RegisterDeployExtraSpacing(spacing)
     end
+end
+
+function EntityScript:SetDeploySmartRadius(radius)
+	--Smart radius will calculate spacing using our radius and the radii of entities near me as well.
+	--NOTE: legacy deplay spacing generally does not care about size of other entities,
+	--      unless those entities specify deploy_extra_spacing.
+	self.deploy_smart_radius = radius
+	if radius then
+		--see components/map.lua
+		TheWorld.Map:RegisterDeploySmartRadius(radius)
+	end
 end
 
 function EntityScript:SetTerraformExtraSpacing(spacing)
@@ -848,6 +917,10 @@ function EntityScript:RemovePlatformFollower(child)
         self.platformfollowers[child] = nil
     end
     child.entity:SetPlatform(nil)
+
+	if self.OnRemovePlatformFollower then
+		self:OnRemovePlatformFollower(child)
+	end
 end
 
 function EntityScript:AddPlatformFollower(child)
@@ -864,6 +937,10 @@ function EntityScript:AddPlatformFollower(child)
 
     self.platformfollowers[child] = true
     child.entity:SetPlatform(self.entity)
+
+	if self.OnAddPlatformFollower then
+		self:OnAddPlatformFollower(child)
+	end
 end
 
 --only works on master sim
@@ -997,30 +1074,74 @@ function EntityScript:RunScript(name)
     fn(self)
 end
 
-function EntityScript:RestartBrain()
-    self:StopBrain()
-    if self.brainfn ~= nil then
-        --if type(self.brainfn) ~= "table" then print(self, self.brainfn) end
-        self.brain = self.brainfn()
-        if self.brain ~= nil then
-            self.brain.inst = self
-            self.brain:Start()
-        end
-    end
+function EntityScript:RestartBrain(reason)
+	reason = reason or ""
+	if self._brainstopped and self._brainstopped[reason] then
+		self._brainstopped[reason] = nil
+		if next(self._brainstopped) == nil then
+			self._brainstopped = nil
+			if self.brain then
+				self.brain:_Start_Internal()
+			end
+		end
+	end
 end
 
-function EntityScript:StopBrain()
-    if self.brain ~= nil then
-        self.brain:Stop()
-        self.brain = nil
-    end
+function EntityScript:StopBrain(reason)
+	reason = reason or ""
+	if self._brainstopped then
+		self._brainstopped[reason] = true
+	else
+		self._brainstopped = { [reason] = true }
+		if self.brain then
+			self.brain:_Stop_Internal()
+		end
+	end
 end
 
 function EntityScript:SetBrain(brainfn)
     self.brainfn = brainfn
-    if self.brain ~= nil then
-        self:RestartBrain()
-    end
+	--V2C: -sleepstatepending check to prevent brain starting at construction when :IsAsleep() always returns false
+	self._braindisabled = brainfn and (self.sleepstatepending or self:IsInLimbo() or self:IsAsleep()) or nil
+	if self.brain then
+		self.brain:_Stop_Internal()
+	end
+	self.brain = brainfn and not self._braindisabled and brainfn() or nil
+	if self.brain then
+		self.brain.inst = self
+		if not self._brainstopped then
+			self.brain:_Start_Internal()
+		end
+	end
+end
+
+--V2C: should only be called from OnEntitySleep, RemoveFromScene
+function EntityScript:_DisableBrain_Internal()
+	if self.brainfn then
+		--_braindisabled flag is only valid if we have a brainfn.
+		--Don't bother checking "not self._braindisabled".  This code is safe to run
+		--multiple times, and we can also assume that the engine properly calls this
+		--only when necessary.
+		self._braindisabled = true
+		if self.brain then
+			self.brain:_Stop_Internal()
+			self.brain = nil
+		end
+	end
+end
+
+--V2C: should only be called from OnEntityWake, ReturnToScene
+function EntityScript:_EnableBrain_Internal()
+	if self._braindisabled then
+		self._braindisabled = nil
+		self.brain = self.brainfn()
+		if self.brain then
+			self.brain.inst = self
+			if not self._brainstopped then
+				self.brain:_Start_Internal()
+			end
+		end
+	end
 end
 
 function EntityScript:SetStateGraph(name)
@@ -1031,8 +1152,11 @@ function EntityScript:SetStateGraph(name)
     assert(sg ~= nil)
     if sg ~= nil then
         self.sg = StateGraphInstance(sg, self)
-        SGManager:AddInstance(self.sg)
+		SGManager:AddInstance(self.sg, self:IsAsleep())
         self.sg:GoToState(self.sg.sg.defaultstate)
+		if self:IsInLimbo() then
+			self.sg:Stop()
+		end
         return self.sg
     end
 end
@@ -1057,8 +1181,6 @@ local function AddListener(t, event, inst, fn)
         listeners[inst] = listener_fns
     end
 
-    --source.event_listeners[event][self][1]
-
     table.insert(listener_fns, fn)
 end
 
@@ -1072,33 +1194,30 @@ function EntityScript:ListenForEvent(event, fn, source)
 
     AddListener(source.event_listeners, event, self, fn)
 
-
     if not self.event_listening then
         self.event_listening = {}
     end
 
     AddListener(self.event_listening, event, source, fn)
-
 end
 
 local function RemoveListener(t, event, inst, fn)
-    if t then
-        local listeners = t[event]
-        if listeners then
-            local listener_fns = listeners[inst]
-            if listener_fns then
-                RemoveByValue(listener_fns, fn)
-                if next(listener_fns) == nil then
-                    listeners[inst] = nil
-                end
-            end
-            if next(listeners) == nil then
-                t[event] = nil
-            end
+    if not t then return end
+
+    local listeners = t[event]
+    if not listeners then return end
+
+    local listener_fns = listeners[inst]
+    if listener_fns then
+        RemoveByValue(listener_fns, fn)
+        if next(listener_fns) == nil then
+            listeners[inst] = nil
         end
     end
+    if next(listeners) == nil then
+        t[event] = nil
+    end
 end
-
 
 function EntityScript:RemoveEventCallback(event, fn, source)
     assert(type(fn) == "function") -- signature change, fn is new parameter and is required
@@ -1107,13 +1226,9 @@ function EntityScript:RemoveEventCallback(event, fn, source)
 
     RemoveListener(source.event_listeners, event, self, fn)
     RemoveListener(self.event_listening, event, source, fn)
-
 end
 
 function EntityScript:RemoveAllEventCallbacks()
-
-    --self.event_listening[event][source][1]
-
     --tell others that we are no longer listening for them
     if self.event_listening then
         for event, sources  in pairs(self.event_listening) do
@@ -1156,16 +1271,18 @@ function EntityScript:StopWatchingWorldState(var, fn)
 end
 
 function EntityScript:StopAllWatchingWorldStates()
-    if self.worldstatewatching ~= nil then
-        for var in pairs(self.worldstatewatching) do
-            TheWorld.components.worldstate:RemoveWatcher(var, self)
-        end
-
-        self.worldstatewatching = nil
+    if not self.worldstatewatching then
+        return
     end
+
+    for var in pairs(self.worldstatewatching) do
+        TheWorld.components.worldstate:RemoveWatcher(var, self)
+    end
+
+    self.worldstatewatching = nil
 end
 
-function EntityScript:PushEvent(event, data)
+function EntityScript:PushEvent_Internal(event, data, immediate)
     if self.event_listeners then
         local listeners = self.event_listeners[event]
         if listeners then
@@ -1183,15 +1300,25 @@ function EntityScript:PushEvent(event, data)
         end
     end
 
-    if self.sg and
-        self.sg:IsListeningForEvent(event) and
-        SGManager:OnPushEvent(self.sg) then
-        self.sg:PushEvent(event, data)
+	if self.sg then
+		if immediate then
+			self.sg:HandleEvent(event, data)
+		elseif self.sg:IsListeningForEvent(event) and SGManager:OnPushEvent(self.sg) then
+			self.sg:PushEvent(event, data)
+		end
     end
 
     if self.brain then
         self.brain:PushEvent(event, data)
     end
+end
+
+function EntityScript:PushEvent(event, data)
+	self:PushEvent_Internal(event, data, false)
+end
+
+function EntityScript:PushEventImmediate(event, data)
+	self:PushEvent_Internal(event, data, true)
 end
 
 function EntityScript:SetPhysicsRadiusOverride(radius)
@@ -1200,6 +1327,28 @@ end
 
 function EntityScript:GetPhysicsRadius(default)
     return self.physicsradiusoverride or (self.Physics ~= nil and self.Physics:GetRadius()) or default
+end
+
+local BOAT_MUST_TAGS = {"boat"}
+function EntityScript:GetBoatIntersectingPhysics()
+    local self_radius = self.Physics ~= nil and self.Physics:GetRadius() or 0 -- Intentionally ignoring physics override radius.
+    local max_boat_radius = MAX_PHYSICS_RADIUS + 0.18 -- Add a small offset for item overhangs.
+    local check_radius = self_radius + max_boat_radius
+    local x, y, z = self.Transform:GetWorldPosition()
+    local boats = TheSim:FindEntities(x, y, z, check_radius, BOAT_MUST_TAGS) -- Biggest radius check may include smaller boats.
+    for _, boat in ipairs(boats) do
+        if boat ~= self then
+            local boat_radius = boat.GetSafePhysicsRadius and boat:GetSafePhysicsRadius() or (boat.components.hull ~= nil and boat.components.hull:GetRadius() or TUNING.BOAT.RADIUS) + 0.18 -- Add a small offset for item overhangs.
+            local bx, by, bz = boat.Transform:GetWorldPosition()
+            local dx, dz = bx - x, bz - z
+            local dist = math.sqrt(dx * dx + dz * dz)
+            if dist - boat_radius <= self_radius then
+                return boat
+            end
+        end
+    end
+
+    return nil
 end
 
 function EntityScript:GetPosition()
@@ -1258,7 +1407,8 @@ function EntityScript:IsNear(otherinst, dist)
 end
 
 function EntityScript:GetDistanceSqToPoint(x, y, z)
-    if y == nil and z == nil and x ~= nil then
+    -- If x is the only input, assume it's a Vector3 or Point
+    if x and not y and not z then
         x, y, z = x:Get()
     end
     local x1, y1, z1 = self.Transform:GetWorldPosition()
@@ -1292,13 +1442,32 @@ function EntityScript:FaceAwayFromPoint(dest, force)
     self.Transform:SetRotation(math.atan2(z - dest.z, dest.x - x) / DEGREES + 180)
 end
 
+function EntityScript:IsEntityInFrontConeSlice(otherinst, wholearcangle_degrees, max_dist, circle_dist)
+    -- Distances are optional.
+    -- circle_dist lets a small circle around self to be counted regardless of the angle.
+    if max_dist or circle_dist then
+        local dsq = self:GetDistanceSqToInst(otherinst)
+        if circle_dist and (dsq < circle_dist * circle_dist) then
+            return true -- This is valid close.
+        end
+        if max_dist and (dsq > max_dist * max_dist) then
+            return false -- Too far.
+        end
+    end
+
+    -- More expensive calculations for cone slice.
+    local rotation = self.Transform:GetRotation()
+    local forward_vector = Vector3(math.cos(-rotation / RADIANS), 0 , math.sin(-rotation / RADIANS))
+    return IsWithinAngle(self:GetPosition(), forward_vector, wholearcangle_degrees / RADIANS, otherinst:GetPosition())
+end
+
 function EntityScript:IsAsleep()
     return not self.entity:IsAwake()
 end
 
 function EntityScript:CancelAllPendingTasks()
     if self.pendingtasks then
-        for k,v in pairs(self.pendingtasks) do
+        for k in pairs(self.pendingtasks) do
             k:Cancel()
         end
         self.pendingtasks = nil
@@ -1340,29 +1509,23 @@ function EntityScript:DoStaticTaskInTime(time, fn, ...)
 end
 
 function EntityScript:DoPeriodicTask(time, fn, initialdelay, ...)
-
     --print ("DO PERIODIC", time, self)
-    local per = scheduler:ExecutePeriodic(time, fn, nil, initialdelay, self.GUID, self, ...)
+    local periodic = scheduler:ExecutePeriodic(time, fn, nil, initialdelay, self.GUID, self, ...)
 
-    if not self.pendingtasks then
-        self.pendingtasks = {}
-    end
-
-    self.pendingtasks[per] = true
-    per.onfinish = task_finish --function() if self.pendingtasks then self.pendingtasks[per] = nil end end
-    return per
+    self.pendingtasks = self.pendingtasks or {}
+    self.pendingtasks[periodic] = true
+    periodic.onfinish = task_finish --function() if self.pendingtasks then self.pendingtasks[per] = nil end end
+    return periodic
 end
 
 function EntityScript:DoTaskInTime(time, fn, ...)
     --print ("DO TASK IN TIME", time, self)
-    if not self.pendingtasks then
-        self.pendingtasks = {}
-    end
+    local periodic = scheduler:ExecuteInTime(time, fn, self.GUID, self, ...)
 
-    local per = scheduler:ExecuteInTime(time, fn, self.GUID, self, ...)
-    self.pendingtasks[per] = true
-    per.onfinish = task_finish -- function() if self and self.pendingtasks then self.pendingtasks[per] = nil end end
-    return per
+    self.pendingtasks = self.pendingtasks or {}
+    self.pendingtasks[periodic] = true
+    periodic.onfinish = task_finish -- function() if self and self.pendingtasks then self.pendingtasks[per] = nil end end
+    return periodic
 end
 
 function EntityScript:PushEventInTime(time, eventname, data)
@@ -1371,10 +1534,10 @@ function EntityScript:PushEventInTime(time, eventname, data)
     local event_function = function(inst)
         inst:PushEvent(eventname, data)
     end
-    local per = scheduler:ExecuteInTime(time, event_function, self.GUID, self, data)
-    self.pendingtasks[per] = true
-    per.onfinish = task_finish
-    return per
+    local periodic = scheduler:ExecuteInTime(time, event_function, self.GUID, self, data)
+    self.pendingtasks[periodic] = true
+    periodic.onfinish = task_finish
+    return periodic
 end
 
 function EntityScript:GetTaskInfo(time)
@@ -1386,8 +1549,7 @@ end
 
 function EntityScript:TimeRemainingInTask(taskinfo)
     local timeleft = (taskinfo.start + taskinfo.time) - GetTime()
-    if timeleft < 1 then timeleft = 1 end
-    return timeleft
+    return (timeleft < 1 and 1) or timeleft
 end
 
 function EntityScript:ResumeTask(time, fn, ...)
@@ -1411,7 +1573,7 @@ function EntityScript:PreviewBufferedAction(bufferedaction)
         self.bufferedaction ~= nil and
         bufferedaction.target == self.bufferedaction.target and
         bufferedaction.action == self.bufferedaction.action and
-        bufferedaction.inv_obj == self.bufferedaction.inv_obj and
+        bufferedaction.invobject == self.bufferedaction.invobject and
         not (self.sg ~= nil and self.sg:HasStateTag("idle") and self:HasTag("idle")) then
         return
     end
@@ -1448,7 +1610,7 @@ function EntityScript:PushBufferedAction(bufferedaction)
         self.bufferedaction ~= nil and
         bufferedaction.target == self.bufferedaction.target and
         bufferedaction.action == self.bufferedaction.action and
-        bufferedaction.inv_obj == self.bufferedaction.inv_obj and
+        bufferedaction.invobject == self.bufferedaction.invobject and
         not (self.sg ~= nil and self.sg:HasStateTag("idle")) then
         return
     end
@@ -1589,14 +1751,14 @@ function EntityScript:Remove()
     NewWallUpdatingEnts[self.GUID] = nil
 
     if self.children then
-        for k,v in pairs(self.children) do
+        for k in pairs(self.children) do
             k.parent = nil
             k:Remove()
         end
     end
 
     if self.platformfollowers then
-        for k,v in pairs(self.platformfollowers) do
+        for k in pairs(self.platformfollowers) do
             k.platform = nil
         end
     end
@@ -1617,11 +1779,7 @@ function EntityScript:CanInteractWith(inst)
         return false
     end
     local parent = inst.entity:GetParent()
-    if parent and parent ~= self then
-        return false
-    end
-
-    return true
+    return (parent == nil) or (parent == self)
 end
 
 function EntityScript:OnUsedAsItem(action, doer, target)
@@ -1671,16 +1829,12 @@ EntityScript.IsOnWater = EntityScript.IsOnOcean
 
 function EntityScript:GetCurrentPlatform()
     if TheWorld.ismastersim then
-        if self.parent then
-            return self.parent:GetCurrentPlatform()
-        end
-        return self.platform
+        return (self.parent ~= nil and self.parent:GetCurrentPlatform())
+            or self.platform
     else
         local parent = self.entity:GetParent()
-        if parent then
-            return parent:GetCurrentPlatform()
-        end
-        return self.entity:GetPlatform()
+        return (parent ~= nil and parent:GetCurrentPlatform())
+            or self.entity:GetPlatform()
     end
 end
 
@@ -1694,24 +1848,24 @@ function EntityScript:GetCurrentTileType()
 
     if actual_tile ~= nil and tilecenter_x ~= nil and tilecenter_z ~= nil then
         if not TileGroupManager:IsLandTile(actual_tile) then
-            local xpercent = (tilecenter_x - ptx) / TILE_SCALE + .25
-            local ypercent = (tilecenter_z - ptz) / TILE_SCALE + .25
+			local xpercent = (tilecenter_x - ptx) / TILE_SCALE
+			local ypercent = (tilecenter_z - ptz) / TILE_SCALE
 
-            local x_min = xpercent > .666 and -1 or 0
-            local x_max = xpercent < .333 and 1 or 0
-            local y_min = ypercent > .666 and -1 or 0
-            local y_max = ypercent < .333 and 1 or 0
+			local x_min = xpercent > 0.166 and -1 or 0
+			local x_max = xpercent < -0.166 and 1 or 0
+			local y_min = ypercent > 0.166 and -1 or 0
+			local y_max = ypercent < -0.166 and 1 or 0
 
-            local x_off = 0
-            local y_off = 0
+            --local x_off = 0 -- These are only calculated for debugging
+            --local y_off = 0 -- These are only calculated for debugging
 
             for x = x_min, x_max do
                 for y = y_min, y_max do
                     local tile = map:GetTile(tx + x, ty + y)
                     if tile > actual_tile then
                         actual_tile = tile
-                        x_off = x
-                        y_off = y
+                        --x_off = x -- These are only calculated for debugging
+                        --y_off = y -- These are only calculated for debugging
                     end
                 end
             end
@@ -1753,6 +1907,9 @@ function EntityScript:GetPersistData()
             local t, refs = v:OnSave()
             if type(t) == "table" and not IsTableEmpty(t) then
                 data[k] = t
+				if t.add_component_if_missing then
+					data.add_component_if_missing = true
+				end
             end
 
             if refs then
@@ -1794,6 +1951,14 @@ function EntityScript:LoadPostPass(newents, savedata)
 end
 
 function EntityScript:SetPersistData(data, newents)
+	if data and data.add_component_if_missing then
+		for k, v in pairs(data) do
+			if self.components[k] == nil and type(v) == "table" and v.add_component_if_missing then
+				self:AddComponent(k)
+			end
+		end
+	end
+
     if self.OnPreLoad ~= nil then
         self:OnPreLoad(data, newents)
     end
@@ -1801,10 +1966,16 @@ function EntityScript:SetPersistData(data, newents)
     if data ~= nil then
         for k, v in pairs(data) do
             local cmp = self.components[k]
+
+			--V2C: -backward compatibility for add_component_if_missing
+			--     -the flag has since been added to the base data table as well so that we
+			--      can add the missing components before preload
             if cmp == nil and type(v) == "table" and v.add_component_if_missing then
 				self:AddComponent(k)
                 cmp = self.components[k]
             end
+			------
+
             if cmp ~= nil and cmp.OnLoad ~= nil then
                 cmp:OnLoad(v, newents)
             end
@@ -1820,7 +1991,7 @@ function EntityScript:GetAdjective()
 	if self.displayadjectivefn ~= nil then
 		return self:displayadjectivefn(self)
 	elseif self:HasTag("critter") then
-		for k,_ in pairs(TUNING.CRITTER_TRAITS) do
+		for k in pairs(TUNING.CRITTER_TRAITS) do
 			if self:HasTag("trait_"..k) then
 				return STRINGS.UI.HUD.CRITTER_TRAITS[k]
 			end
@@ -1929,20 +2100,16 @@ function EntityScript:DebuffsEnabled()
 end
 
 function EntityScript:HasDebuff(name)
-    if self.components.debuffable == nil then
-        return false
-    end
-    return self.components.debuffable:HasDebuff(name)
+    return (self.components.debuffable ~= nil and self.components.debuffable:HasDebuff(name))
+        or false
 end
 
 function EntityScript:GetDebuff(name)
-    if self.components.debuffable == nil then
-        return nil
-    end
-    return self.components.debuffable:GetDebuff(name)
+    return (self.components.debuffable ~= nil and self.components.debuffable:GetDebuff(name))
+        or nil
 end
 
-function EntityScript:AddDebuff(name, prefab, data, skip_test, pre_buff_fn)
+function EntityScript:AddDebuff(name, prefab, data, skip_test, pre_buff_fn, buffer)
     if self.components.debuffable == nil then
         self:AddComponent("debuffable")
     end
@@ -1951,7 +2118,7 @@ function EntityScript:AddDebuff(name, prefab, data, skip_test, pre_buff_fn)
         if pre_buff_fn then
             pre_buff_fn()
         end
-        self.components.debuffable:AddDebuff(name, prefab, data)
+        self.components.debuffable:AddDebuff(name, prefab, data, buffer)
         return true
     end
 
@@ -1959,10 +2126,9 @@ function EntityScript:AddDebuff(name, prefab, data, skip_test, pre_buff_fn)
 end
 
 function EntityScript:RemoveDebuff(name)
-    if self.components.debuffable == nil then
-        return
+    if self.components.debuffable then
+        self.components.debuffable:RemoveDebuff(name)
     end
-    self.components.debuffable:RemoveDebuff(name)
 end
 
 require("entityscriptproxy")

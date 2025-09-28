@@ -156,6 +156,7 @@ CLOTHING =
 		symbol_in_base_hides = { "arm_lower_cuff", },
 		torso_tuck = "untucked",
 		rarity = "HeirloomDistinguished",
+		spinnable_tail = true,
 		marketable = true,
 		release_group = 15,
 	},
@@ -170,6 +171,7 @@ CLOTHING =
 		torso_tuck = "untucked",
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
+		spinnable_tail = true,
 		release_group = 105,
 	},
 	body_chester_costume =
@@ -492,6 +494,16 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 78,
 	},
+	body_pj_grey =
+	{
+		type = "body",
+		skin_tags = { "CLOTHING_BODY", "CLOTHING", "GREY", },
+		symbol_overrides = { "torso", "arm_upper", "arm_lower", "arm_lower_cuff", },
+		torso_tuck = "untucked",
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		release_group = 160,
+	},
 	body_pj_orange_honey =
 	{
 		type = "body",
@@ -604,6 +616,15 @@ CLOTHING =
 		torso_tuck = "untucked",
 		marketable = true,
 		release_group = 0,
+	},
+	body_redjacket =
+	{
+		type = "body",
+		skin_tags = { "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "torso", "arm_upper", },
+		torso_tuck = "untucked",
+		rarity = "Loyal",
+		release_group = 162,
 	},
 	body_silk_eveningrobe_blue_frost =
 	{
@@ -1190,6 +1211,16 @@ CLOTHING =
 		rarity = "ProofOfPurchase",
 		release_group = 110,
 	},
+	body_walter_ancient =
+	{
+		type = "body",
+		skin_tags = { "ANCIENT", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "torso", "arm_upper", "skirt", },
+		torso_tuck = "skirt",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 164,
+	},
 	body_walter_bee =
 	{
 		type = "body",
@@ -1264,6 +1295,17 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 121,
+	},
+	body_walter_rose =
+	{
+		type = "body",
+		skin_tags = { "ROSE", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "torso", "arm_upper", "arm_lower", },
+		symbol_hides = { "arm_upper_skin", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 158,
 	},
 	body_walter_shadow =
 	{
@@ -1403,6 +1445,17 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 144,
 	},
+	body_wanda_rose =
+	{
+		type = "body",
+		skin_tags = { "ROSE", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_upper", "skirt", "torso", "torso_pelvis", "leg", },
+		symbol_overrides_old = { skirt = "skirt_old", torso = "torso_old", torso_pelvis = "torso_pelvis_old", },
+		torso_tuck = "skirt",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 158,
+	},
 	body_wanda_shadow =
 	{
 		type = "body",
@@ -1425,6 +1478,18 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 123,
+	},
+	body_wanda_western =
+	{
+		type = "body",
+		skin_tags = { "WESTERN", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_upper", "arm_lower", "torso", },
+		symbol_overrides_old = { torso = "torso_old", },
+		symbol_hides = { "arm_upper_skin", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 167,
 	},
 	body_wanda_yule =
 	{
@@ -1585,6 +1650,18 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 145,
 	},
+	body_warly_survivor =
+	{
+		type = "body",
+		skin_tags = { "SURVIVOR", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_upper", "leg", "torso", "torso_pelvis", },
+		symbol_overrides_by_character = { default = { leg = "leg_wilson", torso = "torso_wilson", },walter = { leg = "leg_walter", torso = "torso_walter", },wanda = { leg = "leg_wanda", torso = "torso_wanda", },warly = { leg = "leg", torso = "torso", },waxwell = { leg = "leg_waxwell", torso = "torso_waxwell", },webber = { leg = "leg_webber", torso = "torso_webber", },wormwood = { leg = "leg_wormwood", torso = "torso_wormwood", },wortox = { leg = "leg_wortox", torso = "torso_wortox", },wurt = { leg = "leg_wurt", torso = "torso_wurt", },wx78 = { leg = "leg_wx78", torso = "torso_wx78", },},
+		symbol_hides = { "arm_upper_skin", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 171,
+	},
 	body_warly_victorian =
 	{
 		type = "body",
@@ -1594,6 +1671,29 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 70,
+	},
+	body_warly_yule =
+	{
+		type = "body",
+		skin_tags = { "YULE", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_lower", "arm_upper", "torso", "hand", "skirt", },
+		symbol_hides = { "arm_upper_skin", },
+		symbol_in_base_hides = { "arm_lower_cuff", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 160,
+	},
+	body_wathgrithr_ancient =
+	{
+		type = "body",
+		skin_tags = { "ANCIENT", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_upper", "skirt", "torso", "torso_pelvis", },
+		symbol_overrides_by_character = { default = { arm_lower = "arm_lower_wilson", torso = "torso_wilson", torso_pelvis = "torso_pelvis_wilson", },walter = { arm_lower = "arm_lower_walter", torso = "torso_walter", torso_pelvis = "torso_pelvis_walter", },wanda = { arm_lower = "arm_lower_wanda", torso = "torso_wanda", torso_pelvis = "torso_pelvis_wanda", },warly = { arm_lower = "arm_lower_warly", torso = "torso_warly", torso_pelvis = "torso_pelvis_warly", },waxwell = { arm_lower = "arm_lower_waxwell", torso = "torso_waxwell", torso_pelvis = "torso_pelvis_waxwell", },webber = { arm_lower = "arm_lower_webber", torso = "torso_webber", torso_pelvis = "torso_pelvis_webber", },wormwood = { arm_lower = "arm_lower_wormwood", torso = "torso_wormwood", torso_pelvis = "torso_pelvis_wormwood", },wortox = { arm_lower = "arm_lower_wortox", torso = "torso_wortox", torso_pelvis = "torso_pelvis_wortox", },wurt = { arm_lower = "arm_lower_wurt", torso = "torso_wurt", torso_pelvis = "torso_pelvis_wurt", },wx78 = { arm_lower = "arm_lower_wx78", torso = "torso_wx78", torso_pelvis = "torso_pelvis_wx78", },},
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 156,
 	},
 	body_wathgrithr_cook =
 	{
@@ -1697,7 +1797,7 @@ CLOTHING =
 	{
 		type = "body",
 		skin_tags = { "MASQUERADE", "CLOTHING_BODY", "CLOTHING", },
-		symbol_overrides = { "arm_upper", "arm_lower", "arm_lower_cuff", "torso_pelvis", "torso", },
+		symbol_overrides = { "arm_upper", "arm_lower", "arm_lower_cuff", "torso", },
 		torso_tuck = "untucked",
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
@@ -1828,6 +1928,19 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 43,
+	},
+	body_wathgrithr_western =
+	{
+		type = "body",
+		skin_tags = { "WESTERN", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_lower", "arm_upper", "hand", "skirt", "torso", },
+		symbol_hides = { "arm_upper_skin", },
+		symbol_in_base_hides = { "arm_lower_cuff", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		has_leg_boot = true,
+		release_group = 167,
 	},
 	body_wathgrithr_wrestler =
 	{
@@ -1973,6 +2086,16 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 40,
+	},
+	body_waxwell_pirate =
+	{
+		type = "body",
+		skin_tags = { "PIRATE", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_lower", "arm_lower_cuff", "arm_upper", "torso", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 158,
 	},
 	body_waxwell_rose =
 	{
@@ -2197,6 +2320,18 @@ CLOTHING =
 		legs_cuff_size = 2,
 		release_group = 51,
 	},
+	body_webber_masquerade =
+	{
+		type = "body",
+		skin_tags = { "MASQUERADE", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_upper", "arm_lower", "arm_upper_skin", "hand", "leg", "torso", "torso_pelvis", },
+		symbol_hides = { "skirt", },
+		symbol_in_base_hides = { "arm_lower_cuff", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 161,
+	},
 	body_webber_nature =
 	{
 		type = "body",
@@ -2207,6 +2342,16 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 121,
+	},
+	body_webber_pirate =
+	{
+		type = "body",
+		skin_tags = { "PIRATE", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_upper", "torso", "torso_pelvis", "leg", "arm_lower", "arm_upper_skin", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 158,
 	},
 	body_webber_punk =
 	{
@@ -2321,6 +2466,17 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 150,
+	},
+	body_wendy_ancient =
+	{
+		type = "body",
+		skin_tags = { "ANCIENT", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_upper", "skirt", "torso", "torso_pelvis", },
+		symbol_overrides_by_character = { default = { torso = "torso", },walter = { torso = "torso_walter", },wanda = { torso = "torso_wanda", },warly = { torso = "torso_warly", },waxwell = { torso = "torso_waxwell", },webber = { torso = "torso_webber", },wormwood = { torso = "torso_wormwood", },wortox = { torso = "torso_wortox", },wurt = { torso = "torso_wurt", },wx78 = { torso = "torso_wx78", },},
+		torso_tuck = "pelvis_belt",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 164,
 	},
 	body_wendy_cook =
 	{
@@ -2444,6 +2600,16 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 51,
 	},
+	body_wendy_masquerade =
+	{
+		type = "body",
+		skin_tags = { "MASQUERADE", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_upper", "arm_upper_skin", "arm_lower", "torso", "torso_pelvis", "skirt", "leg", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 161,
+	},
 	body_wendy_nature =
 	{
 		type = "body",
@@ -2454,6 +2620,18 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 121,
+	},
+	body_wendy_pirate =
+	{
+		type = "body",
+		skin_tags = { "PIRATE", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_lower_cuff", "arm_upper", "torso", },
+		symbol_overrides_by_character = { default = { torso = "torso", },walter = { torso = "torso_walter", },wanda = { torso = "torso_wanda", },warly = { torso = "torso_warly", },waxwell = { torso = "torso_waxwell", },webber = { torso = "torso_webber", },wormwood = { torso = "torso_wormwood", },wortox = { torso = "torso_wortox", },wurt = { torso = "torso_wurt", },wx78 = { torso = "torso_wx78", },},
+		symbol_hides = { "skirt", },
+		torso_tuck = "skirt",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 171,
 	},
 	body_wendy_rose =
 	{
@@ -2794,6 +2972,16 @@ CLOTHING =
 		legs_cuff_size = 2,
 		release_group = 43,
 	},
+	body_wes_western =
+	{
+		type = "body",
+		skin_tags = { "WESTERN", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_upper", "skirt", "torso", },
+		torso_tuck = "skirt",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 167,
+	},
 	body_wes_wrestler =
 	{
 		type = "body",
@@ -2918,6 +3106,19 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 51,
 	},
+	body_wickerbottom_masquerade =
+	{
+		type = "body",
+		skin_tags = { "MASQUERADE", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_lower", "arm_upper", "hand", "hand_wickerbottom", "leg", "skirt", "torso", "torso_pelvis", },
+		symbol_overrides_by_character = { default = { hand = "hand", },walter = { hand = "hand_walter", },wanda = { hand = "hand_wanda", },warly = { hand = "hand_warly", },waxwell = { hand = "hand_waxwell", },webber = { hand = "hand_webber", },wormwood = { hand = "hand_wormwood", },wortox = { hand = "hand_wortox", },wurt = { hand = "hand_wurt", },wx78 = { hand = "hand_wx78", },},
+		symbol_hides = { "arm_upper_skin", },
+		symbol_in_base_hides = { "arm_lower_cuff", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 161,
+	},
 	body_wickerbottom_nature =
 	{
 		type = "body",
@@ -2939,6 +3140,17 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 134,
+	},
+	body_wickerbottom_pirate =
+	{
+		type = "body",
+		skin_tags = { "PIRATE", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_upper", "skirt", "torso", "torso_pelvis", },
+		symbol_overrides_by_character = { default = { torso = "torso", },walter = { torso = "torso_walter", },wanda = { torso = "torso_wanda", },warly = { torso = "torso_warly", },waxwell = { torso = "torso_waxwell", },webber = { torso = "torso_webber", },wormwood = { torso = "torso_wormwood", },wortox = { torso = "torso_wortox", },wurt = { torso = "torso_wurt", },wx78 = { torso = "torso_wx78", },},
+		torso_tuck = "pelvis_belt",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 171,
 	},
 	body_wickerbottom_rose =
 	{
@@ -3036,6 +3248,16 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 127,
+	},
+	body_willow_ancient =
+	{
+		type = "body",
+		skin_tags = { "ANCIENT", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_upper", "skirt", "torso", "torso_pelvis", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 156,
 	},
 	body_willow_cook =
 	{
@@ -3421,6 +3643,18 @@ CLOTHING =
 		feet_cuff_size = 3,
 		release_group = 105,
 	},
+	body_wilson_pirate =
+	{
+		type = "body",
+		skin_tags = { "PIRATE", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_upper", "arm_lower", "torso", "hand", },
+		symbol_hides = { "arm_upper_skin", },
+		symbol_in_base_hides = { "arm_lower_cuff", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 158,
+	},
 	body_wilson_rose =
 	{
 		type = "body",
@@ -3514,6 +3748,17 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 127,
+	},
+	body_winona_ancient =
+	{
+		type = "body",
+		skin_tags = { "ANCIENT", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "torso_pelvis", "torso", "skirt", "leg", "hand", "foot", "arm_upper", "arm_lower_cuff", },
+		symbol_overrides_by_character = { default = { foot = "foot_wilson", hand = "hand_wilson", leg = "leg_wilson", },walter = { foot = "foot_walter", hand = "hand_walter", leg = "leg_walter", },wanda = { foot = "foot_wanda", hand = "hand_wanda", leg = "leg_wanda", },warly = { foot = "foot_warly", hand = "hand_warly", leg = "leg_warly", },waxwell = { foot = "foot_waxwell", hand = "hand_waxwell", leg = "leg_waxwell", },webber = { foot = "foot_webber", hand = "hand_webber", leg = "leg_webber", },wormwood = { foot = "foot_wormwood", hand = "hand_wormwood", leg = "leg_wormwood", },wortox = { foot = "foot_wortox", hand = "hand_wortox", leg = "leg_wortox", },wurt = { foot = "foot_wurt", hand = "hand_wurt", leg = "leg_wurt", },wx78 = { foot = "foot_wx78", hand = "hand_wx78", leg = "leg_wx78", },},
+		torso_tuck = "skirt",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 156,
 	},
 	body_winona_cook =
 	{
@@ -3643,6 +3888,19 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 51,
+	},
+	body_winona_masquerade =
+	{
+		type = "body",
+		skin_tags = { "CLOTHING_BODY", "CLOTHING", "MASQUERADE", },
+		symbol_overrides = { "arm_upper", "arm_lower", "arm_lower_cuff", "foot", "hand", "leg", "torso", "torso_pelvis", },
+		symbol_hides = { "arm_upper_skin", "skirt", },
+		symbol_in_base_hides = { "arm_lower_cuff", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		legs_cuff_size = 1,
+		release_group = 161,
 	},
 	body_winona_nature =
 	{
@@ -4073,6 +4331,20 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 56,
 	},
+	body_wolfgang_yule =
+	{
+		type = "body",
+		skin_tags = { "YULE", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "torso", "hand", "arm_upper", "arm_lower", },
+		symbol_overrides_by_character = { default = { hand = "hand_wilson", },walter = { hand = "hand_walter", },wanda = { hand = "hand_wanda", },warly = { hand = "hand_warly", },waxwell = { hand = "hand_waxwell", },webber = { hand = "hand_webber", },wormwood = { hand = "hand_wormwood", },wortox = { hand = "hand_wortox", },wurt = { hand = "hand_wurt", },wx78 = { hand = "hand_wx78", },},
+		symbol_overrides_mighty = { arm_lower = "arm_lower_mighty", arm_upper = "arm_upper_mighty", torso = "torso_mighty", },
+		symbol_hides = { "arm_upper_skin", },
+		symbol_in_base_hides = { "arm_lower_cuff", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 160,
+	},
 	body_woodie_ancient =
 	{
 		type = "body",
@@ -4156,6 +4428,16 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 138,
+	},
+	body_woodie_lunar =
+	{
+		type = "body",
+		skin_tags = { "LUNAR", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "torso", "arm_upper", },
+		torso_tuck = "skirt",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 167,
 	},
 	body_woodie_magma =
 	{
@@ -4484,6 +4766,19 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 100,
 	},
+	body_wormwood_survivor =
+	{
+		type = "body",
+		skin_tags = { "SURVIVOR", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "torso", },
+		symbol_overrides_stage2 = { torso = "torso_stage2", },
+		symbol_overrides_stage3 = { torso = "torso_stage3", },
+		symbol_overrides_stage4 = { torso = "torso_stage4", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 171,
+	},
 	body_wormwood_victorian =
 	{
 		type = "body",
@@ -4511,6 +4806,17 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 127,
+	},
+	body_wortox_ancient =
+	{
+		type = "body",
+		skin_tags = { "ANCIENT", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_lower", "arm_upper", "arm_upper_skin", "hand", "torso", },
+		symbol_in_base_hides = { "arm_lower_cuff", },
+		torso_tuck = "full",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 164,
 	},
 	body_wortox_dragon =
 	{
@@ -4543,6 +4849,17 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 109,
+	},
+	body_wortox_lunar =
+	{
+		type = "body",
+		skin_tags = { "LUNAR", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_lower", "arm_upper", "arm_upper_skin", "hand", "torso", },
+		symbol_in_base_hides = { "arm_lower_cuff", },
+		torso_tuck = "skirt",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 167,
 	},
 	body_wortox_masquerade =
 	{
@@ -4619,6 +4936,17 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 133,
 	},
+	body_wortox_rose =
+	{
+		type = "body",
+		skin_tags = { "ROSE", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_lower", "arm_upper", "arm_upper_skin", "hand", "torso", "torso_pelvis", },
+		symbol_in_base_hides = { "arm_lower_cuff", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 158,
+	},
 	body_wortox_shadow =
 	{
 		type = "body",
@@ -4649,6 +4977,28 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 115,
+	},
+	body_wortox_yule =
+	{
+		type = "body",
+		skin_tags = { "YULE", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_lower", "arm_upper_skin", "hand", "torso", },
+		symbol_in_base_hides = { "arm_lower_cuff", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 160,
+	},
+	body_wurt_ancient =
+	{
+		type = "body",
+		skin_tags = { "ANCIENT", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "torso", },
+		symbol_overrides_powerup = { torso = "torso_powerup", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 156,
 	},
 	body_wurt_cave =
 	{
@@ -4686,6 +5036,17 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 138,
+	},
+	body_wurt_lunar =
+	{
+		type = "body",
+		skin_tags = { "LUNAR", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_lower", "arm_upper_skin", "torso", },
+		symbol_overrides_powerup = { arm_lower = "arm_lower_powerup", arm_upper_skin = "arm_upper_skin_powerup", torso = "torso_powerup", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 167,
 	},
 	body_wurt_masquerade =
 	{
@@ -4759,6 +5120,17 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 106,
+	},
+	body_wurt_survivor =
+	{
+		type = "body",
+		skin_tags = { "SURVIVOR", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "torso", },
+		symbol_overrides_powerup = { torso = "torso_powerup", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 171,
 	},
 	body_wurt_toadstool =
 	{
@@ -4883,6 +5255,16 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 51,
 	},
+	body_wx78_masquerade =
+	{
+		type = "body",
+		skin_tags = { "MASQUERADE", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "torso", "hand", "arm_upper_skin", "arm_upper", "arm_lower_cuff", "arm_lower", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 161,
+	},
 	body_wx78_nature =
 	{
 		type = "body",
@@ -4893,6 +5275,16 @@ CLOTHING =
 		rarity = "Distinguished",
 		rarity_modifier = "Woven",
 		release_group = 40,
+	},
+	body_wx78_pirate =
+	{
+		type = "body",
+		skin_tags = { "PIRATE", "CLOTHING_BODY", "CLOTHING", },
+		symbol_overrides = { "arm_upper", "torso", "torso_pelvis", },
+		torso_tuck = "untucked",
+		rarity = "Distinguished",
+		rarity_modifier = "Woven",
+		release_group = 171,
 	},
 	body_wx78_retro =
 	{
@@ -5618,6 +6010,16 @@ CLOTHING =
 		feet_cuff_size = 3,
 		release_group = 136,
 	},
+	feet_wanda_rose =
+	{
+		type = "feet",
+		skin_tags = { "ROSE", "CLOTHING_FEET", "CLOTHING", },
+		symbol_overrides = { "foot", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		feet_cuff_size = 1,
+		release_group = 158,
+	},
 	feet_warly_candyman =
 	{
 		type = "feet",
@@ -5718,6 +6120,16 @@ CLOTHING =
 		feet_cuff_size = 2,
 		release_group = 145,
 	},
+	feet_warly_survivor =
+	{
+		type = "feet",
+		skin_tags = { "SURVIVOR", "CLOTHING_FEET", "CLOTHING", },
+		symbol_overrides = { "foot", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		feet_cuff_size = 2,
+		release_group = 171,
+	},
 	feet_warly_victorian =
 	{
 		type = "feet",
@@ -5727,6 +6139,17 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		feet_cuff_size = 2,
 		release_group = 70,
+	},
+	feet_wathgrithr_ancient =
+	{
+		type = "feet",
+		skin_tags = { "ANCIENT", "CLOTHING_FEET", "CLOTHING", },
+		symbol_overrides = { "foot", },
+		symbol_overrides_by_character = { default = { foot = "foot_wilson", },walter = { foot = "foot_walter", },wanda = { foot = "foot_wanda", },warly = { foot = "foot_warly", },waxwell = { foot = "foot_waxwell", },webber = { foot = "foot_webber", },wormwood = { foot = "foot_wormwood", },wortox = { foot = "foot_wortox", },wurt = { foot = "foot_wurt", },wx78 = { foot = "foot_wx78", },},
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		feet_cuff_size = 1,
+		release_group = 156,
 	},
 	feet_wathgrithr_gladiator =
 	{
@@ -5885,6 +6308,15 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 51,
 	},
+	feet_webber_masquerade =
+	{
+		type = "feet",
+		skin_tags = { "MASQUERADE", "CLOTHING_FEET", "CLOTHING", },
+		symbol_overrides = { "foot", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		release_group = 161,
+	},
 	feet_webber_nature =
 	{
 		type = "feet",
@@ -5893,6 +6325,16 @@ CLOTHING =
 		rarity = "Classy",
 		rarity_modifier = "Woven",
 		release_group = 121,
+	},
+	feet_webber_pirate =
+	{
+		type = "feet",
+		skin_tags = { "PIRATE", "CLOTHING_FEET", "CLOTHING", },
+		symbol_overrides = { "foot", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		feet_cuff_size = 3,
+		release_group = 158,
 	},
 	feet_webber_punk =
 	{
@@ -5913,6 +6355,16 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		feet_cuff_size = 1,
 		release_group = 43,
+	},
+	feet_wendy_ancient =
+	{
+		type = "feet",
+		skin_tags = { "ANCIENT", "CLOTHING_FEET", "CLOTHING", },
+		symbol_overrides = { "foot", },
+		symbol_overrides_by_character = { default = { foot = "foot", },walter = { foot = "foot_walter", },wanda = { foot = "foot_wanda", },warly = { foot = "foot_warly", },waxwell = { foot = "foot_waxwell", },webber = { foot = "foot_webber", },wormwood = { foot = "foot_wormwood", },wortox = { foot = "foot_wortox", },wurt = { foot = "foot_wurt", },wx78 = { foot = "foot_wx78", },},
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		release_group = 164,
 	},
 	feet_wendy_creepy =
 	{
@@ -5977,6 +6429,16 @@ CLOTHING =
 		feet_cuff_size = 5,
 		release_group = 51,
 	},
+	feet_wendy_masquerade =
+	{
+		type = "feet",
+		skin_tags = { "MASQUERADE", "CLOTHING_FEET", "CLOTHING", },
+		symbol_overrides = { "foot", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		feet_cuff_size = 2,
+		release_group = 161,
+	},
 	feet_wendy_nature =
 	{
 		type = "feet",
@@ -5986,6 +6448,16 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		feet_cuff_size = 2,
 		release_group = 121,
+	},
+	feet_wendy_pirate =
+	{
+		type = "feet",
+		skin_tags = { "PIRATE", "CLOTHING_FEET", "CLOTHING", },
+		symbol_overrides = { "foot", },
+		symbol_overrides_by_character = { default = { foot = "foot", },walter = { foot = "foot_walter", },wanda = { foot = "foot_wanda", },warly = { foot = "foot_warly", },waxwell = { foot = "foot_waxwell", },webber = { foot = "foot_webber", },wormwood = { foot = "foot_wormwood", },wortox = { foot = "foot_wortox", },wurt = { foot = "foot_wurt", },wx78 = { foot = "foot_wx78", },},
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		release_group = 171,
 	},
 	feet_wendy_victorian =
 	{
@@ -6057,6 +6529,16 @@ CLOTHING =
 		feet_cuff_size = 3,
 		release_group = 43,
 	},
+	feet_wes_western =
+	{
+		type = "feet",
+		skin_tags = { "WESTERN", "CLOTHING_FEET", "CLOTHING", },
+		symbol_overrides = { "foot", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		feet_cuff_size = 2,
+		release_group = 167,
+	},
 	feet_wes_yule =
 	{
 		type = "feet",
@@ -6107,6 +6589,16 @@ CLOTHING =
 		feet_cuff_size = 4,
 		release_group = 51,
 	},
+	feet_wickerbottom_masquerade =
+	{
+		type = "feet",
+		skin_tags = { "MASQUERADE", "CLOTHING_FEET", "CLOTHING", },
+		symbol_overrides = { "foot", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		feet_cuff_size = 3,
+		release_group = 161,
+	},
 	feet_wickerbottom_nature =
 	{
 		type = "feet",
@@ -6125,6 +6617,16 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		feet_cuff_size = 5,
 		release_group = 134,
+	},
+	feet_wickerbottom_pirate =
+	{
+		type = "feet",
+		skin_tags = { "PIRATE", "CLOTHING_FEET", "CLOTHING", },
+		symbol_overrides = { "foot", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		feet_cuff_size = 2,
+		release_group = 171,
 	},
 	feet_wickerbottom_victorian =
 	{
@@ -6145,6 +6647,17 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		feet_cuff_size = 3,
 		release_group = 127,
+	},
+	feet_willow_ancient =
+	{
+		type = "feet",
+		skin_tags = { "ANCIENT", "CLOTHING_FEET", "CLOTHING", },
+		symbol_overrides = { "foot", },
+		symbol_overrides_by_character = { default = { foot = "foot", },walter = { foot = "foot_walter", },wanda = { foot = "foot_wanda", },warly = { foot = "foot_warly", },waxwell = { foot = "foot_waxwell", },webber = { foot = "foot_webber", },wormwood = { foot = "foot_wormwood", },wortox = { foot = "foot_wortox", },wurt = { foot = "foot_wurt", },wx78 = { foot = "foot_wx78", },},
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		feet_cuff_size = 3,
+		release_group = 156,
 	},
 	feet_willow_dowdy =
 	{
@@ -6387,6 +6900,16 @@ CLOTHING =
 		feet_cuff_size = 3,
 		release_group = 133,
 	},
+	feet_wolfgang_yule =
+	{
+		type = "feet",
+		skin_tags = { "YULE", "CLOTHING_FEET", "CLOTHING", },
+		symbol_overrides = { "foot", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		feet_cuff_size = 2,
+		release_group = 160,
+	},
 	feet_woodie_gladiator =
 	{
 		type = "feet",
@@ -6401,7 +6924,7 @@ CLOTHING =
 		type = "feet",
 		skin_tags = { "HALLOWED", "CLOTHING_FEET", "CLOTHING", },
 		symbol_overrides = { "foot", },
-		symbol_overrides_by_character = { default = { foot = "foot_wilson", },walter = { foot = "foot_walter", },wanda = { foot = "foot_wanda", },warly = { foot = "foot_warly", },webber = { foot = "foot_webber", },wormwood = { foot = "foot_wormwood", },wortox = { foot = "foot_wortox", },wurt = { foot = "foot_wurt", },wx78 = { foot = "foot_wx78", },},
+		symbol_overrides_by_character = { default = { foot = "foot_wilson", },walter = { foot = "foot_walter", },wanda = { foot = "foot_wanda", },warly = { foot = "foot_warly", },waxwell = { foot = "foot_waxwell", },webber = { foot = "foot_webber", },wormwood = { foot = "foot_wormwood", },wortox = { foot = "foot_wortox", },wurt = { foot = "foot_wurt", },wx78 = { foot = "foot_wx78", },},
 		rarity = "Classy",
 		rarity_modifier = "Woven",
 		feet_cuff_size = 2,
@@ -6517,6 +7040,16 @@ CLOTHING =
 		feet_cuff_size = 5,
 		release_group = 51,
 	},
+	feet_wx78_masquerade =
+	{
+		type = "feet",
+		skin_tags = { "MASQUERADE", "CLOTHING_FEET", "CLOTHING", },
+		symbol_overrides = { "foot", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		feet_cuff_size = 3,
+		release_group = 161,
+	},
 	feet_wx78_nature =
 	{
 		type = "feet",
@@ -6526,6 +7059,16 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		feet_cuff_size = 5,
 		release_group = 40,
+	},
+	feet_wx78_pirate =
+	{
+		type = "feet",
+		skin_tags = { "PIRATE", "CLOTHING_FEET", "CLOTHING", },
+		symbol_overrides = { "foot", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		feet_cuff_size = 3,
+		release_group = 171,
 	},
 	feet_wx78_wip =
 	{
@@ -6769,6 +7312,17 @@ CLOTHING =
 		marketable = true,
 		release_group = 0,
 	},
+	hand_walter_ancient =
+	{
+		type = "hand",
+		skin_tags = { "ANCIENT", "CLOTHING_HAND", "CLOTHING", },
+		symbol_overrides = { "hand", },
+		symbol_overrides_by_character = { default = { hand = "hand", },walter = { hand = "hand_walter", },wanda = { hand = "hand_wanda", },warly = { hand = "hand_warly", },waxwell = { hand = "hand_waxwell", },webber = { hand = "hand_webber", },wormwood = { hand = "hand_wormwood", },wortox = { hand = "hand_wortox", },wurt = { hand = "hand_wurt", },wx78 = { hand = "hand_wx78", },},
+		symbol_in_base_hides = { "arm_lower_cuff", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		release_group = 164,
+	},
 	hand_walter_ice =
 	{
 		type = "hand",
@@ -6819,6 +7373,15 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 136,
 	},
+	hand_wanda_rose =
+	{
+		type = "hand",
+		skin_tags = { "ROSE", "CLOTHING_HAND", "CLOTHING", },
+		symbol_overrides = { "hand", "arm_lower_cuff", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		release_group = 158,
+	},
 	hand_wanda_shadow =
 	{
 		type = "hand",
@@ -6837,6 +7400,15 @@ CLOTHING =
 		rarity = "Spiffy",
 		rarity_modifier = "Woven",
 		release_group = 123,
+	},
+	hand_wanda_western =
+	{
+		type = "hand",
+		skin_tags = { "WESTERN", "CLOTHING_HAND", "CLOTHING", },
+		symbol_overrides = { "hand", "arm_lower_cuff", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		release_group = 167,
 	},
 	hand_wanda_yule =
 	{
@@ -7135,6 +7707,16 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 121,
 	},
+	hand_webber_pirate =
+	{
+		type = "hand",
+		skin_tags = { "PIRATE", "CLOTHING_HAND", "CLOTHING", },
+		symbol_overrides = { "hand", },
+		symbol_in_base_hides = { "arm_lower_cuff", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		release_group = 158,
+	},
 	hand_webber_punk =
 	{
 		type = "hand",
@@ -7162,6 +7744,17 @@ CLOTHING =
 		rarity = "Spiffy",
 		rarity_modifier = "Woven",
 		release_group = 80,
+	},
+	hand_wendy_ancient =
+	{
+		type = "hand",
+		skin_tags = { "ANCIENT", "CLOTHING_HAND", "CLOTHING", },
+		symbol_overrides = { "hand", },
+		symbol_overrides_by_character = { default = { hand = "hand", },walter = { hand = "hand_walter", },wanda = { hand = "hand_wanda", },warly = { hand = "hand_warly", },waxwell = { hand = "hand_waxwell", },webber = { hand = "hand_webber", },wormwood = { hand = "hand_wormwood", },wortox = { hand = "hand_wortox", },wurt = { hand = "hand_wurt", },wx78 = { hand = "hand_wx78", },},
+		symbol_in_base_hides = { "arm_lower_cuff", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		release_group = 164,
 	},
 	hand_wendy_gladiator =
 	{
@@ -7265,6 +7858,16 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 43,
 	},
+	hand_wes_western =
+	{
+		type = "hand",
+		skin_tags = { "WESTERN", "CLOTHING_HAND", "CLOTHING", },
+		symbol_overrides = { "hand", },
+		symbol_in_base_hides = { "arm_lower_cuff", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		release_group = 167,
+	},
 	hand_wes_wrestler =
 	{
 		type = "hand",
@@ -7347,6 +7950,17 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 134,
 	},
+	hand_wickerbottom_pirate =
+	{
+		type = "hand",
+		skin_tags = { "PIRATE", "CLOTHING_HAND", "CLOTHING", },
+		symbol_overrides = { "hand", "hand_wickerbottom", },
+		symbol_overrides_by_character = { default = { hand = "hand_wilson", },walter = { hand = "hand_walter", },wanda = { hand = "hand_wanda", },warly = { hand = "hand_warly", },waxwell = { hand = "hand_waxwell", },webber = { hand = "hand_webber", },wormwood = { hand = "hand_wormwood", },wortox = { hand = "hand_wortox", },wurt = { hand = "hand_wurt", },wx78 = { hand = "hand_wx78", },},
+		symbol_in_base_hides = { "arm_lower_cuff", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		release_group = 171,
+	},
 	hand_wickerbottom_spiderwitch =
 	{
 		type = "hand",
@@ -7368,6 +7982,16 @@ CLOTHING =
 		rarity = "Spiffy",
 		rarity_modifier = "Woven",
 		release_group = 43,
+	},
+	hand_willow_ancient =
+	{
+		type = "hand",
+		skin_tags = { "ANCIENT", "CLOTHING_HAND", "CLOTHING", },
+		symbol_overrides = { "hand", },
+		symbol_in_base_hides = { "arm_lower_cuff", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		release_group = 156,
 	},
 	hand_willow_gladiator =
 	{
@@ -7788,6 +8412,16 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 138,
 	},
+	hand_woodie_lunar =
+	{
+		type = "hand",
+		skin_tags = { "LUNAR", "CLOTHING_HAND", "CLOTHING", },
+		symbol_overrides = { "hand", "arm_upper_skin", "arm_lower", },
+		symbol_hides = { "arm_lower_cuff", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		release_group = 167,
+	},
 	hand_woodie_magma =
 	{
 		type = "hand",
@@ -8007,6 +8641,18 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 100,
 	},
+	hand_wormwood_survivor =
+	{
+		type = "hand",
+		skin_tags = { "SURVIVOR", "CLOTHING_HAND", "CLOTHING", },
+		symbol_overrides = { "hand", "hand_idle_wormwood", "arm_lower", "arm_upper", "arm_upper_skin", },
+		symbol_overrides_stage3 = { arm_upper_skin = "arm_upper_skin_stage3", hand = "hand_stage3", hand_idle_wormwood = "hand_idle_wormwood_stage3", },
+		symbol_overrides_stage4 = { arm_upper_skin = "arm_upper_skin_stage4", hand = "hand_stage4", hand_idle_wormwood = "hand_idle_wormwood_stage4", },
+		symbol_hides = { "arm_lower_cuff", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		release_group = 171,
+	},
 	hand_wormwood_victorian =
 	{
 		type = "hand",
@@ -8099,6 +8745,17 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 115,
 	},
+	hand_wurt_ancient =
+	{
+		type = "hand",
+		skin_tags = { "CLOTHING_HAND", "CLOTHING", "ANCIENT", },
+		symbol_overrides = { "hand", "arm_upper_skin", "arm_lower", },
+		symbol_overrides_powerup = { arm_lower = "arm_lower_powerup", arm_upper_skin = "arm_upper_skin_powerup", hand = "hand_powerup", },
+		symbol_hides = { "arm_lower_cuff", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		release_group = 156,
+	},
 	hand_wurt_cave =
 	{
 		type = "hand",
@@ -8120,6 +8777,17 @@ CLOTHING =
 		rarity = "Spiffy",
 		rarity_modifier = "Woven",
 		release_group = 78,
+	},
+	hand_wurt_lunar =
+	{
+		type = "hand",
+		skin_tags = { "CLOTHING_HAND", "CLOTHING", "LUNAR", },
+		symbol_overrides = { "hand", },
+		symbol_overrides_powerup = { hand = "hand_powerup", },
+		symbol_in_base_hides = { "arm_lower_cuff", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		release_group = 167,
 	},
 	hand_wurt_nature =
 	{
@@ -8174,6 +8842,17 @@ CLOTHING =
 		rarity = "Spiffy",
 		rarity_modifier = "Woven",
 		release_group = 106,
+	},
+	hand_wurt_survivor =
+	{
+		type = "hand",
+		skin_tags = { "CLOTHING_HAND", "CLOTHING", "SURVIVOR", },
+		symbol_overrides = { "hand", "arm_upper_skin", "arm_lower", },
+		symbol_overrides_powerup = { arm_lower = "arm_lower_powerup", arm_upper_skin = "arm_upper_skin_powerup", hand = "hand_powerup", },
+		symbol_hides = { "arm_lower_cuff", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		release_group = 171,
 	},
 	hand_wurt_victorian =
 	{
@@ -8231,6 +8910,15 @@ CLOTHING =
 		rarity = "Spiffy",
 		rarity_modifier = "Woven",
 		release_group = 40,
+	},
+	hand_wx78_pirate =
+	{
+		type = "hand",
+		skin_tags = { "PIRATE", "CLOTHING_HAND", "CLOTHING", },
+		symbol_overrides = { "arm_lower_cuff", "hand", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		release_group = 171,
 	},
 	hand_wx78_retro =
 	{
@@ -8535,6 +9223,17 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		legs_cuff_size = 2,
 		release_group = 78,
+	},
+	legs_pj_grey =
+	{
+		type = "legs",
+		skin_tags = { "CLOTHING_LEGS", "CLOTHING", "GREY", },
+		symbol_overrides = { "torso_pelvis", "leg", },
+		symbol_hides = { "skirt", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		legs_cuff_size = 2,
+		release_group = 160,
 	},
 	legs_pj_orange_honey =
 	{
@@ -8895,6 +9594,16 @@ CLOTHING =
 		marketable = true,
 		release_group = 7,
 	},
+	legs_walter_ancient =
+	{
+		type = "legs",
+		skin_tags = { "ANCIENT", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "foot", "leg", "torso_pelvis", },
+		symbol_overrides_by_character = { default = { foot = "foot", leg = "leg", },walter = { foot = "foot_walter", leg = "leg_walter", },wanda = { foot = "foot_wanda", leg = "leg_wanda", },warly = { foot = "foot_warly", leg = "leg_warly", },waxwell = { foot = "foot_waxwell", leg = "leg_waxwell", },webber = { foot = "foot_webber", leg = "leg_webber", },wormwood = { foot = "foot_wormwood", leg = "leg_wormwood", },wortox = { foot = "foot_wortox", leg = "leg_wortox", },wurt = { foot = "foot_wurt", leg = "leg_wurt", },wx78 = { foot = "foot_wx78", leg = "leg_wx78", },},
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		release_group = 164,
+	},
 	legs_walter_detective =
 	{
 		type = "legs",
@@ -8947,6 +9656,17 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		has_leg_boot = true,
 		release_group = 121,
+	},
+	legs_walter_rose =
+	{
+		type = "legs",
+		skin_tags = { "ROSE", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "foot", "leg", "torso_pelvis", },
+		symbol_hides = { "skirt", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		has_leg_boot = true,
+		release_group = 158,
 	},
 	legs_walter_shadow =
 	{
@@ -9032,6 +9752,17 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		has_leg_boot = true,
 		release_group = 123,
+	},
+	legs_wanda_western =
+	{
+		type = "legs",
+		skin_tags = { "WESTERN", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "foot", "leg", "torso_pelvis", },
+		symbol_overrides_old = { torso_pelvis = "torso_pelvis_old", },
+		symbol_hides = { "skirt", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		release_group = 167,
 	},
 	legs_wanda_yule =
 	{
@@ -9155,6 +9886,18 @@ CLOTHING =
 		legs_cuff_size = 1,
 		release_group = 70,
 	},
+	legs_warly_yule =
+	{
+		type = "legs",
+		skin_tags = { "YULE", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "leg", "foot", "torso_pelvis", },
+		symbol_hides = { "skirt", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		feet_cuff_size = 1,
+		has_leg_boot = true,
+		release_group = 160,
+	},
 	legs_wathgrithr_gladiator =
 	{
 		type = "legs",
@@ -9246,6 +9989,17 @@ CLOTHING =
 		has_leg_boot = true,
 		release_group = 43,
 	},
+	legs_wathgrithr_western =
+	{
+		type = "legs",
+		skin_tags = { "WESTERN", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "foot", "leg", "torso_pelvis", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		feet_cuff_size = 2,
+		has_leg_boot = true,
+		release_group = 167,
+	},
 	legs_waxwell_gladiator =
 	{
 		type = "legs",
@@ -9292,6 +10046,16 @@ CLOTHING =
 		rarity = "Spiffy",
 		rarity_modifier = "Woven",
 		release_group = 40,
+	},
+	legs_waxwell_pirate =
+	{
+		type = "legs",
+		skin_tags = { "PIRATE", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "foot", "leg", "torso_pelvis", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		has_leg_boot = true,
+		release_group = 158,
 	},
 	legs_waxwell_vampire =
 	{
@@ -9363,6 +10127,16 @@ CLOTHING =
 		has_leg_boot = true,
 		release_group = 136,
 	},
+	legs_wendy_pirate =
+	{
+		type = "legs",
+		skin_tags = { "PIRATE", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "leg", "torso_pelvis", },
+		symbol_overrides_by_character = { default = { leg = "leg", },walter = { leg = "leg_walter", },wanda = { leg = "leg_wanda", },warly = { leg = "leg_warly", },waxwell = { leg = "leg_waxwell", },webber = { leg = "leg_webber", },wormwood = { leg = "leg_wormwood", },wortox = { leg = "leg_wortox", },wurt = { leg = "leg_wurt", },wx78 = { leg = "leg_wx78", },},
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		release_group = 171,
+	},
 	legs_wes_masquerade =
 	{
 		type = "legs",
@@ -9383,6 +10157,16 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		has_leg_boot = true,
 		release_group = 133,
+	},
+	legs_wes_western =
+	{
+		type = "legs",
+		skin_tags = { "WESTERN", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "leg", "torso_pelvis", },
+		symbol_hides = { "skirt", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		release_group = 167,
 	},
 	legs_wes_yule =
 	{
@@ -9510,6 +10294,16 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		has_leg_boot = true,
 		release_group = 100,
+	},
+	legs_wilson_pirate =
+	{
+		type = "legs",
+		skin_tags = { "PIRATE", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "leg", "foot", "torso_pelvis", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		has_leg_boot = true,
+		release_group = 158,
 	},
 	legs_wilson_yule =
 	{
@@ -9709,6 +10503,17 @@ CLOTHING =
 		feet_cuff_size = 2,
 		release_group = 106,
 	},
+	legs_wolfgang_yule =
+	{
+		type = "legs",
+		skin_tags = { "YULE", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "leg", "torso_pelvis", },
+		symbol_hides = { "skirt", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		legs_cuff_size = 0,
+		release_group = 160,
+	},
 	legs_woodie_gladiator =
 	{
 		type = "legs",
@@ -9740,6 +10545,17 @@ CLOTHING =
 		rarity = "Spiffy",
 		rarity_modifier = "Woven",
 		release_group = 73,
+	},
+	legs_woodie_lunar =
+	{
+		type = "legs",
+		skin_tags = { "LUNAR", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "leg", "foot", "torso_pelvis", },
+		symbol_hides = { "skirt", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		feet_cuff_size = 2,
+		release_group = 167,
 	},
 	legs_woodie_magma =
 	{
@@ -9935,6 +10751,19 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 100,
 	},
+	legs_wormwood_survivor =
+	{
+		type = "legs",
+		skin_tags = { "SURVIVOR", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "leg", "foot", "torso_pelvis", },
+		symbol_overrides_stage3 = { foot = "foot_stage3", },
+		symbol_overrides_stage4 = { foot = "foot_stage4", leg = "leg_stage4", torso_pelvis = "torso_pelvis_stage4", },
+		symbol_hides = { "skirt", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		feet_cuff_size = 3,
+		release_group = 171,
+	},
 	legs_wormwood_victorian =
 	{
 		type = "legs",
@@ -9958,6 +10787,17 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		release_group = 127,
 	},
+	legs_wortox_ancient =
+	{
+		type = "legs",
+		skin_tags = { "ANCIENT", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "foot", "leg", "tail", "torso_pelvis", },
+		symbol_hides = { "skirt", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		legs_cuff_size = 1,
+		release_group = 164,
+	},
 	legs_wortox_dragon =
 	{
 		type = "legs",
@@ -9967,6 +10807,7 @@ CLOTHING =
 		rarity = "Classy",
 		rarity_modifier = "Woven",
 		legs_cuff_size = 1,
+		spinnable_tail = true,
 		release_group = 77,
 	},
 	legs_wortox_formal =
@@ -9978,6 +10819,7 @@ CLOTHING =
 		rarity = "Classy",
 		rarity_modifier = "Woven",
 		feet_cuff_size = 1,
+		spinnable_tail = true,
 		release_group = 148,
 	},
 	legs_wortox_ice =
@@ -9991,6 +10833,16 @@ CLOTHING =
 		legs_cuff_size = 1,
 		release_group = 109,
 	},
+	legs_wortox_lunar =
+	{
+		type = "legs",
+		skin_tags = { "LUNAR", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "foot", "leg", "tail", "torso_pelvis", },
+		symbol_hides = { "skirt", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		release_group = 167,
+	},
 	legs_wortox_masquerade =
 	{
 		type = "legs",
@@ -9999,6 +10851,7 @@ CLOTHING =
 		symbol_hides = { "skirt", },
 		rarity = "Classy",
 		rarity_modifier = "Woven",
+		spinnable_tail = true,
 		release_group = 140,
 	},
 	legs_wortox_minotaur =
@@ -10009,6 +10862,7 @@ CLOTHING =
 		symbol_hides = { "skirt", },
 		rarity = "Classy",
 		rarity_modifier = "Woven",
+		spinnable_tail = true,
 		release_group = 62,
 	},
 	legs_wortox_nature =
@@ -10020,6 +10874,7 @@ CLOTHING =
 		rarity = "Classy",
 		rarity_modifier = "Woven",
 		legs_cuff_size = 1,
+		spinnable_tail = true,
 		release_group = 121,
 	},
 	legs_wortox_original =
@@ -10042,7 +10897,20 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		legs_cuff_size = 3,
 		feet_cuff_size = 3,
+		spinnable_tail = true,
 		release_group = 133,
+	},
+	legs_wortox_rose =
+	{
+		type = "legs",
+		skin_tags = { "ROSE", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "foot", "leg", "tail", "torso_pelvis", },
+		symbol_hides = { "skirt", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		legs_cuff_size = 1,
+		spinnable_tail = true,
+		release_group = 158,
 	},
 	legs_wortox_shadow =
 	{
@@ -10053,6 +10921,7 @@ CLOTHING =
 		rarity = "Classy",
 		rarity_modifier = "Woven",
 		legs_cuff_size = 1,
+		spinnable_tail = true,
 		release_group = 145,
 	},
 	legs_wortox_survivor =
@@ -10063,6 +10932,7 @@ CLOTHING =
 		symbol_hides = { "skirt", },
 		rarity = "Classy",
 		rarity_modifier = "Woven",
+		spinnable_tail = true,
 		release_group = 62,
 	},
 	legs_wortox_victorian =
@@ -10074,7 +10944,32 @@ CLOTHING =
 		rarity = "Classy",
 		rarity_modifier = "Woven",
 		legs_cuff_size = 1,
+		spinnable_tail = true,
 		release_group = 115,
+	},
+	legs_wortox_yule =
+	{
+		type = "legs",
+		skin_tags = { "YULE", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "foot", "leg", "tail", "torso_pelvis", },
+		symbol_hides = { "skirt", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		legs_cuff_size = 1,
+		spinnable_tail = true,
+		release_group = 160,
+	},
+	legs_wurt_ancient =
+	{
+		type = "legs",
+		skin_tags = { "ANCIENT", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "foot", "leg", "torso_pelvis", "tail", },
+		symbol_overrides_powerup = { foot = "foot_powerup", leg = "leg_powerup", tail = "tail_powerup", torso_pelvis = "torso_pelvis_powerup", },
+		symbol_hides = { "skirt", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		feet_cuff_size = 0,
+		release_group = 156,
 	},
 	legs_wurt_cave =
 	{
@@ -10111,6 +11006,18 @@ CLOTHING =
 		feet_cuff_size = 1,
 		has_nub = true,
 		release_group = 138,
+	},
+	legs_wurt_lunar =
+	{
+		type = "legs",
+		skin_tags = { "LUNAR", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "foot", "leg", "torso_pelvis", "tail", },
+		symbol_overrides_powerup = { foot = "foot_powerup", leg = "leg_powerup", tail = "tail_powerup", torso_pelvis = "torso_pelvis_powerup", },
+		symbol_hides = { "skirt", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		feet_cuff_size = 1,
+		release_group = 167,
 	},
 	legs_wurt_nature =
 	{
@@ -10158,6 +11065,18 @@ CLOTHING =
 		rarity = "Classy",
 		rarity_modifier = "Woven",
 		release_group = 78,
+	},
+	legs_wurt_survivor =
+	{
+		type = "legs",
+		skin_tags = { "SURVIVOR", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "foot", "leg", "torso_pelvis", },
+		symbol_overrides_powerup = { foot = "foot_powerup", leg = "leg_powerup", nub = "nub_powerup", torso_pelvis = "torso_pelvis_powerup", },
+		symbol_hides = { "skirt", },
+		rarity = "Classy",
+		rarity_modifier = "Woven",
+		has_nub = true,
+		release_group = 171,
 	},
 	legs_wurt_victorian =
 	{
@@ -10215,6 +11134,16 @@ CLOTHING =
 		rarity_modifier = "Woven",
 		legs_cuff_size = 1,
 		release_group = 136,
+	},
+	legs_wx78_masquerade =
+	{
+		type = "legs",
+		skin_tags = { "MASQUERADE", "CLOTHING_LEGS", "CLOTHING", },
+		symbol_overrides = { "leg", "torso_pelvis", },
+		symbol_hides = { "skirt", },
+		rarity = "Spiffy",
+		rarity_modifier = "Woven",
+		release_group = 161,
 	},
 	legs_wx78_retro =
 	{

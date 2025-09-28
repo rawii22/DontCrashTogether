@@ -5,7 +5,7 @@ local assets =
 
 local assets_base =
 {
-	Asset("ANIM", "anim/shadow_pillar_fx.zip"),
+	Asset("ANIM", "anim/shadow_pillar_fx.zip", ALT_RENDERPATH),
 	Asset("ANIM", "anim/splash_weregoose_fx.zip"),
 	Asset("ANIM", "anim/splash_water_drop.zip"),
 }
@@ -405,7 +405,7 @@ local function base_fn()
 	inst.AnimState:PushAnimation("idle")
 
 	inst.KillFX = Base_KillFX
-	inst.persist = false
+	inst.persists = false
 
 	return inst
 end

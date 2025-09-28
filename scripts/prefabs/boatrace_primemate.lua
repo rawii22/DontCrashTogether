@@ -186,6 +186,8 @@ local function fn()
     inst.AnimState:UsePointFiltering(true)
     inst.AnimState:SetMultColour(0, 0, 0, 0.85)
 
+    inst.AnimState:Hide("ARM_carry_up")
+
     inst:AddTag("character")
     inst:AddTag("monkey")
     inst:AddTag("nomagic")
@@ -250,6 +252,7 @@ local function fn()
     --
     inst:SetBrain(brain)
     inst:SetStateGraph("SGprimemate")
+	inst.sg.mem.noelectrocute = true --sg is shared by prime_mate that support electrocute
 
     --
     inst.OnEntitySleep = OnEntitySleep

@@ -250,6 +250,7 @@ local function MakeBeebox(name, common_postinit, master_postinit)
         inst.entity:AddNetwork()
         inst.entity:AddLightWatcher()
 
+		inst:SetDeploySmartRadius(1.25) --recipe min_spacing/2
         MakeObstaclePhysics(inst, .5)
 
         inst.MiniMapEntity:SetIcon("beebox.png")
@@ -309,6 +310,7 @@ local function MakeBeebox(name, common_postinit, master_postinit)
         MakeHauntableWork(inst)
 
         MakeSnowCovered(inst)
+        SetLunarHailBuildupAmountSmall(inst)
         inst:ListenForEvent("onbuilt", onbuilt)
 
         inst.OnSave = OnSave
@@ -344,6 +346,9 @@ local function beebox_hermit(inst)
 	inst:AddTag("antlion_sinkhole_blocker")
 
     inst.scrapbook_specialinfo = "BEEBOX"
+
+    TheWorld:PushEvent("ms_register_beebox_hermit", inst)
+    TheWorld:PushEvent("ms_register_pearl_entity", inst)
 end
 
 local function beebox_master(inst)

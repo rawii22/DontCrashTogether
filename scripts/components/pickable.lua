@@ -48,6 +48,7 @@ local Pickable = Class(function(self, inst)
     self.quickpick = false
     self.jostlepick = false
     self.wildfirestarter = false
+    --self.stuck = nil
 
     self.droppicked = nil
     self.dropheight = nil
@@ -88,6 +89,7 @@ function Pickable:OnRemoveFromEntity()
     self.inst:RemoveTag("pickable")
     self.inst:RemoveTag("barren")
     self.inst:RemoveTag("quickpick")
+    self.inst:RemoveTag("jostlepick")
 end
 
 local function OnRegen(inst)
@@ -298,6 +300,7 @@ function Pickable:OnSave()
         transplanted = self.transplanted and true or nil,
         paused = self.paused and true or nil,
         caninteractwith = self.caninteractwith and true or nil,
+		stuck = self.stuck or nil,
     }
 
     if self.cycles_left ~= self.max_cycles then
@@ -325,6 +328,7 @@ function Pickable:OnLoad(data)
     self.transplanted = data.transplanted or false
     self.cycles_left = data.cycles_left or self.cycles_left
     self.max_cycles = data.max_cycles or self.max_cycles
+	self.stuck = data.stuck
 
     if data.picked or data.time ~= nil then
         if self:IsBarren() and self.makebarrenfn ~= nil then
@@ -432,19 +436,85 @@ function Pickable:MakeEmpty()
     self.canbepicked = false
 
     if not self.paused and self.baseregentime ~= nil then
-        local time = self.baseregentime
-        if self.getregentimefn ~= nil then
-            time = self.getregentimefn(self.inst)
-        end
-        time = SpringGrowthMod(time)
+        self.regentime = SpringGrowthMod(self.getregentimefn ~= nil and self.getregentimefn(self.inst) or self.baseregentime)
 
         if not self.useexternaltimer then
-            self.task = self.inst:DoTaskInTime(time, OnRegen)
-            self.targettime = GetTime() + time
+            self.task = self.inst:DoTaskInTime(self.regentime, OnRegen)
+            self.targettime = GetTime() + self.regentime
         else
-            self.startregentimer(self.inst, time)
+            self.startregentimer(self.inst, self.regentime)
         end
     end
+end
+
+function Pickable:SpawnProductLoot(picker)
+    if not (picker ~= nil and self.product  ~= nil or self.use_lootdropper_for_product) then
+        return
+    end
+
+    local inventory = picker ~= nil and picker.components.inventory or nil
+
+    local pt = self.inst:GetPosition()
+    local loot = nil
+
+    if self.droppicked and self.inst.components.lootdropper ~= nil then
+        pt.y = pt.y + (self.dropheight or 0)
+
+        if self.use_lootdropper_for_product then
+            self.inst.components.lootdropper:DropLoot(pt)
+        else
+            local num = self.numtoharvest or 1
+            for i = 1, num do
+                self.inst.components.lootdropper:SpawnLootPrefab(self.product, pt)
+            end
+        end
+    else
+        if self.use_lootdropper_for_product then
+            loot = self.inst.components.lootdropper:GenerateLoot()
+
+            for i, prefab in ipairs(loot) do -- Convert prefabs to entities.
+                loot[i] = self.inst.components.lootdropper:SpawnLootPrefab(prefab)
+            end
+
+            if #loot > 0 then
+                if inventory then
+                    picker:PushEvent("picksomething", { object = self.inst, loot = loot })
+                end
+
+                for i, item in ipairs(loot) do
+                    if inventory and item.components.inventoryitem then
+                        inventory:GiveItem(item, nil, pt)
+                    else
+                        item.Transform:SetPosition(pt:Get())
+                    end
+                end
+            end
+        else
+            loot = SpawnPrefab(self.product)
+
+            if loot ~= nil then
+                if loot.components.inventoryitem ~= nil then
+                    loot.components.inventoryitem:InheritWorldWetnessAtTarget(self.inst)
+                end
+
+                if self.numtoharvest > 1 and loot.components.stackable ~= nil then
+                    loot.components.stackable:SetStackSize(self.numtoharvest)
+                end
+
+                if inventory then
+                    picker:PushEvent("picksomething", { object = self.inst, loot = loot })
+                end
+
+                if inventory and loot.components.inventoryitem then
+                    inventory:GiveItem(loot, nil, pt)
+                else
+                    loot.Transform:SetPosition(pt:Get())
+                end
+            end
+        end
+    end
+
+    return loot
 end
 
 ------------------------
@@ -463,7 +533,7 @@ end
 --   two different events to handle being picked.
 
 function Pickable:Pick(picker)
-    if self.canbepicked and self.caninteractwith then
+	if self.canbepicked and self.caninteractwith and not self.stuck then
         if self.transplanted and self.cycles_left ~= nil then
             self.cycles_left = math.max(0, self.cycles_left - 1)
         end
@@ -478,59 +548,7 @@ function Pickable:Pick(picker)
             end
         end
 
-        local loot = nil
-		if picker and self.product or self.use_lootdropper_for_product then
-			local inventory = picker and picker.components.inventory or nil
-            local pt = self.inst:GetPosition()
-            if self.droppicked and self.inst.components.lootdropper ~= nil then
-                pt.y = pt.y + (self.dropheight or 0)
-                if self.use_lootdropper_for_product then
-                    self.inst.components.lootdropper:DropLoot(pt)
-                else
-                    local num = self.numtoharvest or 1
-                    for i = 1, num do
-                        self.inst.components.lootdropper:SpawnLootPrefab(self.product, pt)
-                    end
-                end
-            else
-                if self.use_lootdropper_for_product then
-					loot = self.inst.components.lootdropper:GenerateLoot()
-					for i, prefab in ipairs(loot) do --convert prefabs to insts
-						loot[i] = self.inst.components.lootdropper:SpawnLootPrefab(prefab)
-                    end
-					if #loot > 0 then
-						if inventory then
-							picker:PushEvent("picksomething", { object = self.inst, loot = loot })
-						end
-						for i, item in ipairs(loot) do
-							if inventory and item.components.inventoryitem then
-								inventory:GiveItem(item, nil, pt)
-							else
-								item.Transform:SetPosition(pt:Get())
-							end
-						end
-					end
-                else
-                    loot = SpawnPrefab(self.product)
-                    if loot ~= nil then
-                        if loot.components.inventoryitem ~= nil then
-							loot.components.inventoryitem:InheritWorldWetnessAtTarget(self.inst)
-                        end
-                        if self.numtoharvest > 1 and loot.components.stackable ~= nil then
-                            loot.components.stackable:SetStackSize(self.numtoharvest)
-                        end
-						if inventory then
-                            picker:PushEvent("picksomething", { object = self.inst, loot = loot })
-						end
-						if inventory and loot.components.inventoryitem then
-							inventory:GiveItem(loot, nil, pt)
-						else
-                            loot.Transform:SetPosition(pt:Get())
-                        end
-                    end
-                end
-            end
-        end
+        local loot = self:SpawnProductLoot(picker)
 
         if self.onpickedfn ~= nil then
             self.onpickedfn(self.inst, picker, loot)
@@ -539,12 +557,13 @@ function Pickable:Pick(picker)
         self.canbepicked = false
 
         if self.baseregentime ~= nil and not (self.paused or self:IsBarren() or self.inst:HasTag("withered")) then
-            self.regentime = SpringGrowthMod(self.baseregentime)
+            self.regentime = SpringGrowthMod(self.getregentimefn ~= nil and self.getregentimefn(self.inst) or self.baseregentime)
 
             if not self.useexternaltimer then
                 if self.task ~= nil then
                     self.task:Cancel()
                 end
+
                 self.task = self.inst:DoTaskInTime(self.regentime, OnRegen)
                 self.targettime = GetTime() + self.regentime
             else
@@ -571,6 +590,14 @@ function Pickable:ConsumeCycles(cycles)
     if self.protected_cycles ~= nil then
         self.protected_cycles = math.max(0, self.protected_cycles - cycles)
     end
+end
+
+function Pickable:SetStuck(stuck)
+	self.stuck = stuck
+end
+
+function Pickable:IsStuck()
+	return self.stuck == true
 end
 
 return Pickable

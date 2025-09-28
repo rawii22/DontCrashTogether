@@ -20,21 +20,25 @@ local actionhandlers =
 
 local events =
 {
-    EventHandler("attacked", function(inst)
-        if not inst.components.health:IsDead() and not inst.sg:HasStateTag("attack") then
-            inst.sg:GoToState("hit")
+	EventHandler("attacked", function(inst, data)
+		if not inst.components.health:IsDead() then
+			if CommonHandlers.TryElectrocuteOnAttacked(inst, data) then
+				return
+			elseif not inst.sg:HasAnyStateTag("attack", "electrocute") then
+				inst.sg:GoToState("hit")
+			end
         end
     end),
     EventHandler("death", function(inst)
         inst.sg:GoToState("death", inst.sg.statemem.dead)
     end),
     EventHandler("doattack", function(inst, data)
-        if not inst.components.health:IsDead() and (inst.sg:HasStateTag("hit") or not inst.sg:HasStateTag("busy")) then
+		if not inst.components.health:IsDead() and ((inst.sg:HasStateTag("hit") and not inst.sg:HasStateTag("electrocute")) or not inst.sg:HasStateTag("busy")) then
             inst.sg:GoToState("attack", data.target)
         end
     end),
     EventHandler("doink", function(inst, data)
-        if not inst.components.health:IsDead() and (inst.sg:HasStateTag("hit") or not inst.sg:HasStateTag("busy")) then
+		if not inst.components.health:IsDead() and ((inst.sg:HasStateTag("hit") and not inst.sg:HasStateTag("electrocute")) or not inst.sg:HasStateTag("busy")) then
             inst.sg:GoToState("shoot", data.target)
         end
     end),
@@ -45,6 +49,7 @@ local events =
     CommonHandlers.OnHop(),
     CommonHandlers.OnLocomote(true, false),
     CommonHandlers.OnFreeze(),
+	CommonHandlers.OnElectrocute(),
 }
 
 local function dimLight(inst,dim,instant,zero,time)
@@ -126,11 +131,13 @@ local function RestorRunSpeed(inst)
 end
 
 local function RestoreCollidesWith(inst)
-    inst.Physics:CollidesWith(COLLISION.WORLD
-                        + COLLISION.OBSTACLES
-                        + COLLISION.SMALLOBSTACLES
-                        + COLLISION.CHARACTERS
-                        + COLLISION.GIANTS)
+	inst.Physics:SetCollisionMask(
+    	COLLISION.WORLD,
+		COLLISION.OBSTACLES,
+		COLLISION.SMALLOBSTACLES,
+		COLLISION.CHARACTERS,
+		COLLISION.GIANTS
+	)
 end
 
 local function AddNoClick(inst)
@@ -206,7 +213,7 @@ local states =
 
     State{
         name = "spawn",
-        tags = { "busy" },
+		tags = { "busy", "noelectrocute" },
 
         onenter = function(inst)
             dimLight(inst, false, false, true, 20*FRAMES)
@@ -230,7 +237,7 @@ local states =
 
     State{
         name = "despawn",
-        tags = { "busy" },
+		tags = { "busy", "noelectrocute" },
 
         onenter = function(inst)
             dimLight(inst,true)
@@ -327,8 +334,9 @@ local states =
         {
             TimeEvent(7*FRAMES, function(inst) inst.SoundEmitter:PlaySound(inst.sounds.spit) end),
             TimeEvent(15*FRAMES, function(inst)
-                if inst.sg.statemem.target and inst.sg.statemem.target:IsValid() then
-                    inst.sg.statemem.inkpos = Vector3(inst.sg.statemem.target.Transform:GetWorldPosition())
+                local target = inst.sg.statemem.target
+                if target and target:IsValid() then
+                    inst.sg.statemem.inkpos = target:GetPosition()
                     inst:LaunchProjectile(inst.sg.statemem.inkpos)
 
                     inst.components.timer:StopTimer("ink_cooldown")
@@ -584,7 +592,7 @@ local states =
 			inst.AnimState:SetFrame(5)
             inst.AnimState:PushAnimation("jump_loop")
 
-            inst:StopBrain()
+			inst:StopBrain("SGsquid_fling")
 
             inst.components.locomotor:Stop()
             inst.components.locomotor:EnableGroundSpeedMultiplier(false)
@@ -680,7 +688,7 @@ local states =
             inst.components.locomotor:Stop()
             inst.components.locomotor:EnableGroundSpeedMultiplier(true)
             inst.Physics:ClearMotorVelOverride()
-            inst:RestartBrain()
+			inst:RestartBrain("SGsquid_fling")
             RestoreCollidesWith(inst)
         end,
 
@@ -818,7 +826,7 @@ local states =
         timeline =
         {
             TimeEvent(3*FRAMES, function(inst)
-                local theta, speed = math.random() * 2 * PI, 1
+                local theta, speed = math.random() * TWOPI, 1
                 inst.Physics:SetMotorVelOverride(math.sin(theta) * speed, 0, math.cos(theta) * speed)
             end),
             TimeEvent(21*FRAMES, function(inst)
@@ -1127,5 +1135,6 @@ CommonStates.AddSleepStates(states,
 CommonStates.AddWalkStates(states, nil, nil, nil, true)
 
 CommonStates.AddFrozenStates(states)
+CommonStates.AddElectrocuteStates(states)
 
 return StateGraph("squid", states, events, "idle", actionhandlers)

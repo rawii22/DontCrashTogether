@@ -166,6 +166,7 @@ local function fn()
     inst.scrapbook_anim = "cocoon_small"
 
     inst:AddTag("structure")
+	inst:AddTag("lifedrainable") -- by batbat (since it normally doesn't drain from structures)
     inst:AddTag("beaverchewable") -- by werebeaver
     inst:AddTag("hive")
     inst:AddTag("beehive")
@@ -224,6 +225,7 @@ local function fn()
     ---------------------
     MakeLargePropagator(inst)
     MakeSnowCovered(inst)
+    SetLunarHailBuildupAmountSmall(inst)
 
     inst:AddComponent("hauntable")
     inst.components.hauntable:SetHauntValue(TUNING.HAUNT_SMALL)

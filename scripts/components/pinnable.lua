@@ -29,9 +29,7 @@ local function onstuck(self, stuck)
 end
 
 local function OnUnpinned(inst)
-    if inst.components.pinnable:IsStuck() then
-        inst.components.pinnable:Unstick()
-    end
+	inst.components.pinnable:Unstick()
 end
 
 local function OnAttacked(inst)
@@ -41,14 +39,6 @@ local function OnAttacked(inst)
         --print("attacks since pinned", self.attacks_since_pinned)
         self:SpawnShatterFX()
         self:UpdateStuckStatus()
-    end
-end
-
-local function OnDied(inst)
-    local self = inst.components.pinnable
-    if self.wearofftask ~= nil then
-        self.wearofftask:Cancel()
-        self.wearofftask = nil
     end
 end
 
@@ -70,7 +60,7 @@ local Pinnable = Class(function(self, inst)
 
     inst:ListenForEvent("unpinned", OnUnpinned)
     inst:ListenForEvent("attacked", OnAttacked)
-    inst:ListenForEvent("playerdied", OnDied)
+	inst:ListenForEvent("death", OnUnpinned)
 end,
 nil,
 {
@@ -78,13 +68,10 @@ nil,
 })
 
 function Pinnable:OnRemoveFromEntity()
-    if self.wearofftask ~= nil then
-        self.wearofftask:Cancel()
-        self.wearofftask = nil
-    end
     self.inst:RemoveEventCallback("unpinned", OnUnpinned)
     self.inst:RemoveEventCallback("attacked", OnAttacked)
-    self.inst:RemoveEventCallback("playerdied", OnDied)
+	self.inst:RemoveEventCallback("death", OnUnpinned)
+	self:Unstick()
 end
 
 function Pinnable:SetDefaultWearOffTime(wearofftime)
@@ -123,9 +110,7 @@ function Pinnable:Stick(goo_build, splashfxlist)
         local prevState = self.stuck
         self.stuck = true
 
-        if self.inst.brain ~= nil then
-            self.inst.brain:Stop()
-        end
+		self.inst:StopBrain("pinned")
 
         if self.inst.components.combat ~= nil then
             self.inst.components.combat:SetTarget(nil)
@@ -169,14 +154,12 @@ function Pinnable:RemainingRatio()
 end
 
 function Pinnable:Unstick()
-    if (self.inst.components.health == nil or not self.inst.components.health:IsDead()) and self:IsStuck() then
+	if self:IsStuck() then
         self.stuck = false
 
         self:SpawnShatterFX()
 
-        if self.inst.brain ~= nil then
-            self.inst.brain:Start()
-        end
+		self.inst:RestartBrain("pinned")
 
         if self.wearofftask ~= nil then
             self.wearofftask:Cancel()

@@ -45,7 +45,7 @@ end
 
 local function onburnt(inst)
     inst.SoundEmitter:KillSound("mooring")
-    inst.sg:Stop()
+	inst:ClearStateGraph()
 end
 
 local function onbuilt(inst)
@@ -89,6 +89,8 @@ local function common_fn(build)
     inst.entity:AddAnimState()
     inst.entity:AddSoundEmitter()
     inst.entity:AddNetwork()
+
+	inst:SetDeploySmartRadius(DEPLOYSPACING_RADIUS[DEPLOYSPACING.DEFAULT] / 2) --match kit item
 
     inst.AnimState:SetBank("boat_anchor")
     inst.AnimState:SetBuild(build or "boat_anchor")

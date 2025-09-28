@@ -29,6 +29,7 @@ local function MakeDummy(name, common_postinit, master_postinit)
 		inst.Label:SetColour(1, 1, 1)
 		inst.Label:Enable(true)
 
+		inst:SetDeploySmartRadius(1)
 		MakeObstaclePhysics(inst, .3)
 
 		inst.AnimState:SetBank("wilsonstatue")
@@ -49,12 +50,16 @@ local function MakeDummy(name, common_postinit, master_postinit)
 			return inst
 		end
 
+        MakeSnowCovered(inst)
+
 		inst:AddComponent("bloomer")
 		inst:AddComponent("colouradder")
 
 		inst:AddComponent("inspectable")
 
 		inst:AddComponent("combat")
+		inst.components.combat.hiteffectsymbol = "ww_torso"
+
 		inst:AddComponent("debuffable")
 		inst.components.debuffable:SetFollowSymbol("ww_head", 0, -250, 0)
 

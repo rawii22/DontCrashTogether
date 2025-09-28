@@ -201,6 +201,7 @@ local function fn()
 
     inst:AddTag("ignorewalkableplatforms")
     inst:AddTag("seastack")
+    inst:AddTag("waterplant")
 
     inst.AnimState:SetBank("barnacle_plant")
     inst.AnimState:SetBuild("barnacle_plant_colour_swaps")
@@ -213,6 +214,7 @@ local function fn()
     inst.AnimState:Hide("stage3")
 
     MakeInventoryFloatable(inst, "med", 0.1, {1.1, 0.9, 1.1})
+    inst.components.floater:SetIsObstacle()
     inst.components.floater.bob_percent = 0
     inst.components.floater.splash = false
 
@@ -244,6 +246,7 @@ local function fn()
     MakeMediumPropagator(inst)
 
     MakeSnowCovered(inst)
+    SetLunarHailBuildupAmountSmall(inst)
 
     inst:ListenForEvent("onburnt", on_burnt)
 

@@ -80,7 +80,7 @@ function StandardSleepChecks(inst)
         and not (inst.components.burnable ~= nil and inst.components.burnable:IsBurning())
         and not (inst.components.freezable ~= nil and inst.components.freezable:IsFrozen())
         and not (inst.components.teamattacker ~= nil and inst.components.teamattacker.inteam)
-        and not inst.sg:HasStateTag("busy")
+		and not (inst.sg and inst.sg:HasStateTag("busy"))
 end
 
 function StandardWakeChecks(inst)
@@ -286,9 +286,7 @@ function Sleeper:GoToSleep(sleeptime)
             self.wearofftask = nil
         end
 
-        if self.inst.brain ~= nil then
-            self.inst.brain:Stop()
-        end
+		self.inst:StopBrain("sleeper")
 
         if self.inst.components.combat ~= nil then
             self.inst.components.combat:SetTarget(nil)
@@ -329,9 +327,7 @@ function Sleeper:WakeUp()
         self.isasleep = false
         self.sleepiness = 0
 
-        if self.inst.brain ~= nil then
-            self.inst.brain:Start()
-        end
+		self.inst:RestartBrain("sleeper")
 
         self.inst:PushEvent("onwakeup")
         self:SetSleepTest(self.sleeptestfn)

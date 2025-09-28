@@ -147,6 +147,7 @@ local function fn()
     inst.entity:AddMiniMapEntity()
     inst.entity:AddNetwork()
 
+	inst:SetDeploySmartRadius(DEPLOYSPACING_RADIUS[DEPLOYSPACING.DEFAULT] / 2) --match kit item
     MakeObstaclePhysics(inst, .5)
 
     inst.MiniMapEntity:SetIcon("yotb_sewingmachine.png")
@@ -194,6 +195,7 @@ local function fn()
     inst.components.hauntable:SetHauntValue(TUNING.HAUNT_TINY)
 
     MakeSnowCovered(inst)
+    SetLunarHailBuildupAmountSmall(inst)
     inst:ListenForEvent("onbuilt", onbuilt)
 
     MakeMediumBurnable(inst, nil, nil, true)

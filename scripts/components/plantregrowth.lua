@@ -11,6 +11,15 @@ local InternalTimes = {}
 
 local BASE_RADIUS = 8
 
+local moon_tree_mult =
+{
+    new = 0,
+    quarter = 0.5,
+    half = 1.0,
+    threequarter = 1.5,
+    full = 2.0,
+}
+
 local TimeMultipliers = {
     ["evergreen"] = function()
         return TUNING.EVERGREEN_REGROWTH_TIME_MULT * ((TheWorld.state.issummer and 2) or (TheWorld.state.iswinter and 0) or 1)
@@ -34,13 +43,19 @@ local TimeMultipliers = {
         return TUNING.MUSHTREE_REGROWTH_TIME_MULT * ((not TheWorld.state.isspring and 0) or 1)
     end,
     ["moon_tree"] = function()
-        return TUNING.MOONTREE_REGROWTH_TIME_MULT * ((not TheWorld.state.isspring and 0) or 1)
+        return TUNING.MOONTREE_REGROWTH_TIME_MULT * (moon_tree_mult[TheWorld.state.moonphase] or 0)
     end,
     ["mushtree_moon"] = function()
         return TUNING.MOONMUSHTREE_REGROWTH_TIME_MULT * ((not TheWorld.state.iswinter and 0) or 1)
     end,
     ["palmconetree"] = function()
         return TUNING.PALMCONETREE_REGROWTH_TIME_MULT * ((TheWorld.state.iswinter and 0) or 1)
+    end,
+    ["tree_rock1"] = function()
+        return TUNING.TREE_ROCK_REGROWTH_TIME_MULT
+    end,
+    ["tree_rock2"] = function()
+        return TUNING.TREE_ROCK_REGROWTH_TIME_MULT
     end,
 }
 
@@ -127,6 +142,8 @@ local PlantRegrowth = Class(function(self, inst)
     self.nextregrowth = 0
 
     self.area = nil -- defer this until we try regrowing, to spread out the cost
+
+    -- self.skip_plant_check = nil
 end)
 
 PlantRegrowth.TimeMultipliers = TimeMultipliers
@@ -151,6 +168,10 @@ function PlantRegrowth:SetSearchTag(tag)
     self.searchtag = tag
 end
 
+function PlantRegrowth:SetSkipCanPlantCheck(bool)
+    self.skip_plant_check = bool
+end
+
 function PlantRegrowth:OnRemoveFromEntity()
     UnregisterUpdate(self)
 end
@@ -160,29 +181,28 @@ function PlantRegrowth:OnRemoveEntity()
 end
 
 local SPAWN_BLOCKER_TAGS = { "structure", "wall" }
-local function GetSpawnPoint(from_pt, radius, prefab)
+local function GetSpawnPoint(from_pt, radius, prefab, skip_plant_check)
     local map = TheWorld.Map
     if map == nil then
         return
     end
-    local theta = math.random() * 2 * PI
-    local radius = math.random(radius/2, radius)
+    local theta = math.random() * TWOPI
+    radius = math.random(radius/2, radius)
     local steps = 10
-    local validpos = nil
-    for i = 1, steps do
+    local step_decrement = (TWOPI/steps)
+    for _ = 1, steps do
         local offset = Vector3(radius * math.cos( theta ), 0, -radius * math.sin( theta ))
         local try_pos = from_pt + offset
-        if map:CanPlantAtPoint(try_pos:Get())
+        if (skip_plant_check or map:CanPlantAtPoint(try_pos:Get()))
             and map:CanPlacePrefabFilteredAtPoint(try_pos.x, try_pos.y, try_pos.z, prefab)
             and not (RoadManager ~= nil and RoadManager:IsOnRoad(try_pos.x, 0, try_pos.z))
             and #TheSim:FindEntities(try_pos.x, try_pos.y, try_pos.z, 3) <= 0
 			and #TheSim:FindEntities(try_pos.x, try_pos.y, try_pos.z, BASE_RADIUS, nil, nil, SPAWN_BLOCKER_TAGS) <= 0 then
-            validpos = try_pos
-            break
+            return try_pos
         end
-        theta = theta - (2 * PI / steps)
+        theta = theta - step_decrement
     end
-    return validpos
+    return nil
 end
 
 function PlantRegrowth:TrySpawnNearby()
@@ -206,7 +226,7 @@ function PlantRegrowth:TrySpawnNearby()
         end
     end
 
-    local spawnpoint = GetSpawnPoint(Point(x,y,z), self.fiveradius, self.product or self.inst.prefab)
+    local spawnpoint = GetSpawnPoint(Point(x,y,z), self.fiveradius, self.product or self.inst.prefab, self.skip_plant_check)
     if spawnpoint ~= nil then
         local targetradius = GetFiveRadius(spawnpoint.x, spawnpoint.z, self.inst.prefab)
         if targetradius then

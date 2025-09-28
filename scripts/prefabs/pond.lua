@@ -90,8 +90,8 @@ local function SpawnPlants(inst)
 
     if inst.plants == nil then
         inst.plants = {}
-        for i = 1, math.random(2, 4) do
-            local theta = math.random() * 2 * PI
+        for _ = 1, math.random(2, 4) do
+            local theta = math.random() * TWOPI
             table.insert(inst.plants,
             {
                 offset =
@@ -152,9 +152,10 @@ local function OnSnowLevel(inst, snowlevel)
             inst.components.fishable:Freeze()
 
             inst.Physics:SetCollisionGroup(COLLISION.LAND_OCEAN_LIMITS)
-            inst.Physics:ClearCollisionMask()
-            inst.Physics:CollidesWith(COLLISION.WORLD)
-            inst.Physics:CollidesWith(COLLISION.ITEMS)
+			inst.Physics:SetCollisionMask(
+				COLLISION.WORLD,
+				COLLISION.ITEMS
+			)
 
             DespawnPlants(inst)
 
@@ -169,10 +170,11 @@ local function OnSnowLevel(inst, snowlevel)
         inst.components.fishable:Unfreeze()
 
 		inst.Physics:SetCollisionGroup(COLLISION.OBSTACLES)
-        inst.Physics:ClearCollisionMask()
-        inst.Physics:CollidesWith(COLLISION.ITEMS)
-        inst.Physics:CollidesWith(COLLISION.CHARACTERS)
-        inst.Physics:CollidesWith(COLLISION.GIANTS)
+		inst.Physics:SetCollisionMask(
+			COLLISION.ITEMS,
+			COLLISION.CHARACTERS,
+			COLLISION.GIANTS
+		)
 
         SpawnPlants(inst)
 
@@ -237,7 +239,7 @@ local function commonfn(pondtype)
 
     inst.no_wet_prefix = true
 
-    inst:SetDeployExtraSpacing(2)
+	inst:SetDeploySmartRadius(2)
 
     inst.entity:SetPristine()
 

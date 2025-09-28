@@ -96,12 +96,11 @@ function Stackable:Get(num)
     if self.stacksize > num_to_get then
         local instance = SpawnPrefab( self.inst.prefab, self.inst.skinname, self.inst.skin_id, nil )
 
-
         self:SetStackSize(self.stacksize - num_to_get)
         instance.components.stackable:SetStackSize(num_to_get)
 
         if self.ondestack ~= nil then
-            self.ondestack(instance)
+            self.ondestack(instance, self.inst)
         end
 
         if instance.components.perishable ~= nil then

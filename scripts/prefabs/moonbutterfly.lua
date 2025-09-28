@@ -140,6 +140,7 @@ local function fn()
     inst:AddTag("show_spoilage")
     inst:AddTag("small_livestock")
     inst:AddTag("deployedplant")
+    inst:AddTag("lunar_aligned")
 
     inst:DoPeriodicTask(.1, OnUpdateFlicker, nil, GetTime())
     OnUpdateFlicker(inst)
@@ -192,7 +193,7 @@ local function fn()
     inst:AddComponent("deployable")
     inst.components.deployable.ondeploy = OnDeploy
     inst.components.deployable:SetDeployMode(DEPLOYMODE.PLANT)
-    inst.components.deployable:SetDeploySpacing(TUNING.MOON_TREE_DEPLOY_SPACING)
+	inst.components.deployable:SetDeploySpacing(DEPLOYSPACING.PLACER_DEFAULT)
 
     MakeHauntablePanicAndIgnite(inst)
 
@@ -206,6 +207,7 @@ local function fn()
     inst.components.perishable:SetOnPerishFn(onperish)
 
     inst:SetStateGraph("SGbutterfly")
+	inst.sg.mem.burn_on_electrocute = true
     inst:SetBrain(brain)
 
 	inst:ListenForEvent("death", ondeath)

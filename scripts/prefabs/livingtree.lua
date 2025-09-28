@@ -57,6 +57,7 @@ end
 
 local function makestump(inst, instant)
     inst:RemoveComponent("workable")
+    inst:RemoveComponent("lunarhailbuildup")
     inst:RemoveComponent("burnable")
     MakeMediumBurnable(inst)
     inst:RemoveComponent("propagator")
@@ -160,6 +161,7 @@ local function fn()
     inst.entity:AddMiniMapEntity()
     inst.entity:AddNetwork()
 
+	inst:SetDeploySmartRadius(DEPLOYSPACING_RADIUS[DEPLOYSPACING.DEFAULT] / 2) --livingtree_root deployspacing/2
     MakeObstaclePhysics(inst, .75)
 
     inst.MiniMapEntity:SetIcon("livingtree.png")
@@ -200,6 +202,7 @@ local function fn()
     MakeHauntableWorkAndIgnite(inst)
 
     MakeSnowCovered(inst)
+    SetLunarHailBuildupAmountLarge(inst)
 
 	if IsSpecialEventActive(SPECIAL_EVENTS.HALLOWED_NIGHTS) then
 		inst:DoTaskInTime(0, OnHalloweenSetup)

@@ -305,11 +305,18 @@ end
 
 local function OnAttacked(inst, data)
     if data.attacker ~= nil then
-        if inst._recentattackers ~= nil and data.attacker:HasTag("player") then
-            if inst._recentattackers[data.attacker] ~= nil then
-                inst._recentattackers[data.attacker]:Cancel()
+		local shouldtrackplayerhit
+        if data.attacker:HasTag("player") then
+            if inst._recentattackers ~= nil then
+                if inst._recentattackers[data.attacker] ~= nil then
+                    inst._recentattackers[data.attacker]:Cancel()
+                end
+                inst._recentattackers[data.attacker] = inst:DoTaskInTime(6, ClearRecentAttacker, data.attacker)
             end
-            inst._recentattackers[data.attacker] = inst:DoTaskInTime(6, ClearRecentAttacker, data.attacker)
+            if inst.atriumstalker then
+				shouldtrackplayerhit = true
+                --inst._lastplayerhittime = GetTime()
+            end
         end
         local target = inst.components.combat.target
         if target ~= data.attacker and
@@ -321,6 +328,9 @@ local function OnAttacked(inst, data)
                 inst:IsNearAtrium()) then
             inst.components.combat:SetTarget(data.attacker)
         end
+		if shouldtrackplayerhit and inst.components.combat:HasTarget() then
+			inst._lastplayerhittime = GetTime()
+		end
     end
 end
 
@@ -372,14 +382,14 @@ local function AtriumSetEngaged(inst, engaged)
         inst.engaged = engaged
         inst.components.timer:StopTimer("snare_cd")
         inst.components.timer:StopTimer("spikes_cd")
-        inst.components.timer:StopTimer("channelers_cd")
-        inst.components.timer:StopTimer("minions_cd")
+		--inst.components.timer:StopTimer("channelers_cd")
+		--inst.components.timer:StopTimer("minions_cd")
         inst.components.timer:StopTimer("mindcontrol_cd")
         if engaged then
             inst.components.timer:StartTimer("snare_cd", TUNING.STALKER_FIRST_SNARE_CD)
             inst.components.timer:StartTimer("spikes_cd", TUNING.STALKER_FIRST_SPIKES_CD)
-            inst.components.timer:StartTimer("channelers_cd", TUNING.STALKER_FIRST_CHANNELERS_CD)
-            inst.components.timer:StartTimer("minions_cd", TUNING.STALKER_FIRST_MINIONS_CD)
+			--inst.components.timer:StartTimer("channelers_cd", TUNING.STALKER_FIRST_CHANNELERS_CD)
+			--inst.components.timer:StartTimer("minions_cd", TUNING.STALKER_FIRST_MINIONS_CD)
             inst.components.timer:StartTimer("mindcontrol_cd", TUNING.STALKER_FIRST_MINDCONTROL_CD)
             inst:RemoveEventCallback("newcombattarget", OnNewTarget)
         else
@@ -528,11 +538,10 @@ local function SpawnSnare(inst, x, z, r, num, target)
     local used = {}
     local queued = {}
     local count = 0
-    local dtheta = PI * 2 / num
-    local thetaoffset = math.random() * PI * 2
+    local dtheta = TWOPI / num
     local delaytoggle = 0
     local map = TheWorld.Map
-    for theta = math.random() * dtheta, PI * 2, dtheta do
+    for theta = math.random() * dtheta, TWOPI, dtheta do
         local x1 = x + r * math.cos(theta)
         local z1 = z + r * math.sin(theta)
         if map:IsPassableAtPoint(x1, 0, z1) and not map:IsPointNearHole(Vector3(x1, 0, z1)) then
@@ -674,8 +683,8 @@ local function SpawnChannelers(inst)
     {
         x = x,
         z = z,
-        angle = math.random() * 2 * PI,
-        delta = -2 * PI / count,
+        angle = math.random() * TWOPI,
+        delta = -TWOPI / count,
         count = count,
     }
     DoSpawnChanneler(inst)
@@ -754,7 +763,7 @@ local function SpawnMinions(inst, count)
         local ringweight = ring * ring / RING_TOTAL
         local ringcount = math.floor(count * ringweight + .5)
         if ringcount > 0 then
-            local delta = 2 * PI / ringcount
+            local delta = TWOPI / ringcount
             local radius = ring * RING_SIZE
             for i = 1, ringcount do
                 local angle = delta * i
@@ -827,7 +836,7 @@ local function GenerateSpiralSpikes(inst)
     local spacing = 1.7
     local radius = 2
     local deltaradius = .2
-    local angle = 2 * PI * math.random()
+    local angle = TWOPI * math.random()
     local deltaanglemult = (inst.reversespikes and -2 or 2) * PI * spacing
     inst.reversespikes = not inst.reversespikes
     local delay = 0
@@ -1165,7 +1174,7 @@ local function DoPlantBloom(inst)
     local x, y, z = inst.Transform:GetWorldPosition()
     local map = TheWorld.Map
     local offset = FindValidPositionByFan(
-        math.random() * 2 * PI,
+        math.random() * TWOPI,
         math.random() * 3,
         8,
         function(offset)
@@ -1231,7 +1240,7 @@ local function OnDecay(inst)
     if not inst.components.health:IsDead() then
         -- If we tried to decay while we're dunked in the ocean, we can't die to
         -- health:Kill(), so queue up the task until we finish washing ashore.
-        if inst.sg:HasStateTag("drowning") then
+        if inst.sg:HasStateTag("drowning") or inst.sg:HasStateTag("falling") then
             inst._decaytask = inst:DoTaskInTime(2 + math.random(), OnDecay)
         else
             --No chance fuel drops if decayed due to daylight
@@ -1334,6 +1343,8 @@ local function common_fn(bank, build, shadowsize, canfight, atriumstalker)
 		inst.controller_priority_override_is_epic = function()
 			return not inst._hasshield:value()
 		end
+    else
+        inst:AddTag("smallepic")
     end
 
     if canfight then

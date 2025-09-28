@@ -37,8 +37,11 @@ function UIAnimButton:OnLoseFocus()
 
 	if self:IsSelected() or self:IsDisabledState() then return end
 
-    if self:IsEnabled() and self.idleanimation and not self.animstate:IsCurrentAnimation(self.idleanimation) then
+    if self:IsEnabled() and self.idleanimation and not self.animstate:IsCurrentAnimation(self.idleanimation) then        
         self.animstate:PlayAnimation(self.idleanimation, self.loops[self.idleanimation])
+        if self.onlosefocus then
+            self.onlosefocus()
+        end        
     end
 end
 
@@ -52,7 +55,9 @@ function UIAnimButton:OnControl(control, down)
                 self.animstate:PlayAnimation(self.downanimation, self.loops[self.downanimation])
             end
 
-            TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
+            if not self.stopclicksound then
+				TheFrontEnd:GetSound():PlaySound(self.overrideclicksound or "dontstarve/HUD/click_move")
+            end
 
             self.down = true
             if self.whiledown then
@@ -92,6 +97,12 @@ end
 function UIAnimButton:SetOnFocus(fn)
     if fn then
         self.onfocus = fn
+    end
+end
+
+function UIAnimButton:SetOnLoseFocus(fn)
+    if fn then
+        self.onlosefocus = fn
     end
 end
 

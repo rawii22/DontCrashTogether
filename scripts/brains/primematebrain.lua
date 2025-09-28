@@ -74,7 +74,7 @@ function rowboat(inst)
         local radius = boat.components.walkableplatform.platform_radius - 0.35 
         pos = boat:GetPosition()
 
-        local offset = FindWalkableOffset(pos, math.random()*2*PI, radius, 12, false,false,nil,false,true)
+        local offset = FindWalkableOffset(pos, math.random()*TWOPI, radius, 12, false,false,nil,false,true)
         if offset then
             pos = pos + offset
         end
@@ -202,6 +202,7 @@ function PrimemateBrain:OnStart()
     local root = PriorityNode(
     {
 		BrainCommon.PanicTrigger(self.inst),
+        BrainCommon.ElectricFencePanicTrigger(self.inst),
 
         ChattyNode(self.inst, "MONKEY_TALK_ABANDON",
             DoAction(self.inst, DoAbandon, "abandon", true )),

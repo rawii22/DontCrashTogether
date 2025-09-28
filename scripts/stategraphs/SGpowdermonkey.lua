@@ -31,15 +31,17 @@ local actionhandlers =
     ActionHandler(ACTIONS.ABANDON, "dive"),
 }
 
-local events=
+local events =
 {
     CommonHandlers.OnLocomote(false, true),
     CommonHandlers.OnFreeze(),
+	CommonHandlers.OnElectrocute(),
     CommonHandlers.OnAttacked(),
     CommonHandlers.OnAttack(),
     CommonHandlers.OnDeath(),
     CommonHandlers.OnHop(),
     CommonHandlers.OnSink(),
+    CommonHandlers.OnFallInVoid(),
     CommonHandlers.OnSleep(),
 
     EventHandler("victory", function(inst, data)
@@ -59,6 +61,10 @@ local events=
     end),
 }
 
+local function go_to_idle(inst)
+    inst.sg:GoToState("idle")
+end
+
 local states =
 {
     State{
@@ -76,15 +82,9 @@ local states =
             inst.SoundEmitter:PlaySound("monkeyisland/powdermonkey/idle")
         end,
 
-        timeline =
-        {
-
-        },
-
-        events=
+        events =
         {
             EventHandler("animover", function(inst)
-
                 if inst.components.combat.target and
                     inst.components.combat.target:HasTag("player") then
 
@@ -117,14 +117,14 @@ local states =
            -- inst.SoundEmitter:PlaySound("dontstarve/wilson/make_trap", "make")
         end,
 
-        onexit = function(inst)
-        end,
-
         timeline =
         {
             TimeEvent(6*FRAMES, function(inst)
-                if inst:GetBufferedAction() and inst:GetBufferedAction().target and inst:GetBufferedAction().target.components.boatcannon then
-                    if inst.cannon then inst.cannon.operator = nil end
+                local ba = inst:GetBufferedAction()
+                if ba and ba.target
+                        and ba.target.components.boatcannon
+                        and inst.cannon ~= nil then
+                    inst.cannon.operator = nil
                     inst.cannon = nil
                 end
 
@@ -133,11 +133,9 @@ local states =
             end),
         },
 
-        events=
+        events =
         {
-            EventHandler("animqueueover", function (inst)
-                inst.sg:GoToState("idle")
-            end),
+            EventHandler("animqueueover", go_to_idle),
         }
     },
 
@@ -148,8 +146,6 @@ local states =
             inst.Physics:Stop()
             inst.AnimState:PlayAnimation("atk")
         end,
-        onexit = function(inst)
-        end,
 
         timeline =
         {
@@ -159,14 +155,11 @@ local states =
             end),
         },
 
-        events=
+        events =
         {
-            EventHandler("animover", function (inst)
-                inst.sg:GoToState("idle")
-            end),
+            EventHandler("animover", go_to_idle),
         }
     },
-
 
     State{
 
@@ -185,11 +178,9 @@ local states =
             end)
         },
 
-        events=
+        events =
         {
-            EventHandler("animover", function (inst)
-                inst.sg:GoToState("idle")
-            end),
+            EventHandler("animover", go_to_idle),
         }
     },
 
@@ -215,20 +206,16 @@ local states =
                 inst.AnimState:PlayAnimation("action_victory_pre")
 
                 inst.SoundEmitter:PlaySound("monkeyisland/powdermonkey/victory_pre")
-            else 
+            else
                 inst.sg:GoToState("victory_pst", data)
             end
         end,
 
-        events=
+        events =
         {
             EventHandler("animover", function (inst)
                 inst.sg:GoToState("victory_pst", {say = inst.sg.statemem.say} )
             end),
-          --[[  EventHandler("attacked", function (inst)
-                inst.sg:GoToState("hit")
-            end),
-            ]]
         }
     },
 
@@ -241,8 +228,9 @@ local states =
             inst.AnimState:PlayAnimation("victory")
             inst.SoundEmitter:PlaySound("monkeyisland/powdermonkey/victory")
 
-            inst.components.talker:Say(data and data.say or STRINGS["MONKEY_BATTLECRY_VICTORY_CHEER"][math.random(1,#STRINGS["MONKEY_BATTLECRY_VICTORY_CHEER"])])
-
+            local say_script = (data and data.say)
+                or STRINGS["MONKEY_BATTLECRY_VICTORY_CHEER"][math.random(#STRINGS["MONKEY_BATTLECRY_VICTORY_CHEER"])]
+            inst.components.talker:Say(say_script)
         end,
 
         timeline =
@@ -268,11 +256,9 @@ local states =
             end),
         },
 
-        events=
+        events =
         {
-            EventHandler("animover", function (inst)
-                inst.sg:GoToState("idle")
-            end),
+            EventHandler("animover", go_to_idle),
         }
     },
 
@@ -293,16 +279,16 @@ local states =
             TimeEvent(8*FRAMES, function(inst)
                 local waittime = FRAMES*8
                 for i = 0, 3 do
-                    inst:DoTaskInTime((i * waittime), function() inst.SoundEmitter:PlaySound("monkeyisland/powdermonkey/eat") end)
+                    inst:DoTaskInTime((i * waittime), function(inst2)
+                        inst2.SoundEmitter:PlaySound("monkeyisland/powdermonkey/eat")
+                    end)
                 end
             end)
         },
 
-        events=
+        events =
         {
-            EventHandler("animover", function (inst)
-                inst.sg:GoToState("idle")
-            end),
+            EventHandler("animover", go_to_idle),
         }
     },
 
@@ -320,21 +306,18 @@ local states =
         {
             TimeEvent(8*FRAMES, function(inst)
                 local bc = inst.components.crewmember and inst.components.crewmember.boat and inst.components.crewmember.boat.components.boatcrew or nil                
-                if inst.sg.statemem.say then
-                    inst.components.talker:Say(inst.sg.statemem.say)
-                elseif bc and bc.status == "retreat" then
-                    inst.components.talker:Say(STRINGS["MONKEY_TALK_RETREAT"][math.random(1,#STRINGS["MONKEY_TALK_RETREAT"])])
-                else
-                    inst.components.talker:Say(STRINGS["MONKEY_BATTLECRY"][math.random(1,#STRINGS["MONKEY_BATTLECRY"])])
-                end
-                
+                inst.components.talker:Say(
+                    inst.sg.statemem.say
+                    or (bc and bc.statis == "retreat" and STRINGS["MONKEY_TALK_RETREAT"][math.random(#STRINGS["MONKEY_TALK_RETREAT"])])
+                    or STRINGS["MONKEY_BATTLECRY"][math.random(#STRINGS["MONKEY_BATTLECRY"])]
+                )
                 inst.SoundEmitter:PlaySound("monkeyisland/powdermonkey/taunt")
             end)
         },
 
-        events=
+        events =
         {
-            EventHandler("animover", function(inst) inst.sg:GoToState("idle") end),
+            EventHandler("animover", go_to_idle),
         },
     },
 
@@ -355,9 +338,6 @@ local states =
 
         end,
 
-        onexit = function(inst)
-        end,
-
         timeline =
         {
             TimeEvent(7*FRAMES, function(inst)
@@ -369,15 +349,11 @@ local states =
             end),
         },
 
-        events=
+        events =
         {
             EventHandler("animqueueover", function (inst)
                 if inst.components.crewmember and inst.components.crewmember:Shouldrow() then
-                    if math.random()<0.1 then
-                        inst.sg:GoToState("taunt")
-                    else
-                        inst.sg:GoToState("row")
-                    end
+                    inst.sg:GoToState((math.random() < 0.1 and "taunt") or "row")
                 else
                     inst.sg:GoToState("idle")
                 end
@@ -393,7 +369,7 @@ local states =
         onenter = function(inst)
             local platform = inst:GetCurrentPlatform()
             if platform then
-                local pt = Vector3(inst.Transform:GetWorldPosition())
+                local pt = inst:GetPosition()
                 local angle = platform:GetAngleToPoint(pt)
                 inst.Transform:SetRotation(angle)
             end
@@ -409,7 +385,6 @@ local states =
         timeline =
         {
             TimeEvent(10*FRAMES, function(inst)
-
                 inst.sg.statemem.collisionmask = inst.Physics:GetCollisionMask()
                 inst.Physics:SetCollisionMask(COLLISION.GROUND)
                 if not TheWorld.ismastersim then
@@ -436,13 +411,14 @@ local states =
             end
         end,
 
-        events=
+        events =
         {
             EventHandler("animover", function(inst)
-                if TheWorld.Map:IsVisualGroundAtPoint(inst.Transform:GetWorldPosition()) or inst:GetCurrentPlatform() then
+                local x, y, z = inst.Transform:GetWorldPosition()
+                if TheWorld.Map:IsVisualGroundAtPoint(x, y, z) or inst:GetCurrentPlatform() then
                     inst.sg:GoToState("dive_pst_land")
                 else
-                    SpawnPrefab("splash_green").Transform:SetPosition(inst.Transform:GetWorldPosition())
+                    SpawnPrefab("splash_green").Transform:SetPosition(x, y, z)
 
 					inst.components.inventory:DropEverything(true)
                     inst:Remove()
@@ -467,9 +443,9 @@ local states =
             end),
         },
 
-        events=
+        events =
         {
-            EventHandler("animover", function(inst) inst.sg:GoToState("idle") end),
+            EventHandler("animover", go_to_idle),
         },
     },
 
@@ -486,12 +462,11 @@ local states =
             PlayFootstep(inst)
         end,
 
-        events=
+        events =
         {
-            EventHandler("animover", function(inst) inst.sg:GoToState("idle") end),
+            EventHandler("animover", go_to_idle),
         },
-    },    
-
+    },
 }
 
 CommonStates.AddWalkStates(states,
@@ -503,13 +478,13 @@ CommonStates.AddWalkStates(states,
 
 	walktimeline =
     {
-        TimeEvent(5*FRAMES, function(inst) PlayFootstep(inst) end),
-        TimeEvent(13*FRAMES, function(inst) PlayFootstep(inst) end),
+        TimeEvent(5*FRAMES, PlayFootstep),
+        TimeEvent(13*FRAMES, PlayFootstep),
 	},
 
     endtimeline =
     {
-        TimeEvent(5*FRAMES, function(inst) PlayFootstep(inst) end),
+        TimeEvent(5*FRAMES, PlayFootstep),
     },
 })
 
@@ -518,21 +493,21 @@ CommonStates.AddSleepStates(states,
 {
     starttimeline =
     {
-        TimeEvent(1*FRAMES, function(inst)
+        TimeEvent(FRAMES, function(inst)
             inst.SoundEmitter:PlaySound("monkeyisland/powdermonkey/sleep_pre") 
         end),
     },
 
     sleeptimeline =
     {
-        TimeEvent(1*FRAMES, function(inst)
+        TimeEvent(FRAMES, function(inst)
             inst.SoundEmitter:PlaySound("monkeyisland/powdermonkey/sleep_lp", "sleep_lp") 
         end),
     },
 
     endtimeline =
     {
-        TimeEvent(1*FRAMES, function(inst)
+        TimeEvent(FRAMES, function(inst)
             inst.SoundEmitter:PlaySound("monkeyisland/powdermonkey/sleep_pst") 
         end),
     },
@@ -555,38 +530,36 @@ CommonStates.AddCombatStates(states,
                 inst.components.combat:DoAttack()
             end
 
-            if inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) then
-                inst.SoundEmitter:PlaySound("monkeyisland/powdermonkey/attack_sword")
-            else
-                inst.SoundEmitter:PlaySound("monkeyisland/powdermonkey/attack_unarmed")
-            end
-
+            inst.SoundEmitter:PlaySound(
+                (inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) and "monkeyisland/powdermonkey/attack_sword")
+                or "monkeyisland/powdermonkey/attack_unarmed"
+            )
         end),
     },
 
     hittimeline =
     {
-        TimeEvent(1*FRAMES, function(inst)
+        TimeEvent(FRAMES, function(inst)
             inst.components.timer:StartTimer("hit",2+(math.random()*2))
-            inst.SoundEmitter:PlaySound("monkeyisland/powdermonkey/hit") end),
+            inst.SoundEmitter:PlaySound("monkeyisland/powdermonkey/hit")
+        end),
     },
 
     deathtimeline =
     {
-        TimeEvent(1*FRAMES, function(inst)
-            inst.SoundEmitter:PlaySound("monkeyisland/powdermonkey/death") end),
+        TimeEvent(FRAMES, function(inst)
+            inst.SoundEmitter:PlaySound("monkeyisland/powdermonkey/death")
+        end),
     },
 },nil,{
     attackanimfn = function(inst) 
-        if inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) then
-            return "atk"
-        else
-            return "unequipped_atk"
-        end
+        return (inst.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) and "atk")
+            or "unequipped_atk"
     end
 })
 
 CommonStates.AddFrozenStates(states)
+CommonStates.AddElectrocuteStates(states)
 CommonStates.AddHopStates(states, true, { pre = "boat_jump_pre", loop = "boat_jump_loop", pst = "boat_jump_pst"})
 
 return StateGraph("powdermonkey", states, events, "idle", actionhandlers)

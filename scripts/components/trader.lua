@@ -31,6 +31,7 @@ local Trader = Class(function(self, inst)
     self.abletoaccepttest = nil
 
     self.acceptstacks = nil
+    --self.acceptsmimics = nil
 
     --V2C: Recommended to explicitly add tags to prefab pristine state
     --On construciton, "trader" tag is added by default
@@ -48,12 +49,19 @@ function Trader:OnRemoveFromEntity()
 end
 
 function Trader:IsTryingToTradeWithMe(inst)
+	local target
     local act = inst:GetBufferedAction()
-    return act ~= nil
-        and act.target == self.inst
-        and (act.action == ACTIONS.GIVETOPLAYER or
-            act.action == ACTIONS.GIVEALLTOPLAYER or
-            act.action == ACTIONS.GIVE)
+	if act then
+		target = act.target
+		act = act.action
+	elseif inst.components.playercontroller then
+		act, target = inst.components.playercontroller:GetRemoteInteraction()
+	end
+	return target == self.inst
+		and (	act == ACTIONS.GIVE or
+				act == ACTIONS.GIVEALLTOPLAYER or
+				act == ACTIONS.GIVETOPLAYER
+			)
 end
 
 function Trader:IsAcceptingStacks()
@@ -98,6 +106,8 @@ function Trader:AbleToAccept(item, giver, count)
 
     if not self.enabled or item == nil then
         return false
+    elseif not self.acceptsmimics and item.components.itemmimic then
+        return false, "ITEMMIMIC"
     elseif self.abletoaccepttest ~= nil then
         return self.abletoaccepttest(self.inst, item, giver, count)
     elseif self.inst.components.health ~= nil and self.inst.components.health:IsDead() then
@@ -145,12 +155,12 @@ function Trader:AcceptGift(giver, item, count)
         self.inst:PushEvent("trade", { giver = giver, item = item })
 
         return true
+    else
+        if self.onrefuse ~= nil then
+            self.onrefuse(self.inst, giver, item)
+        end
+        return false
     end
-
-    if self.onrefuse ~= nil then
-        self.onrefuse(self.inst, giver, item)
-    end
-    return false
 end
 
 function Trader:GetDebugString()

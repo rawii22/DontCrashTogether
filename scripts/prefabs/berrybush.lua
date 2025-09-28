@@ -182,7 +182,7 @@ local function dig_up_common(inst, worker, numberries)
                     inst.components.lootdropper:SpawnLootPrefab(inst.components.pickable.product, pt)
                 end
             end
-            inst.components.lootdropper:SpawnLootPrefab("dug_"..inst.prefab)
+            inst.components.lootdropper:SpawnLootPrefab("dug_"..inst.prefab, nil, inst.linked_skinname, inst.skin_id)
         end
     end
     inst:Remove()
@@ -247,6 +247,7 @@ local function createbush(name, inspectname, berryname, master_postinit)
         inst.entity:AddMiniMapEntity()
         inst.entity:AddNetwork()
 
+		inst:SetDeploySmartRadius(DEPLOYSPACING_RADIUS[DEPLOYSPACING.DEFAULT] / 2) --plantables deployspacing/2
         MakeSmallObstaclePhysics(inst, .1)
 
         inst:AddTag("bush")
@@ -312,6 +313,7 @@ local function createbush(name, inspectname, berryname, master_postinit)
 
         inst:ListenForEvent("onwenthome", shake)
         MakeSnowCovered(inst)
+        SetLunarHailBuildupAmountSmall(inst)
         MakeNoGrowInWinter(inst)
 
         MakeWaxablePlant(inst)

@@ -128,7 +128,7 @@ local function fling_portal_loot(inst, loot_to_drop)
     else
         loot_to_drop.Transform:SetPosition(fling_pos:Get())
 
-        local hopout_offset = FindWalkableOffset(portal_pos, 2*PI*math.random(), 3, nil, true, false)
+        local hopout_offset = FindWalkableOffset(portal_pos, TWOPI*math.random(), 3, nil, true, false)
         if hopout_offset then
             portal_pos = portal_pos + hopout_offset
         end
@@ -436,6 +436,8 @@ local function fn()
 
 	inst.Test = try_portal_spawn
     inst._TestPortalEvent = start_portal_event
+
+    TheWorld:PushEvent("ms_register_monkeyisland_portal", inst)
 
     return inst
 end

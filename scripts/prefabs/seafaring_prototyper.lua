@@ -98,6 +98,7 @@ local function fn()
     inst.entity:AddSoundEmitter()
     inst.entity:AddNetwork()
 
+	inst:SetDeploySmartRadius(1) --recipe min_spacing/2
     MakeObstaclePhysics(inst, .4)
 
     inst.MiniMapEntity:SetPriority(5)
@@ -111,8 +112,6 @@ local function fn()
 
     --prototyper (from prototyper component) added to pristine state for optimization
     inst:AddTag("prototyper")
-
-    MakeSnowCoveredPristine(inst)
 
     inst.entity:SetPristine()
 
@@ -135,7 +134,6 @@ local function fn()
     inst.components.workable:SetWorkLeft(4)
     inst.components.workable:SetOnFinishCallback(onhammered)
     inst.components.workable:SetOnWorkCallback(onhit)
-    MakeSnowCovered(inst)
 
     MakeLargeBurnable(inst, nil, nil, true)
     MakeLargePropagator(inst)

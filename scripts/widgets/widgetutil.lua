@@ -23,14 +23,30 @@ function CanPrototypeRecipe(recipetree, buildertree)
     return true
 end
 
+local function BuilderCanAccessIngredientRecipe(builder, ing_prefab, ing_recipe, tech_level)
+	return builder:KnowsRecipe(ing_recipe) or (CanPrototypeRecipe(ing_recipe.level, tech_level) and builder:CanLearn(ing_prefab))
+end
+
 local function CanCraftIngredient(owner, ing, tech_level)
+	local builder = owner.replica.builder
+	if owner.replica.inventory:Has(ing.type, math.max(1, RoundBiasedUp(ing.amount * builder:IngredientMod())), true) then
+		return false
+	end
 	local ing_recipe = GetValidRecipe(ing.type)
-	return ing_recipe ~= nil
-		and not owner.replica.inventory:Has(ing.type, math.max(1, RoundBiasedUp(ing.amount * owner.replica.builder:IngredientMod())), true)
-		and (	owner.replica.builder:KnowsRecipe(ing_recipe) or
-				(CanPrototypeRecipe(ing_recipe.level, tech_level) and owner.replica.builder:CanLearn(ing.type))
-			)
-		and owner.replica.builder:HasIngredients(ing_recipe)
+	if ing_recipe == nil then
+		return false
+	elseif BuilderCanAccessIngredientRecipe(builder, ing.type, ing_recipe, tech_level) then
+		return builder:HasIngredients(ing_recipe)
+	elseif ing_recipe.forward_ingredients then
+		--V2C: skill tree might've locked basic ingredient recipe. try the forwarded ingredient recipes.
+		for i, v in ipairs(ing_recipe.forward_ingredients) do
+			ing_recipe = GetValidRecipe(v)
+			if ing_recipe and BuilderCanAccessIngredientRecipe(builder, v, ing_recipe, tech_level) then
+				return builder:HasIngredients(ing_recipe)
+			end
+		end
+	end
+	return false
 end
 
 local lastsoundtime = nil
@@ -148,4 +164,79 @@ function DoRecipeClick(owner, recipe, skin)
             end
         end
     end
+end
+
+local function GetXCoord(angle, width)
+    if angle >= 90 and angle <= 180 then -- left side
+        return 0
+    elseif angle <= 0 and angle >= -90 then -- right side
+        return width
+    else -- middle somewhere
+        if angle < 0 then
+            angle = -angle - 90
+        end
+        local pctX = 1 - (angle / 90)
+        return pctX * width
+    end
+end
+
+local function GetYCoord(angle, height)
+    if angle <= -90 and angle >= -180 then -- top side
+        return height
+    elseif angle >= 0 and angle <= 90 then -- bottom side
+        return 0
+    else -- middle somewhere
+        if angle < 0 then
+            angle = -angle
+        end
+        if angle > 90 then
+            angle = angle - 90
+        end
+        local pctY = (angle / 90)
+        return pctY * height
+    end
+end
+
+function GetIndicatorLocationAndAngle(owner, targX, targZ, w, h, bufferoverrides)
+    local angleToTarget = owner:GetAngleToPoint(targX, 0, targZ)
+    local downVector = TheCamera:GetDownVec()
+    local downAngle = -math.atan2(downVector.z, downVector.x) / DEGREES
+    local indicatorAngle = (angleToTarget - downAngle) + 45
+    while indicatorAngle > 180 do indicatorAngle = indicatorAngle - 360 end
+    while indicatorAngle < -180 do indicatorAngle = indicatorAngle + 360 end
+
+    local screenWidth, screenHeight = TheSim:GetScreenSize()
+
+    local x = GetXCoord(indicatorAngle, screenWidth)
+    local y = GetYCoord(indicatorAngle, screenHeight)
+
+    local TOP_EDGE_BUFFER = 20
+    local BOTTOM_EDGE_BUFFER = 40
+    local LEFT_EDGE_BUFFER = 67
+    local RIGHT_EDGE_BUFFER = 80
+    if bufferoverrides then
+        TOP_EDGE_BUFFER = bufferoverrides.TOP_EDGE_BUFFER or TOP_EDGE_BUFFER
+        BOTTOM_EDGE_BUFFER = bufferoverrides.BOTTOM_EDGE_BUFFER or BOTTOM_EDGE_BUFFER
+        LEFT_EDGE_BUFFER = bufferoverrides.LEFT_EDGE_BUFFER or LEFT_EDGE_BUFFER
+        RIGHT_EDGE_BUFFER = bufferoverrides.RIGHT_EDGE_BUFFER or RIGHT_EDGE_BUFFER
+    elseif bufferoverrides == false then
+        TOP_EDGE_BUFFER = 0
+        BOTTOM_EDGE_BUFFER = 0
+        LEFT_EDGE_BUFFER = 0
+        RIGHT_EDGE_BUFFER = 0
+    end
+
+    if x <= LEFT_EDGE_BUFFER + w then
+        x = LEFT_EDGE_BUFFER + w
+    elseif x >= screenWidth - RIGHT_EDGE_BUFFER - w then
+        x = screenWidth - RIGHT_EDGE_BUFFER - w
+    end
+
+    if y <= BOTTOM_EDGE_BUFFER + h then
+        y = BOTTOM_EDGE_BUFFER + h
+    elseif y >= screenHeight - TOP_EDGE_BUFFER - h then
+        y = screenHeight - TOP_EDGE_BUFFER - h
+    end
+
+    return x, y, indicatorAngle
 end

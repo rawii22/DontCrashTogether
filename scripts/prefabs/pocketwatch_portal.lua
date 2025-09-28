@@ -44,9 +44,9 @@ local function DoCastSpell(inst, doer, target, pos)
 
 	if recallmark:IsMarked() then
 		local pt = doer:GetPosition()
-		local offset = FindWalkableOffset(pt, math.random() * 2 * PI, 3 + math.random(), 16, false, true, noentcheckfn, true, true)
-						or FindWalkableOffset(pt, math.random() * 2 * PI, 5 + math.random(), 16, false, true, noentcheckfn, true, true)
-						or FindWalkableOffset(pt, math.random() * 2 * PI, 7 + math.random(), 16, false, true, noentcheckfn, true, true)
+		local offset = FindWalkableOffset(pt, math.random() * TWOPI, 3 + math.random(), 16, false, true, noentcheckfn, true, true)
+						or FindWalkableOffset(pt, math.random() * TWOPI, 5 + math.random(), 16, false, true, noentcheckfn, true, true)
+						or FindWalkableOffset(pt, math.random() * TWOPI, 7 + math.random(), 16, false, true, noentcheckfn, true, true)
 		if offset ~= nil then
 			pt = pt + offset
 		end
@@ -80,12 +80,12 @@ local function DoCastSpell(inst, doer, target, pos)
 		return true
 	else
 		local x, y, z = doer.Transform:GetWorldPosition()
-		recallmark:MarkPosition(x, y, z)
-		inst.SoundEmitter:PlaySound("wanda2/characters/wanda/watch/MarkPosition")
-
-		doer:DoTaskInTime(12 * FRAMES, DelayedMarkTalker) 
-
-		return true
+		local success, reason = recallmark:MarkPosition(x, y, z)
+		if success then
+			inst.SoundEmitter:PlaySound("wanda2/characters/wanda/watch/MarkPosition")
+			doer:DoTaskInTime(12 * FRAMES, DelayedMarkTalker) 
+		end
+		return success, reason
 	end
 end
 

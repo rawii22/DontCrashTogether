@@ -508,6 +508,48 @@ TileManager.AddTile(
 )
 
 TileManager.AddTile(
+    "LUNAR_MARSH",
+    TileRanges.LAND,
+    {ground_name = "Lunar Marsh"},
+    {
+        name="marsh",
+        noise_texture="Ground_noise_marsh",
+        runsound="dontstarve/movement/run_marsh",
+        walksound="dontstarve/movement/walk_marsh",
+        snowsound="dontstarve/movement/run_ice",
+        mudsound="dontstarve/movement/run_mud",
+        cannotbedug = true,
+        hard = true,
+        istemptile = true,
+    },
+    {
+        name="map_edge",
+        noise_texture="mini_marsh_noise",
+    }
+)
+
+TileManager.AddTile(
+    "SHADOW_MARSH",
+    TileRanges.LAND,
+    {ground_name = "Shadow Marsh"},
+    {
+        name="marsh",
+        noise_texture="Ground_noise_marsh",
+        runsound="dontstarve/movement/run_marsh",
+        walksound="dontstarve/movement/walk_marsh",
+        snowsound="dontstarve/movement/run_ice",
+        mudsound="dontstarve/movement/run_mud",
+        cannotbedug = true,
+        hard = true,
+        istemptile = true,
+    },
+    {
+        name="map_edge",
+        noise_texture="mini_marsh_noise",
+    }
+)
+
+TileManager.AddTile(
     "ROCKY",
     TileRanges.LAND,
     {ground_name = "Rocky", old_static_id = GROUND.ROCKY},
@@ -819,6 +861,30 @@ TileManager.AddTile(
 )
 
 TileManager.AddTile(
+    "VENT",
+    TileRanges.LAND,
+    {ground_name = "Vent Flooring" },
+    {
+        name="cave",
+        noise_texture="ground_noise_fumarole",
+        runsound="dontstarve/movement/run_dirt",
+        walksound="dontstarve/movement/walk_dirt",
+        snowsound="dontstarve/movement/run_ice",
+        mudsound="dontstarve/movement/run_mud",
+        hard = true,
+    },
+    {
+        name="map_edge",
+        noise_texture="ground_noise_fumarole_mini",
+    },
+    {
+        name = "vent", -- Inventory item
+        anim = "fumarole", -- Ground item
+        pickupsound = "rock",
+    }
+)
+
+TileManager.AddTile(
     "MUD",
     TileRanges.LAND,
     {ground_name = "Mud", old_static_id = GROUND.MUD},
@@ -851,6 +917,7 @@ TileManager.AddTile(
         walksound="dontstarve/movement/run_marble",
         snowsound="dontstarve/movement/run_ice",
         mudsound="dontstarve/movement/run_mud",
+        hard = true,
     },
     {
         name="map_edge",
@@ -859,6 +926,49 @@ TileManager.AddTile(
     {
         name = "archive",
         bank_build = "turf_archives",
+        pickupsound = "rock",
+    }
+)
+
+TileManager.AddTile(
+    "VAULT",
+    TileRanges.LAND,
+    {ground_name = "Vault"},
+    {
+        name="blocky",
+        noise_texture="Ground_noise_vault",
+        runsound="dontstarve/movement/run_marble",
+        walksound="dontstarve/movement/run_marble",
+        snowsound="dontstarve/movement/run_ice",
+        mudsound="dontstarve/movement/run_mud",
+        cannotbedug = true,
+        hard = true,
+    },
+    {
+        name="map_edge",
+        noise_texture="Ground_noise_vault_clean_mini",
+    }
+)
+
+TileManager.AddTile(
+    "VAULT_CLEAN",
+    TileRanges.LAND,
+    {ground_name = "Vault Clean"},
+    {
+        name="blocky",
+        noise_texture="Ground_noise_vault_clean",
+        runsound="dontstarve/movement/run_marble",
+        walksound="dontstarve/movement/run_marble",
+        snowsound="dontstarve/movement/run_ice",
+        mudsound="dontstarve/movement/run_mud",
+        hard = true,
+    },
+    {
+        name="map_edge",
+        noise_texture="Ground_noise_vault_clean_mini",
+    },
+    {
+        name = "vault", -- Inventory item
         pickupsound = "rock",
     }
 )
@@ -874,6 +984,7 @@ TileManager.AddTile(
         walksound="dontstarve/movement/walk_dirt",
         snowsound="dontstarve/movement/run_ice",
         mudsound="dontstarve/movement/run_mud",
+        hard = true,
     },
     {
         name="map_edge",
@@ -897,6 +1008,7 @@ TileManager.AddTile(
         walksound="dontstarve/movement/walk_dirt",
         snowsound="dontstarve/movement/run_ice",
         mudsound="dontstarve/movement/run_mud",
+        hard = true,
     },
     {
         name="map_edge",
@@ -920,6 +1032,7 @@ TileManager.AddTile(
         walksound="dontstarve/movement/walk_dirt",
         snowsound="dontstarve/movement/run_snow",
         mudsound="dontstarve/movement/run_mud",
+        hard = true,
     },
     {
         name="map_edge",
@@ -943,6 +1056,7 @@ TileManager.AddTile(
         walksound="dontstarve/movement/walk_dirt",
         snowsound="dontstarve/movement/run_ice",
         mudsound="dontstarve/movement/run_mud",
+        hard = true,
     },
     {
         name="map_edge",
@@ -966,6 +1080,7 @@ TileManager.AddTile(
         walksound="dontstarve/movement/walk_dirt",
         snowsound="dontstarve/movement/run_snow",
         mudsound="dontstarve/movement/run_mud",
+        hard = true,
     },
     {
         name="map_edge",
@@ -989,6 +1104,7 @@ TileManager.AddTile(
         walksound="dontstarve/movement/walk_dirt",
         snowsound="dontstarve/movement/run_ice",
         mudsound="dontstarve/movement/run_mud",
+        hard = true,
     },
     {
         name="map_edge",
@@ -1069,6 +1185,72 @@ TileManager.AddTile(
 )
 
 TileManager.AddTile(
+    "CHARLIE_VINE",
+    TileRanges.LAND,
+    {ground_name = "Charlie Vine"},
+    {
+        name="grass2",
+        noise_texture="ground_noise_vines",
+        runsound="dontstarve/movement/run_grass",
+        walksound="dontstarve/movement/walk_grass",
+        snowsound="dontstarve/movement/run_snow",
+        mudsound="dontstarve/movement/run_mud",
+        nogroundoverlays = true,
+        isinvisibletile = true,
+        cannotbedug = true,
+        hard = true,
+        istemptile = true,
+    },
+    {
+        name="map_edge",
+        noise_texture="mini_grass2_noise",
+    }
+)
+
+TileManager.AddTile(
+    "ROPE_BRIDGE",
+    TileRanges.LAND,
+    {ground_name = "Rope Bridge"},
+    {
+        name="blocky",
+        noise_texture="noise_woodfloor",
+        runsound="dontstarve/movement/run_cavesbridge",
+        walksound="dontstarve/movement/walk_cavesbridge",
+        snowsound="dontstarve/movement/run_ice",
+        mudsound="dontstarve/movement/run_mud",
+        nogroundoverlays = true,
+        isinvisibletile = true,
+        cannotbedug = true,
+        hard = true,
+        istemptile = true,
+    },
+    {
+        name="map_edge",
+        noise_texture="mini_woodfloor_noise",
+    }
+)
+
+TileManager.AddTile(
+    "WAGSTAFF_FLOOR",
+    TileRanges.LAND,
+    {ground_name = "Wagstaff Floor"},
+    {
+        name="blocky",
+        noise_texture="ground_noise_wagstaff_floor",
+        runsound="dontstarve/movement/run_wagdock",
+        walksound="dontstarve/movement/walk_wagdock",
+        snowsound="dontstarve/movement/walk_wagdock",
+        mudsound="dontstarve/movement/walk_wagdock",
+        cannotbedug = true,
+        hard = true,
+    },
+    {
+        name="map_edge",
+        noise_texture="mini_woodfloor_noise",
+    }
+)
+
+TileManager.AddTile(
     "SCALE",
     TileRanges.LAND,
     {ground_name = "Scale", old_static_id = GROUND.SCALE},
@@ -1079,7 +1261,8 @@ TileManager.AddTile(
         walksound="dontstarve/movement/run_marble",
         snowsound="dontstarve/movement/run_ice",
         mudsound="dontstarve/movement/run_mud",
-        flashpoint_modifier = 250,
+        flashpoint_modifier = 250, --Deprecated, as fire spread is completely disabled now.
+        no_fire_spread = true,
         flooring = true,
         hard = true,
     },
@@ -1352,6 +1535,7 @@ TileManager.AddTile(
         walksound="dontstarve/movement/walk_mud",
         snowsound="dontstarve/movement/run_snow",
         mudsound="dontstarve/movement/run_mud",
+        istemptile = true,
     },
     {
         name="map_edge",
@@ -1459,6 +1643,10 @@ TileManager.AddTile(
     "FUNGUS_NOISE",
     TileRanges.NOISE,
     {old_static_id = GROUND.FUNGUS_NOISE}
+)
+TileManager.AddTile(
+    "VENT_NOISE",
+    TileRanges.NOISE
 )
 
 mod_protect_TileManager = true

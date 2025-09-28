@@ -95,7 +95,6 @@ local function OnSeekOblivion(inst)
 		--reschedule
 		inst.components.timer:StartTimer("obliviate", .5)
 	else
-		inst:StopBrain()
 		inst:SetBrain(nil)
 		inst.components.health:Kill()
 	end
@@ -607,7 +606,7 @@ local function NoHoles(pt)
 end
 
 local function onbuilt(inst, builder)
-    local theta = math.random() * 2 * PI
+    local theta = math.random() * TWOPI
     local pt = builder:GetPosition()
     local radius = math.random(3, 6)
     local offset = FindWalkableOffset(pt, theta, radius, 12, true, true, NoHoles)

@@ -103,6 +103,9 @@ local function upgrade_onhammered(inst, worker)
 			inst:Remove()
 			return
 		end
+	elseif inst.components.container ~= nil then
+        --We might still have some overstacks, just not enough to "collapse"
+        inst.components.container:DropEverything()
 	end
 
 	--fallback to default
@@ -195,6 +198,9 @@ local function OnDecontructStructure(inst, caster)
 			inst.no_delete_on_deconstruct = true
 			return
 		end
+	elseif inst.components.container ~= nil then
+        --We might still have some overstacks, just not enough to "collapse"
+        inst.components.container:DropEverything()
 	end
 
 	--fallback to default
@@ -209,6 +215,8 @@ local function fn()
     inst.entity:AddSoundEmitter()
     inst.entity:AddMiniMapEntity()
     inst.entity:AddNetwork()
+
+	inst:SetDeploySmartRadius(0.75) --recipe min_spacing/2
 
     inst.MiniMapEntity:SetIcon("dragonflychest.png")
 

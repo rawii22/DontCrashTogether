@@ -64,6 +64,7 @@ local function fn()
     inst.entity:AddMiniMapEntity()
     inst.entity:AddNetwork()
 
+	inst:SetDeploySmartRadius(0.75) --recipe min_spacing/2
     MakeObstaclePhysics(inst, .2)
 
     inst.MiniMapEntity:SetIcon("sign.png")
@@ -104,6 +105,7 @@ local function fn()
     inst.components.workable:SetOnWorkCallback(onhit)
 
     MakeSnowCovered(inst)
+    SetLunarHailBuildupAmountSmall(inst)
 
     inst:AddComponent("savedrotation")
 
@@ -151,6 +153,8 @@ local function panelfn()
     -- TODO: Make workable, but transfer the work to the sign base instead
 
     MakeSnowCovered(inst)
+    -- TODO(JBK): The panel needs the workable transfer and so we will not want to have lunarhailbuildup here.
+    inst:RemoveComponent("lunarhailbuildup")
 
     inst.OnSave = onsave
     inst.OnLoad = onload

@@ -60,14 +60,14 @@ end
 
 local function onattunecost(inst, player)
     --round up health to match UI display
-	local amount_required = player:HasTag("health_as_oldage") and math.ceil(TUNING.EFFIGY_HEALTH_PENALTY * TUNING.OLDAGE_HEALTH_SCALE) or TUNING.EFFIGY_HEALTH_PENALTY
+    local amount_required = player:HasTag("health_as_oldage") and math.ceil(TUNING.EFFIGY_HEALTH_PENALTY * TUNING.OLDAGE_HEALTH_SCALE) or TUNING.EFFIGY_HEALTH_PENALTY
 
     if player.components.health == nil or math.ceil(player.components.health.currenthealth) <= amount_required then
-		--Don't die from attunement!
+        --Don't die from attunement!
         return false, "NOHEALTH"
     end
-    
-	player:PushEvent("consumehealthcost")
+
+    player:PushEvent("consumehealthcost")
     player.components.health:DoDelta(-TUNING.EFFIGY_HEALTH_PENALTY, false, "statue_attune", true, inst, true)
     return true
 end
@@ -122,6 +122,7 @@ local function fn()
     inst.entity:AddSoundEmitter()
     inst.entity:AddNetwork()
 
+	inst:SetDeploySmartRadius(1) --recipe min_spacing/2
     MakeObstaclePhysics(inst, .3)
 
     inst.MiniMapEntity:SetIcon("resurrect.png")

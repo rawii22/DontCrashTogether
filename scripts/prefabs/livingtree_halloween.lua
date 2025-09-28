@@ -173,6 +173,7 @@ local function makestump(inst, instant)
 
     inst:RemoveComponent("sanityaura")
     inst:RemoveComponent("workable")
+    inst:RemoveComponent("lunarhailbuildup")
     inst:RemoveComponent("burnable")
     MakeMediumBurnable(inst)
     inst:RemoveComponent("propagator")
@@ -306,7 +307,7 @@ local function fn()
     inst.AnimState:SetBuild("evergreen_living_wood_growable")
     inst.AnimState:PlayAnimation("idle_old", true)
 
-    inst:SetDeployExtraSpacing(TUNING.LIVINGTREE_EXTRA_SPACING)
+	inst:SetDeploySmartRadius(DEPLOYSPACING_RADIUS[DEPLOYSPACING.DEFAULT] / 2) --livingtree_root deployspacing/2
 
     MakeSnowCoveredPristine(inst)
 
@@ -359,6 +360,7 @@ local function fn()
     inst.components.growable:StartGrowing()
 
     MakeSnowCovered(inst)
+    SetLunarHailBuildupAmountLarge(inst)
 
     inst.growfromseed = GrowFromSeed
 

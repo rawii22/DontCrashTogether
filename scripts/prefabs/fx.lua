@@ -3,10 +3,17 @@ local function PlaySound(inst, sound)
 end
 
 local function MakeFx(t)
-    local assets =
-    {
-        Asset("ANIM", "anim/"..t.build..".zip")
-    }
+    local assets
+    if t.build_is_skin then
+        assets = {
+            Asset("DYNAMIC_ANIM", "anim/dynamic/"..t.build..".zip"),
+            Asset("PKGREF", "anim/dynamic/"..t.build..".dyn"),
+        }
+    else
+        assets = {
+            Asset("ANIM", "anim/"..t.build..".zip"),
+        }
+    end
 
     local function startfx(proxy)
         --print ("SPAWN", debugstack())
@@ -97,12 +104,12 @@ local function MakeFx(t)
         if t.fn ~= nil then
             if t.fntime ~= nil then
                 if t.update_while_paused then
-                    inst:DoStaticTaskInTime(t.fntime, t.fn)
+                    inst:DoStaticTaskInTime(t.fntime, t.fn, proxy)
                 else
-                    inst:DoTaskInTime(t.fntime, t.fn)
+                    inst:DoTaskInTime(t.fntime, t.fn, proxy)
                 end
             else
-                t.fn(inst)
+                t.fn(inst, proxy)
             end
         end
 

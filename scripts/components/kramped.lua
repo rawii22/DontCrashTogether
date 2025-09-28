@@ -34,7 +34,7 @@ local function GetSpawnPoint(pt)
     if not TheWorld.Map:IsAboveGroundAtPoint(pt:Get()) then
         pt = FindNearbyLand(pt, 1) or pt
     end
-    local offset = FindWalkableOffset(pt, math.random() * 2 * PI, SPAWN_DIST, 12, true, true, NoHoles)
+    local offset = FindWalkableOffset(pt, math.random() * TWOPI, SPAWN_DIST, 12, true, true, NoHoles)
     if offset ~= nil then
         offset.x = offset.x + pt.x
         offset.z = offset.z + pt.z
@@ -91,7 +91,8 @@ local function OnKilledOther(player, data)
             local playerdata = _activeplayers[player]
             if not (data.victim.prefab == "pigman" and
                     data.victim.components.werebeast ~= nil and
-                    data.victim.components.werebeast:IsInWereState()) then
+                    data.victim.components.werebeast:IsInWereState())
+                and (not data.victim:HasTag("shadowthrall_parasite_hosted") and not data.victim.was_shadowthrall_parasited) then
                 local naughty_val = FunctionOrValue(naughtiness, player, data)
                 OnNaughtyAction(naughty_val * (data.stackmult or 1), playerdata)
             end

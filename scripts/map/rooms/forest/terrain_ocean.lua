@@ -19,9 +19,10 @@ AddRoom("OceanCoastal", {
 						distributepercent = 0.01,
 						distributeprefabs =
 						{
-							driftwood_log = 1,
-							bullkelp_plant = 2,
-							messagebottle = 0.08,
+							driftwood_log = 3,
+							bullkelp_plant = 6,
+							messagebottle = 0.24,
+							boat_otterden = 1,
 						},
 
 						countstaticlayouts =
@@ -36,16 +37,19 @@ AddRoom("OceanSwell", {
 					value = WORLD_TILES.OCEAN_SWELL,
 				    required_prefabs = {"crabking_spawner"},
 					contents =  {
-						distributepercent = 0.005,
+						distributepercent = 0.004,
 						distributeprefabs =
 						{
 							seastack = 1.0,
 							seastack_spawner_swell = 0.10,
-							oceanfish_shoalspawner = 0.07,
+							oceanfish_shoalspawner = 0.08,
                         },
 						countstaticlayouts =
 						{
 							["CrabKing"] = 1,
+							["AbandonedBoat1"] = function () return math.random(0, 1) end,
+							["AbandonedBoat2"] = function () return math.random(0, 1) end,
+							["OceanMonument"]  = function () return math.random(0, 2) end,
 						},
 					}})
 
@@ -56,9 +60,10 @@ AddRoom("OceanRough", {
                         "hermithouse_construction1",
                         "waterplant",
 						"monkeyqueen",
+                        "oceanwhirlbigportal",
                     },
 					contents =  {
-						distributepercent = 0.01 ,
+						distributepercent = 0.01,
 						distributeprefabs =
 						{
 							seastack = 1,
@@ -68,7 +73,9 @@ AddRoom("OceanRough", {
 						countstaticlayouts =
 						{
 							["HermitcrabIsland"] = 1,
-							["MonkeyIsland"] = 1,
+							["MonkeyIsland"]      = function() return WorldSim:GetWorldSize() >= 425 and 1 or 0 end,
+							["MonkeyIslandSmall"] = function() return WorldSim:GetWorldSize() < 425  and 1 or 0 end,
+                            ["OceanWhirlBigPortal"] = 1,
 						},
 					}})
 

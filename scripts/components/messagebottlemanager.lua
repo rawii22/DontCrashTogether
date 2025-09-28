@@ -24,7 +24,12 @@ local WATER_RADIUS_CHECK_BIAS = -4
 local SHORE_CHECK_RADIUS = 2
 local SHORE_CHECK_ATTEMPTS = 12
 
-local MAX_ACTIVE_TREASURE_HUNTS = 4
+local BLOCKER_TAGS = {"blocker"}
+
+local WHIRL_PORTAL_TAGS = {"oceanwhirlbigportal"}
+local WHIRL_PORTAL_RADIUS = 16 -- Perfectly matching the spatial cell radius!
+
+local BLOCKER_RADIUS = 1
 
 --------------------------------------------------------------------------
 --[[ Member variables ]]
@@ -67,7 +72,7 @@ local function getoffsetfromtreasurespawnpoint(point_ind, radius, attempts, doer
 	local pt = gettreasurespawnpointfromindex(point_ind)
 
 	-- Checks for a point in the ocean around the given point
-	local offset = FindSwimmableOffset(pt, math.random() * 2 * PI, radius, attempts)
+	local offset = FindSwimmableOffset(pt, math.random() * TWOPI, radius, attempts)
 	if offset == nil then
 		return nil
 	end
@@ -81,6 +86,19 @@ local function getoffsetfromtreasurespawnpoint(point_ind, radius, attempts, doer
 	-- If a point was found a check is also made to make sure it's not right next to land
 	if FindSwimmableOffset(Vector3(x, y, z), 0, SHORE_CHECK_RADIUS, SHORE_CHECK_ATTEMPTS) == nil then
 		return nil
+	end
+	
+	-- Don't spawn close to a big whirl portal
+	if TheSim:CountEntities(x, y, z, WHIRL_PORTAL_RADIUS, WHIRL_PORTAL_TAGS) > 0 then
+		return nil
+	end
+
+	-- Don't spawn close to a blocker
+	for _, ent in ipairs(TheSim:FindEntities(x, y, z, BLOCKER_RADIUS + MAX_PHYSICS_RADIUS, nil, nil, BLOCKER_TAGS)) do
+		local range = BLOCKER_RADIUS + ent:GetPhysicsRadius(0)
+		if ent:GetDistanceSqToPoint(x, 0, z) < range * range then
+			return nil
+		end
 	end
 
 	for _, v in ipairs(AllPlayers) do
@@ -190,7 +208,7 @@ function self:UseMessageBottle(bottle, doer, is_not_from_hermit)
 		local pos, reason
 		local num_active_hunts = GetTableSize(self.active_treasure_hunt_markers)
 
-		if num_active_hunts < MAX_ACTIVE_TREASURE_HUNTS then
+		if num_active_hunts < TUNING.MAX_ACTIVE_TREASURE_HUNTS then
 			pos, reason = gettreasurepos(doer)
 
 			if pos and pos.x ~= nil then
@@ -204,9 +222,9 @@ function self:UseMessageBottle(bottle, doer, is_not_from_hermit)
 			local active_hunt = nil
 
 			-- Iterate in random order
-			local rand = math.random(MAX_ACTIVE_TREASURE_HUNTS)
-			for i = 1, MAX_ACTIVE_TREASURE_HUNTS do
-				local ind = ((i + rand) % MAX_ACTIVE_TREASURE_HUNTS) + 1
+			local rand = math.random(TUNING.MAX_ACTIVE_TREASURE_HUNTS)
+			for i = 1, TUNING.MAX_ACTIVE_TREASURE_HUNTS do
+				local ind = ((i + rand) % TUNING.MAX_ACTIVE_TREASURE_HUNTS) + 1
 
 				local keys = {}
 				for k, v in pairs(self.active_treasure_hunt_markers) do

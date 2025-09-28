@@ -148,8 +148,10 @@ local function common(bank, build, anim, tags, dryable, cookable)
     end
 
     if dryable ~= nil then
-        --dryable (from dryable component) added to pristine state for optimization
-        inst:AddTag("dryable")
+		if dryable.product then
+			--dryable (from dryable component) added to pristine state for optimization
+			inst:AddTag("dryable")
+		end
         inst:AddTag("lureplant_bait")
     end
 
@@ -209,7 +211,8 @@ local function common(bank, build, anim, tags, dryable, cookable)
 end
 
 local function humanmeat()
-    local inst = common("meat_human", "meat_human", "raw", nil, { product = "humanmeat_dried", time = TUNING.DRY_FAST }, { product = "humanmeat_cooked" })
+    --selfstacker (from selfstacker component) added to pristine state for optimization
+    local inst = common("meat_human", "meat_human", "raw", {"selfstacker"}, { product = "humanmeat_dried", time = TUNING.DRY_FAST }, { product = "humanmeat_cooked" })
 
     if not TheWorld.ismastersim then
         return inst
@@ -266,7 +269,8 @@ local function humanmeat_dried()
 end
 
 local function monster()
-    local inst = common("monstermeat", "meat_monster", "idle", { "monstermeat" }, { product = "monstermeat_dried", time = TUNING.DRY_FAST }, { product = "cookedmonstermeat" })
+    --selfstacker (from selfstacker component) added to pristine state for optimization
+    local inst = common("monstermeat", "meat_monster", "idle", { "monstermeat", "selfstacker" }, { product = "monstermeat_dried", time = TUNING.DRY_FAST }, { product = "cookedmonstermeat" })
 
     if not TheWorld.ismastersim then
         return inst
@@ -566,6 +570,8 @@ local function batwing()
 
     inst.components.perishable:SetPerishTime(TUNING.PERISH_FAST)
 
+	inst:AddComponent("snowmandecor")
+
     return inst
 end
 
@@ -638,7 +644,8 @@ local function quagmire_cookedsmallmeat()
 end
 
 local function barnacle()
-    local inst = common("barnacle", "barnacle", "raw", {"barnacle", "rawmeat"}, nil, { product = "barnacle_cooked" })
+    --selfstacker (from selfstacker component) added to pristine state for optimization
+    local inst = common("barnacle", "barnacle", "raw", {"barnacle", "rawmeat", "selfstacker"}, nil, { product = "barnacle_cooked" })
 
     if not TheWorld.ismastersim then
         return inst

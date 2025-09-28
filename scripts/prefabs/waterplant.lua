@@ -356,6 +356,10 @@ local function on_load(inst, data)
     update_barnacle_layers(inst, inst.components.harvestable.produce / inst.components.harvestable.maxproduce)
 end
 
+local function on_landed_initialize(inst)
+    inst.components.floater:OnLandedServer()
+end
+
 local PRIZE_PREFAB = "barnacle"
 local function fn()
     local inst = CreateEntity()
@@ -368,6 +372,7 @@ local function fn()
 
     inst:SetPhysicsRadiusOverride(2.35)
     MakeWaterObstaclePhysics(inst, 0.80, 2, 0.75)
+    MakeCollidesWithElectricField(inst)
 
     inst.MiniMapEntity:SetIcon("barnacle_plant.png")
 
@@ -401,6 +406,7 @@ local function fn()
     inst.AnimState:SetFinalOffset(1)
 
     MakeInventoryFloatable(inst, "med", 0.1, {1.1, 0.9, 1.1})
+    inst.components.floater:SetIsObstacle()
     inst.components.floater.bob_percent = 0
     inst.components.floater.splash = false
 
@@ -408,6 +414,9 @@ local function fn()
     if not TheWorld.ismastersim then
         return inst
     end
+
+	inst.override_combat_fx_size = "med"
+	inst.override_combat_fx_height = "high"
 
     inst.base = SpawnPrefab("waterplant_base")
     inst.base.entity:SetParent(inst.entity)
@@ -421,9 +430,7 @@ local function fn()
     inst.highlightchildren = { inst.base }
 
     local land_time = (POPULATING and math.random()*5*FRAMES) or 0
-    inst:DoTaskInTime(land_time, function(inst)
-        inst.components.floater:OnLandedServer()
-    end)
+    inst:DoTaskInTime(land_time, on_landed_initialize)
 
     inst:AddComponent("sleeper")
 
@@ -498,6 +505,7 @@ local function fn()
     inst.PushSyncAnimation = syncanimpush
 
     inst:SetStateGraph("SGwaterplant")
+	inst.sg.mem.burn_on_electrocute = true
     inst:SetBrain(brain)
 
     inst.components.timer:StartTimer("equipweapon", math.random() * 2 * FRAMES)

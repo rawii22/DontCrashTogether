@@ -88,7 +88,7 @@ local function MakeTackleContainer(name, bank, build, assets)
 		MakeInventoryPhysics(inst)
 
         local swap_data = {bank = bank, anim = "closed"}
-        MakeInventoryFloatable(inst, "med", nil, nil, nil, nil, swap_data)
+        MakeInventoryFloatable(inst, "small", 0.2, nil, nil, nil, swap_data)
 
         inst.entity:SetPristine()
 
@@ -137,5 +137,5 @@ local function MakeTackleContainer(name, bank, build, assets)
     return Prefab(name, fn, assets, prefabs)
 end
 
-return MakeTackleContainer("tacklecontainer", "tacklecontainer", "tacklecontainer", { Asset("ANIM", "anim/ui_tacklecontainer_3x2.zip"), Asset("INV_IMAGE", "tacklecontainer_open") }),
-	MakeTackleContainer("supertacklecontainer", "supertacklecontainer", "supertacklecontainer", { Asset("ANIM", "anim/ui_tacklecontainer_3x5.zip"), Asset("INV_IMAGE", "supertacklecontainer_open") })
+return MakeTackleContainer("tacklecontainer", "tacklecontainer", "tacklecontainer", { Asset("ANIM", "anim/ui_tacklecontainer_3x2.zip"), Asset("INV_IMAGE", "tacklecontainer_open"), Asset("MINIMAP_IMAGE", "tacklecontainer") }),
+	MakeTackleContainer("supertacklecontainer", "supertacklecontainer", "supertacklecontainer", { Asset("ANIM", "anim/ui_tacklecontainer_3x5.zip"), Asset("INV_IMAGE", "supertacklecontainer_open"), Asset("MINIMAP_IMAGE", "supertacklecontainer") })

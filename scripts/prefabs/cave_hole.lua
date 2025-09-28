@@ -296,10 +296,11 @@ local function fn()
     inst.entity:AddPhysics()
     inst.Physics:SetMass(0)
     inst.Physics:SetCollisionGroup(COLLISION.OBSTACLES)
-    inst.Physics:ClearCollisionMask()
-    inst.Physics:CollidesWith(COLLISION.ITEMS)
-    inst.Physics:CollidesWith(COLLISION.CHARACTERS)
-    inst.Physics:CollidesWith(COLLISION.GIANTS)
+	inst.Physics:SetCollisionMask(
+		COLLISION.ITEMS,
+		COLLISION.CHARACTERS,
+		COLLISION.GIANTS
+	)
     inst.Physics:SetTriangleMesh(build_hole_collision_mesh())
 
     inst.AnimState:SetBank("cave_hole")
@@ -314,7 +315,7 @@ local function fn()
 
     inst.Transform:SetEightFaced()
 
-    inst:SetDeployExtraSpacing(5)
+	inst:SetDeploySmartRadius(3)
 
     --NOTE: Shadows are on WORLD_BACKGROUND sort order 1
     --      Hole goes above to hide shadows

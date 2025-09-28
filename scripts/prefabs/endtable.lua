@@ -244,6 +244,8 @@ local function fn()
     inst.Light:SetColour(169/255, 231/255, 245/255)
     inst.Light:Enable(false)
 
+	inst:SetDeploySmartRadius(0.75) --recipe min_spacing/2
+
     MakeObstaclePhysics(inst, .6)
 
     inst:AddTag("structure")
@@ -285,6 +287,7 @@ local function fn()
     MakeSmallPropagator(inst)
     MakeHauntableWork(inst)
     MakeSnowCovered(inst)
+    SetLunarHailBuildupAmountSmall(inst)
 
     inst:ListenForEvent("onbuilt", onbuilt)
 	inst:ListenForEvent("ondeconstructstructure", ondeconstructstructure)

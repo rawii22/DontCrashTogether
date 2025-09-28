@@ -3,12 +3,17 @@ require "behaviours/follow"
 require "behaviours/leash"
 require "behaviours/panicandavoid"
 require "behaviours/wander"
+local BrainCommon = require("brains/braincommon")
 
 local MAX_BOAT_FOLLOW_DIST = TUNING.MAX_WALKABLE_PLATFORM_RADIUS + 13
 local MIN_BOAT_FOLLOW_DIST = TUNING.MAX_WALKABLE_PLATFORM_RADIUS + 2
 local BOAT_TARGET_DISTANCE = TUNING.MAX_WALKABLE_PLATFORM_RADIUS + 4
 local MAX_CHASE_TIME = 15
 local TRADE_DISTANCE = MAX_BOAT_FOLLOW_DIST + 3
+
+local MIN_FOLLOW_DIST = 6
+local TARGET_FOLLOW_DIST = 7.5
+local MAX_FOLLOW_DIST = 10
 
 local function HasValidWaterTarget(inst)
     -- We pass if we have a target, it's not on valid ground (it's on a boat or the water), and we're not in cooldown.
@@ -51,8 +56,6 @@ local function TryToTossNearestItem(inst)
     inst.sg:GoToState("toss_pre", toss_data)
 end
 
-local UP_VECTOR = Vector3(0, 1, 0)
-local ZERO_VECTOR = Vector3(0, 0, 0)
 local function GetLeaderFollowPosition(inst)
     local leader = inst.components.follower:GetLeader()
     if not leader then
@@ -136,7 +139,7 @@ local function GetTrader(inst)
     return nil
 end
 
-local FINDFOOD_CANT_TAGS = {"outofreach"}
+local FINDFOOD_CANT_TAGS = { "INLIMBO", "outofreach" }
 
 local function FindFoodAction(inst)
     -- Don't go looking for random ocean food if we're busy.
@@ -179,6 +182,20 @@ local function GetWanderDirection(inst)
     return approximate_opposite_angle * DEGREES
 end
 
+local function GetFollowTargetFn(inst)
+    if inst.sg:HasStateTag("jumping") then
+        return nil
+    end
+
+    local target = inst.components.combat.target
+
+    return target ~= nil and not target:HasTag("smallcreature") and target or nil
+end
+
+local function KeepFaceTargetFn(inst)
+    return HasValidWaterTarget(inst)
+end
+
 local GnarwailBrain = Class(Brain, function(self, inst)
     Brain._ctor(self, inst)
 end)
@@ -199,14 +216,6 @@ function GnarwailBrain:OnStart()
         return false
     end
 
-    local get_runaway_target = function()
-        if self.inst.components.combat.target and not self.inst.components.combat.target:HasTag("smallcreature") then
-            return self.inst.components.combat.target
-        else
-            return nil
-        end
-    end
-
     local root = PriorityNode(
     {
         WhileNode( function() return self.inst:HornIsBroken() and
@@ -217,6 +226,7 @@ function GnarwailBrain:OnStart()
             "HornBrokenPanicAndAvoid",
             PanicAndAvoid(self.inst, function(i) return i.components.combat.target end, MIN_BOAT_FOLLOW_DIST)
         ),
+        BrainCommon.ElectricFencePanicTrigger(self.inst),
         WhileNode( function() return HasValidWaterTarget(self.inst) end,
             "AttackMomentarily",
             PriorityNode({
@@ -227,7 +237,8 @@ function GnarwailBrain:OnStart()
                     "AttackIfNotInCooldown",
                     ChaseAndAttack(self.inst, SpringCombatMod(MAX_CHASE_TIME), SpringCombatMod(MAX_BOAT_FOLLOW_DIST), 2)
                 ),
-                RunAway(self.inst, get_runaway_target, 4, 6, nil, nil, nil, true),
+                Follow(self.inst, GetFollowTargetFn, MIN_FOLLOW_DIST, TARGET_FOLLOW_DIST, MAX_FOLLOW_DIST, false),
+                FaceEntity(self.inst, GetFollowTargetFn, KeepFaceTargetFn),
             }, 0.30)
         ),
         Leash(self.inst, GetLeaderFollowPosition, GetLeaderFollowDistance, 0.5, ShouldLeashRun),

@@ -44,7 +44,9 @@ local function work_detach(inst, target)
 end
 
 local function moisture_attach(inst, target)
-	if target.components.moistureimmunity == nil then
+	if target:HasTag("wet") then
+		return --don't add the buff for perma-wet creatures
+	elseif target.components.moistureimmunity == nil then
 		target:AddComponent("moistureimmunity")
 	end
 	target.components.moistureimmunity:AddSource(inst)
@@ -79,9 +81,8 @@ local function electric_attach(inst, target)
                     return
                 end
             end
-            if data.target ~= nil and data.target:IsValid() and attacker:IsValid() then
-                SpawnPrefab("electrichitsparks"):AlignToTarget(data.target, data.projectile ~= nil and data.projectile:IsValid() and data.projectile or attacker, true)
-            end
+
+            SpawnElectricHitSparks(data.projectile ~= nil and data.projectile:IsValid() and data.projectile or attacker, data.target, true)
         end
         inst:ListenForEvent("onattackother", inst._onattackother, target)
     end
@@ -114,6 +115,18 @@ local function sleepless_detach(inst, target)
     end
 end
 
+local function sleepimmunity_attach(inst, target)
+    if target.components.grogginess ~= nil then
+        target.components.grogginess:AddImmunitySource(inst)
+    end
+end
+
+local function sleepimmunity_detach(inst, target)
+    if target.components.grogginess ~= nil then
+        target.components.grogginess:RemoveImmunitySource(inst)
+    end
+end
+
 -------------------------------------------------------------------------
 ----------------------- Prefab building functions -----------------------
 -------------------------------------------------------------------------
@@ -124,7 +137,16 @@ local function OnTimerDone(inst, data)
     end
 end
 
-local function MakeBuff(name, onattachedfn, onextendedfn, ondetachedfn, duration, priority, prefabs)
+local function MakeBuff(name, onattachedfn, onextendedfn, ondetachedfn, duration, priority, prefabs, nospeech)
+    local ATTACH_BUFF_DATA = {
+        buff = (not nospeech and "ANNOUNCE_ATTACH_BUFF_"..string.upper(name)) or nil,
+        priority = priority
+    }
+    local DETACH_BUFF_DATA = {
+        buff = (not nospeech and "ANNOUNCE_DETACH_BUFF_"..string.upper(name)) or nil,
+        priority = priority
+    }
+
     local function OnAttached(inst, target)
         inst.entity:SetParent(target.entity)
         inst.Transform:SetPosition(0, 0, 0) --in case of loading
@@ -132,7 +154,7 @@ local function MakeBuff(name, onattachedfn, onextendedfn, ondetachedfn, duration
             inst.components.debuff:Stop()
         end, target)
 
-        target:PushEvent("foodbuffattached", { buff = "ANNOUNCE_ATTACH_BUFF_"..string.upper(name), priority = priority })
+        target:PushEvent("foodbuffattached", ATTACH_BUFF_DATA)
         if onattachedfn ~= nil then
             onattachedfn(inst, target)
         end
@@ -142,7 +164,7 @@ local function MakeBuff(name, onattachedfn, onextendedfn, ondetachedfn, duration
         inst.components.timer:StopTimer("buffover")
         inst.components.timer:StartTimer("buffover", duration)
 
-        target:PushEvent("foodbuffattached", { buff = "ANNOUNCE_ATTACH_BUFF_"..string.upper(name), priority = priority })
+        target:PushEvent("foodbuffattached", ATTACH_BUFF_DATA)
         if onextendedfn ~= nil then
             onextendedfn(inst, target)
         end
@@ -153,7 +175,7 @@ local function MakeBuff(name, onattachedfn, onextendedfn, ondetachedfn, duration
             ondetachedfn(inst, target)
         end
 
-        target:PushEvent("foodbuffdetached", { buff = "ANNOUNCE_DETACH_BUFF_"..string.upper(name), priority = priority })
+        target:PushEvent("foodbuffdetached", DETACH_BUFF_DATA)
         inst:Remove()
     end
 
@@ -191,9 +213,13 @@ local function MakeBuff(name, onattachedfn, onextendedfn, ondetachedfn, duration
     return Prefab("buff_"..name, fn, nil, prefabs)
 end
 
+-- NOTES(JBK): Search strings!
+-- "buff_attack", "buff_playerabsorption", "buff_workeffectiveness", "buff_moistureimmunity", "buff_electricattack", "buff_sleepresistance", "buff_sleepimmunity", -- Keep space after comma.
+
 return MakeBuff("attack", attack_attach, nil, attack_detach, TUNING.BUFF_ATTACK_DURATION, 1),
        MakeBuff("playerabsorption", playerabsorption_attach, nil, playerabsorption_detach, TUNING.BUFF_PLAYERABSORPTION_DURATION, 1),
        MakeBuff("workeffectiveness", work_attach, nil, work_detach, TUNING.BUFF_WORKEFFECTIVENESS_DURATION, 1),
        MakeBuff("moistureimmunity", moisture_attach, nil, moisture_detach, TUNING.BUFF_MOISTUREIMMUNITY_DURATION, 2),
-       MakeBuff("electricattack", electric_attach, electric_extend, electric_detach, TUNING.BUFF_ELECTRICATTACK_DURATION, 2, { "electrichitsparks", "electricchargedfx" }),
-       MakeBuff("sleepresistance", sleepless_attach, nil, sleepless_detach, TUNING.SLEEPRESISTBUFF_TIME, 2)
+       MakeBuff("electricattack", electric_attach, electric_extend, electric_detach, TUNING.BUFF_ELECTRICATTACK_DURATION, 2, { "electrichitsparks", "electrichitsparks_electricimmune", "electricchargedfx" }),
+       MakeBuff("sleepresistance", sleepless_attach, nil, sleepless_detach, TUNING.SLEEPRESISTBUFF_TIME, 2),
+       MakeBuff("sleepimmunity", sleepimmunity_attach, nil, sleepimmunity_detach, TUNING.SLEEPIMMUNEBUFF_TIME, 0, nil, true)

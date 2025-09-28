@@ -14,9 +14,10 @@ local events=
 {
 	CommonHandlers.OnSleep(),
 	CommonHandlers.OnFreeze(),
+	CommonHandlers.OnElectrocute(),
 	EventHandler("doattack", function(inst)
 		if inst.components.health and not inst.components.health:IsDead()
-			and (inst.sg:HasStateTag("hit") or not inst.sg:HasStateTag("busy")) then
+			and ((inst.sg:HasStateTag("hit") and not inst.sg:HasStateTag("electrocute")) or not inst.sg:HasStateTag("busy")) then
 			if not inst.mother_dead then
 				inst.sg:GoToState("attack")
 			else
@@ -68,7 +69,7 @@ end
 
 local function LightningStrike(inst)
 	local rad = math.random(0,3)
-	local angle = math.random() * 2 * PI
+	local angle = math.random() * TWOPI
 	local offset = Vector3(rad * math.cos(angle), 0, -rad * math.sin(angle))
 
 	local pos = inst:GetPosition() + offset
@@ -235,7 +236,7 @@ local states=
 
 	State{
 		name = "flyaway",
-		tags = {"flight", "busy"},
+		tags = { "flight", "busy", "noelectrocute" },
 		onenter = function(inst)
 			inst.Physics:Stop()
 			inst.DynamicShadow:Enable(false)
@@ -270,10 +271,10 @@ local states=
 
 	State{
 		name = "hatch",
-		tags = {"busy"},
+		tags = { "busy", "noelectrocute" },
 
 		onenter = function(inst)
-			local angle = math.random()*2*PI
+			local angle = math.random()*TWOPI
 			local speed = GetRandomWithVariance(3, 2)
 			inst.Physics:SetMotorVel(speed*math.cos(angle), 0, speed*math.sin(angle))
 			inst.AnimState:PlayAnimation("hatch")
@@ -317,7 +318,7 @@ local states=
 
 	State{
 		name = "spin_loop",
-		tags = {"busy", "spinning"},
+		tags = { "busy", "spinning", "noelectrocute" },
 
 		onenter = function(inst)
 			inst.DynamicShadow:SetSize(2.5,1.25)
@@ -425,6 +426,7 @@ local states=
 }
 
 CommonStates.AddFrozenStates(states)
+CommonStates.AddElectrocuteStates(states)
 CommonStates.AddWalkStates(states,
 {
 	walktimeline =
@@ -467,4 +469,3 @@ CommonStates.AddSleepStates(states,
 })
 
 return StateGraph("mossling", states, events, "idle", actionhandlers)
-

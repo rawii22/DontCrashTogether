@@ -60,6 +60,19 @@ function TileGroupManager__index:IsNoiseTile(tile)
     return false
 end
 
+function TileGroupManager__index:IsTemporaryTile(tile)
+    -- A group for tiles that are used with the undertile component,
+    -- to help avoid collisions in temporary tiles trying to go onto
+    -- the same spot.
+    return GROUND_ISTEMPTILE[tile]
+end
+
+function TileGroupManager__index:IsShallowOceanTile(tile)
+    return tile == WORLD_TILES.OCEAN_COASTAL_SHORE
+        or tile == WORLD_TILES.OCEAN_COASTAL
+        or tile == WORLD_TILES.OCEAN_WATERLOG
+end
+
 local is_worldgen = rawget(_G, "WORLDGEN_MAIN") ~= nil
 if is_worldgen then return end
 
@@ -113,11 +126,21 @@ TileGroupManager:SetIsInvalidTileGroup(TileGroups.InvalidTiles)
 TileGroupManager:SetIsNoiseTileGroup(TileGroups.NoiseTiles)
 
 --falloff groups
-TileGroups.LandTilesNotDock = TileGroupManager:AddTileGroup(TileGroups.LandTiles)
-TileGroupManager:AddInvalidTile(TileGroups.LandTilesNotDock, WORLD_TILES.MONKEY_DOCK)
+TileGroups.LandTilesNotDock = TileGroupManager:AddTileGroup(TileGroups.LandTiles) -- Deprecated for TileGroups.LandTilesWithDefaultFalloff.
+TileGroupManager:AddInvalidTile(TileGroups.LandTilesNotDock, WORLD_TILES.MONKEY_DOCK) -- Deprecated!
+
+TileGroups.LandTilesWithDefaultFalloff = TileGroupManager:AddTileGroup(TileGroups.LandTiles)
+TileGroupManager:AddInvalidTile(TileGroups.LandTilesWithDefaultFalloff, WORLD_TILES.MONKEY_DOCK)
 
 TileGroups.DockTiles = TileGroupManager:AddTileGroup()
 TileGroupManager:AddValidTile(TileGroups.DockTiles, WORLD_TILES.MONKEY_DOCK)
 
 TileGroups.OceanIceTiles = TileGroupManager:AddTileGroup()
 TileGroupManager:AddValidTile(TileGroups.OceanIceTiles, WORLD_TILES.OCEAN_ICE)
+
+TileGroups.LandTilesInvisible = TileGroupManager:AddTileGroup(TileGroups.LandTiles)
+
+TileGroups.ShallowOceanTiles = TileGroupManager:AddTileGroup()
+TileGroupManager:AddValidTile(TileGroups.ShallowOceanTiles, WORLD_TILES.OCEAN_COASTAL_SHORE)
+TileGroupManager:AddValidTile(TileGroups.ShallowOceanTiles, WORLD_TILES.OCEAN_COASTAL)
+TileGroupManager:AddValidTile(TileGroups.ShallowOceanTiles, WORLD_TILES.OCEAN_WATERLOG)

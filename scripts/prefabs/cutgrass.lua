@@ -20,6 +20,7 @@ local function fn()
 
     inst:AddTag("cattoy")
     inst:AddTag("renewable")
+    inst:AddTag("cutgrass")
 
     MakeInventoryFloatable(inst, "med", 0.05, 0.68)
 
@@ -53,6 +54,8 @@ local function fn()
     inst:AddComponent("repairer")
     inst.components.repairer.repairmaterial = MATERIALS.HAY
     inst.components.repairer.healthrepairvalue = TUNING.REPAIR_CUTGRASS_HEALTH
+
+	inst:AddComponent("snowmandecor")
 
     return inst
 end

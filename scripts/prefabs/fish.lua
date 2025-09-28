@@ -35,6 +35,8 @@ local function commonfn(build, anim, loop, dryable, cookable)
     inst:AddTag("catfood")
 	inst:AddTag("pondfish")
 
+
+
     if dryable then
         --dryable (from dryable component) added to pristine state for optimization
         inst:AddTag("dryable")
@@ -118,7 +120,7 @@ local function rawfn(build)
     inst.components.perishable:SetPerishTime(TUNING.PERISH_SUPERFAST)
 
     inst:DoTaskInTime(5, stopkicking)
-    inst.components.inventoryitem:SetOnPickupFn(stopkicking)
+    inst.components.inventoryitem:SetOnPutInInventoryFn(stopkicking)
     inst.OnLoad = stopkicking
 
     inst:ListenForEvent("animover", function()

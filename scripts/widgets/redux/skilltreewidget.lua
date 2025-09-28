@@ -25,16 +25,51 @@ local SkillTreeWidget = Class(Widget, function(self, prefabname, targetdata, fro
 
     self.midlay = self.root:AddChild(Widget())
 
-    self.bg_tree = self.root:AddChild(Image(GetSkilltreeBG(self.target.."_background.tex"), self.target.."_background.tex"))
+    local bg_tree_imagename = self.target .. "_background.tex"
+    local bg_tree_atlas = GetSkilltreeBG(bg_tree_imagename)
+    if bg_tree_atlas == nil then
+        print(string.format("FIXME: Skill tree background %s image is missing!", bg_tree_imagename))
+        self.bg_tree = self.root:AddChild(Image("images/skilltree.xml", "fallbackbackground.tex"))
+        self.bg_tree:SetTint(0, 0, 0, 1) -- Black box for missing asset.
+    else
+        self.bg_tree = self.root:AddChild(Image(bg_tree_atlas, bg_tree_imagename))
+    end
     self.bg_tree:SetPosition(2,-20)
     self.bg_tree:ScaleToSize(600, 460)
 
+    local defs = skilltreedefs.SKILLTREE_METAINFO[prefabname]
+    local tint_bright, tint_dim
+    local tint_bright_alpha, tint_dim_alpha
+    if defs and defs.BACKGROUND_SETTINGS then
+        local settings = defs.BACKGROUND_SETTINGS
+        tint_bright, tint_dim = settings.tint_bright, settings.tint_dim
+        tint_bright_alpha, tint_dim_alpha = settings.tint_bright_alpha, settings.tint_dim_alpha
+    end
+
     if self.fromfrontend then
-        local color = UICOLOURS.GOLD
-        self.bg_tree:SetTint(color[1],color[2],color[3],0.6)
+        local color
+        if tint_bright ~= nil then
+            if tint_bright ~= false then
+                color = tint_bright
+            end
+        else
+            color = UICOLOURS.GOLD
+        end
+        if color then
+            self.bg_tree:SetTint(color[1], color[2], color[3], tint_bright_alpha or 0.6)
+        end
     else
-        local color = UICOLOURS.BLACK
-        self.bg_tree:SetTint(color[1],color[2],color[3],1)
+        local color
+        if tint_dim ~= nil then
+            if tint_dim ~= false then
+                color = tint_dim
+            end
+        else
+            color = UICOLOURS.BLACK
+        end
+        if color then
+            self.bg_tree:SetTint(color[1], color[2], color[3], tint_dim_alpha or 1)
+        end
     end
 
     self.root.infopanel = self.root:AddChild(Widget("infopanel"))
@@ -81,7 +116,7 @@ local SkillTreeWidget = Class(Widget, function(self, prefabname, targetdata, fro
             self:RespecSkills()
         end, STRINGS.SKILLTREE.RESPEC, {200, 50}))
     if TheInput:ControllerAttached() then
-        self.root.infopanel.respec_button:SetText(TheInput:GetLocalizedControl(TheInput:GetControllerID(),  CONTROL_MENU_MISC_1).." "..STRINGS.SKILLTREE.RESPEC)
+        self.root.infopanel.respec_button:SetText(TheInput:GetLocalizedControl(TheInput:GetControllerID(),  CONTROL_MENU_MISC_2).." "..STRINGS.SKILLTREE.RESPEC)
     end
 
     self.root.infopanel.respec_button:SetPosition(0,-120)
@@ -129,8 +164,9 @@ function SkillTreeWidget:RespecSkills()
         graphics.status = {}
     end
 
-    self.root.tree:RefreshTree()
+    self.root.tree:RefreshTree(true)
 end
+
 
 function SkillTreeWidget:SpawnFavorOverlay(pre)
     if not self.fromfrontend and (self.midlay ~= nil and self.midlay.splash == nil) then
@@ -190,16 +226,24 @@ function SkillTreeWidget:SpawnFavorOverlay(pre)
         end
     end
 end
+--[[
+function SkillTreeWidget:OnUpdate()
+    if self.root.infopanel.puck then
+
+    end
+end
+]]
 
 function SkillTreeWidget:Kill()
-    --ThePlantRegistry:Save() -- for saving filter settings
+    self.root.tree:Kill()
+
     SkillTreeWidget._base.Kill(self)
 end
 
 function SkillTreeWidget:OnControl(control, down)
     if SkillTreeWidget._base.OnControl(self, control, down) then return true end
 
-    if not down and control ==  CONTROL_MENU_MISC_1 and self.root.infopanel.respec_button:IsVisible() then
+    if not down and control ==  CONTROL_MENU_MISC_2 and self.root.infopanel.respec_button:IsVisible() then
         self:RespecSkills()
         return true
     end
@@ -231,7 +275,7 @@ function SkillTreeWidget:GetHelpText()
     local t = {}
 
     if self.root.infopanel.respec_button:IsVisible() then
-        table.insert(t, TheInput:GetLocalizedControl(controller_id,  CONTROL_MENU_MISC_1).. " " .. STRINGS.SKILLTREE.RESPEC)
+        table.insert(t, TheInput:GetLocalizedControl(controller_id,  CONTROL_MENU_MISC_2).. " " .. STRINGS.SKILLTREE.RESPEC)
     end
 
     return table.concat(t, "  ")

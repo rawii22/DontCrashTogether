@@ -42,7 +42,7 @@ local function ChangeToItem(inst)
     if inst.components.container ~= nil then
         inst.components.container:DropEverything()
     end
-    local item = SpawnPrefab("portablespicer_item")
+    local item = SpawnPrefab("portablespicer_item", inst.linked_skinname, inst.skin_id)
     item.Transform:SetPosition(inst.Transform:GetWorldPosition())
     item.AnimState:PlayAnimation("collapse")
     item.SoundEmitter:PlaySound("dontstarve/common/together/portable/spicer/collapse")
@@ -240,6 +240,7 @@ local function fn()
     inst.entity:AddMiniMapEntity()
     inst.entity:AddNetwork()
 
+	inst:SetDeploySmartRadius(DEPLOYSPACING_RADIUS[DEPLOYSPACING.DEFAULT] / 2) --item deployspacing/2
     inst:SetPhysicsRadiusOverride(.5)
     MakeObstaclePhysics(inst, inst.physicsradiusoverride)
 
@@ -313,7 +314,7 @@ end
 ---------------------------------------------------------------
 
 local function ondeploy(inst, pt, deployer)
-    local spicer = SpawnPrefab("portablespicer")
+    local spicer = SpawnPrefab("portablespicer", inst.linked_skinname, inst.skin_id)
     if spicer ~= nil then
         spicer.Physics:SetCollides(false)
         spicer.Physics:Teleport(pt.x, 0, pt.z)

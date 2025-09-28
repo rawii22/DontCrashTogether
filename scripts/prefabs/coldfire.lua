@@ -101,11 +101,7 @@ local function fn()
     inst.entity:AddTransform()
     inst.entity:AddAnimState()
     inst.entity:AddSoundEmitter()
-    inst.entity:AddMiniMapEntity()
     inst.entity:AddNetwork()
-
-    inst.MiniMapEntity:SetIcon("coldfire.png")
-    inst.MiniMapEntity:SetPriority(1)
 
     inst.AnimState:SetBank("coldfire")
     inst.AnimState:SetBuild("coldfire")
@@ -118,6 +114,7 @@ local function fn()
 	-- for storytellingprop component
 	inst:AddTag("storytellingprop")
 
+	inst:SetDeploySmartRadius(1) --recipe min_spacing/2
     MakeObstaclePhysics(inst, .3)
 
     inst.entity:SetPristine()

@@ -259,6 +259,8 @@ local function fn()
         return inst
     end
 
+	inst.override_combat_fx_height = "high"
+
 	inst.hidingspot_onremove = function(hider, data) hidingspot_onremove(inst, hider, data) end
 
 	inst:AddComponent("inspectable")
@@ -330,7 +332,7 @@ end
 -------------------------------------------------------------------------------
 local function builder_onbuilt(inst, builder)
     local pt = builder:GetPosition()
-    local offset = FindWalkableOffset(pt, math.random() * 2 * PI, 2, 6, true)
+    local offset = FindWalkableOffset(pt, math.random() * TWOPI, 2, 6, true)
     if offset ~= nil then
         pt.x = pt.x + offset.x
         pt.z = pt.z + offset.z

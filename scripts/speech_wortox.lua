@@ -2,59 +2,11 @@
 return{
 	ACTIONFAIL =
 	{
-        APPRAISE =
+        GENERIC =
         {
-            NOTNOW = "I tried, but they're occupied.",
+            ITEMMIMIC = "Can't stand it! Left empty-handed!",
         },
-        REPAIR =
-        {
-            WRONGPIECE = "That is incorrect!",
-        },
-        BUILD =
-        {
-            MOUNTED = "Either I must get down, or the world must come up.",
-            HASPET = "I've made my pact with a beast already.",
-			TICOON = "Oh, but one's enough, hyuyu!",
-        },
-		SHAVE =
-		{
-			AWAKEBEEFALO = "I may only do that while it sleeps.",
-			GENERIC = "I can't, I won't, I shan't.",
-			NOBITS = "Instead of hair, there's nothing there!",
---fallback to speech_wilson.lua             REFUSE = "only_used_by_woodie",
-            SOMEONEELSESBEEFALO = "I think you will find that creature's not mine.",
-		},
-		STORE =
-		{
-			GENERIC = "It's full, full, full.",
-			NOTALLOWED = "Oh I simply couldn't.",
-			INUSE = "Another soul has use of it right now.",
-            NOTMASTERCHEF = "Warly won't let me peek inside. He's no fun.",
-		},
-        CONSTRUCT =
-        {
-            INUSE = "Another soul has use of it right now.",
-            NOTALLOWED = "Oh I simply couldn't.",
-            EMPTY = "I can't create from nothing.",
-            MISMATCH = "I've made an error.",
-            NOTREADY = "I'll come back around once the ground's settled down.",
-        },
-		RUMMAGE =
-		{
-			GENERIC = "Oh I simply couldn't.",
-			INUSE = "It is making a pact with another.",
-            NOTMASTERCHEF = "Warly won't let me peek inside. He's no fun.",
-		},
-		UNLOCK =
-        {
-        	WRONGKEY = "Either the key is wrong, or the lock is.",
-        },
-		USEKLAUSSACKKEY =
-        {
-        	WRONGKEY = "Either the key is wrong, or the lock is.",
-        	KLAUS = "Hyuyu!",
-			QUAGMIRE_WRONGKEY = "I believe there is another way.",
-        },
+
 		ACTIVATE =
 		{
 			LOCKED_GATE = "Am I locked out, or in?",
@@ -68,55 +20,150 @@ return{
             MANNEQUIN_EQUIPSWAPFAILED = "Oh what a shame, I thought it would suit you.",
             PILLOWFIGHT_NO_HANDPILLOW = "A pillow must be promptly procured.",
             NOTMYBERNIE = "Willow! What are you doin' while your bruin causes such ruin?",
+            NOTMERM = "I can't help, even with kelp.",
+            NOKELP = "only_used_by_wurt",
+--fallback to speech_wilson.lua             HASMERMLEADER = "only_used_by_wurt",
 		},
-		OPEN_CRAFTING =
+        APPLYELIXIR =
+        {
+            TOO_SUPER = "Don't think I can take that drink!",
+            NO_ELIXIRABLE = "only_used_by_wendy",
+        },
+        APPLYMODULE =
+        {
+            COOLDOWN = "only_used_by_wx78",
+            NOTENOUGHSLOTS = "only_used_by_wx78",
+        },
+        APPRAISE =
+        {
+            NOTNOW = "I tried, but they're occupied.",
+        },
+        ATTUNE =
+        {
+            NOHEALTH = "My body would surely die.",
+        },
+        BATHBOMB =
+        {
+            GLASSED = "I can't throw it through the looking glass!",
+            ALREADY_BOMBED = "Someone else took the fun!",
+        },
+        BEDAZZLE =
+        {
+--fallback to speech_wilson.lua             BURNING = "only_used_by_webber",
+--fallback to speech_wilson.lua             BURNT = "only_used_by_webber",
+--fallback to speech_wilson.lua             FROZEN = "only_used_by_webber",
+--fallback to speech_wilson.lua             ALREADY_BEDAZZLED = "only_used_by_webber",
+        },
+        BEGIN_QUEST =
+        {
+            ONEGHOST = "only_used_by_wendy",
+        },
+        BUILD =
+        {
+            MOUNTED = "Either I must get down, or the world must come up.",
+            HASPET = "I've made my pact with a beast already.",
+			TICOON = "Oh, but one's enough, hyuyu!",
+            BUSY_STATION = "Wait, mate!",
+        },
+        CARNIVALGAME_FEED =
+        {
+            TOO_LATE = "Oh ho, too slow!",
+        },
+		CAST_POCKETWATCH =
 		{
-            PROFESSIONALCHEF = "Warly won't let me peek inside. He's no fun.",
-			SHADOWMAGIC = "I don't think he knows how to use it.",
+--fallback to speech_wilson.lua 			GENERIC = "only_used_by_wanda",
+--fallback to speech_wilson.lua 			REVIVE_FAILED = "only_used_by_wanda",
+--fallback to speech_wilson.lua 			WARP_NO_POINTS_LEFT = "only_used_by_wanda",
+--fallback to speech_wilson.lua 			SHARD_UNAVAILABLE = "only_used_by_wanda",
 		},
+		CAST_SPELLBOOK =
+		{
+--fallback to speech_wilson.lua 			NO_TOPHAT = "only_used_by_waxwell",
+		},
+		CASTAOE =
+		{
+--fallback to speech_wilson.lua 			NO_MAX_SANITY = "only_used_by_waxwell",
+            NOT_ENOUGH_EMBERS = "only_used_by_willow",
+            NO_TARGETS = "only_used_by_willow",
+            CANT_SPELL_MOUNTED = "only_used_by_willow",
+            SPELL_ON_COOLDOWN = "only_used_by_willow",
+			NO_BATTERY = "only_used_by_winona",
+			NO_CATAPULTS = "only_used_by_winona",
+		},
+        CASTSPELL =
+        {
+            TERRAFORM_TOO_SOON = "only_used_by_wurt",
+        },
+        CHANGEIN =
+        {
+            GENERIC = "I prefer my current form.",
+            BURNING = "I'm not big on clothes, anyway.",
+            INUSE = "Another soul has use of it right now.",
+            NOTENOUGHHAIR = "I could give it some flair... once it has enough hair.",
+            NOOCCUPANT = "I can't begin without a beefalo hitched in.",
+        },
+        CHARGE_FROM =
+        {
+            NOT_ENOUGH_CHARGE = "only_used_by_wx78",
+            CHARGE_FULL = "only_used_by_wx78",
+        },
+		COMPARE_WEIGHABLE =
+		{
+            FISH_TOO_SMALL = "This minnow won't win, no!",
+            OVERSIZEDVEGGIES_TOO_SMALL = "I'll have to produce some bigger produce, hyuyuyu!",
+		},
+        CONSTRUCT =
+        {
+            INUSE = "Another soul has use of it right now.",
+            NOTALLOWED = "Oh I simply couldn't.",
+            EMPTY = "I can't create from nothing.",
+            MISMATCH = "I've made an error.",
+            NOTREADY = "I'll come back around once the ground's settled down.",
+        },
         COOK =
         {
             GENERIC = "I'd rather snack on a soul no one's using.",
             INUSE = "Mortals need physical food more than I do.",
             TOOFAR = "I could hop over, I suppose.",
         },
-        START_CARRAT_RACE =
-        {
-            NO_RACERS = "Now that's quite the trick, invisible racing Carrats!",
+        DEPLOY = {
+            HERMITCRAB_RELOCATE = "Oh my, it's dry! Later, I'll try.",
         },
-
-		DISMANTLE = 
+        DIRECTCOURIER_MAP =
+        {
+--fallback to speech_wilson.lua             NOTARGET = "only_used_by_walter",
+        },
+		DISMANTLE =
 		{
 			COOKING = "I'm afraid the pot is far too hot!",
 			INUSE = "Another soul has use of it right now.",
 			NOTEMPTY = "First it must be relieved of its possessions.",
         },
+        DISMANTLE_POCKETWATCH =
+        {
+--fallback to speech_wilson.lua             ONCOOLDOWN = "only_used_by_wanda",
+        },
+        DRAW =
+        {
+            NOIMAGE = "I have no imagination.",
+        },
+        ENTER_GYM =
+        {
+--fallback to speech_wilson.lua             NOWEIGHT = "only_used_by_wolfang",
+--fallback to speech_wilson.lua             UNBALANCED = "only_used_by_wolfang",
+--fallback to speech_wilson.lua             ONFIRE = "only_used_by_wolfang",
+--fallback to speech_wilson.lua             SMOULDER = "only_used_by_wolfang",
+--fallback to speech_wilson.lua             HUNGRY = "only_used_by_wolfang",
+--fallback to speech_wilson.lua             FULL = "only_used_by_wolfang",
+        },
+        FILL_OCEAN =
+        {
+            UNSUITABLE_FOR_PLANTS = "I'd better abscond to a freshwater pond.",
+        },
         FISH_OCEAN =
 		{
 			TOODEEP = "Stop, abort! My line's too short!",
 		},
-        OCEAN_FISHING_POND =
-		{
-			WRONGGEAR = "I fear I've brought the wrong gear, hyuyu!",
-		},
-        --wickerbottom specific action
---fallback to speech_wilson.lua         READ =
---fallback to speech_wilson.lua         {
---fallback to speech_wilson.lua             GENERIC = "only_used_by_waxwell_and_wicker",
---fallback to speech_wilson.lua             NOBIRDS = "only_used_by_waxwell_and_wicker",
---fallback to speech_wilson.lua             NOWATERNEARBY = "only_used_by_waxwell_and_wicker",
---fallback to speech_wilson.lua             TOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
---fallback to speech_wilson.lua             WAYTOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
---fallback to speech_wilson.lua             NOFIRES =       "only_used_by_waxwell_and_wicker",
---fallback to speech_wilson.lua             NOSILVICULTURE = "only_used_by_waxwell_and_wicker",
---fallback to speech_wilson.lua             NOHORTICULTURE = "only_used_by_waxwell_and_wicker",
---fallback to speech_wilson.lua             NOTENTACLEGROUND = "only_used_by_waxwell_and_wicker",
---fallback to speech_wilson.lua             NOSLEEPTARGETS = "only_used_by_waxwell_and_wicker",
---fallback to speech_wilson.lua             TOOMANYBEES = "only_used_by_waxwell_and_wicker",
---fallback to speech_wilson.lua             NOMOONINCAVES = "only_used_by_waxwell_and_wicker",
---fallback to speech_wilson.lua             ALREADYFULLMOON = "only_used_by_waxwell_and_wicker",
---fallback to speech_wilson.lua         },
-
         GIVE =
         {
             GENERIC = "No, no, no.",
@@ -127,6 +174,7 @@ return{
             GHOSTHEART = "There's no body for it to return to.",
             NOTGEM = "It couldn't fit if it wanted to!",
             WRONGGEM = "Its color is wrong, wrong, wrong.",
+			NOGENERATORSKILL = "It couldn't fit if it wanted to!",
             NOTSTAFF = "That's quite wrong, yes, yes!",
             MUSHROOMFARM_NEEDSSHROOM = "There is only room... for a 'shroom!",
             MUSHROOMFARM_NEEDSLOG = "Its tummy rumbles for the soul of a log.",
@@ -151,6 +199,10 @@ return{
             NOTAMONKEY = "I speak in tongues, but not that one.",
             QUEENBUSY = "Her majesty's schedule must be bananas, hyuyu!",
         },
+        GIVE_TACKLESKETCH =
+		{
+			DUPLICATE = "We cannot learn what we already know!",
+        },
         GIVETOPLAYER =
         {
             FULL = "Their brim is bursting!",
@@ -165,26 +217,44 @@ return{
             SLEEPING = "Their mind inhabits another plane right now.",
             BUSY = "First I must gain their focus.",
         },
-        WRITE =
+        HARVEST =
         {
-            GENERIC = "What is written cannot be unwrote!",
-            INUSE = "Someone else has command of it.",
+            DOER_ISNT_MODULE_OWNER = "The tin gnat is not keen to chat.",
         },
-        DRAW =
+        HEAL =
         {
-            NOIMAGE = "I have no imagination.",
+            NOT_MERM = "I'm afraid it's true, this won't work on you.",
         },
-        CHANGEIN =
+        HERD_FOLLOWERS =
         {
-            GENERIC = "I prefer my current form.",
-            BURNING = "I'm not big on clothes, anyway.",
-            INUSE = "Another soul has use of it right now.",
-            NOTENOUGHHAIR = "I could give it some flair... once it has enough hair.",
-            NOOCCUPANT = "I can't begin without a beefalo hitched in.",
+            WEBBERONLY = "Fiddle dee dee, they won't listen to me!",
         },
-        ATTUNE =
+        HITCHUP =
         {
-            NOHEALTH = "My body would surely die.",
+            NEEDBEEF = "First I must find a beefalo to be mine.",
+            NEEDBEEF_CLOSER = "Now now my friend, I can't hitch you up while you're way over there!",
+            BEEF_HITCHED = "Surely secured!",
+            INMOOD = "My furry friend is too caught up in their furious frenzy.",
+        },
+		LOOKAT = --fail strings for close inspection
+		{
+			-- Winona specific
+--fallback to speech_wilson.lua 			ROSEGLASSES_INVALID = "only_used_by_winona",
+--fallback to speech_wilson.lua 			ROSEGLASSES_COOLDOWN = "only_used_by_winona",
+--fallback to speech_wilson.lua             ROSEGLASSES_DISMISS = "only_used_by_winona",
+--fallback to speech_wilson.lua             ROSEGLASSES_STUMPED = "only_used_by_winona",
+			--
+		},
+        LOWER_SAIL_FAIL =
+        {
+            "What a fiendishly frustrating contraption! I'm impressed.",
+            "Perhaps I should try a new tack! Hyuyu!",
+            "My guise as a sailor was a spectacular failure!",
+        },
+        MARK =
+        {
+            ALREADY_MARKED = "Will a change of fate be in order?",
+            NOT_PARTICIPANT = "Why was I not invited to the festivities?",
         },
         MOUNT =
         {
@@ -192,27 +262,19 @@ return{
             INUSE = "It has made a pact with another.",
 			SLEEPING = "It's had its forty winks, methinks.",
         },
-        SADDLE =
+        OCEAN_FISHING_POND =
+		{
+			WRONGGEAR = "I fear I've brought the wrong gear, hyuyu!",
+		},
+		OPEN_CRAFTING =
+		{
+            PROFESSIONALCHEF = "Warly won't let me peek inside. He's no fun.",
+			SHADOWMAGIC = "I don't think he knows how to use it.",
+		},
+        PICK =
         {
-            TARGETINCOMBAT = "Its focus is elsewhere.",
-        },
-        TEACH =
-        {
-            --Recipes/Teacher
-            KNOWN = "You cannot learn what you already know.",
-            CANTLEARN = "My poor imp head cannot contain this knowledge.",
-
-            --MapRecorder/MapExplorer
-            WRONGWORLD = "I'm on the wrong plane of existence for this.",
-
-			--MapSpotRevealer/messagebottle
-			MESSAGEBOTTLEMANAGER_NOT_FOUND = "Not here, my dear.",--Likely trying to read messagebottle treasure map in caves
-
-            STASH_MAP_NOT_FOUND = "There's no rhyme or riddle to it.",-- Likely trying to read stash map  in world without stash                  
-        },
-        WRAPBUNDLE =
-        {
-            EMPTY = "I need something to bind within.",
+            NOTHING_INSIDE = "Rather annoyed with this void.",
+			STUCK = "Just my luck, it's stuck.",
         },
         PICKUP =
         {
@@ -227,67 +289,10 @@ return{
 --fallback to speech_wilson.lua 			NO_HEAVY_LIFTING = "only_used_by_wanda",
             FULL_OF_CURSES = "I've had enough of this monkey stuff.",
         },
-        SLAUGHTER =
-        {
-            TOOFAR = "Oh ho! Too late, they've made their escape.",
-        },
-        REPLATE =
-        {
-            MISMATCH = "Hyuyu! They all look the same to me!",
-            SAMEDISH = "I cannot redo what's already been done!",
-        },
-        SAIL =
-        {
-        	REPAIR = "The ship is tippy tip top!",
-        },
-        ROW_FAIL =
-        {
-            BAD_TIMING0 = "Time to sync or swim, hyuyu!",
-            BAD_TIMING1 = "If I time it just right, the end is in sight!",
-            BAD_TIMING2 = "I mustn't rock the boat!",
-        },
-        LOWER_SAIL_FAIL =
-        {
-            "What a fiendishly frustrating contraption! I'm impressed.",
-            "Perhaps I should try a new tack! Hyuyu!",
-            "My guise as a sailor was a spectacular failure!",
-        },
-        BATHBOMB =
-        {
-            GLASSED = "I can't throw it through the looking glass!",
-            ALREADY_BOMBED = "Someone else took the fun!",
-        },
-		GIVE_TACKLESKETCH =
-		{
-			DUPLICATE = "We cannot learn what we already know!",
-		},
-		COMPARE_WEIGHABLE =
-		{
-            FISH_TOO_SMALL = "This minnow won't win, no!",
-            OVERSIZEDVEGGIES_TOO_SMALL = "I'll have to produce some bigger produce, hyuyuyu!",
-		},
-        BEGIN_QUEST =
-        {
-            ONEGHOST = "only_used_by_wendy",
-        },
-		TELLSTORY =
-		{
-			GENERIC = "only_used_by_walter",
---fallback to speech_wilson.lua 			NOT_NIGHT = "only_used_by_walter",
---fallback to speech_wilson.lua 			NO_FIRE = "only_used_by_walter",
-		},
-        SING_FAIL =
-        {
---fallback to speech_wilson.lua             SAMESONG = "only_used_by_wathgrithr",
-        },
         PLANTREGISTRY_RESEARCH_FAIL =
         {
             GENERIC = "I already know all its tricks, hyuyu!",
             FERTILIZER = "That's all I need to know to make my garden grow.",
-        },
-        FILL_OCEAN =
-        {
-            UNSUITABLE_FOR_PLANTS = "I'd better abscond to a freshwater pond.",
         },
         POUR_WATER =
         {
@@ -297,6 +302,120 @@ return{
         {
             OUT_OF_WATER = "Goodness me, it's dry as can be!",
         },
+        --wickerbottom specific action
+--fallback to speech_wilson.lua         READ =
+--fallback to speech_wilson.lua         {
+--fallback to speech_wilson.lua             GENERIC = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOWATERNEARBY = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             TOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             WAYTOOMANYBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             BIRDSBLOCKED = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOFIRES =       "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOSILVICULTURE = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOHORTICULTURE = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOTENTACLEGROUND = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOSLEEPTARGETS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             TOOMANYBEES = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             NOMOONINCAVES = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             ALREADYFULLMOON = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua             -- rifts5.1
+--fallback to speech_wilson.lua             DEADBIRDS = "only_used_by_waxwell_and_wicker",
+--fallback to speech_wilson.lua         },
+		REMOTE_TELEPORT =
+		{
+			NOSKILL = "only_used_by_winona",
+			NODEST = "only_used_by_winona",
+		},
+        REMOVEMODULES =
+        {
+            NO_MODULES = "only_used_by_wx78",
+        },
+        REPAIR =
+        {
+            WRONGPIECE = "That is incorrect!",
+        },
+        REPLATE =
+        {
+            MISMATCH = "Hyuyu! They all look the same to me!",
+            SAMEDISH = "I cannot redo what's already been done!",
+        },
+        ROW_FAIL =
+        {
+            BAD_TIMING0 = "Time to sync or swim, hyuyu!",
+            BAD_TIMING1 = "If I time it just right, the end is in sight!",
+            BAD_TIMING2 = "I mustn't rock the boat!",
+        },
+		RUMMAGE =
+		{
+			GENERIC = "Oh I simply couldn't.",
+			INUSE = "It is making a pact with another.",
+            NOTMASTERCHEF = "Warly won't let me peek inside. He's no fun.",
+            NOTAMERM = "Not for me, I see.",
+            NOTSOULJARHANDLER = "These aren't my souls.",
+            RESTRICTED = "I can't! I shan't!",
+		},
+        SADDLE =
+        {
+            TARGETINCOMBAT = "Its focus is elsewhere.",
+        },
+		SHAVE =
+		{
+			AWAKEBEEFALO = "I may only do that while it sleeps.",
+			GENERIC = "I can't, I won't, I shan't.",
+			NOBITS = "Instead of hair, there's nothing there!",
+--fallback to speech_wilson.lua             REFUSE = "only_used_by_woodie",
+            SOMEONEELSESBEEFALO = "I think you will find that creature's not mine.",
+		},
+        SING_FAIL =
+        {
+--fallback to speech_wilson.lua             SAMESONG = "only_used_by_wathgrithr",
+        },
+        SLAUGHTER =
+        {
+            TOOFAR = "Oh ho! Too late, they've made their escape.",
+        },
+        START_CARRAT_RACE =
+        {
+            NO_RACERS = "Now that's quite the trick, invisible racing Carrats!",
+        },
+		STORE =
+		{
+			GENERIC = "It's full, full, full.",
+			NOTALLOWED = "Oh I simply couldn't.",
+			INUSE = "Another soul has use of it right now.",
+            NOTMASTERCHEF = "Warly won't let me peek inside. He's no fun.",
+            NOTSOULJARHANDLER = "These aren't my souls.",
+            RESTRICTED = "I can't! I shan't!",
+		},
+        TEACH =
+        {
+            --Recipes/Teacher
+            KNOWN = "You cannot learn what you already know.",
+            CANTLEARN = "My poor imp head cannot contain this knowledge.",
+
+            --MapRecorder/MapExplorer
+            WRONGWORLD = "I'm on the wrong plane of existence for this.",
+
+			--MapSpotRevealer/messagebottle
+			MESSAGEBOTTLEMANAGER_NOT_FOUND = "Not here, my dear.",--Likely trying to read messagebottle treasure map in caves
+
+            STASH_MAP_NOT_FOUND = "There's no rhyme or riddle to it.",-- Likely trying to read stash map  in world without stash                  
+        },
+		TELLSTORY =
+		{
+			GENERIC = "only_used_by_walter",
+--fallback to speech_wilson.lua 			NOT_NIGHT = "only_used_by_walter",
+--fallback to speech_wilson.lua 			NO_FIRE = "only_used_by_walter",
+		},
+		UNLOCK =
+        {
+            WRONGKEY = "Either the key is wrong, or the lock is.",
+        },
+        UPGRADE =
+        {
+--fallback to speech_wilson.lua             BEDAZZLED = "only_used_by_webber",
+        },
         USEITEMON =
         {
             --GENERIC = "I can't use this on that!",
@@ -305,102 +424,69 @@ return{
             BEEF_BELL_INVALID_TARGET = "Nope, hyuyuyu!",
             BEEF_BELL_ALREADY_USED = "Turns out in the end, it already had a friend.",
             BEEF_BELL_HAS_BEEF_ALREADY = "Having more than one wouldn't be much fun.",
+
+			NOT_MINE = "I see it doesn't belong to me!",
+
+			CANNOT_FIX_DRONE = "It's had its fun, and now it's done.",
         },
-        HITCHUP =
+		USEKLAUSSACKKEY =
         {
-            NEEDBEEF = "First I must find a beefalo to be mine.",
-            NEEDBEEF_CLOSER = "Now now my friend, I can't hitch you up while you're way over there!",
-            BEEF_HITCHED = "Surely secured!",
-            INMOOD = "My furry friend is too caught up in their furious frenzy.",
+            WRONGKEY = "Either the key is wrong, or the lock is.",
+            KLAUS = "Hyuyu!",
+			QUAGMIRE_WRONGKEY = "I believe there is another way.",
         },
-        MARK =
+        WRAPBUNDLE =
         {
-            ALREADY_MARKED = "Will a change of fate be in order?",
-            NOT_PARTICIPANT = "Why was I not invited to the festivities?",
+            EMPTY = "I need something to bind within.",
+        },
+        WRITE =
+        {
+            GENERIC = "What is written cannot be unwrote!",
+            INUSE = "Someone else has command of it.",
         },
         YOTB_STARTCONTEST =
         {
             DOESNTWORK = "Oh ho! Something's gone awry!",
             ALREADYACTIVE = "Perhaps he too likes to travel between planes? Hyuyuyu!",
+            NORESPONSE = "I wonder where he's wandered.",
+            RIGHTTHERE = "Busy, I see.",
         },
         YOTB_UNLOCKSKIN =
         {
             ALREADYKNOWN = "Oh what a bore, I've seen it before.",
         },
-        CARNIVALGAME_FEED =
-        {
-            TOO_LATE = "Oh ho, too slow!",
-        },
-        HERD_FOLLOWERS =
-        {
-            WEBBERONLY = "Fiddle dee dee, they won't listen to me!",
-        },
-        BEDAZZLE =
-        {
---fallback to speech_wilson.lua             BURNING = "only_used_by_webber",
---fallback to speech_wilson.lua             BURNT = "only_used_by_webber",
---fallback to speech_wilson.lua             FROZEN = "only_used_by_webber",
---fallback to speech_wilson.lua             ALREADY_BEDAZZLED = "only_used_by_webber",
-        },
-        UPGRADE =
-        {
---fallback to speech_wilson.lua             BEDAZZLED = "only_used_by_webber",
-        },
-		CAST_POCKETWATCH =
+		CARVEPUMPKIN =
 		{
---fallback to speech_wilson.lua 			GENERIC = "only_used_by_wanda",
---fallback to speech_wilson.lua 			REVIVE_FAILED = "only_used_by_wanda",
---fallback to speech_wilson.lua 			WARP_NO_POINTS_LEFT = "only_used_by_wanda",
---fallback to speech_wilson.lua 			SHARD_UNAVAILABLE = "only_used_by_wanda",
+			INUSE = "Another soul is carving it.",
+			BURNING = "Fire! My fur!",
 		},
-        DISMANTLE_POCKETWATCH =
-        {
---fallback to speech_wilson.lua             ONCOOLDOWN = "only_used_by_wanda",
-        },
-
-        ENTER_GYM =
-        {
---fallback to speech_wilson.lua             NOWEIGHT = "only_used_by_wolfang",
---fallback to speech_wilson.lua             UNBALANCED = "only_used_by_wolfang",
---fallback to speech_wilson.lua             ONFIRE = "only_used_by_wolfang",
---fallback to speech_wilson.lua             SMOULDER = "only_used_by_wolfang",
---fallback to speech_wilson.lua             HUNGRY = "only_used_by_wolfang",
---fallback to speech_wilson.lua             FULL = "only_used_by_wolfang",
-        },
-
-        APPLYMODULE =
-        {
-            COOLDOWN = "only_used_by_wx78",
-            NOTENOUGHSLOTS = "only_used_by_wx78",
-        },
-        REMOVEMODULES =
-        {
-            NO_MODULES = "only_used_by_wx78",
-        },
-        CHARGE_FROM =
-        {
-            NOT_ENOUGH_CHARGE = "only_used_by_wx78",
-            CHARGE_FULL = "only_used_by_wx78",
-        },
-
-        HARVEST =
-        {
-            DOER_ISNT_MODULE_OWNER = "The tin gnat is not keen to chat.",
-        },
-
-		CAST_SPELLBOOK =
+		DECORATESNOWMAN =
 		{
---fallback to speech_wilson.lua 			NO_TOPHAT = "only_used_by_waxwell",
+			INUSE = "Another soul is building it!",
+			HASHAT = "Drat! That hat!",
+			STACKEDTOOHIGH = "Sigh, too high.",
+			MELTING = "I felt it melt.",
 		},
-
-		CASTAOE =
+        MUTATE = 
+        {
+            NOGHOST = "only_used_by_wendy",
+            NONEWMOON = "only_used_by_wendy",
+            NOFULLMOON = "only_used_by_wendy",
+            NOTNIGHT = "only_used_by_wendy",
+            CAVE = "only_used_by_wendy",
+        },
+		MODSLINGSHOT =
 		{
---fallback to speech_wilson.lua 			NO_MAX_SANITY = "only_used_by_waxwell",
-            NOT_ENOUGH_EMBERS = "only_used_by_willow",
-            NO_TARGETS = "only_used_by_willow",
-            CANT_SPELL_MOUNTED = "only_used_by_willow",
-            SPELL_ON_COOLDOWN = "only_used_by_willow", 
+--fallback to speech_wilson.lua 			NOSLINGSHOT = "only_used_by_walter",
 		},
+		POUNCECAPTURE =
+		{
+			MISSED = "Miss! Boo and hiss!",
+		},
+        DIVEGRAB =
+        {
+            MISSED = "Miss! Boo and hiss!",
+        },
     },
 
 	ANNOUNCE_CANNOT_BUILD =
@@ -413,6 +499,7 @@ return{
 	ACTIONFAIL_GENERIC = "No, no, no.",
 	ANNOUNCE_BOAT_LEAK = "Now this ride's getting fun!",
 	ANNOUNCE_BOAT_SINK = "Into the drink I go, hyuyu!",
+    ANNOUNCE_PREFALLINVOID = "No time to rhyme, lest we hear death's chime!",
 	ANNOUNCE_DIG_DISEASE_WARNING = "I've helped it!", --removed
 	ANNOUNCE_PICK_DISEASE_WARNING = "Its soul has not left its body, yet still it stinks.", --removed
 	ANNOUNCE_ADVENTUREFAIL = "I've had enough plane hopping.",
@@ -471,6 +558,21 @@ return{
 --fallback to speech_wilson.lua     ANNOUNCE_CHARGE = "only_used_by_wx78",
 --fallback to speech_wilson.lua 	ANNOUNCE_DISCHARGE = "only_used_by_wx78",
 
+    -- Winona specific
+--fallback to speech_wilson.lua     ANNOUNCE_ROSEGLASSES = 
+--fallback to speech_wilson.lua     {
+--fallback to speech_wilson.lua         "only_used_by_winona",
+--fallback to speech_wilson.lua         "only_used_by_winona",
+--fallback to speech_wilson.lua         "only_used_by_winona",
+--fallback to speech_wilson.lua     },
+    ANNOUNCE_CHARLIESAVE = 
+    {
+        "only_used_by_winona",
+    },
+	ANNOUNCE_ENGINEERING_CAN_UPGRADE = "only_used_by_winona",
+	ANNOUNCE_ENGINEERING_CAN_DOWNGRADE = "only_used_by_winona",
+	ANNOUNCE_ENGINEERING_CAN_SIDEGRADE = "only_used_by_winona",
+
 	ANNOUNCE_EAT =
 	{
 		GENERIC = "Mmm! Soul free!",
@@ -523,6 +625,7 @@ return{
 	ANNOUNCE_HIGHRESEARCH = "My brain's grown three sizes this day!",
 	ANNOUNCE_HOUNDS = "The beasts are baying!",
 	ANNOUNCE_WORMS = "Something approaches from beneath!",
+    ANNOUNCE_WORMS_BOSS = "Don't bumble about, upon that rumble, no doubt!",
     ANNOUNCE_ACIDBATS = "That sounds like bats.",
 	ANNOUNCE_HUNGRY = "Oh no, I'm hungry again.",
 	ANNOUNCE_HUNT_BEAST_NEARBY = "I love a game of hide and seek!",
@@ -563,6 +666,7 @@ return{
 	ANNOUNCE_TRAP_WENT_OFF = "Oh dear, oh dear.",
 	ANNOUNCE_UNIMPLEMENTED = "What on earth could it be!",
 	ANNOUNCE_WORMHOLE = "Hyuyu, how grotesque that was!",
+--fallback to speech_wilson.lua     ANNOUNCE_WORMHOLE_SAMESPOT = "only_used_by_winona",
 	ANNOUNCE_TOWNPORTALTELEPORT = "Never fear, the imp is here!",
 	ANNOUNCE_CANFIX = "\nI could restore it.",
 	ANNOUNCE_ACCOMPLISHMENT = "I feel excellent about myself!",
@@ -659,28 +763,93 @@ return{
         "I don't want to suck anymore souls!",
         "What gruesome things I must do to live!",
     },
+    ANNOUNCE_SOUL_EMPTY_NICE =
+    {
+        "I'm afraid I must feed soon.",
+        "Curse my need to feed!",
+        "It is tragic that they must die so that I may have life.",
+    },
+    ANNOUNCE_SOUL_EMPTY_NAUGHTY =
+    {
+        "I am absolutely famished!",
+        "I'm starved for some delicious souls!",
+        "I yearn for those tasty treats!",
+    },
     ANNOUNCE_SOUL_FEW =
     {
         "I'll need more souls soon.",
         "I feel the soul hunger stirring.",
+    },
+    ANNOUNCE_SOUL_FEW_NICE =
+    {
+        "Oh dear. Running low on souls, I fear.",
+        "I have precious few souls left.",
+    },
+    ANNOUNCE_SOUL_FEW_NAUGHTY =
+    {
+        "My collection is running low.",
+        "I'll need a soul snack soon.",
     },
     ANNOUNCE_SOUL_MANY =
     {
         "I've enough souls to sustain me.",
         "I hope I was not too greedy.",
     },
+    ANNOUNCE_SOUL_MANY_NICE =
+    {
+        "Oh my, I've taken so many!",
+        "Such abundance. Many thanks!",
+    },
+    ANNOUNCE_SOUL_MANY_NAUGHTY =
+    {
+        "When is enough enough? Never! Hyuyu!",
+        "I love a feast of souls.",
+    },
     ANNOUNCE_SOUL_OVERLOAD =
     {
         "I can't handle that much soul power!",
         "That was one soul too many!",
     },
+    ANNOUNCE_SOUL_OVERLOAD_NICE =
+    {
+        "I was too greedy!",
+        "Those poor souls have gone to waste!",
+    },
+    ANNOUNCE_SOUL_OVERLOAD_NAUGHTY =
+    {
+        "My precious souls!",
+        "Those were mine! All mine!",
+    },
+    ANNOUNCE_SOUL_OVERLOAD_WARNING =
+    {
+        "The souls are going to burst my brim!",
+        "The burden of souls is certain to pop!",
+    },
+    ANNOUNCE_SOUL_OVERLOAD_AVOIDED =
+    {
+        "My brim is back from making a crack.",
+        "I had to stop before I popped.",
+    },
+    ANNOUNCE_PANFLUTE_BUFF_ACTIVE =
+    {
+        "I feel the call to toot my flute! Hyuyu!",
+        "My flute's my muse, I can't refuse!",
+    },
+    ANNOUNCE_PANFLUTE_BUFF_USED =
+    {
+        "What a hoot, to play my flute!",
+        "A treat that feeds the soul! Hyuyu!",
+    },
 
     --walter specfic
+--fallback to speech_wilson.lua 	ANNOUNCE_AMMO_SLOT_OVERSTACKED = "only_used_by_walter",
 --fallback to speech_wilson.lua 	ANNOUNCE_SLINGHSOT_OUT_OF_AMMO =
 --fallback to speech_wilson.lua 	{
 --fallback to speech_wilson.lua 		"only_used_by_walter",
 --fallback to speech_wilson.lua 		"only_used_by_walter",
 --fallback to speech_wilson.lua 	},
+--fallback to speech_wilson.lua 	ANNOUNCE_SLINGHSOT_NO_AMMO_SKILL = "only_used_by_walter",
+--fallback to speech_wilson.lua 	ANNOUNCE_SLINGHSOT_NO_PARTS_SKILL = "only_used_by_walter",
 --fallback to speech_wilson.lua 	ANNOUNCE_STORYTELLING_ABORT_FIREWENTOUT =
 --fallback to speech_wilson.lua 	{
 --fallback to speech_wilson.lua         "only_used_by_walter",
@@ -688,6 +857,38 @@ return{
 --fallback to speech_wilson.lua 	ANNOUNCE_STORYTELLING_ABORT_NOT_NIGHT =
 --fallback to speech_wilson.lua 	{
 --fallback to speech_wilson.lua         "only_used_by_walter",
+--fallback to speech_wilson.lua 	},
+--fallback to speech_wilson.lua 	ANNOUNCE_WOBY_RETURN =
+--fallback to speech_wilson.lua 	{
+--fallback to speech_wilson.lua 		"only_used_by_walter",
+--fallback to speech_wilson.lua 	},
+--fallback to speech_wilson.lua 	ANNOUNCE_WOBY_SIT =
+--fallback to speech_wilson.lua 	{
+--fallback to speech_wilson.lua 		"only_used_by_walter",
+--fallback to speech_wilson.lua 	},
+--fallback to speech_wilson.lua 	ANNOUNCE_WOBY_FOLLOW =
+--fallback to speech_wilson.lua 	{
+--fallback to speech_wilson.lua 		"only_used_by_walter",
+--fallback to speech_wilson.lua 	},
+--fallback to speech_wilson.lua 	ANNOUNCE_WOBY_PRAISE =
+--fallback to speech_wilson.lua 	{
+--fallback to speech_wilson.lua 		"only_used_by_walter",
+--fallback to speech_wilson.lua 	},
+--fallback to speech_wilson.lua 	ANNOUNCE_WOBY_FORAGE =
+--fallback to speech_wilson.lua 	{
+--fallback to speech_wilson.lua 		"only_used_by_walter",
+--fallback to speech_wilson.lua 	},
+--fallback to speech_wilson.lua 	ANNOUNCE_WOBY_WORK =
+--fallback to speech_wilson.lua 	{
+--fallback to speech_wilson.lua 		"only_used_by_walter",
+--fallback to speech_wilson.lua 	},
+--fallback to speech_wilson.lua 	ANNOUNCE_WOBY_COURIER =
+--fallback to speech_wilson.lua 	{
+--fallback to speech_wilson.lua 		"only_used_by_walter",
+--fallback to speech_wilson.lua 	},
+--fallback to speech_wilson.lua 	ANNOUNCE_WOBY_REMEMBERCHEST_FAIL =
+--fallback to speech_wilson.lua 	{
+--fallback to speech_wilson.lua 		"only_used_by_walter",
 --fallback to speech_wilson.lua 	},
 
     -- wx specific
@@ -700,12 +901,18 @@ return{
     QUAGMIRE_ANNOUNCE_LOSE = "Oh dear.",
     QUAGMIRE_ANNOUNCE_WIN = "Must be off now!",
 
---fallback to speech_wilson.lua     ANNOUNCE_ROYALTY =
---fallback to speech_wilson.lua     {
---fallback to speech_wilson.lua         "Your majesty.",
---fallback to speech_wilson.lua         "Your highness.",
---fallback to speech_wilson.lua         "My liege!",
---fallback to speech_wilson.lua     },
+    ANNOUNCE_ROYALTY =
+    {
+        "You humble me, royal bumble bee!",
+        "Pardon my shyness, your Highness!",
+        "A crown of great renown!",
+    },
+    ANNOUNCE_ROYALTY_JOKER =
+    {
+        "A hat for a prat! Hyuyu!",
+        "The joke's on you! Hyuyu!",
+        "A clown of great renown!",
+    },
 
     ANNOUNCE_ATTACH_BUFF_ELECTRICATTACK    = "I'm an electric imp!",
     ANNOUNCE_ATTACH_BUFF_ATTACK            = "Hyuyu, I'm ready to play!",
@@ -768,6 +975,7 @@ return{
 --fallback to speech_wilson.lua         BOOK_RESEARCH_STATION = "only_used_by_wurt",
 --fallback to speech_wilson.lua         BOOK_LIGHT_UPGRADED = "only_used_by_wurt",
     },
+
     ANNOUNCE_WEAK_RAT = "Time has nearly run out for this would-be racer.",
 
     ANNOUNCE_CARRAT_START_RACE = "Let the race begin, I'm sure to win!",
@@ -786,6 +994,8 @@ return{
 --fallback to speech_wilson.lua         "only_used_by_wendy",
 --fallback to speech_wilson.lua     },
 --fallback to speech_wilson.lua 	ANNOUNCE_SISTURN_FULL = "only_used_by_wendy",
+    ANNOUNCE_SISTURN_FULL_EVIL = "only_used_by_wendy",
+    ANNOUNCE_SISTURN_FULL_BLOSSOM = "only_used_by_wendy",
 --fallback to speech_wilson.lua     ANNOUNCE_ABIGAIL_DEATH = "only_used_by_wendy",
 --fallback to speech_wilson.lua     ANNOUNCE_ABIGAIL_RETRIEVE = "only_used_by_wendy",
 --fallback to speech_wilson.lua 	ANNOUNCE_ABIGAIL_LOW_HEALTH = "only_used_by_wendy",
@@ -938,6 +1148,57 @@ return{
     ANNOUNCE_YOTD_NOBOATS = "Me and the start are too far apart.",
     ANNOUNCE_YOTD_NOCHECKPOINTS = "Whoopsie! I'll make a point to check first.",
     ANNOUNCE_YOTD_NOTENOUGHBOATS = "I should make space, so someone can join the race.",
+
+    ANNOUNCE_OTTERBOAT_OUTOFSHALLOWS = "I knew I otter keep to the shallows, hyuyu!",
+    ANNOUNCE_OTTERBOAT_DENBROKEN = "I shouldn't have shattered the den, then?",
+
+    ANNOUNCE_GATHER_MERM = "only_used_by_wurt",
+
+    -- rifts 4
+    ANNOUNCE_EXIT_GELBLOB = "I could've died inside!",
+	ANNOUNCE_SHADOWTHRALL_STEALTH = "I felt a keen blow, from an unseen foe!",
+    ANNOUNCE_RABBITKING_AGGRESSIVE = "I'm serious, what approaches sounds furious!",
+    ANNOUNCE_RABBITKING_PASSIVE = "What's that sound from underground?",
+    ANNOUNCE_RABBITKING_LUCKY = "A special rabbit! Please don't stab it!",
+    ANNOUNCE_RABBITKING_LUCKYCAUGHT = "Got it!",
+    ANNOUNCE_RABBITKINGHORN_BADSPAWNPOINT = "Not quite the site.",
+
+	-- Hallowed Nights 2024
+	ANNOUNCE_NOPUMPKINCARVINGONFIRE = "I weren't done, this burnt one!",
+
+	-- Winter's Feast 2024
+	ANNOUNCE_SNOWBALL_TOO_BIG = "I tell no lies! It's at full size!",
+	ANNOUNCE_SNOWBALL_NO_SNOW = "It won't grow without more snow.",
+
+    -- Meta 5
+    ANNOUNCE_WENDY_BABYSITTER_SET = "only_used_by_wendy", 
+    ANNOUNCE_WENDY_BABYSITTER_STOP = "only_used_by_wendy",
+
+	ANNOUNCE_WORTOX_REVIVER_FAILTELEPORT = "Oh dear, still here!",
+
+    ANNOUNCE_NO_ABIGAIL_FLOWER = "only_used_by_wendy",
+
+    ANNOUNCE_ELIXIR_BOOSTED = "I feel like a new imp!",
+    ANNOUNCE_ELIXIR_GHOSTVISION = "See like the dead, they said.",
+    ANNOUNCE_ELIXIR_PLAYER_SPEED = "I have the strength of ten imps!",
+
+    ANNOUNCE_ELIXIR_TOO_SUPER = "Don't think I can take that drink!",
+
+    -- Rift 5
+
+    ANNOUNCE_LUNARGUARDIAN_INCOMING = "Ack! It's back!",
+    ANNOUNCE_FLOATER_HELD = "Wet fur? What for?",
+    ANNOUNCE_FLOATER_LETGO = "No time to rhy-",
+
+    -- rifts5.1
+    ANNOUNCE_LUNARHAIL_BIRD_SOUNDS = "If you're flying, you're dying! Hyuyu!",
+    ANNOUNCE_LUNARHAIL_BIRD_CORPSES = "The weather was unkind to those of the feather.",
+    ANNOUNCE_FLOAT_SWIM_TIRED = "I need a while after swimming a mile!",
+    ANOUNCE_MUTATED_BIRD_ATTACK = "They're back, and on the attack!",
+
+    -- Rift 6
+    ANNOUNCE_WEAPON_TOOWEAK = "I need stronger arms to do any harms!",
+    ANNOUNCE_VAULT_TELEPORTER_DOES_NOTHING = "Ahem! What's the problem!",
 
 	BATTLECRY =
 	{
@@ -1522,6 +1783,8 @@ return{
 		TURF_FUNGUS="Floor or ceiling, depending on your perspective.",
 		TURF_FUNGUS_MOON = "Floor or ceiling, depending on your perspective.",
 		TURF_ARCHIVE = "Floor or ceiling, depending on your perspective.",
+        TURF_VAULT = "Floor or ceiling, depending on your perspective.",
+        TURF_VENT = "Floor or ceiling, depending on your perspective.",
 		TURF_SINKHOLE="Floor or ceiling, depending on your perspective.",
 		TURF_UNDERROCK="Floor or ceiling, depending on your perspective.",
 		TURF_MUD="Floor or ceiling, depending on your perspective.",
@@ -1589,7 +1852,8 @@ return{
                 "Poor soul.",
                 "Poor soul.",
             },
-		},
+        },
+
 		ADVENTURE_PORTAL = "I want to play a game with you!",
 		AMULET = "A glimmering jewel that's rife with life.",
 		ANIMAL_TRACK = "Those aren't my hoofprints!",
@@ -1671,8 +1935,10 @@ return{
             DOMESTICATED = "I believe we've made a friend!",
             ORNERY = "Don't you feel just hopping mad?",
             RIDER = "Don't you want to carry me?",
-            PUDGY = "It's soul is chubby too, hyuyu!",
+            PUDGY = "Its soul is chubby too, hyuyu!",
             MYPARTNER = "We're kindred souls, wouldn't you say?",
+            DEAD = "Someone's ride has died.",
+            DEAD_MYPARTNER = "Say it ain't so, m'fellow beefalo!",
 		},
 
 		BEEFALOHAT = "Horn replacements.",
@@ -1734,7 +2000,7 @@ return{
             RARE = "Ooo, secret knowledge, what fun, what power!",
         },
         SKETCH = "Would you look at that!",
-		COOKINGRECIPECARD = 
+		COOKINGRECIPECARD =
 		{
 			GENERIC = "How mysterious, the card is blank!",
 		},
@@ -1861,9 +2127,15 @@ return{
         CHESSPIECE_EYEOFTERROR = "He's gone, no matter how you look at it, hyuyu!",
         CHESSPIECE_TWINSOFTERROR = "What an eye-catching statue, hyuyu!",
         CHESSPIECE_DAYWALKER = "A boorish boar's bust!",
+        CHESSPIECE_DAYWALKER2 = "The hog heaved through heaps of junk.",
         CHESSPIECE_DEERCLOPS_MUTATED = "She got quite the eyeful.",
         CHESSPIECE_WARG_MUTATED = "Must we memorialize the mutated mutt?",
         CHESSPIECE_BEARGER_MUTATED = "It bears a strong resemblance.",
+        CHESSPIECE_SHARKBOI = "We avoided the maw of the rowdy Frostjaw.",
+        CHESSPIECE_WORMBOSS = "Its jaws were near, but I disappeared! Hyuyu!",
+        CHESSPIECE_YOTS = "Make no error facing this writhing terror.",
+        CHESSPIECE_WAGBOSS_ROBOT = "That bot was a lot.",
+        CHESSPIECE_WAGBOSS_LUNAR = "What error caused such a terror?",
 
         CHESSJUNK1 = "It looks quite broke, and that's no joke!",
         CHESSJUNK2 = "It looks quite broke, and that's no joke!",
@@ -2252,8 +2524,8 @@ return{
 		LIGHTER  = "A tool to set fire, if you desire.",
 		LIGHTNING_ROD =
 		{
-			CHARGED = "For peace of mind.",
-			GENERIC = "It's brimming with elemental energy.",
+			CHARGED = "It's brimming with elemental energy.",
+			GENERIC = "For peace of mind.",
 		},
 		LIGHTNINGGOAT =
 		{
@@ -2849,13 +3121,13 @@ return{
         },
         CLAYWARG =
         {
-        	GENERIC = "Growl and bark, teeth like a shark!",
-        	STATUE = "Petrified from toe to tip!",
+            GENERIC = "Growl and bark, teeth like a shark!",
+            STATUE = "Petrified from toe to tip!",
         },
         CLAYHOUND =
         {
-        	GENERIC = "Yip yap yelp, I need help!",
-        	STATUE = "Petrified from toe to tip!",
+            GENERIC = "Yip yap yelp, I need help!",
+            STATUE = "Petrified from toe to tip!",
         },
         HOUNDWHISTLE = "Ooo, ouch! My ears!",
         CHESSPIECE_CLAYHOUND = "A clay hound made from that sketch we found!",
@@ -3085,6 +3357,7 @@ return{
         WINTER_ORNAMENTBOSS = "Memories of a fun time.",
 		WINTER_ORNAMENTFORGE = "I remember when we played there!",
 		WINTER_ORNAMENTGORGE = "Adornment from the land of goats!",
+        WINTER_ORNAMENTPEARL = "Made by the hermit. I can confirm it.",
 
         WINTER_FOOD1 = "It looks like a little mortal! Hyuyu!", --gingerbread cookie
         WINTER_FOOD2 = "I might try one today.", --sugar cookie
@@ -3457,6 +3730,7 @@ return{
         	OFF = "Doesn't look too lively!",
         	BURNING = "Hoohoohoo!",
         	BURNT = "How hilarious!",
+			SLEEP = "It's sure to entertain our guests!",
         },
         WINONA_SPOTLIGHT =
         {
@@ -3464,6 +3738,7 @@ return{
         	OFF = "Doesn't look too lively!",
         	BURNING = "Hoohoohoo!",
         	BURNT = "How hilarious!",
+			SLEEP = "What a funny thing!",
         },
         WINONA_BATTERY_LOW =
         {
@@ -3475,12 +3750,64 @@ return{
         },
         WINONA_BATTERY_HIGH =
         {
-        	GENERIC = "Ooohoohoo! The mortal learned magic!",
-        	LOWPOWER = "Winding down, waning.",
-        	OFF = "Playtime's over!",
-        	BURNING = "Hoohoohoo!",
-        	BURNT = "How hilarious!",
+			GENERIC = "Ooohoohoo! The mortal learned magic!",
+			LOWPOWER = "Winding down, waning.",
+			OFF = "Playtime's over!",
+			BURNING = "Hoohoohoo!",
+			BURNT = "How hilarious!",
+			OVERLOADED = "It fired up and fizzled out, hyuyu!",
         },
+		--v3 Winona
+		WINONA_REMOTE =
+		{
+			GENERIC = "Give that button a press, see what happens next!",
+			OFF = "Doesn't look too lively!",
+			CHARGING = "Give that button a press, see what happens next!",
+			CHARGED = "Give that button a press, see what happens next!",
+		},
+		WINONA_TELEBRELLA =
+		{
+			GENERIC = "I'm not a fella who needs a metal umbrella.",
+--fallback to speech_wilson.lua             MISSINGSKILL = "only_used_by_winona",
+			OFF = "Doesn't look too lively!",
+			CHARGING = "I'm not a fella who needs a metal umbrella.",
+			CHARGED = "I'm not a fella who needs a metal umbrella.",
+		},
+		WINONA_TELEPORT_PAD_ITEM =
+		{
+			GENERIC = "Imitation is the sincerest form of flattery, hyuyu!",
+--fallback to speech_wilson.lua             MISSINGSKILL = "only_used_by_winona",
+			OFF = "Playtime's over!",
+			BURNING = "Hoohoohoo!",
+			BURNT = "How hilarious!",
+		},
+		WINONA_STORAGE_ROBOT =
+		{
+			GENERIC = "Here I am trying to make a lovely mess, and you keep cleaning it up!",
+			OFF = "Rest those gears, my dear.",
+			SLEEP = "See? Stop tidying and appreciate the chaos around you!",
+			CHARGING = "Rest those gears, my dear.",
+			CHARGED = "Rest those gears, my dear.",
+		},
+		INSPECTACLESBOX = "only_used_by_winona",
+		INSPECTACLESBOX2 = "only_used_by_winona",
+		INSPECTACLESHAT = 
+        {
+            GENERIC = "She's made the decision to follow his vision?",
+            MISSINGSKILL = "only_used_by_winona",
+        },
+		ROSEGLASSESHAT =
+        {
+            GENERIC = "What have we here? A dark magic seer?",
+            MISSINGSKILL = "only_used_by_winona",
+        },
+		CHARLIERESIDUE = "only_used_by_winona",
+		CHARLIEROSE = "only_used_by_winona",
+        WINONA_MACHINEPARTS_1 = "only_used_by_winona",
+        WINONA_MACHINEPARTS_2 = "only_used_by_winona",
+		WINONA_RECIPESCANNER = "only_used_by_winona",
+		WINONA_HOLOTELEPAD = "only_used_by_winona",
+		WINONA_HOLOTELEBRELLA = "only_used_by_winona",
 
         --Wormwood
         COMPOSTWRAP = "It's poop. So the plants won't droop.",
@@ -3627,7 +3954,7 @@ return{
         MAST_ITEM = "A mast to sail the ocean vast.",
         MUTATEDHOUND =
         {
-        	DEAD = "I'm surprised it had a soul!",
+        	DEAD = "Soulless beast.",
         	GENERIC = "What if I'm actually inside out, and it's rightside in?",
         	SLEEPING = "Its mind has fled far from here, hyuyu.",
         },
@@ -3839,14 +4166,28 @@ return{
             "Hello, my small furry friend!",
         },
 		WALTERHAT = "Imps and uniforms rarely mix.",
-		SLINGSHOT = "Now this could cause some mischief!",
+		SLINGSHOT =
+		{
+			GENERIC = "Now this could cause some mischief!",
+--fallback to speech_wilson.lua 			NOT_MINE = "only_used_by_walter",
+		},
 		SLINGSHOTAMMO_ROCK = "Oooh, how fun!",
 		SLINGSHOTAMMO_MARBLE = "Oooh, how fun!",
 		SLINGSHOTAMMO_THULECITE = "Oooh, how fun!",
         SLINGSHOTAMMO_GOLD = "Oooh, how fun!",
+		SLINGSHOTAMMO_HONEY = "Oooh, how fun!",
         SLINGSHOTAMMO_SLOW = "Oooh, how fun!",
         SLINGSHOTAMMO_FREEZE = "Oooh, how fun!",
 		SLINGSHOTAMMO_POOP = "Oooh, how fun!",
+		SLINGSHOTAMMO_STINGER = "Oooh, how fun!",
+		SLINGSHOTAMMO_MOONGLASS = "Oooh, how fun!",
+		SLINGSHOTAMMO_GELBLOB = "Oooh, how fun!",
+		SLINGSHOTAMMO_SCRAPFEATHER = "Oooh, how fun!",
+        SLINGSHOTAMMO_DREADSTONE = "Oooh, how fun!",
+        SLINGSHOTAMMO_GUNPOWDER = "Oooh, how fun!",
+        SLINGSHOTAMMO_LUNARPLANTHUSK = "Oooh, how fun!",
+        SLINGSHOTAMMO_PUREBRILLIANCE = "Oooh, how fun!",
+        SLINGSHOTAMMO_HORRORFUEL = "Oooh, how fun!",
         PORTABLETENT = "So many pranks to pull! Do I push it in the lake? Toss in a snake?",
         PORTABLETENT_ITEM = "Round and round, tent goes up and then comes down!",
 
@@ -3879,15 +4220,22 @@ return{
 		GHOSTLYELIXIR_ATTACK = "Hyuyu! Someone's getting crafty!",
 		GHOSTLYELIXIR_SPEED = "Hyuyu! Someone's getting crafty!",
 		GHOSTLYELIXIR_RETALIATION = "Hyuyu! Someone's getting crafty!",
+        GHOSTLYELIXIR_REVIVE = "Hyuyu! Someone's getting crafty!",
 		SISTURN =
 		{
 			GENERIC = "A touching tribute to a treasured twin.",
 			SOME_FLOWERS = "A flowery addition for our apparition!",
 			LOTS_OF_FLOWERS = "Maybe I should keep my distance...",
+            LOTS_OF_FLOWERS_EVIL = "Floral vanity at the cost of my sanity! Hyuyu!",
+            LOTS_OF_FLOWERS_BLOSSOM = "No one around to make that sound.",   
 		},
 
         --Wortox
         WORTOX_SOUL = "Hyuyu! It looks tasty.", --only wortox can inspect souls
+        --WORTOX_DECOY is not needed because it uses the default WORTOX inspection.
+        WORTOX_NABBAG = "My clever clobbering collector! Hyuyu!",
+        WORTOX_REVIVER = "To die is not always goodbye.",
+        WORTOX_SOULJAR = "I'll need more souls to store.",
 
         PORTABLECOOKPOT_ITEM =
         {
@@ -3962,12 +4310,17 @@ return{
         WEREITEM_GOOSE = "Let loose the goose!",
         WEREITEM_MOOSE = "Weremoose? There moose!",
 
-        MERMHAT = "Some would call me two-faced, hyuyu!",
+        MERMHAT = "Some would call me two-faced, hyuyu!",        
         MERMTHRONE =
         {
             GENERIC = "A mat made for a monarch.",
             BURNT = "A little rain could have saved their reign.",
         },
+        MOSQUITOMUSK = "A cuddly creepy-crawly!",
+        MOSQUITOBOMB = "A bombastic bag of blood-suckers!",
+        MOSQUITOFERTILIZER = "Methinks it stinks.",
+        MOSQUITOMERMSALVE = "No need to squirm, it's made for a Merm.",
+
         MERMTHRONE_CONSTRUCTION =
         {
             GENERIC = "My my, what mischief are you making?",
@@ -4101,6 +4454,13 @@ return{
             LINE_4 = "Oh my! My, my my!",
             LINE_5 = "Hyuyu, I shouldn't spoil the surprise!",
         },
+		VAULT_RUNE = "Makes sense.",
+		VAULT_STATUE =
+		{
+			LORE1 = "The Monarch is lost to the Dark!",
+			LORE2 = "Mass extinction makes no distinction!",
+			LORE3 = "Oh dears. They appears to have spears, I fears!",
+		},
 
         ARCHIVE_RESONATOR = {
             GENERIC = "There's something hidden that it seeks.",
@@ -4376,7 +4736,7 @@ return{
 
         YOTB_BEEFALO_DOLL_WAR = {
             GENERIC = "Enjoying the plush life? Hyuyuyu!",
-            YOTB = "",
+            YOTB = "Our judge just may have something to say.",
         },
         YOTB_BEEFALO_DOLL_DOLL = {
             GENERIC = "Enjoying the plush life? Hyuyuyu!",
@@ -4489,6 +4849,7 @@ return{
 
         MOONSTORM_STATIC = "Best stay back if I don't want to get zapped!",
         MOONSTORM_STATIC_ITEM = "It makes my fur stand on end.",
+        MOONSTORM_STATIC_ROAMER = "That juice is on the loose!",
         MOONSTORM_SPARK = "Hyuyu, it tickles!",
 
         BIRD_MUTANT = "My my, you're looking rather pale!",
@@ -4721,6 +5082,9 @@ return{
         BOAT_BUMPER_KELP_KIT = "But idle hands are such good playthings!",
 		BOAT_BUMPER_SHELL = "We shell be well protected, hyuyu!",
         BOAT_BUMPER_SHELL_KIT = "But idle hands are such good playthings!",
+        BOAT_BUMPER_CRABKING = "A princely reward for a battle endured.",
+        BOAT_BUMPER_CRABKING_KIT = "But idle hands are such good playthings!",
+
         BOAT_CANNON = {
             GENERIC = "Rounded stones are required for this cannon to fire.",
             AMMOLOADED = "Ready to fire and brimstone!",
@@ -4798,6 +5162,8 @@ return{
         CHARLIE_HECKLER = "Hyuyu, what a funny pair!",
 
         PLAYBILL_THE_DOLL = "A curious tale of friendship and betrayal.",
+        PLAYBILL_THE_VEIL = "More of a controversial commercial.",
+        PLAYBILL_THE_VAULT = "How nice! A story of sacrifice!",
         STATUEHARP_HEDGESPAWNER = "The poor cherub and harp, lost in vines thorny sharp.",
         HEDGEHOUND = "You wouldn't eat a fellow trickster, would you?",
         HEDGEHOUND_BUSH = "Did those vines just whine? I'm sure it's fine.",
@@ -4872,7 +5238,7 @@ return{
 		DAYWALKER2 =
 		{
 			GENERIC = "Freed indeed.",
-			BURIED = "Just my luck to find him stuck… again.",
+			BURIED = "Just my luck to find him stuck... again.",
 			HOSTILE = "Not to belabor, but you've a pattern of behavior.",
 		},
 		ARMORDREADSTONE = "All blows will be blocked by this armor of rock.",
@@ -4926,6 +5292,7 @@ return{
 		SHADOWTHRALL_HANDS = "This one's all topsy-turvy, hyuyu!",
 		SHADOWTHRALL_HORNS = "You wouldn't want to eat a sweet little imp like me!",
 		SHADOWTHRALL_WINGS = "A fright, taken flight!",
+		SHADOWTHRALL_MOUTH = "I'd rather see that smile from a mile.",
 
         CHARLIE_NPC = "The Shadow Queen is finally seen!",
         CHARLIE_HAND = "It seeks a stone of dread.",
@@ -5049,14 +5416,16 @@ return{
         PHONOGRAPH = "Ooo, music! I'm practically giddy!",
         RECORD = "Encore!",
         RECORD_CREEPYFOREST = "What a cheeky little tune.",
-        RECORD_DANGER = "Oh dear, what have we here?",
-        RECORD_DAWN = "A delight at first light!",
+        RECORD_DANGER = "Oh dear, what have we here?", -- Unused.
+        RECORD_DAWN = "A delight at first light!", -- Unused.
         RECORD_DRSTYLE = "I think I heard this in a dream.",
-        RECORD_DUSK = "That's it?",
+        RECORD_DUSK = "That's it?", -- Unused.
         RECORD_EFS = "Oh dear, what have we here?",
-        RECORD_END = "That's it?",
-        RECORD_MAIN = "What a cheeky little tune.",
-        RECORD_WORKTOBEDONE = "Oh dear, what have we here?",
+        RECORD_END = "That's it?", -- Unused.
+        RECORD_MAIN = "What a cheeky little tune.", -- Unused.
+        RECORD_WORKTOBEDONE = "Oh dear, what have we here?", -- Unused.
+        RECORD_HALLOWEDNIGHTS = "Thrilling and chilling!",
+        RECORD_BALATRO = "A game is always good for the soul!",
 
         ARCHIVE_ORCHESTRINA_MAIN = "This floor is soundly built, hyuyu!",
 
@@ -5145,9 +5514,345 @@ return{
 
         FENCE_JUNK = "A metal fence for our defense.",
         JUNK_PILE = "Could it hide a surprise inside?",
-        JUNK_PILE_BIG = "I won't fall for that, hyuyu!",
-
+        JUNK_PILE_BIG = {
+            BLUEPRINT = "I spy with my little eye, something sitting way up high, hyuyu!",
+            GENERIC = "I won't fall for that, hyuyu!",
+        },
+        
         ARMOR_LUNARPLANT_HUSK = "Prickly plant protection, perfection!",
+
+        -- Meta 4 / Ocean QoL
+
+        OTTER = "Furry fish-tailed freeloader!",
+        OTTERDEN = {
+            GENERIC = "Nada? Another otter den then.",
+            HAS_LOOT = "Let's clean out this clawed klepto.",
+        },
+        OTTERDEN_DEAD = "We'll soon be sunk.",
+
+        BOAT_ANCIENT_ITEM = "This old boat will surely float!",
+        BOAT_ANCIENT_CONTAINER = "To hide my prize from prying primate eyes.",
+        WALKINGPLANK_ANCIENT = "It's just a last resort, worrywart!",
+
+        ANCIENTTREE_SEED = "I see a seed to sow, hyuyu!",
+
+        ANCIENTTREE_GEM = {
+            GENERIC = "The tree furnace burns in earnest.",
+            STUMP = "Once a tree, now debris.",
+        },
+
+        ANCIENTTREE_SAPLING_ITEM = "It's tricky with a tree so picky.",
+
+        ANCIENTTREE_SAPLING = {
+            GENERIC = "Not to get sappy, I'm glad it's happy.",
+            WRONG_TILE = "Not the picky plant's preferred placement?",
+            WRONG_SEASON = "What now? Oh, not now.",
+        },
+ 
+        ANCIENTTREE_NIGHTVISION = {
+            GENERIC = "Is it so scary for a tree to be hairy?",
+            STUMP = "It's leafy life was cut short.",
+        },
+
+        ANCIENTFRUIT_GEM = "Don't try to eat it, better to heat it!",
+        ANCIENTFRUIT_NIGHTVISION = "Just one bite to help my sight at night.",
+        ANCIENTFRUIT_NIGHTVISION_COOKED = "I miss the wriggle, it made me giggle.",
+
+        BOATPATCH_KELP = "This kelp should help!",
+
+        CRABKING_MOB = "Stay back, bottom feeder!",
+        CRABKING_MOB_KNIGHT = "I'm surely shell-shocked!",
+        CRABKING_CANNONTOWER = "Well don't go ballistic, hyuyu!",
+        CRABKING_ICEWALL = "Nothing nice about a wall of ice.",
+
+        SALTLICK_IMPROVED = "I sea salt!",
+
+        OFFERING_POT =
+        {
+            GENERIC = "A saddening scarcity of seaweed, I see.",
+            SOME_KELP = "Would it be such a chore to add some more?",
+            LOTS_OF_KELP = "Heaping helpings of kelp!",
+        },
+
+        OFFERING_POT_UPGRADED =
+        {
+            GENERIC = "A saddening scarcity of seaweed, I see.",
+            SOME_KELP = "Would it be such a chore to add some more?",
+            LOTS_OF_KELP = "Heaping helpings of kelp!",
+        },
+
+        MERM_ARMORY = "A Merm millinery.",
+        MERM_ARMORY_UPGRADED = "A Merm millinery.",
+        MERM_TOOLSHED = "Does appear we're not welcome here.",
+        MERM_TOOLSHED_UPGRADED = "Does appear we're not welcome here.",
+        MERMARMORHAT = "It will find its home on a merm's fishy dome.",
+        MERMARMORUPGRADEDHAT = "It will find its home on a merm's fishy dome.",
+        MERM_TOOL = "A Merm's multi-tool.",
+        MERM_TOOL_UPGRADED = "Meticulously manufactured for Merms.",
+
+        WURT_SWAMPITEM_SHADOW = "Crafted by her scaly hand, to bring the swamp to any land.",
+        WURT_SWAMPITEM_LUNAR = "Don't be fooled by its shine so bright, what rains down is sure to fright.",
+
+        MERM_SHADOW = "I'm afraid retirement will have to wait.",
+        MERMGUARD_SHADOW = "And they say there are no second chances, hyuyu!",
+
+        MERM_LUNAR = "Ah, the latest from young Wurt. I wonder if those spikes hurt.",
+        MERMGUARD_LUNAR = "An ugly mutant from the Marsh. Pardon me, was that too harsh?",
+
+        -- Rifts 4
+
+        SHADOW_BEEF_BELL = "A bell to bring back the beef!",
+        SADDLE_SHADOW = "Shall we take a ride on the dark side?",
+        SHADOW_BATTLEAXE = "Foes will take pause, when they see the claws.",
+        VOIDCLOTH_BOOMERANG = "Delivering death from a distance!",
+		ROPE_BRIDGE_KIT = "Hope the rope holds.",
+		GELBLOB =
+		{
+			GENERIC = "Ick! It sticks!",
+			HAS_ITEM = "Enough with the guff! Let's get that stuff!",
+			HAS_CHARACTER = "They're frowning because they're drowning! Hyuyu!",
+		},
+        RABBITKING_AGGRESSIVE = "Let his kicks miss you, he's got an anger issue!",
+        RABBITKING_PASSIVE = "The hare has an air about him.",
+        RABBITKING_LUCKY = "That rabbit! Grab it!",
+        RABBITKINGMINION_BUNNYMAN = "It's a warrin' warren!",
+        ARMOR_CARROTLURE = "Carrot? Wear it!",
+        RABBITKINGHORN = "It plays a tunneling tune.",
+        RABBITKINGHORN_CHEST = "Subterranean storage service",
+        RABBITKINGSPEAR = "A bludgeon from a long-eared curmudgeon.",
+        RABBITHAT = "Aww, lookit that! A rabbit hat!",
+        WORM_BOSS = "Squirmy wormy! Hyuyu!",
+
+        STONE_TABLE = -- Shared between the round and square tables.
+        {
+            GENERIC = "Now, will the tables turn?",
+            HAS_ITEM = "The centerpiece has been set.",
+        },
+
+        STONE_CHAIR =
+        {
+            GENERIC = "I'll take a seat and rest my feet.",
+            OCCUPIED = "Move your rear, I want to sit here!",
+        },
+
+        CARPENTRY_BLADE_MOONGLASS = "But what does it cut?",
+
+        CHEST_MIMIC_REVEALED = "Why did we open it?!",
+
+        GELBLOB_STORAGE = {
+            GENERIC  = "I do declare, there's nothing there.",
+            FULL = "Congealed and sealed!",
+        },
+        GELBLOB_STORAGE_KIT = "Grrr... Not on the fur!",
+        GELBLOB_BOTTLE = "Bottled abomination.",
+
+        PLAYER_HOSTED =
+        {
+            GENERIC = "Can't you see, you're dead to me?",
+            ME = "As such, I've seen too much. Hyuyu...",
+        },
+
+        MASK_SAGEHAT = "Hard to despise this disguise!",
+        MASK_HALFWITHAT = "Who's down to clown?",
+        MASK_TOADYHAT = "A mask fit for the task!",
+
+        SHADOWTHRALL_PARASITE = "That thingy looks clingy.",
+
+        PUMPKINCARVER = "My turn to carve the lantern!",
+		SNOWMAN =
+		{
+			GENERIC = "Whoa, man. Snowman!",
+			SNOWBALL = "Of all the snowballs...",
+		},
+        SNOWBALL_ITEM = "No greater delight than a snowball fight!",
+
+        -- Year of the Snake
+        YOTS_SNAKESHRINE =
+        {
+            GENERIC = "The worm's terms are met!",
+            EMPTY = "On what does the beast wish to feast?",
+            BURNT = "My head was turned, and it was burned.",
+        },
+        YOTS_WORM = "Stand firm against the squirm of the worm!",
+        YOTS_LANTERN_POST = 
+        {
+            GENERIC = "A post with the most to boast!",
+            BURNT = "Who cares! We have spares! Right?",
+        },
+        YOTS_LANTERN_POST_ITEM = "It will stand tall with them all!",
+        CHESSPIECE_DEPTHWORM  = "Make no error facing this writhing terror.",
+
+        -- Meta 5
+        GHOSTLYELIXIR_LUNAR = "Hyuyu! Someone's getting crafty!",
+        GHOSTLYELIXIR_SHADOW = "Hyuyu! Someone's getting crafty!",
+
+		SLINGSHOTMODKIT = "Hotshot! Is he not?",
+		SLINGSHOT_BAND_PIGSKIN = "Hotshot! Is he not?",
+		SLINGSHOT_BAND_TENTACLE = "Hotshot! Is he not?",
+		SLINGSHOT_BAND_MIMIC = "Hotshot! Is he not?",
+		SLINGSHOT_FRAME_BONE = "Hotshot! Is he not?",
+		SLINGSHOT_FRAME_GEMS = "Hotshot! Is he not?",
+		SLINGSHOT_FRAME_WAGPUNK_0 = "Hotshot! Is he not?",
+		SLINGSHOT_FRAME_WAGPUNK = "Hotshot! Is he not?",
+		SLINGSHOT_HANDLE_STICKY = "Hotshot! Is he not?",
+		SLINGSHOT_HANDLE_JELLY = "Hotshot! Is he not?",
+		SLINGSHOT_HANDLE_SILK = "Hotshot! Is he not?",
+		SLINGSHOT_HANDLE_VOIDCLOTH = "Hotshot! Is he not?",
+
+		WOBY_TREAT = "Lookie, lookie! A doggie's cookie!",
+		BANDAGE_BUTTERFLYWINGS = "Who? Who has a boo-boo?",
+		PORTABLEFIREPIT_ITEM = "Mobile combustible!",
+        SLINGSHOTAMMO_CONTAINER = "Pockets full of rockets.",
+
+        ELIXIR_CONTAINER = "Any mixers for those elixirs?",
+        GHOSTFLOWERHAT = "Ghostly flowers yield strange powers.",
+        WENDY_RESURRECTIONGRAVE = "A just-in-case vase!",
+        GRAVEURN =
+        {
+            GENERIC = "The urn yearns, hyuyu!",
+            HAS_SPIRIT = "Just a spirit, no need to fear it.",
+        },
+
+        SHALLOW_GRAVE = "Poor soul.",
+        THULECITEBUGNET = "Fly away? Not today!",
+
+        -- Deck of Cards
+        DECK_OF_CARDS = "One sec, who shuffled this deck?",
+        PLAYING_CARD = "Is it so hard to not lose a card?",
+        BALATRO_MACHINE = "Hey joker, let's play some poker!",
+
+		-- Rifts 5
+		GESTALT_CAGE =
+		{
+			GENERIC = "Nothing worth noting.",
+			FILLED = "It hides insides!",
+		},
+		WAGBOSS_ROBOT_SECRET = "If we know history, better to leave it a mystery.",
+        WAGBOSS_ROBOT = "No need for alarm, it means us no harm...",
+        WAGBOSS_ROBOT_POSSESSED = "It's got a few screws loose, I do deduce.",
+		WAGBOSS_ROBOT_LEG = "A robust robot leg!",
+		ALTERGUARDIAN_PHASE1_LUNARRIFT = "What's it growing? Why's it glowing?",
+		ALTERGUARDIAN_PHASE1_LUNARRIFT_GESTALT = "We fought it, and we got it!",
+        ALTERGUARDIAN_PHASE4_LUNARRIFT = "You atrocity of a monstrosity!",
+		WAGDRONE_ROLLING =
+        {
+            GENERIC = "Deranged dervish on the skirmish!",
+            INACTIVE = "A mean little machine!",
+            DAMAGED = "Shall I repair or take the spare... parts?",
+            FRIENDLY = "A friendly model that doesn't dawdle.",
+        },
+        WAGDRONE_FLYING =
+        {
+            GENERIC = "Buzzing blight from yonder height!",
+            INACTIVE = "A mean little machine!",
+            DAMAGED = "It's had its day, let's salvage away!",
+        },
+		WAGDRONE_PARTS = "Spares for repairs.",
+		WAGDRONE_BEACON = "I've seen it all! An invisible wall!",
+
+        WAGPUNK_WORKSTATION = "What have we here? His intentions are never clear!",
+        WAGPUNK_LEVER = "Is it polite to pull it?",
+        WAGPUNK_FLOOR_KIT = "Score! More floor!",
+        WAGPUNK_CAGEWALL = "Save the sass! None shall pass! Hyuyu!",
+
+		WAGSTAFF_ITEM_1 = "The glove is on the physical plane? I must have truly gone insane!",
+		WAGSTAFF_ITEM_2 = "The clipboard is real, I said with a squeal! Hyuyu!",
+
+        HERMITCRAB_RELOCATION_KIT = "It'll permit to move the hermit!",
+
+        WANDERINGTRADER =
+        {
+            REVEALED = "This guy's disguise! Hyuyu!",
+            GENERIC = "Whoa, uncanny beefalo!",
+        },
+
+        GESTALT_GUARD_EVOLVED = "Well whad'ya know, we reap what we sow!",
+        FLOTATIONCUSHION = "Because there's no time to think, when you're plunged in the drink!",
+        LUNAR_SEED = "You went down, and left your crown!",
+
+        -- rifts5.1
+        WAGBOSS_ROBOT_CONSTRUCTIONSITE = "The foundation of devastation, hyuyu!",
+        WAGBOSS_ROBOT_CONSTRUCTIONSITE_KIT = "I'll feel no guilt until it's built!",
+        WAGBOSS_ROBOT_CREATION_PARTS = "Install to end us all?",
+        MOONSTORM_STATIC_CATCHER = "It's hollow, you follow?",
+        COOLANT = "All that trouble for these bubbles.",
+
+        FENCE_ELECTRIC = {
+            LINKED = "Think it's linked.",      --NOTE: the fence post is fully linked to two other posts
+            GENERIC = "Don't think it's linked.",           --NOTE: no links or electricity, just boring ol fence post
+        },
+        FENCE_ELECTRIC_ITEM = "Yet to set.",
+
+        MUTATEDBIRD = "That bird is absurd.",
+
+        BIRDCORPSE =
+        {
+            GENERIC  = "It's dead but not done.", --witnessing the corpse
+            BURNING  = "Cremation to curb mutation!", --when its burning
+            REVIVING = "It's changing and deranging.", --when its mutating and being revived
+        },
+
+        BUZZARDCORPSE = {
+            GENERIC  = "It's dead but not done.", --witnessing the corpse
+            BURNING  = "Cremation to curb mutation!", --when its burning
+            REVIVING = "It's changing and deranging.", --when its mutating and being revived
+        },
+
+        MUTATEDBUZZARD = {
+            GENERIC = "A buzzard? Absurd!", -- Generic string
+            EATING_CORPSE = "It eats the meats, the cycle repeats!", -- Eating from a fresh corpse (might be from the players kill or another creatures kill)
+        },
+
+        -- Rifts 6
+
+        SHADOWTHRALL_CENTIPEDE = {
+            HEAD = "Two heads? What about a butt?", --The head segment
+            BODY = "Hard to make a dent in that segment!", --The body segment
+            FLIPPED = "A heck of a train wreck!", --When it's flipped over (either head or body segment)
+        },
+
+        TREE_ROCK =
+		{
+			BURNING = "Torch the trunk and then kerplunk!", --It's vines are burning, it will collapse
+			CHOPPED = "It's mine to mine!", --It's 'chopped', so the rock fell
+			GENERIC = "The rock? I see it, but how to free it?", --Rock is still on tree
+		},
+
+        -- NOTE: Unsure about HOT and COLD, just do GENERIC, GAS, MIASMA for now!
+        CAVE_VENT_ROCK =
+        {
+            GENERIC = "What will rise, shall be a surprise!", -- Not ventilating anything
+            HOT     = "Fear not, team! Just hot steam.", -- Ventiliating hot air, making the area warm
+            GAS     = "Rather stinks, me thinks.", -- Ventiliating Toadstools gas fumes and spores
+            MIASMA  = "Inhale that plume, embrace your doom!", -- Ventiliating the shadow rift miasma
+        },
+        CAVE_FERN_WITHERED = "Looks dead, I said.",
+        FLOWER_CAVE_WITHERED = "The light will not last.",
+
+		ABYSSPILLAR_MINION =
+		{
+			GENERIC = "How do you do, statue?", --off, looks like decor/statue
+			ACTIVATED = "At least it waits its turn, but what's the pattern to discern?", --turned on and hopping over puzzle pillars
+		},
+		ABYSSPILLAR_TRIAL = "A clever little lever!",
+
+        VAULT_TELEPORTER =
+        {
+            GENERIC = "How lame, I do the same.",
+            BROKEN = "Don't despair, we can repair!",
+            UNPOWERED = "No power? At this hour?",
+        },
+		VAULT_ORB = "The ball took a fall!",
+        VAULT_LOBBY_EXIT = "The way out, no doubt!",
+		VAULT_CHANDELIER_BROKEN = "Oh dear, the chandelier.",
+
+		ANCIENT_HUSK = "Oh my, how they died!",
+		MASK_ANCIENT_HANDMAIDHAT = "The eyes pierce, so fierce.",
+		MASK_ANCIENT_ARCHITECTHAT = "The face of an intelligent gent!",
+		MASK_ANCIENT_MASONHAT = "I would root for this brute!",
+
+        TREE_ROCK_SEED = "A seed, indeed!",
+        TREE_ROCK_SAPLING = "What's happening, sapling?",
     },
 
     DESCRIBE_GENERIC = "Ooo, a mystery!",
@@ -5170,4 +5875,8 @@ return{
         TALLBIRDEGG_CRACKED = "Doing that hurt my feelings.",
 		WINTERSFEASTFUEL = "Hyuyu, how fun!",
     },
+
+    WENDY_SKILLTREE_EASTEREGG = "only_used_by_wendy",
+
+
 }

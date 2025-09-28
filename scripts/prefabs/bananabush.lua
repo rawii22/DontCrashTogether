@@ -155,6 +155,7 @@ local function fn()
     inst.entity:AddMiniMapEntity()
     inst.entity:AddNetwork()
 
+	inst:SetDeploySmartRadius(DEPLOYSPACING_RADIUS[DEPLOYSPACING.DEFAULT] / 2) --plantables deployspacing/2
     MakeSmallObstaclePhysics(inst, .1)
 
     inst:AddTag("bananabush")
@@ -166,8 +167,6 @@ local function fn()
     inst.AnimState:SetBuild("bananabush")
     inst.AnimState:PlayAnimation("idle_small", true)
     inst.scrapbook_anim = "idle_big"
-
-    MakeSnowCoveredPristine(inst)
 
     inst.entity:SetPristine()
     if not TheWorld.ismastersim then
@@ -220,7 +219,6 @@ local function fn()
     inst:AddComponent("witherable")
 
     --------------------------------------------------------------------------
-    MakeSnowCovered(inst)
     MakeNoGrowInWinter(inst)
 
     --------------------------------------------------------------------------

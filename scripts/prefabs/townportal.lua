@@ -179,6 +179,7 @@ local function fn()
     inst.MiniMapEntity:SetCanUseCache(false)
     inst.MiniMapEntity:SetDrawOverFogOfWar(true)
 
+	inst:SetDeploySmartRadius(1) --recipe min_spacing/2
     MakeObstaclePhysics(inst, .1)
 
     inst.AnimState:SetBank("townportal")
@@ -199,6 +200,7 @@ local function fn()
     -----------------------
     MakeHauntableWork(inst)
     MakeSnowCovered(inst)
+    SetLunarHailBuildupAmountLarge(inst)
 
     -------------------------
     inst:AddComponent("lootdropper")

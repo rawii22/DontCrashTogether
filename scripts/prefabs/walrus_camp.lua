@@ -21,7 +21,7 @@ local AGGRO_SPAWN_PARTY_RADIUS = 10
 local function GetSpawnPoint(inst)
     local x, y, z = inst.Transform:GetWorldPosition()
     local rad = 2
-    local angle = math.random() * 2 * PI
+    local angle = math.random() * TWOPI
     return x + rad * math.cos(angle), y, z - rad * math.sin(angle)
 end
 
@@ -55,7 +55,6 @@ local function SetOccupied(inst, occupied)
     inst.data.occupied = occupied
 
     if occupied then
-
         anim:SetBank("walrus_house")
         anim:SetBuild("walrus_house")
 
@@ -65,7 +64,11 @@ local function SetOccupied(inst, occupied)
         anim:SetLayer(LAYER_WORLD)
         anim:SetSortOrder(0)
 
-        MakeObstaclePhysics(inst, 3)
+		inst.Physics:SetCollisionMask(
+			COLLISION.ITEMS,
+			COLLISION.CHARACTERS,
+			COLLISION.GIANTS
+		)
     else
         UpdateLight(inst, false)
 
@@ -77,7 +80,6 @@ local function SetOccupied(inst, occupied)
         anim:SetSortOrder(3)
 
         inst.Physics:ClearCollisionMask()
-        inst.Physics:CollidesWith(COLLISION.WORLD)
     end
 end
 
@@ -373,7 +375,7 @@ local function OnMegaFlare(inst, data)
 
                 --find a spot outside player vision of that player 
                 if #players > 0 then
-                    local offset = FindValidPositionByFan(math.random()*2*PI, 40, 32, function(testoffset)
+                    local offset = FindValidPositionByFan(math.random()*TWOPI, 40, 32, function(testoffset)
                         local newpt = data.sourcept + testoffset
 
                         if TheWorld.Map:IsAboveGroundAtPoint(newpt.x, newpt.y, newpt.z) then

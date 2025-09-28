@@ -39,6 +39,15 @@ local UIAnim = require "widgets/uianim"
 
 local dataset = require("screens/redux/scrapbookdata")
 
+--DO SOME FILTERING FOR PREFABS NOT PRESENT IN ALL VERSIONS
+--if rawget(_G, "TheSim") and not TheSim:HasPlayerSkeletons() then
+--if TheSim and not TheSim:HasPlayerSkeletons() then
+if rawget(_G, "TheSim") and not TheSim:HasPlayerSkeletons() then
+	dataset["skeleton"] = nil
+else
+	dataset["shallow_grave"] = nil
+end
+
 local PANEL_WIDTH = 1000
 local PANEL_HEIGHT = 530
 local SEARCH_BOX_HEIGHT = 40
@@ -50,26 +59,6 @@ local UNKNOWN = "unknown"
 local UK_TINT = {0.5,0.5,0.5,1}
 
 ---------------------------------------
--- SEEDED RANDOM NUMBER
-local A1, A2 = 727595, 798405 -- 5^17=D20*A1+A2
-local D20, D40 = 1048576, 1099511627776 -- 2^20, 2^40
-local X1, X2 = 0, 1
-
-function rand()
-  	local U = X2 * A2
-  	local V = (X1 * A2 + X2 * A1) % D20
-  	V = (V * D20 + U) % D40
-  	X1 = math.floor(V / D20)
-  	X2 = V - X1 * D20
-  	return V / D40
-end
-
-function primeRand(seed)
-	X1= seed
- 	A1, A2 = 727595, 798405 -- 5^17=D20*A1+A2
-	D20, D40 = 1048576, 1099511627776 -- 2^20, 2^40
-	X2 = 1
-end
 
 local function GetPeriodString(period)
 	local days = math.floor(period/60/8*100)/100
@@ -81,7 +70,7 @@ local function GetPeriodString(period)
 			return subfmt(STRINGS.SCRAPBOOK.DATA_TIME, { time = period, txt = STRINGS.SCRAPBOOK.DATA_SECONDS })
 		end
 
-		return subfmt(STRINGS.SCRAPBOOK.DATA_TIME, { time = minutes, txt = (minutes <= 1 and STRINGS.SCRAPBOOK.DATA_MINUTE or STRINGS.SCRAPBOOK.DATA_MINUTES) }) 
+		return subfmt(STRINGS.SCRAPBOOK.DATA_TIME, { time = minutes, txt = (minutes <= 1 and STRINGS.SCRAPBOOK.DATA_MINUTE or STRINGS.SCRAPBOOK.DATA_MINUTES) })
 	else
 		return subfmt(STRINGS.SCRAPBOOK.DATA_TIME, { time = days, txt = (days <= 1 and STRINGS.SCRAPBOOK.DATA_DAY or STRINGS.SCRAPBOOK.DATA_DAYS) })
 	end
@@ -131,8 +120,8 @@ local FUELTYPE_SUBICONS = table.getkeys(FUELTYPE_SUBICON_LOOKUP)
 local ScrapbookScreen = Class(Screen, function( self, prev_screen, default_section )
 	Screen._ctor(self, "ScrapbookScreen")
 
-    self.letterbox = self:AddChild(TEMPLATES.old.ForegroundLetterbox())	
-	self.root = self:AddChild(TEMPLATES.ScreenRoot("ScrapBook"))		
+    self.letterbox = self:AddChild(TEMPLATES.old.ForegroundLetterbox())
+	self.root = self:AddChild(TEMPLATES.ScreenRoot("ScrapBook"))
     self.bg = self.root:AddChild(TEMPLATES.PlainBackground())
 
     if not TheScrapbookPartitions:ApplyOnlineProfileData() then
@@ -186,18 +175,18 @@ local ScrapbookScreen = Class(Screen, function( self, prev_screen, default_secti
     self.gridroot:SetPosition(240,0)
 
     self.item_grid = self.gridroot:AddChild( self:BuildItemGrid() )
-    self.item_grid:SetPosition(0, 0)    
+    self.item_grid:SetPosition(0, 0)
 
     self.item_grid:SetItemsData(self.current_view_data)
 
-	local grid_w, grid_h = self.item_grid:GetScrollRegionSize()	
+	local grid_w, grid_h = self.item_grid:GetScrollRegionSize()
 
 	self.details = self.detailsroot:AddChild(self:PopulateInfoPanel())
 
 	self:MakeBottomBar()
 	self:MakeTopBar()
 	self:SetGrid()
-	
+
 	self.focus_forward = self.item_grid
 
 	if TheInput:ControllerAttached() then
@@ -211,7 +200,7 @@ end)
 function ScrapbookScreen:SetPlayerKnowledge()
 	for prefab,data in pairs(dataset) do
 		data.knownlevel = TheScrapbookPartitions:GetLevelFor(prefab)
-	end	
+	end
 end
 
 function ScrapbookScreen:LinkDeps()
@@ -235,6 +224,10 @@ function ScrapbookScreen:LinkDeps()
 	end
 end
 
+local function trim_spaces_and_periods(str)
+    return str:gsub("[ %.]", "")
+end
+
 function ScrapbookScreen:FilterData(search_text, search_set)
 	if not search_set  then
 		search_set = self:CollectType(dataset)
@@ -251,11 +244,11 @@ function ScrapbookScreen:FilterData(search_text, search_set)
 	for i,set in ipairs( search_set ) do
 		local name = nil
 		if set.type ~= UNKNOWN then
-			name = TrimString(string.lower(STRINGS.NAMES[string.upper(set.name)])):gsub(" ", "")
-		
+			name = trim_spaces_and_periods(TrimString(string.lower(STRINGS.NAMES[string.upper(set.name)])))
+
 		--local name = TrimString(string.lower(set.name)):gsub(" ", "")
 			if set.subcat then
-				name = name .. TrimString(string.lower(STRINGS.SCRAPBOOK.SUBCATS[string.upper(set.subcat)])):gsub(" ", "")
+				name = name .. trim_spaces_and_periods(TrimString(string.lower(STRINGS.SCRAPBOOK.SUBCATS[string.upper(set.subcat)])))
 			end
 			local num = string.find(name, search_text, 1, true)
 			if num then
@@ -263,12 +256,12 @@ function ScrapbookScreen:FilterData(search_text, search_set)
 			end
 		end
 	end
-	
+
 	self.current_view_data = newset
 end
 
 function ScrapbookScreen:SetSearchText(search_text)
-	search_text = TrimString(string.lower(search_text)):gsub(" ", "")
+	search_text = trim_spaces_and_periods(TrimString(string.lower(search_text)))
 
 	self:FilterData(search_text)
 
@@ -338,7 +331,7 @@ function ScrapbookScreen:CollectType(set, filter)
 end
 
 function ScrapbookScreen:updatemenubuttonflashes()
-	
+
 	for i,button in ipairs(self.menubuttons)do
 		button.flash:Hide()
 	end
@@ -430,14 +423,14 @@ function ScrapbookScreen:SelectMenuItem(dir)
 			else
 				selected = selected -1
 			end
-		end		
+		end
 		cat = self.menubuttons[selected].filter
 	end
 
-	self:SelectSideButton(cat)		
+	self:SelectSideButton(cat)
 	self.current_dataset = self:CollectType(dataset,cat)
 	self.current_view_data = self:CollectType(dataset,cat)
-	self:SetGrid()	
+	self:SetGrid()
 end
 
 function ScrapbookScreen:SelectSideButton(category)
@@ -469,7 +462,7 @@ function ScrapbookScreen:MakeSideBar()
 	}
 
 	local buttons = {
-		{name="Creatures", filter="creature"},	
+		{name="Creatures", filter="creature"},
 		{name="Giants", filter="giant"},
 		{name="Items", filter="item"},
 		{name="Food", filter="food"},
@@ -484,7 +477,7 @@ function ScrapbookScreen:MakeSideBar()
 		if idx == 0 then idx = #colors end
 		button.color = colors[idx]
 	end
-	
+
 	for t=#buttons,1,-1 do
 		local ok =false
 		for i,cat in ipairs(SCRAPBOOK_CATS)do
@@ -544,7 +537,7 @@ function ScrapbookScreen:MakeSideBar()
 		end)
 
 		local text = button:AddChild(Text(HEADERFONT, 12, STRINGS.SCRAPBOOK.CATS[string.upper(data.name)] , UICOLOURS.WHITE))
-		text:SetPosition(10,-8)		
+		text:SetPosition(10,-8)
 		buttonwidget:SetPosition(522+buttonwidth/2, y)
 
 		local total = 0
@@ -553,7 +546,7 @@ function ScrapbookScreen:MakeSideBar()
 			if set.type == data.filter then
 				total = total +1
 				if set.knownlevel > 0 then
-					count = count+1					
+					count = count+1
 				end
 			end
 		end
@@ -575,9 +568,10 @@ function ScrapbookScreen:MakeSideBar()
 		buttonwidget.flash = buttonwidget:AddChild(UIAnim())
 		buttonwidget.flash:GetAnimState():SetBank("cookbook_newrecipe")
 		buttonwidget.flash:GetAnimState():SetBuild("cookbook_newrecipe")
-		buttonwidget.flash:GetAnimState():PlayAnimation("anim",true)
-		buttonwidget.flash:GetAnimState():SetScale(0.15,0.15,0.15)
-		buttonwidget.flash:SetPosition( 40,0,0 )
+		buttonwidget.flash:GetAnimState():PlayAnimation("anim", true)
+		buttonwidget.flash:GetAnimState():SetDeltaTimeMultiplier(1.25)
+		buttonwidget.flash:SetScale(.8, .8, .8)
+		buttonwidget.flash:SetPosition(40, 0, 0)
 		buttonwidget.flash:Hide()
 		buttonwidget.flash:SetClickable(false)
 
@@ -595,11 +589,11 @@ end
 function ScrapbookScreen:updatemenubuttonnewitem(data, setting)
 	local buttontype = data.type
 	for i, button in ipairs(self.menubuttons)do
-		if button.filter == buttontype then			
+		if button.filter == buttontype then
 			button.newcreatures[data.prefab] = setting
 
 			button.flash:Hide()
-			
+
 			for prefab,bool in pairs(button.newcreatures)do
 				if bool == true then
 					button.flash:Show()
@@ -607,7 +601,7 @@ function ScrapbookScreen:updatemenubuttonnewitem(data, setting)
 				end
 			end
 			break
-		end		
+		end
 	end
 end
 
@@ -660,7 +654,7 @@ function ScrapbookScreen:MakeTopBar()
 
 	self.display_col_2_button = self.root:AddChild(ImageButton("images/scrapbook.xml", "sort2.tex"))
 	self.display_col_2_button:SetPosition(220+(SEARCH_BOX_WIDTH/2)+28+28, PANEL_HEIGHT/2 +33)
-	self.display_col_2_button:ForceImageSize(25,25)	
+	self.display_col_2_button:ForceImageSize(25,25)
 	self.display_col_2_button.scale_on_focus = false
 	self.display_col_2_button.focus_scale = {1.1,1.1,1.1}
 	self.display_col_2_button.ignore_standard_scaling = true
@@ -675,7 +669,7 @@ function ScrapbookScreen:MakeTopBar()
 
 	self.display_col_3_button = self.root:AddChild(ImageButton("images/scrapbook.xml", "sort3.tex"))
 	self.display_col_3_button:SetPosition(220+(SEARCH_BOX_WIDTH/2)+28+28+28, PANEL_HEIGHT/2 +33)
-	self.display_col_3_button:ForceImageSize(25,25)	
+	self.display_col_3_button:ForceImageSize(25,25)
 	self.display_col_3_button.scale_on_focus = false
 	self.display_col_3_button.focus_scale = {1.1,1.1,1.1}
 	self.display_col_3_button.ignore_standard_scaling = true
@@ -690,7 +684,7 @@ function ScrapbookScreen:MakeTopBar()
 
 	self.display_col_grid_button = self.root:AddChild(ImageButton("images/scrapbook.xml", "sort4.tex"))
 	self.display_col_grid_button:SetPosition(220+(SEARCH_BOX_WIDTH/2)+28+28+28+28, PANEL_HEIGHT/2 +33)
-	self.display_col_grid_button:ForceImageSize(25,25)	
+	self.display_col_grid_button:ForceImageSize(25,25)
 	self.display_col_grid_button.scale_on_focus = false
 	self.display_col_grid_button.focus_scale = {1.1,1.1,1.1}
 	self.display_col_grid_button.ignore_standard_scaling = true
@@ -715,7 +709,7 @@ function ScrapbookScreen:MakeBackButton()
 	self.cancel_button = self.root:AddChild(TEMPLATES.BackButton(
 		function()
 			self:Close() --go back
-		end))	
+		end))
 end
 
 function ScrapbookScreen:Close(fn)
@@ -736,7 +730,7 @@ function ScrapbookScreen:BuildItemGrid()
 	local bigimagesize = 64
 	local imagebuffer = 6
 	local row_w = totalwidth/columns
-	
+
 	if columns > 3 then
  		imagesize = bigimagesize
  		imagebuffer = 12
@@ -745,7 +739,7 @@ function ScrapbookScreen:BuildItemGrid()
 
 	local row_h = imagesize
 
-    local row_spacing = 5    
+    local row_spacing = 5
     local bg_padding = 3
     local name_pos = -5
     local catname_pos = 8
@@ -764,7 +758,7 @@ function ScrapbookScreen:BuildItemGrid()
 			return a.entry < b.entry
 		end
 
-		return a_name < b_name
+		return stringidsorter(a_name, b_name)
 	end)
 
 	for i, data in ipairs(self.current_view_data) do
@@ -772,11 +766,11 @@ function ScrapbookScreen:BuildItemGrid()
 	end
 
     local function ScrollWidgetsCtor(context, index)
-        local w = Widget("recipe-cell-".. index)		
+        local w = Widget("scrapbook-cell-".. index)
 
 		----------------
 		w.item_root = w:AddChild(Widget("item_root"))
-				
+
 		w.item_root.bg = w.item_root:AddChild(Image("images/global.xml", "square.tex"))
 		w.item_root.bg:ScaleToSize(totalwidth+((row_spacing+bg_padding)*columns), row_h+bg_padding)
 		w.item_root.bg:SetPosition(-(((columns-1)*.5) * row_w),0)
@@ -809,8 +803,11 @@ function ScrapbookScreen:BuildItemGrid()
 		w.item_root.flash =w.item_root:AddChild(UIAnim())
 		w.item_root.flash:GetAnimState():SetBank("cookbook_newrecipe")
 		w.item_root.flash:GetAnimState():SetBuild("cookbook_newrecipe")
-		w.item_root.flash:GetAnimState():PlayAnimation("anim",true)
-		w.item_root.flash:SetPosition((-row_w/2)+imagesize-(imagesize*0.1),0 )
+		w.item_root.flash:GetAnimState():PlayAnimation("anim", true)
+		w.item_root.flash:GetAnimState():PlayAnimation("anim", true)
+		w.item_root.flash:GetAnimState():SetDeltaTimeMultiplier(1.25)
+		w.item_root.flash:SetScale(.5, .5, .5)
+		w.item_root.flash:SetPosition((-row_w/2)+imagesize-(imagesize*0.1), (-row_h/2)+imagesize-(imagesize*0.1))
 		w.item_root.flash:Hide()
 		w.item_root.flash:SetClickable(false)
 
@@ -833,7 +830,12 @@ function ScrapbookScreen:BuildItemGrid()
 			end
 		end)
 
-		w.focus_forward = w.item_root.button	
+
+		w.item_root.ongainfocusfn = function()
+			self.lastselecteditem = w.item_root.button
+		end
+
+		w.focus_forward = w.item_root.button
 
 		w.item_root.button:SetOnGainFocus(function()
 			self.item_grid:OnWidgetFocus(w)
@@ -843,7 +845,7 @@ function ScrapbookScreen:BuildItemGrid()
 		return w
     end
 
-    local function ScrollWidgetSetData(context, widget, data, index)    
+    local function ScrollWidgetSetData(context, widget, data, index)
 		widget.item_root.image:SetTint(1,1,1,1)
 		widget.item_root.inv_image:SetTint(1,1,1,1)
 		widget.item_root.flash:Hide()
@@ -851,17 +853,17 @@ function ScrapbookScreen:BuildItemGrid()
 		widget.data = data
 
 		if data ~= nil and data.name ~= FILLER and data.type ~= UNKNOWN then
-			widget.item_root.image:Show()			
+			widget.item_root.image:Show()
 			widget.item_root.button:Show()
 			if not widget.item_root.button:IsEnabled() then
 				widget.item_root.button:Enable()
 			end
 
 			if columns <= 3 then
-				widget.item_root.name:Show()							
+				widget.item_root.name:Show()
 			else
 				widget.item_root.name:Hide()
-			end									
+			end
 			widget.item_root.catname:Hide()
 			widget.item_root.inv_image:Hide()
 
@@ -926,30 +928,32 @@ function ScrapbookScreen:BuildItemGrid()
 				end
 			end
 
-			widget.item_root.button:Disable()
+			widget.item_root.button:SetOnClick(function()
+			end)
 
 			widget.item_root.name:Hide()
 			widget.item_root.catname:Hide()
 			widget.item_root.inv_image:Hide()
-		end	
+		end
 
 		if data and data.name ~= FILLER and data.type ~= UNKNOWN then
 			if not TheScrapbookPartitions:WasViewedInScrapbook(data.prefab) then
 				widget.item_root.flash:Show()
-			else				
+			else
 				widget.item_root.flash:Hide()
 			end
 		end
 
-		if columns > 3 then 
+		if columns > 3 then
 			widget.item_root.bg:Hide()
 		else
 			if index % (columns *2) ~= 0 then
 				widget.item_root.bg:Hide()
 			else
 				widget.item_root.bg:Show()
-			end	
+			end
 		end
+
     end
 
     local grid = TEMPLATES.ScrollingGrid(
@@ -981,12 +985,12 @@ end
 function ScrapbookScreen:PopulateInfoPanel(entry)
 	local data = self:GetData(entry)
 
-	primeRand(hash((data and data.name or "")..ThePlayer.userid))
-	
+    self.PRNG = PRNG_Uniform(hash((data and data.name or "")..ThePlayer.userid))
+
     local page = Widget("page")
     if data then TheScrapbookPartitions:SetViewedInScrapbook(data.prefab) end
 	self:updatemenubuttonflashes()
-	
+
 	page.entry = entry
 
     page:SetPosition(-PANEL_WIDTH/4 - 20,0)
@@ -999,7 +1003,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 	local height = 0
 	local title_space = 5
 	local section_space = 22
-	
+
 	local applytexturesize = function(widget,w,h, tex, source)
 		local suffix = "_square"
 		local ratio = w/h
@@ -1015,24 +1019,24 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 			"scrap",
 			"scrap2",
 		}
-		if not tex then 
-			tex = materials[math.ceil(rand()*#materials)]..suffix.. ".tex"
+		if not tex then
+			tex = materials[math.ceil(self.PRNG:Rand()*#materials)]..suffix.. ".tex"
 		end
 		if not source then
 			source = "images/scrapbook.xml"
 		end
-		
+
 		widget:SetTexture(source, tex, tex)
 		widget:ScaleToSize(w,h)
 	end
 
 	local setattachmentdetils = function (widget,w,h, shortblock)
-		local choice = rand()
+		local choice = self.PRNG:Rand()
 
 		if choice < 0.4 and not shortblock then
-			-- picture tabs		
+			-- picture tabs
 			local mat = "corner.tex"
-			if rand() < 0.5 then
+			if self.PRNG:Rand() < 0.5 then
 				mat = "corner2.tex"
 			end
 			local tape1 = widget:AddChild(Image("images/scrapbook.xml", mat))
@@ -1045,39 +1049,39 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 			tape2:SetScale(0.5)
 			tape2:SetClickable(false)
 			tape2:SetPosition(-w/2+15,h/2-15)
-			tape2:SetRotation(90)		
-			
+			tape2:SetRotation(90)
+
 			local tape3 = widget:AddChild(Image("images/scrapbook.xml", mat))
 			tape3:SetScale(0.5)
 			tape3:SetClickable(false)
 			tape3:SetPosition(w/2-15,h/2-15)
 			tape3:SetRotation(180)
-			
+
 			local tape4 = widget:AddChild(Image("images/scrapbook.xml", mat))
 			tape4:SetScale(0.5)
 			tape4:SetClickable(false)
 			tape4:SetPosition(w/2-15,-h/2+15)
-			tape4:SetRotation(270)	
+			tape4:SetRotation(270)
 		elseif choice < 0.7 then
-			local tape1 = widget:AddChild(Image("images/scrapbook.xml", "tape".. math.ceil(rand()*2).."_centre.tex"))
+			local tape1 = widget:AddChild(Image("images/scrapbook.xml", "tape".. math.ceil(self.PRNG:Rand()*2).."_centre.tex"))
 			tape1:SetScale(0.5)
 			tape1:SetClickable(false)
 			tape1:SetPosition(0,h/2)
-			tape1:SetRotation(rand()*3- 1.5)
+			tape1:SetRotation(self.PRNG:Rand()*3- 1.5)
 		elseif choice < 0.8 then
 			--tape
 			local diagonal = false
 			local right = true
 			if shortblock then
-				if rand()<0.3 then
+				if self.PRNG:Rand()<0.3 then
 					diagonal = true
-					if rand()<0.5 then
+					if self.PRNG:Rand()<0.5 then
 						right = false
 					end
 				end
 			end
-			if (rand() < 0.5 and not shortblock) or (diagonal==true and right==false) then
-				local tape1 = widget:AddChild(Image("images/scrapbook.xml", "tape".. math.ceil(rand()*2).."_corner.tex"))
+			if (self.PRNG:Rand() < 0.5 and not shortblock) or (diagonal==true and right==false) then
+				local tape1 = widget:AddChild(Image("images/scrapbook.xml", "tape".. math.ceil(self.PRNG:Rand()*2).."_corner.tex"))
 				tape1:SetScale(0.5)
 				tape1:SetClickable(false)
 				tape1:SetPosition(-w/2+5,-h/2+5)
@@ -1086,16 +1090,16 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 			end
 
 			if not diagonal or right then
-				local tape2 = widget:AddChild(Image("images/scrapbook.xml", "tape".. math.ceil(rand()*2).."_corner.tex"))
+				local tape2 = widget:AddChild(Image("images/scrapbook.xml", "tape".. math.ceil(self.PRNG:Rand()*2).."_corner.tex"))
 				tape2:SetScale(0.5)
 				tape2:SetClickable(false)
 				tape2:SetPosition(-w/2+5,h/2-5)
 				local rotation = 45
-				tape2:SetRotation(rotation)	
+				tape2:SetRotation(rotation)
 			end
-			
+
 			if not diagonal or right == false then
-				local tape3 = widget:AddChild(Image("images/scrapbook.xml", "tape".. math.ceil(rand()*2).."_corner.tex"))
+				local tape3 = widget:AddChild(Image("images/scrapbook.xml", "tape".. math.ceil(self.PRNG:Rand()*2).."_corner.tex"))
 				tape3:SetScale(0.5)
 				tape3:SetClickable(false)
 				tape3:SetPosition(w/2-5,h/2-5)
@@ -1103,16 +1107,16 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 				tape3:SetRotation(rotation)
 			end
 
-			if (rand() < 0.5 and not shortblock) or (diagonal==true and right==true) then
-				local tape4 = widget:AddChild(Image("images/scrapbook.xml", "tape".. math.ceil(rand()*2).."_corner.tex"))
+			if (self.PRNG:Rand() < 0.5 and not shortblock) or (diagonal==true and right==true) then
+				local tape4 = widget:AddChild(Image("images/scrapbook.xml", "tape".. math.ceil(self.PRNG:Rand()*2).."_corner.tex"))
 				tape4:SetScale(0.5)
 				tape4:SetClickable(false)
 				tape4:SetPosition(w/2-5,-h/2+5)
 				local rotation = -90 - 45
-				tape4:SetRotation(rotation)	
+				tape4:SetRotation(rotation)
 			end
 		else
-			local ropechoice = math.ceil(rand()*3)
+			local ropechoice = math.ceil(self.PRNG:Rand()*3)
 			local rope = widget:AddChild(Image("images/scrapbook.xml", "rope".. ropechoice.."_corner.tex"))
 			rope:SetScale(0.5)
 			rope:SetClickable(false)
@@ -1120,7 +1124,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 				rope:SetPosition(-w/2+5,h/2-10)
 			elseif ropechoice == 3 then
 				rope:SetPosition(-w/2+5,h/2-13)
-			else				
+			else
 				rope:SetPosition(-w/2+13,h/2-16)
 			end
 		end
@@ -1128,11 +1132,11 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 
 	local settextblock = function (height, data) -- font, size, str, color,leftmargin,rightmargin, leftoffset, ignoreheightchange, widget
 		assert(data.font and data.size and data.str and data.color, "Missing String Data")
-		local targetwidget = data.widget and data.widget or sub_root 	
+		local targetwidget = data.widget and data.widget or sub_root
 		local txt = targetwidget:AddChild(Text(data.font, data.size, data.str, data.color))
 		txt:SetHAlign(ANCHOR_LEFT)
 		txt:SetVAlign(ANCHOR_TOP)
-		local subwidth = data.width or width 
+		local subwidth = data.width or width
 		local adjustedwidth = subwidth - (data.leftmargin and data.leftmargin or 0) - (data.rightmargin and data.rightmargin or 0)
 		txt:SetMultilineTruncatedString(data.str, 100, adjustedwidth)
 		local x, y = txt:GetRegionSize()
@@ -1144,7 +1148,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 
 		return height, txt
 	end
-	
+
 	local setimageblock = function(height, data) -- source, tex, w,h,rotation,leftoffset, ignoreheightchange, widget)
 		assert(data.source and data.tex, "Missing Image Data")
 		local targetwidget = data.widget and data.widget or sub_root
@@ -1152,10 +1156,10 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 		if data.w and data.h then
 			applytexturesize(img,w,h, data.source, data.tex)
 		end
-		if data.rotation then 
+		if data.rotation then
 			img:SetRotation(data.rotation)
 		end
-		local x, y = img:GetSize()		
+		local x, y = img:GetSize()
 		local truewidth = calculteRotatedWidth(data.rotation and data.rotation or 0,x,y)
 		local trueheight = calculteRotatedHeight(data.rotation and data.rotation or 0,x,y)
 		local adjustedoffset = data.leftoffset and data.leftoffset or  0
@@ -1173,7 +1177,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 		local bg
 		height, bg = setimageblock(height,{ignoreheightchange=true, widget=panel, source="images/scrapbook.xml", tex="scrap_square.tex"})
 
-		local shade = 0.8 + rand()*0.2
+		local shade = 0.8 + self.PRNG:Rand()*0.2
 		bg:SetTint(shade,shade,shade,1)
 
 		local MARGIN = data.margin and data.margin or 15
@@ -1189,20 +1193,20 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 			widthdiff = data.minwidth - boxwidth
 			boxwidth = data.minwidth
 		end
-		
+
 		applytexturesize(bg, boxwidth,h+(MARGIN*2))
-		
-		local angle =  data.norotation and 0 or rand()*3- 1.5
+
+		local angle =  data.norotation and 0 or self.PRNG:Rand()*3- 1.5
  		panel:SetRotation(angle)
 
 		pos_t = textblock:GetPosition()
 		bg:SetPosition(0,0)
- 		
- 		local attachments = panel:AddChild(Widget("attachments")) 	
- 		attachments:SetPosition(0,0) 		
+
+ 		local attachments = panel:AddChild(Widget("attachments"))
+ 		attachments:SetPosition(0,0)
  		setattachmentdetils(attachments, boxwidth,h+(MARGIN*2), data.shortblock)
  		local newheight = calculteRotatedHeight(angle,boxwidth,h+(MARGIN*2))
- 		--  
+ 		--
 		panel:SetPosition( boxwidth/2 + (data.leftoffset or 0) ,height - (newheight/2) - (data.topoffset or 0))
 		if not data.ignoreheightchange then
 			height = height - newheight - section_space
@@ -1232,35 +1236,35 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 	height = height  - 10
 
 	-- set the photo
-	local rotation = (rand() * 5)-2.5
+	local rotation = (self.PRNG:Rand() * 5)-2.5
 
 	--------------------------------------------------------------------------------------------------------------------------------------------------------------
 	--------------------------------------------------------------------------------------------------------------------------------------------------------------
 	--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-	local CUSTOM_SIZE = Vector3(150,250,0)	
+	local CUSTOM_SIZE = Vector3(150,250,0)
 	local CUSTOM_ANIMOFFSET = Vector3(0,-40,0)
-	local CUSTOM_INDENT = 40 + (rand() * 25)
+	local CUSTOM_INDENT = 40 + (self.PRNG:Rand() * 25)
 
 	local STAT_PANEL_WIDTH = 220
 	local STAT_PANEL_INDENT = 30
 	local STAT_GAP_SMALL = 5
-	local STAT_ICONSIZE = 32	
+	local STAT_ICONSIZE = 32
 
 	local stats,statsheight
-	
+
 	local statwidget = 	sub_root:AddChild(Widget("statswidget"))
 	local statbg = statwidget:AddChild(Image("images/fepanel_fills.xml", "panel_fill_large.tex"))
 	local statsheight = 0
 	statsheight = statsheight - STAT_PANEL_INDENT
-	
+
 	local showstats = false
 	local makeentry = function(tex,text)
 		showstats = true
 		if tex then
 			local icon = statwidget:AddChild(Image(GetScrapbookIconAtlas(tex) or GetScrapbookIconAtlas("cactus.tex"), tex))
 			icon:ScaleToSize(STAT_ICONSIZE,STAT_ICONSIZE)
-			icon:SetPosition(STAT_PANEL_INDENT+(STAT_ICONSIZE/2), statsheight-STAT_ICONSIZE/2)		
+			icon:SetPosition(STAT_PANEL_INDENT+(STAT_ICONSIZE/2), statsheight-STAT_ICONSIZE/2)
 		end
 		local txt = statwidget:AddChild(Text(HEADERFONT, 18, text, UICOLOURS.BLACK))
 		local tw, th = txt:GetRegionSize()
@@ -1283,7 +1287,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 		icon:SetPosition(STAT_PANEL_INDENT+ subwidth +(STAT_ICONSIZE/2), statsheight+STAT_GAP_SMALL+(STAT_ICONSIZE/2) )
 		local txt = statwidget:AddChild(Text(HEADERFONT, 18, text, UICOLOURS.BLACK))
 		local tw, th = txt:GetRegionSize()
-		txt:SetPosition(STAT_PANEL_INDENT+ subwidth +STAT_ICONSIZE + (tw/2), statsheight+STAT_GAP_SMALL+(STAT_ICONSIZE/2)-2)		--+ STAT_GAP_SMALL 
+		txt:SetPosition(STAT_PANEL_INDENT+ subwidth +STAT_ICONSIZE + (tw/2), statsheight+STAT_GAP_SMALL+(STAT_ICONSIZE/2)-2)		--+ STAT_GAP_SMALL
 		subwidth = subwidth + STAT_ICONSIZE+ tw
 		return subwidth
 	end
@@ -1355,7 +1359,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 			end
 		end
 
-		local showfood = true 
+		local showfood = true
 		if data.hungervalue and data.hungervalue == 0 and
 			data.healthvalue and data.healthvalue == 0 and
 			data.sanityvalue and data.sanityvalue == 0 then
@@ -1398,7 +1402,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 		if data.weapondamage then
 			makeentry("icon_damage.tex", tostring(checknumber(data.weapondamage) and math.floor(data.weapondamage) or data.weapondamage))
 			if data.planardamage then
-				makesubentry("+"..math.floor(data.planardamage) .. STRINGS.SCRAPBOOK.DATA_PLANAR_DAMAGE)
+				makesubentry("+"..tostring(checknumber(data.planardamage) and math.floor(data.planardamage) or data.planardamage).. STRINGS.SCRAPBOOK.DATA_PLANAR_DAMAGE)
 			end
 
 			if data.areadamage then
@@ -1413,17 +1417,26 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 		end
 
 		if data.finiteuses then
-			makeentry("icon_uses.tex",math.floor(data.finiteuses)..STRINGS.SCRAPBOOK.DATA_USES)		
+			makeentry("icon_uses.tex",math.floor(data.finiteuses)..STRINGS.SCRAPBOOK.DATA_USES)
 		end
 
 		if data.toolactions then
 			local actions = ""
-			for i,action in ipairs(data.toolactions)do
-				actions = actions .. action
+
+			for i, act in ipairs(data.toolactions) do
+				local string = STRINGS.ACTIONS[act]
+
+				if type(string) == "table" and string.GENERIC then
+					string = string.GENERIC
+				end
+
+				actions = actions .. string.upper(string or act)
+
 				if i ~= #data.toolactions then
 					actions = actions .. ", "
 				end
 			end
+
 			makesubentry(actions)
 		end
 
@@ -1447,7 +1460,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 			makesubentry(STRINGS.SCRAPBOOK.DATA_REPAIRABLE)
 
 			makelistentry(data.forgerepairable, nil, STAT_ICONSIZE/1.5, 30)
-		end	
+		end
 
 		if data.repairitems then
 			makeentry("icon_wrench.tex",STRINGS.SCRAPBOOK.DATA_REPAIRABLE)
@@ -1457,7 +1470,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 
 		if data.waterproofer then
 			makeentry("icon_wetness.tex",STRINGS.SCRAPBOOK.DATA_WETNESS ..(data.waterproofer*100) .. "%")
-		end	
+		end
 
 		if data.insulator then
 			local icon = "icon_cold.tex"
@@ -1465,13 +1478,13 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 				icon = "icon_heat.tex"
 			end
 			makeentry(icon, data.insulator..STRINGS.SCRAPBOOK.DATA_INSULATION)
-		end	
+		end
 
 		if data.dapperness and data.dapperness ~= 0 then
 			local dir = data.dapperness < 0 and "" or "+"
 
 			makeentry("icon_sanity.tex", string.format("%s%.2f%s", dir, data.dapperness * 60, STRINGS.SCRAPBOOK.DATA_PERMIN ))
-		end	
+		end
 
 	 	-- FUEL + FUEL TYPES
 		if data.fueledrate ~= nil and data.fueledmax  ~= nil and data.fueledtype1 ~= nil then
@@ -1491,19 +1504,19 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 
 				if subicon1 ~= nil then
 					makeentry(icon, "")
-					
+
 					local subwidth = STAT_ICONSIZE + STAT_GAP_SMALL + (subicon2 and STAT_ICONSIZE/3 or 0)
 
 					makesubiconentry(subicon1, subwidth, time_str)
 				end
 
 				local subwidth = STAT_ICONSIZE + STAT_GAP_SMALL - STAT_ICONSIZE/4
-	
+
 				if data.fueledtype2 ~= nil and data.fueledtype2 ~= FUELTYPE.USAGE then
 					if subicon2 ~= nil then
 						makesubiconentry(subicon2, subwidth, "")
 					end
-				end	
+				end
 			end
 		end
 
@@ -1514,7 +1527,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 				makeentry("icon_fuel.tex", time_str)
 			else
 				local icon = FUELTYPE_SUBICON_LOOKUP[data.fueltype]
-				
+
 				if icon then
 					makeentry("icon_fuel.tex", "")
 
@@ -1532,7 +1545,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 		-- PERISHABLE
 		if data.perishable then
 			makeentry("icon_spoil.tex", GetPeriodString(data.perishable))
-		end	
+		end
 
 		-- NOTES
 		if data.notes then
@@ -1571,32 +1584,36 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 			end
 			if data.workable == ACTIONS.CHOP.id then
 				makeentry("icon_uses.tex",STRINGS.SCRAPBOOK.DATA_WORKABLE_CHOP)
-			end	
+			end
 			if data.workable == ACTIONS.DIG.id then
 				makeentry("icon_uses.tex",STRINGS.SCRAPBOOK.DATA_WORKABLE_DIG)
-			end	
+			end
 			if data.workable == ACTIONS.MINE.id then
 				makeentry("icon_uses.tex",STRINGS.SCRAPBOOK.DATA_WORKABLE_MINE)
-			end									
+			end
 		end
 		if data.fishable then
 			makeentry("icon_uses.tex",STRINGS.SCRAPBOOK.DATA_FISHABLE)
-		end		
+		end
 		if data.pickable then
-			makeentry("icon_action.tex",STRINGS.SCRAPBOOK.DATA_PICKABLE)			
-		end	
+			makeentry("icon_action.tex",STRINGS.SCRAPBOOK.DATA_PICKABLE)
+		end
 		if data.harvestable then
-			makeentry("icon_action.tex",STRINGS.SCRAPBOOK.DATA_HARVESTABLE)			
-		end				
+			makeentry("icon_action.tex",STRINGS.SCRAPBOOK.DATA_HARVESTABLE)
+		end
 		if data.stewer then
-			makeentry("icon_action.tex",STRINGS.SCRAPBOOK.DATA_STEWER)			
+			makeentry("icon_action.tex",STRINGS.SCRAPBOOK.DATA_STEWER)
 		end
 		if data.activatable then
 			makeentry("icon_action.tex",string.upper(STRINGS.ACTIONS.ACTIVATE[data.activatable]))
 		end
 		if data.burnable then
-			makeentry("icon_burnable.tex", STRINGS.SCRAPBOOK.DATA_BURNABLE)			
+			makeentry("icon_burnable.tex", STRINGS.SCRAPBOOK.DATA_BURNABLE)
 		end
+
+		if data.snowmandecor then
+			makeentry("icon_snowmandeco.tex", STRINGS.SCRAPBOOK.DATA_SNOWMANDECO)
+		end		
 	end
 
 	---------------------------------------------
@@ -1616,11 +1633,11 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 
 	local photostack = sub_root:AddChild(Widget("photostack"))
 	local photo = photostack:AddChild(Image("images/fepanel_fills.xml", "panel_fill_large.tex"))
-	
+
 	photo:SetClickable(false)
 	local BUFFER = 35
 	local ACTUAL_X = CUSTOM_SIZE.x
-	local ACTUAL_Y = CUSTOM_SIZE.y	
+	local ACTUAL_Y = CUSTOM_SIZE.y
 	local offsety = 0
 	local offsetx = 0
 	local animal = nil
@@ -1631,22 +1648,30 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 
 		animstate:SetBuild(data.build)
 		animstate:SetBank(data.bank)
-		animstate:SetPercent(data.anim or "", data.animpercent or rand())
+		animstate:SetPercent(data.anim or "", data.animpercent or self.PRNG:Rand())
 
 		if data.facing then
 			animal:SetFacing(data.facing)
 			animstate:MakeFacingDirty()
 		end
 
-		if data.alpha then
-			animstate:SetMultColour(1, 1, 1, data.alpha)
+		if data.alpha or data.multcolour then
+			local r, g, b = unpack(data.multcolour or {1, 1, 1})
+			animstate:SetMultColour(r, g, b, data.alpha or 1)
 		end
 
 		if data.overridebuild then
-			animstate:AddOverrideBuild(data.overridebuild)
+            if type(data.overridebuild) == "table" then
+                for k, v in pairs(data.overridebuild) do
+                    animstate:AddOverrideBuild(v)
+                end
+            else
+			    animstate:AddOverrideBuild(data.overridebuild)
+            end
 		end
 
 		animstate:Hide("snow")
+		animstate:Hide("mouseover")
 
 		if data.hide then
 			for i,hide in ipairs(data.hide) do
@@ -1678,24 +1703,55 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 			end
 		end
 
+        if data.symbolcolours then
+			for i, set in ipairs( data.symbolcolours ) do
+				animstate:SetSymbolMultColour(set[1], set[2], set[3], set[4], set[5])
+			end
+        end
+
+        if data.usepointfiltering then
+            animstate:UsePointFiltering(true)
+        end
+
 		local x1, y1, x2, y2 = animstate:GetVisualBB()
 
 		local ax,ay = animal:GetBoundingBoxSize()
 
-		local SCALE = CUSTOM_SIZE.x/ax 
+        if data.bb_x_extra or data.bb_y_extra then
+            ax, ay = ax + data.bb_x_extra or 0, ay + data.bb_y_extra or 0
+        end
+
+		local SCALE = CUSTOM_SIZE.x/ax
 
 		if ay*SCALE >= ACTUAL_Y then
-			SCALE = ACTUAL_Y/ay 
+			SCALE = ACTUAL_Y/ay
 			ACTUAL_X = ax*SCALE
 		else
 			ACTUAL_Y = ay*SCALE
 		end
 
 		SCALE = SCALE*(data.scale or 1)
-   
+
 		animal:SetScale(math.min(0.5,SCALE))
  		offsety = ACTUAL_Y/2 -(y2*SCALE)
  		offsetx = ACTUAL_X/2 -(x2*SCALE)
+
+		if data.floater ~= nil then
+			local size, vert_offset, xscale, yscale = unpack(data.floater)
+
+			local floater = animal:AddChild(UIAnim())
+			local floater_animstate = floater:GetAnimState()
+
+			floater_animstate:SetBuild("float_fx")
+			floater_animstate:SetBank("float_front")
+			floater_animstate:SetPercent("idle_front_" .. size, self.PRNG:Rand())
+			floater_animstate:SetFloatParams(-0.05, 1.0, 0)
+
+			floater:SetPosition(0, tonumber(vert_offset), 0)
+			floater:SetScale(tonumber(xscale) - .05, tonumber(yscale) - .05)
+			floater:SetClickable(false)
+		end
+
 	else
 		animal = photostack:AddChild(Image("images/scrapbook.xml", "icon_empty.tex"))
 		ACTUAL_X = CUSTOM_SIZE.x
@@ -1708,13 +1764,9 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
     local extraoffsetbgx = data and data.animoffsetbgx or 0
     local extraoffsetbgy = data and data.animoffsetbgy or 0
 
-	if extraoffsetbgx > 0 then
-		offsetx = offsetx + extraoffsetbgx/2
-	end
-
-	if extraoffsetbgy > 0 then
-		offsety = offsety + extraoffsetbgy/2
-	end
+	-- if extraoffsetbgx > 0 then
+	-- 	offsetx = offsetx + extraoffsetbgx/2
+	-- end
 
     local BG_X = (ACTUAL_X + BUFFER+ extraoffsetbgx)
     local BG_Y = (ACTUAL_Y + BUFFER+ extraoffsetbgy)
@@ -1728,8 +1780,8 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
     local extraoffsetx = data and data.animoffsetx or 0
     local extraoffsety = data and data.animoffsety or 0
 
-    local posx =(CUSTOM_ANIMOFFSET.x+extraoffsetx) *(data and data.scale or 1)
-    local posy =(CUSTOM_ANIMOFFSET.y+extraoffsety) *(data and data.scale or 1)
+    local posx =(CUSTOM_ANIMOFFSET.x+extraoffsetx) *(data and data.scale and data.scale * .5 or 1)
+    local posy =(CUSTOM_ANIMOFFSET.y+extraoffsety) *(data and data.scale and data.scale or 1)
 
     animal:SetPosition(posx,posy)
 
@@ -1759,24 +1811,24 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 
 	height = height - 20
 
-    photostack:SetPosition(left + (rotwidth/2) + CUSTOM_INDENT, height - (0.5 * rotheight)-(extraoffsetbgy/2))
+    photostack:SetPosition(left + (rotwidth/2) + CUSTOM_INDENT, height - (0.5 * rotheight))
 
 	local finalheight = ( (rotheight+20 > math.abs(statsheight)) or (data and data.knownlevel < 2) ) and rotheight+20 or math.abs(statsheight)
 
-    height = height - finalheight - section_space - extraoffsetbgy
+    height = height - finalheight - section_space
 
 	if data and data.knownlevel == 1 then
-		local inspectbody 
+		local inspectbody
 		height, inspectbody = setcustomblock(height,{str=STRINGS.SCRAPBOOK.DATA_NEEDS_INVESTIGATION, minwidth=width-100, leftoffset=40, shortblock=true})
 	end
 	if not data then
-		local inspectbody 
+		local inspectbody
 		height, inspectbody = setcustomblock(height,{str=" \n \n \n \n \n ", minwidth=width-100, leftoffset=40,})
 	end
 
 
 ------------------------ SPECIAL INFO -------------------------------
-	
+
 	local specialinfo = data and (data.specialinfo and STRINGS.SCRAPBOOK.SPECIALINFO[data.specialinfo] or STRINGS.SCRAPBOOK.SPECIALINFO[string.upper(data.prefab)])
 
 	if specialinfo and data.knownlevel > 1 then
@@ -1786,10 +1838,13 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 	end
 
 ----------------------- DEPS -----------------------------------------
+
 	self.depsbuttons = {}
+	self.character_pannel_first = nil
+
     local DEPS_COLS = 9
     if data and data.deps and #data.deps>0 then
-		
+
     	local idx = 1
     	local row= 1
     	local cols = DEPS_COLS --5
@@ -1810,16 +1865,16 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 			if a.knownlevel == 0 or b.knownlevel == 0 then
 				return a.knownlevel > b.knownlevel
 			end
-	
+
 			if not a_name or not b_name then
 				return false
 			end
-	
+
 			if a_name == b_name and a.entry and b.entry then
 				return a.entry < b.entry
 			end
-	
-			return a_name < b_name
+
+			return stringidsorter(a_name, b_name)
 		end)
 
 		local dep_imgsize = imagesize - imagebuffer
@@ -1838,6 +1893,11 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 				local atlas = GetScrapbookIconAtlas(tex)
 				local button = sub_root:AddChild(ImageButton(atlas or GetScrapbookIconAtlas("cactus.tex"), atlas ~= nil and tex or "cactus.tex" ))
 
+				local frame = sub_root:AddChild(Image("images/skilltree.xml","frame.tex" ))
+				frame:ScaleToSize(imagesize+13,imagesize+13)
+				frame:SetPosition(75+((imagesize+gaps)*(xidx-1)),height-imagesize/2 - ((row-1)*(imagesize+gaps)) )
+				frame:Hide()
+
 				button.ignore_standard_scaling = true
 				button.scale_on_focus = true
 				button.clickoffset = Vector3(0, 0, 0)
@@ -1854,35 +1914,47 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 					end
 				end)
 
+
 				if depdata.knownlevel == 1 then
 					button:SetImageNormalColour(unpack(UK_TINT))
 					button:SetImageFocusColour(unpack(UK_TINT))
 				end
-
+				local buttonimg
 				if depdata.knownlevel == 0 then
 					button:SetTextures(GetScrapbookIconAtlas("unknown.tex"), "unknown.tex")
 					button:SetOnClick(function() end)
 
 				elseif table.contains(needs_img_types, depdata.type) then
 					button:SetTextures("images/scrapbook.xml", "inv_item_background.tex")
-					
+
 					atlas = GetInventoryItemAtlas(tex)
 
 					local img = button:AddChild(Image(atlas, tex))
 					img:ScaleToSize(dep_imgsize, dep_imgsize)
 
-					button:SetOnGainFocus(function()
-						img:ScaleToSize(dep_imgsize*button.focus_scale[1], dep_imgsize*button.focus_scale[2])
-					end)
-
-					button:SetOnLoseFocus(function()
-						img:ScaleToSize(dep_imgsize*button.normal_scale[1], dep_imgsize*button.normal_scale[2])
-					end)
-
 					if depdata.knownlevel == 1 then
 						img:SetTint(unpack(UK_TINT))
 					end
+					buttonimg = img
 				end
+
+				button:SetOnGainFocus(function()
+					if TheInput:ControllerAttached() then
+						frame:Show()
+					end
+					if buttonimg and depdata.knownlevel ~= 0 then
+						buttonimg:ScaleToSize(dep_imgsize*button.focus_scale[1], dep_imgsize*button.focus_scale[2])
+					end
+				end)
+
+				button:SetOnLoseFocus(function()
+					if TheInput:ControllerAttached() then
+						frame:Hide()
+					end
+					if buttonimg and depdata.knownlevel ~= 0 then
+						buttonimg:ScaleToSize(dep_imgsize*button.normal_scale[1], dep_imgsize*button.normal_scale[2])
+					end
+				end)
 
 				table.insert(self.depsbuttons, button)
 			end
@@ -1891,7 +1963,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 				row = row +1
 			end
 		end
-	
+
 		height = height - ((imagesize+gaps) * row) -section_space
 	end
 
@@ -1906,10 +1978,20 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 				button:SetFocusChangeDir(MOVE_LEFT,							function(button) return self.depsbuttons[i-1] end)
 			end
 			if i%DEPS_COLS ~= 0 then
-				button:SetFocusChangeDir(MOVE_RIGHT,						function(button) return self.depsbuttons[i+1] end)	
+				button:SetFocusChangeDir(MOVE_RIGHT,						function(button) return self.depsbuttons[i+1] end)
 			end
 			if i+DEPS_COLS <= #self.depsbuttons then
 				button:SetFocusChangeDir(MOVE_DOWN,							function(button) return self.depsbuttons[i+DEPS_COLS] end)
+			else
+				button:SetFocusChangeDir(MOVE_DOWN,							function(button)
+					if TheInput:ControllerAttached() and self.character_pannel_first ~= nil then
+						local x,y,z = self.character_pannel_first:GetPositionXYZ()
+						local scrollpos = (math.abs(y)/math.abs(self.scroll_area.maximum_height)) * self.scroll_area.scroll_pos_end
+						self.scroll_area.target_scroll_pos = scrollpos
+					end
+
+					return  self.character_pannel_first
+				end)
 			end
 		end
 
@@ -1927,7 +2009,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 			local STAT_ICONSIZE = 40
 
 			local recipewidget,recipeheight
-			
+
 			local recipewidget = sub_root:AddChild(Widget("statswidget"))
 			local recipebg = recipewidget:AddChild(Image("images/fepanel_fills.xml", "panel_fill_large.tex"))
 			local recipeheight = 0
@@ -1953,7 +2035,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 						end
 					end
 				end
-				if breakout then 
+				if breakout then
 					break
 				end
 			end
@@ -1967,9 +2049,9 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 				icon:ScaleToSize(STAT_ICONSIZE,STAT_ICONSIZE)
 				icon:SetPosition(STAT_PANEL_INDENT+(STAT_ICONSIZE/2), recipeheight-STAT_ICONSIZE/2)
 				local txt = recipewidget:AddChild(Text(CHATFONT, 15, text, UICOLOURS.BLACK))
-				txt:SetMultilineTruncatedString(text, 100, STAT_PANEL_WIDTH-(STAT_PANEL_INDENT*2))
+				txt:SetMultilineTruncatedString(text, 100, STAT_PANEL_WIDTH-(STAT_PANEL_INDENT*2) - STAT_ICONSIZE - STAT_GAP_SMALL)
 				local tw, th = txt:GetRegionSize()
-				txt:SetPosition(STAT_PANEL_INDENT+STAT_ICONSIZE + STAT_GAP_SMALL + (tw/2), recipeheight-STAT_ICONSIZE/2 )				
+				txt:SetPosition(STAT_PANEL_INDENT+STAT_ICONSIZE + STAT_GAP_SMALL + (tw/2), recipeheight-STAT_ICONSIZE/2 )
 				txt:SetHAlign(ANCHOR_LEFT)
 				recipeheight = recipeheight - STAT_ICONSIZE - STAT_GAP_SMALL
 			end
@@ -2008,7 +2090,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 
 			recipewidget:SetPosition( STAT_PANEL_INDENT ,height)  --rotwidth+ CUSTOM_INDENT +30
 
-			local rotation = (rand() * 5)-2.5
+			local rotation = (self.PRNG:Rand() * 5)-2.5
 			recipewidget:SetRotation(rotation)
 
 		    local rotheight = calculteRotatedHeight(rotation,STAT_PANEL_WIDTH, math.abs(recipeheight))
@@ -2035,6 +2117,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 		if data.knownlevel > 1 and STRINGS.CHARACTERS.GENERIC.DESCRIBE[entry_upper] and #viewed_characters > 0 then
 			local row= 1
             local valid_index = 1
+            local buttonorder = {}
 			for i, char in ipairs(viewed_characters)do
 
 				local xidx = valid_index%9
@@ -2061,7 +2144,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 
 					if type(objstr) == "table" then
 						if #objstr > 0 then
-							objstr = objstr[math.floor(rand()*#objstr)+1]
+							objstr = objstr[math.floor(self.PRNG:Rand()*#objstr)+1]
 
 						elseif DESCRIPTION_STATUS_LOOKUP[entry_upper] ~= nil then
 							objstr = objstr[DESCRIPTION_STATUS_LOOKUP[entry_upper]]
@@ -2092,32 +2175,69 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 						body:Hide()
 
 						local button = sub_root:AddChild(ImageButton("images/crafting_menu_avatars.xml", "avatar_".. char ..".tex"))
+						button._panel = character_panels[char]
 						button:ForceImageSize(50,50)
+						character_panels[char].facebutton = button
 						button.ignore_standard_scaling = true
 						button.scale_on_focus = true
 						button:SetOnClick(function()
 							for t, subchar in ipairs(DST_CHARACTERLIST)do
 								if character_panels[subchar] then
+									character_panels[subchar].facebutton:ForceImageSize(50,50)
 									character_panels[subchar]:Hide()
 								end
 							end
+							character_panels[char].facebutton:ForceImageSize(65,65)
 							character_panels[char]:Show()
+
+							self.current_panel = i
 						end)
 						button:SetPosition(((width/(#DST_CHARACTERLIST/2)) *xidx) ,height-40 -((row)*50))
                         valid_index = valid_index + 1
+
+						table.insert(buttonorder, button)
 					end
 				end
-				
+
 				if xidx == 9 and valid_index< #DST_CHARACTERLIST then
 					row = row +1
 				end
+
+				self.character_pannel_first = buttonorder[1]
 			end
-            local this_character_panel = character_panels[ThePlayer and TheScrapbookPartitions:WasInspectedByCharacter(data.prefab, ThePlayer.prefab) and ThePlayer.prefab or viewed_characters[1]]
+
+			if #buttonorder > 0 then
+				for i,button in ipairs(buttonorder) do
+
+					button:SetFocusChangeDir(MOVE_UP, function(button)
+						if TheInput:ControllerAttached() and self.depsbuttons[1] ~= nil then
+							local x,y,z = self.depsbuttons[1]:GetPositionXYZ()
+							local scrollpos = (math.abs(y)/math.abs(self.scroll_area.maximum_height)) * self.scroll_area.scroll_pos_end
+							self.scroll_area.target_scroll_pos = scrollpos
+						end
+
+						return self.depsbuttons[1]
+					end)
+
+					if i ~= 1 then
+						button:SetFocusChangeDir(MOVE_LEFT,							function(button) return buttonorder[i-1] end)
+					end
+					if i ~= #buttonorder then
+						button:SetFocusChangeDir(MOVE_RIGHT,						function(button) return buttonorder[i+1] end)
+					end
+				end
+
+			end
+
+            local this_character_panel = character_panels[ThePlayer and TheScrapbookPartitions:WasInspectedByCharacter(data.prefab, ThePlayer.prefab) and ThePlayer.prefab or nil] or (self.character_pannel_first and self.character_pannel_first._panel) or nil
+
 			if this_character_panel then
+				this_character_panel.facebutton:ForceImageSize(65, 65)
 				this_character_panel:Show()
 				self.current_panel = this_character_panel.id
 			end
 		end
+
 		self.character_panels = character_panels
 		self.character_panels_total = #viewed_characters
 	end
@@ -2135,7 +2255,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
 	local context = {widget = sub_root, offset = {x = 0, y = top}, size = {w = width, height = height + padding} }
 	local scrollbar = { scroll_per_click = 20*3 }
 	self.scroll_area = page:AddChild(TrueScrollArea(context, scissor_data, scrollbar))
-	
+
 	if height < (PANEL_HEIGHT-60) then
 		self.scroll_area:SetPosition(0,(((PANEL_HEIGHT-60)/2) - (height/2)) )
 	end
@@ -2155,7 +2275,7 @@ function ScrapbookScreen:PopulateInfoPanel(entry)
         local w, h = self.debugentry.text:GetRegionSize()
         self.debugentry:SetPosition(-w*2 - 5, h*2 + 5)
 	end
-
+	self.scroll_area.maximum_height = height
     return page
 end
 
@@ -2164,25 +2284,35 @@ function ScrapbookScreen:CycleChraterQuotes(dir)
 
 		for char,panel in pairs(self.character_panels) do
 			if panel.id == self.current_panel then
+				if  TheInput:ControllerAttached() then
+					panel.facebutton:ForceImageSize(50,50)
+				end
 				panel:Hide()
 				break
 			end
 		end
 
 		if dir == "left" then
-			self.current_panel = self.current_panel -1 
+			self.current_panel = self.current_panel -1
 			if self.current_panel < 1 then
-				self.current_panel = 1
+				self.current_panel = self.character_panels_total
+
 			end
 		else
-			self.current_panel = self.current_panel +1 
+			self.current_panel = self.current_panel +1
 			if self.current_panel > self.character_panels_total then
-				self.current_panel = self.character_panels_total
+				self.current_panel = 1
+
 			end
-		end		
+		end
 
 		for char,panel in pairs(self.character_panels) do
 			if panel.id == self.current_panel then
+
+				if  TheInput:ControllerAttached() then
+					panel.facebutton:ForceImageSize(65,65)
+				end
+
 				panel:Show()
 				break
 			end
@@ -2202,6 +2332,32 @@ function ScrapbookScreen:OnControl(control, down)
 			TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
 			return true
 		end
+
+		 if control == CONTROL_MENU_L2 and TheInput:ControllerAttached() and self.details.entry then
+		 	self.details:SetFocus()
+
+			if TheInput:ControllerAttached() and self.depsbuttons[1] ~= nil then
+				local x,y,z = self.depsbuttons[1]:GetPositionXYZ()
+				local scrollpos = (math.abs(y)/math.abs(self.scroll_area.maximum_height)) * self.scroll_area.scroll_pos_end
+				self.scroll_area.target_scroll_pos = scrollpos
+
+				self.depsbuttons[1]:SetFocus()
+
+			elseif TheInput:ControllerAttached() and self.character_pannel_first ~= nil then
+				local x,y,z = self.character_pannel_first:GetPositionXYZ()
+				local scrollpos = (math.abs(y)/math.abs(self.scroll_area.maximum_height)) * self.scroll_area.scroll_pos_end
+				self.scroll_area.target_scroll_pos = scrollpos
+
+				self.character_pannel_first:SetFocus()
+			end
+		 end
+		 if control == CONTROL_MENU_R2 and TheInput:ControllerAttached() then
+		 	if self.lastselecteditem then
+		 		self.lastselecteditem:SetFocus()
+		 	else
+		 		self.item_grid:SetFocus()
+		 	end
+		 end
 
 	    if control == CONTROL_MENU_START and TheInput:ControllerAttached() then
 			if self.columns_setting == 1 then
@@ -2224,28 +2380,29 @@ function ScrapbookScreen:OnControl(control, down)
 		end
 
 	    if control == CONTROL_MENU_MISC_2 then
-			TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")			
+			TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
 			self:SelectMenuItem("down")
 			return true
-		end	
+		end
 
 	    if control == CONTROL_MENU_BACK then
 			TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
 			self:CycleChraterQuotes("right")
 			return true
-		end	
+		end
 
 		if self.flashestoclear then
   			if control == CONTROL_MENU_MISC_1 then
   				self.flashestoclear = nil
   				self:ClearFlashes()
 				return true
-			end	
+			end
 		end
 
 	end
 end
 
+--CONTROL_MENU_L2  --CONTROL_MENU_R2
 function ScrapbookScreen:GetHelpText()
 	local t = {}
 	local controller_id = TheInput:GetControllerID()
@@ -2254,7 +2411,7 @@ function ScrapbookScreen:GetHelpText()
 
 	table.insert(t, TheInput:GetLocalizedControl(controller_id, CONTROL_MENU_MISC_2) .. " " .. STRINGS.SCRAPBOOK.CYCLE_CAT)
 
-	if self.character_panels and self.character_panels_total>1 then
+	if self.character_panels and self.character_panels_total>1 and self.details.focus == true then
 		table.insert(t, TheInput:GetLocalizedControl(controller_id, CONTROL_MENU_BACK).. " " .. STRINGS.SCRAPBOOK.CYCLE_QUOTES)
 	end
 
@@ -2268,20 +2425,28 @@ function ScrapbookScreen:GetHelpText()
 		table.insert(t, TheInput:GetLocalizedControl(controller_id, CONTROL_MENU_MISC_1) .. " " .. STRINGS.SCRAPBOOK.CLEARFLASH)
 	end
 
+	if self.details.entry and not self.details.focus then
+		table.insert(t, TheInput:GetLocalizedControl(controller_id, CONTROL_MENU_L2) .. " " .. STRINGS.SCRAPBOOK.SELECT_INFO_PAGE)
+	end
+	if not self.item_grid.focus then
+		table.insert(t, TheInput:GetLocalizedControl(controller_id, CONTROL_MENU_R2) .. " " .. STRINGS.SCRAPBOOK.SELECT_ITEM_PAGE)
+	end
+
+
+
 	return table.concat(t, "  ")
 end
 
 function ScrapbookScreen:DoFocusHookups()
 
 	self.item_grid:SetFocusChangeDir(MOVE_UP,							function(w) return self.searchbox end)
-	self.item_grid:SetFocusChangeDir(MOVE_LEFT,							function(w) return self.scroll_area or nil end)
+
 
 	self.searchbox:SetFocusChangeDir(MOVE_DOWN,							function(w) return self.item_grid end)
 
-	if self.scroll_area then
-		self.scroll_area:SetFocusChangeDir(MOVE_RIGHT,					function(w) return self.item_grid end)
-	end
-	
+	--self.depsbuttons:SetFocusChangeDir(MOVE_DOWN,							function(w) return self.character_panels end)
+	--self.character_panels:SetFocusChangeDir(MOVE_UP,							function(w) return self.depsbuttons end)
+
 end
 
 function ScrapbookScreen:OnDestroy()
@@ -2308,6 +2473,17 @@ function ScrapbookScreen:SelectEntry(entry)
 		self.details = self.detailsroot:AddChild(self:PopulateInfoPanel(entry))
 		self:DoFocusHookups()
 		TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/scrapbook_pageflip")
+	end
+end
+
+function ScrapbookScreen:DEBUG_REIMPORT_DATASET()
+	package.loaded["screens/redux/scrapbookdata"] = nil
+	dataset = require("screens/redux/scrapbookdata")
+
+	if TheSim and not TheSim:HasPlayerSkeletons() then
+		dataset["skeleton"] = nil
+	else	
+		dataset["shallow_grave"] = nil
 	end
 end
 

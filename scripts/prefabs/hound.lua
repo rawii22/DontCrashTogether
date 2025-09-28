@@ -259,7 +259,7 @@ end
 local function GetReturnPos(inst)
     local x, y, z = inst.Transform:GetWorldPosition()
     local rad = 2
-    local angle = math.random() * 2 * PI
+    local angle = math.random() * TWOPI
     return x + rad * math.cos(angle), y, z - rad * math.sin(angle)
 end
 
@@ -465,8 +465,12 @@ local function fncommon(bank, build, morphlist, custombrain, tag, data)
         inst:AddTag(tag)
 
         if tag == "clay" then
+			inst:AddTag("electricdamageimmune")
+
             inst._eyeflames = net_bool(inst.GUID, "clayhound._eyeflames", "eyeflamesdirty")
             inst:ListenForEvent("eyeflamesdirty", OnEyeFlamesDirty)
+        elseif tag == "lunar_aligned" then
+            inst:AddTag("soulless") -- no wortox souls
         end
     end
 
@@ -556,6 +560,7 @@ local function fncommon(bank, build, morphlist, custombrain, tag, data)
     inst.components.inspectable.getstatus = GetStatus
 
     if tag == "clay" then
+		inst.sg.mem.noelectrocute = true
         inst.sg:GoToState("statue")
 
         inst:AddComponent("hauntable")
@@ -816,7 +821,6 @@ local function OnHedgeKilled(inst)
     end
 end
 
-
 local function fnhedge()
     local inst = fncommon("hound", "hound_hedge_ocean", nil, nil, nil, {amphibious = true})
 
@@ -839,6 +843,8 @@ local function fnhedge()
     inst.components.lootdropper:SetChanceLootTable(nil)
 
     inst:ListenForEvent("death", OnHedgeKilled)
+
+	inst.sg.mem.burn_on_electrocute = true
 
     return inst
 end

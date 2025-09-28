@@ -13,24 +13,35 @@ end
 
 local events =
 {
-	EventHandler("attacked", function(inst)
-		if inst.components.health ~= nil and not inst.components.health:IsDead() and not inst.sg:HasStateTag("busy") then
-			if inst.sg.mem.in_water then
-				-- getting attacked while swimming should result in fleeing
-				inst.components.locomotor:Stop()
-				inst.components.locomotor:Clear()
+	CommonHandlers.OnElectrocute(),
+	EventHandler("attacked", function(inst, data)
+		if inst.components.health and not inst.components.health:IsDead() then
+			if CommonHandlers.TryElectrocuteOnAttacked(inst, data, nil, nil,
+				function(inst)
+					if inst.sg.currentstate.name == "jump_pst_boat" then
+						inst.sg.statemem.not_interrupted = true
+					end
+				end)
+			then
+				return
+			elseif not inst.sg:HasStateTag("busy") then
+				if inst.sg.mem.in_water then
+					-- getting attacked while swimming should result in fleeing
+					inst.components.locomotor:Stop()
+					inst.components.locomotor:Clear()
 
-				inst.sg:GoToState("idle")
-				if inst.brain ~= nil then
-					inst.brain:ForceUpdate()
+					inst.sg:GoToState("idle")
+					if inst.brain ~= nil then
+						inst.brain:ForceUpdate()
+					end
+				else
+					inst.sg:GoToState("drill_hit")
 				end
-			else
-				inst.sg:GoToState("drill_hit")
 			end
 		end
 	end),
 	EventHandler("onsink", function(inst)
-		if inst.components.health ~= nil and not inst.components.health:IsDead() and not inst.sg:HasStateTag("jumping") and not inst.sg:HasStateTag("drilling_pst") then
+		if inst.components.health ~= nil and not inst.components.health:IsDead() and not inst.sg:HasAnyStateTag("jumping", "drilling_pst", "electrocute") then
 			if inst.sg:HasStateTag("drilling") then
 				inst.sg:GoToState("drill_pst")
 			else
@@ -38,7 +49,15 @@ local events =
 			end
 		end
 	end),
-	EventHandler("gohome", function(inst) if inst.components.health ~= nil and not inst.components.health:IsDead() then inst.sg:GoToState("gohome") end end),
+	EventHandler("gohome", function(inst)
+		if inst.components.health and not inst.components.health:IsDead() then
+			if inst.sg:HasStateTag("electrocute") then
+				inst.sg.mem.gohome = true
+			else
+				inst.sg:GoToState("gohome")
+			end
+		end
+	end),
 	EventHandler("death", function(inst)
 		if inst.sg.mem.in_water then
 			inst.sg:GoToState("death")
@@ -46,7 +65,14 @@ local events =
 			inst.sg:GoToState("death_boat")
 		end
 	end),
-	EventHandler("gotosleep", function(inst) if inst.components.health ~= nil and not inst.components.health:IsDead() and inst:HasTag("swimming") and not inst.sg:HasStateTag("jumping") then inst.sg:GoToState(inst.sg:HasStateTag("sleeping") and "sleeping" or "sleep") end end),
+	EventHandler("gotosleep", function(inst)
+		if inst.components.health and not inst.components.health:IsDead() and
+			inst:HasTag("swimming") and
+			not inst.sg:HasAnyStateTag("jumping", "electrocute")
+		then
+			inst.sg:GoToState(inst.sg:HasStateTag("sleeping") and "sleeping" or "sleep")
+		end
+	end),
     EventHandler("teleported", function(inst)
 		if inst.components.health ~= nil and not inst.components.health:IsDead() then
 			inst.sg:GoToState("jump_pst_water")
@@ -56,11 +82,13 @@ local events =
 }
 
 local function RestoreCollidesWith(inst)
-	inst.Physics:CollidesWith(COLLISION.WORLD
-						+ COLLISION.OBSTACLES
-						+ COLLISION.SMALLOBSTACLES
-						+ COLLISION.CHARACTERS
-						+ COLLISION.GIANTS)
+	inst.Physics:SetCollisionMask(
+		COLLISION.WORLD,
+		COLLISION.OBSTACLES,
+		COLLISION.SMALLOBSTACLES,
+		COLLISION.CHARACTERS,
+		COLLISION.GIANTS
+	)
 end
 
 local function SetSortOrderIsInWater(inst, in_water)
@@ -523,14 +551,29 @@ local states =
 				inst.components.cookiecutterdrill:ResumeDrilling()
 
 				if inst.target_wood.material == "grass" then
-					inst.sg.statemem.fx_grass_task = inst:DoPeriodicTask(0.3, function(i)
+					inst._spawn_grass_fx_fluff_fn = inst._spawn_grass_fx_fluff_fn or function(i)
 						local fx = SpawnPrefab("fx_grass_boat_fluff")
 						local x,y,z = i.Transform:GetWorldPosition()
-						fx.Transform:SetPosition(i.Transform:GetWorldPosition(x+(math.random()*0.5)-0.25,0,z+(math.random()*0.5)-0.25))
-					end,0)
+						fx.Transform:SetPosition(x+(math.random()*0.5)-0.25, 0, z+(math.random()*0.5)-0.25)
+					end
+					inst.sg.statemem.fx_grass_task = inst:DoPeriodicTask(0.3, inst._spawn_grass_fx_fluff_fn, 0)
+				elseif inst.target_wood.material == "kelp" then
+					inst._spawn_kelp_fx_fn = inst._spawn_kelp_fx_fn or function(i)
+						local fx = SpawnPrefab("fx_kelp_boat_fluff")
+						local x,y,z = i.Transform:GetWorldPosition()
+						fx.Transform:SetPosition(x, 0, z)
+					end
+					inst.sg.statemem.fx_grass_task = inst:DoPeriodicTask(0.3, inst._spawn_kelp_fx_fn, 0)
 				end
 
-				inst.sg.statemem.fx_task = inst:DoPeriodicTask(inst.AnimState:GetCurrentAnimationLength(), function(i) SpawnPrefab("wood_splinter_drill").Transform:SetPosition(i.Transform:GetWorldPosition()) end, 0)
+				inst._spawn_wood_splinter_fn = inst._spawn_wood_splinter_fn or function(i)
+					SpawnPrefab("wood_splinter_drill").Transform:SetPosition(i.Transform:GetWorldPosition())
+				end
+				inst.sg.statemem.fx_task = inst:DoPeriodicTask(
+					inst.AnimState:GetCurrentAnimationLength(),
+					inst._spawn_wood_splinter_fn,
+					0
+				)
 			else
 				inst.sg:GoToState("drill_pst")
 			end
@@ -615,7 +658,6 @@ local states =
 			inst.AnimState:PlayAnimation("hit")
             inst.AnimState:PushAnimation("attack_loop", false)
 			inst.SoundEmitter:PlaySound("saltydog/creatures/cookiecutter/hit")
-
         end,
 
         timeline =
@@ -643,5 +685,46 @@ local states =
 }
 
 CommonStates.AddSleepStates(states, {})
+CommonStates.AddElectrocuteStates(states,
+nil, --timeline
+{ --anims
+	loop = function(inst)
+		return inst.sg.mem.in_water and "water_shock_loop" or nil
+	end,
+	pst = function(inst)
+		return inst.sg.mem.in_water and "water_shock_pst" or nil
+	end,
+},
+{ --fns
+	loop_onenter = function(inst)
+		if not inst.sg.mem.in_water then
+			inst.Physics:SetCollisionMask(COLLISION.GROUND)
+		end
+		inst.Physics:Stop()
+	end,
+	loop_onexit = function(inst)
+		if not inst.sg.statemem.not_interrupted then
+			inst.sg.mem.gohome = nil
+			if not inst.sg.mem.in_water then
+				RestoreCollidesWith(inst)
+			end
+		end
+	end,
+	onanimover = function(inst)
+		if inst.AnimState:AnimDone() then
+			inst.sg:GoToState(
+				(inst.sg.mem.gohome and "gohome") or
+				(inst.sg.mem.in_water and "idle") or
+				"drill"
+			)
+		end
+	end,
+	pst_onexit = function(inst)
+		inst.sg.mem.gohome = nil
+		if not inst.sg.mem.in_water then
+			RestoreCollidesWith(inst)
+		end
+	end,
+})
 
 return StateGraph("cookiecutter", states, events, "resurface", actionhandlers)

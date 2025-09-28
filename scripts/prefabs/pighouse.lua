@@ -388,6 +388,7 @@ local function fn()
     inst.AnimState:PlayAnimation("idle", true)
 
     inst:AddTag("structure")
+    inst:AddTag("pig_house")    
 
     MakeSnowCoveredPristine(inst)
 
@@ -432,6 +433,7 @@ local function fn()
     inst.components.inspectable.getstatus = getstatus
 
     MakeSnowCovered(inst)
+    SetLunarHailBuildupAmountLarge(inst)
 
     MakeMediumBurnable(inst, nil, nil, true)
     MakeLargePropagator(inst)

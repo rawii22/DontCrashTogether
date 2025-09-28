@@ -61,7 +61,7 @@ end
 
 local function ConfigureGhostActions(inst)
     if inst.components.playeractionpicker ~= nil then
-        inst.components.playeractionpicker:PushActionFilter(GhostActionFilter, 99)
+		inst.components.playeractionpicker:PushActionFilter(GhostActionFilter, ACTION_FILTER_PRIORITIES.ghost)
     end
 end
 
@@ -78,7 +78,7 @@ end
 local function PausePlayerActions(inst)
     if inst.components.playeractionpicker ~= nil then
         inst.components.playeractionpicker:PopActionFilter(PausedActionFilter) --always pop the filter in case one is already there.
-        inst.components.playeractionpicker:PushActionFilter(PausedActionFilter, 999)
+		inst.components.playeractionpicker:PushActionFilter(PausedActionFilter, ACTION_FILTER_PRIORITIES.paused)
     end
 end
 
@@ -133,6 +133,10 @@ local function OnPlayerDied(inst, data)
     inst:DoTaskInTime(3, FadeOutDeadPlayer, data ~= nil and data.skeleton)
 end
 
+local function IsCharlieRose(item)
+	return item.prefab == "charlierose"
+end
+
 --Player has initiated death sequence
 local function OnPlayerDeath(inst, data)
     if inst:HasTag("playerghost") then
@@ -146,11 +150,26 @@ local function OnPlayerDeath(inst, data)
 
     inst:ClearBufferedAction()
 
-    if inst.components.revivablecorpse ~= nil then
+    if inst.components.revivablecorpse then
         inst.components.inventory:Hide()
-    else
-        inst.components.inventory:Close()
-        inst.components.age:PauseAging()
+	else
+		if inst.components.skilltreeupdater:IsActivated("winona_charlie_2") then
+			local rose = inst.components.inventory:FindItem(IsCharlieRose)
+			if rose then
+				if rose.components.stackable then
+					rose.components.stackable:Get():Remove()
+                else
+                    rose:Remove()
+				end
+				inst.charlie_vinesave = true
+			end
+		end
+		if inst.charlie_vinesave then
+			inst.components.inventory:Hide()
+		else
+			inst.components.inventory:Close()
+			inst.components.age:PauseAging()
+		end
     end
     inst:PushEvent("ms_closepopups")
 
@@ -176,7 +195,7 @@ local function OnPlayerDeath(inst, data)
         inst.deathpkname = killer:HasTag("player") and killer:GetDisplayName() or nil
     end
 
-    if not inst.ghostenabled and inst.components.revivablecorpse == nil then
+	if not (inst.ghostenabled or inst.components.revivablecorpse or inst.charlie_vinesave) then
         if inst.deathcause ~= "file_load" then
             inst.player_classified:AddMorgueRecord()
 
@@ -251,16 +270,13 @@ local function CommonActualRez(inst)
 end
 
 local function DoActualRez(inst, source, item)
-    local x, y, z
-    if source ~= nil then
-        x, y, z = source.Transform:GetWorldPosition()
-    else
-        x, y, z = inst.Transform:GetWorldPosition()
-    end
+    local x, y, z = (source or inst).Transform:GetWorldPosition()
 
-    local diefx = SpawnPrefab("die_fx")
-    if diefx and x and y and z then
-        diefx.Transform:SetPosition(x, y, z)
+    if x and y and z then
+        local diefx = SpawnPrefab("die_fx")
+        if diefx then
+            diefx.Transform:SetPosition(x, y, z)
+        end
     end
 
     -- inst.AnimState:SetBank("wilson")
@@ -302,13 +318,19 @@ local function DoActualRez(inst, source, item)
             inst.sg:GoToState("wakeup")
         elseif source.prefab == "resurrectionstatue" then
             inst.sg:GoToState("rebirth", source)
+        elseif source.prefab == "wendy_resurrectiongrave" then
+            if inst.prefab == "wendy" then
+                inst.sg:GoToState("wendy_gravestone_rebirth", source)
+            else
+                inst.sg:GoToState("gravestone_rebirth", source)
+            end
         elseif source:HasTag("multiplayer_portal") then
             inst.components.health:DeltaPenalty(TUNING.PORTAL_HEALTH_PENALTY)
 
             source:PushEvent("rez_player")
             inst.sg:GoToState("portal_rez")
         end
-    else 
+    else
 		if item ~= nil and (item.prefab == "pocketwatch_revive" or item.prefab == "pocketwatch_revive_reviver") then
 			inst.DynamicShadow:Enable(true)
 			inst.AnimState:SetBank("wilson")
@@ -377,12 +399,13 @@ local function DoActualRezFromCorpse(inst, source)
     end
 
     --V2C: Let stategraph do it
-    --[[inst.Physics:ClearCollisionMask()
-    inst.Physics:CollidesWith(COLLISION.WORLD)
-    inst.Physics:CollidesWith(COLLISION.OBSTACLES)
-    inst.Physics:CollidesWith(COLLISION.SMALLOBSTACLES)
-    inst.Physics:CollidesWith(COLLISION.CHARACTERS)
-    inst.Physics:CollidesWith(COLLISION.GIANTS)]]
+	--[[inst.Physics:SetCollisionMask(
+		COLLISION.WORLD,
+		COLLISION.OBSTACLES,
+		COLLISION.SMALLOBSTACLES,
+		COLLISION.CHARACTERS,
+		COLLISION.GIANTS
+	)]]
 
     CommonActualRez(inst)
 
@@ -508,7 +531,7 @@ local function OnRespawnFromGhost(inst, data) -- from ListenForEvent "respawnfro
         inst:DoTaskInTime(0, DoActualRez)
     elseif inst.sg.currentstate.name == "remoteresurrect" then
         inst:DoTaskInTime(0, DoMoveToRezSource, data.source, 24 * FRAMES)
-    elseif data.source.prefab == "reviver" then
+    elseif data.source:HasTag("reviver") then
         inst:DoTaskInTime(0, DoActualRez, nil, data.source)
     elseif data.source.prefab == "pocketwatch_revive" then
         if not data.from_haunt then
@@ -532,7 +555,7 @@ local function OnRespawnFromGhost(inst, data) -- from ListenForEvent "respawnfro
 
     inst.rezsource =
         data ~= nil and (
-            (data.source ~= nil and data.source.prefab ~= "reviver" and data.source:GetBasicDisplayName()) or
+            (data.source ~= nil and not data.source:HasTag("reviver") and data.source:GetBasicDisplayName()) or
             (data.user ~= nil and data.user:GetDisplayName())
         ) or
         STRINGS.NAMES.SHENANIGANS
@@ -541,7 +564,8 @@ local function OnRespawnFromGhost(inst, data) -- from ListenForEvent "respawnfro
         data ~= nil and
         data.source ~= nil and
         data.source.components.attunable ~= nil and
-        data.source.components.attunable:GetAttunableTag() == "remoteresurrector"
+        (data.source.components.attunable:GetAttunableTag() == "remoteresurrector"
+        or data.source.components.attunable:GetAttunableTag() == "gravestoneresurrector")
 end
 
 local function CommonPlayerDeath(inst)
@@ -592,9 +616,16 @@ local function OnMakePlayerGhost(inst, data)
 
     local x, y, z = inst.Transform:GetWorldPosition()
 
-    -- Spawn a skeleton
-    if inst.skeleton_prefab ~= nil and data ~= nil and data.skeleton and TheSim:HasPlayerSkeletons() then
-        local skel = SpawnPrefab(inst.skeleton_prefab)
+    -- Spawn post death item
+    if inst.skeleton_prefab ~= nil and data ~= nil and data.skeleton then
+        local skel = nil
+        if TheSim:HasPlayerSkeletons() then
+            -- a skeleton
+            skel = SpawnPrefab(inst.skeleton_prefab)
+        else
+            -- a shallow grave
+            skel = SpawnPrefab("shallow_grave_player")
+        end
         if skel ~= nil then
             skel.Transform:SetPosition(x, y, z)
             -- Set the description
@@ -682,7 +713,7 @@ local function OnRespawnFromPlayerCorpse(inst, data)
 
     inst.rezsource =
         data ~= nil and (
-            (data.source ~= nil and data.source.prefab ~= "reviver" and data.source.name) or
+            (data.source ~= nil and not data.source:HasTag("reviver") and data.source.name) or
             (data.user ~= nil and data.user:GetDisplayName())
         ) or
         STRINGS.NAMES.SHENANIGANS
@@ -718,6 +749,61 @@ local function OnMakePlayerCorpse(inst, data)
     end
 end
 
+local function OnDeathTriggerVineSave(inst)
+	local announcement_string = GetNewDeathAnnouncementString(inst, inst.deathcause, inst.deathpkname, inst.deathbypet)
+	if announcement_string ~= "" then
+		TheNet:AnnounceDeath(announcement_string, inst.entity)
+	end
+	inst.player_classified:AddMorgueRecord()
+	SerializeUserSession(inst)
+end
+
+local function OnRespawnFromVineSave(inst)
+	inst.charlie_vinesave = nil
+
+	inst.deathclientobj = nil
+	inst.deathcause = nil
+	inst.deathpkname = nil
+	inst.deathbypet = nil
+
+	inst.rezsource = nil
+	inst.remoterezsource = nil
+
+	inst.last_death_position = nil
+	inst.last_death_shardid = nil
+
+	if inst.components.talker then
+		inst.components.talker:ShutUp()
+	end
+
+	inst.components.inventory:Show()
+
+	inst.components.burnable:Extinguish(true, 0)
+	inst.components.freezable:Reset()
+	inst.components.grogginess:ResetGrogginess()
+	inst.components.moisture:ForceDry(true, inst)
+	inst.components.moisture:ForceDry(false, inst)
+	inst.components.temperature:SetTemperature(TUNING.STARTING_TEMP)
+
+	inst.components.debuffable:Enable(false) --removes all debuffs
+	inst.components.debuffable:Enable(true)
+
+	if inst.components.sanity:GetRealPercent() < TUNING.SANITY_BECOME_SANE_THRESH then
+		inst.components.sanity:SetPercent(TUNING.SANITY_BECOME_SANE_THRESH, true)
+	end
+
+	if inst.components.hunger:GetPercent() < 0.2 then
+		inst.components.hunger:SetPercent(0.2, true)
+	end
+
+	inst.components.health:SetCurrentHealth(TUNING.RESURRECT_HEALTH * (inst.resurrect_multiplier or 1))
+	inst.components.health:ForceUpdateHUD(true)
+
+	local announcement_string = GetNewRezAnnouncementString(inst, STRINGS.NAMES.CHARLIE)
+	if announcement_string ~= "" then
+		TheNet:AnnounceResurrect(announcement_string, inst.entity)
+	end
+end
 
 local function GivePlayerStartingItems(inst, items, starting_item_skins)
     if items ~= nil and #items > 0 and inst.components.inventory ~= nil then
@@ -813,6 +899,16 @@ end
 local function CanSeePointOnMiniMap(inst, px, py, pz) -- Convenience wrapper.
     local tx, ty = TheWorld.Map:GetTileXYAtPoint(px, py, pz)
     return inst.player_classified.MapExplorer:IsTileSeeable(tx, ty)
+end
+
+local function GetSeeableTilePercent(inst)
+    local total = TheWorld.Map:CalcTotalSeeableTiles() -- This is cached on the engine side so performance is hit once.
+    if total == 0 then
+        return 1 -- We see everything because this is infinitely seeable.
+    end
+    local current = inst.player_classified.MapExplorer:GetSeeableTileCount()
+    local percent = (current / total) * TUNING.PLAYER_MAP_LANDSEEN_FUDGE_FACTOR
+    return math.min(percent, 1) -- Clamp from overshooting.
 end
 
 local function GenericCommander_OnAttackOther(inst, data)
@@ -926,6 +1022,7 @@ local function OnPostActivateHandshake_Client(inst, state) -- NOTES(JBK): Use Po
         inst:PostActivateHandshake(POSTACTIVATEHANDSHAKE.READY)
     elseif state == POSTACTIVATEHANDSHAKE.READY then
         TheSkillTree:OPAH_Ready()
+		inst:PushEvent("skilltreeinitialized_client")
     else
         print("OnPostActivateHandshake_Client got a bad state:", inst, state)
     end
@@ -945,6 +1042,7 @@ local function OnPostActivateHandshake_Server(inst, state) -- NOTES(JBK): Use Po
         skilltreeupdater:SendFromSkillTreeBlob(inst)
     elseif state == POSTACTIVATEHANDSHAKE.READY then
         -- Good state.
+		inst:PushEvent("ms_skilltreeinitialized")
     else
         print("OnPostActivateHandshake_Server got a bad state:", inst, state)
     end
@@ -985,6 +1083,32 @@ local function UpdateScrapbook(inst)
     end
 end
 
+local function MapRevealable_OnIconCreatedFn(inst)
+    if inst.components.maprevealable and inst.components.maprevealable.icon and inst.components.maprevealable.icon.prefab == "globalmapiconnamed" then
+        inst.components.maprevealable.icon._target_displayname:set(inst:GetDisplayName())
+    end
+end
+
+--------------------------------------------------------------------------
+
+local function EnableTargetLocking(inst, enable)
+	if inst.components.playercontroller ~= nil then
+		inst.components.playercontroller.controller_targeting_lock_available = enable
+	end
+end
+
+local function CommandWheelAllowsGameplay(inst, enable)
+	if inst.components.playercontroller ~= nil then
+		inst.components.playercontroller.command_wheel_allows_gameplay = enable
+	end
+	
+	if inst.HUD and inst.HUD.controls and inst.HUD.controls.commandwheel then
+		inst.HUD.controls.commandwheel.ignoreleftstick = enable
+	end
+end
+
+--------------------------------------------------------------------------
+
 return
 {
     ShouldKnockout              = ShouldKnockout,
@@ -999,6 +1123,8 @@ return
     OnMakePlayerCorpse          = OnMakePlayerCorpse,
     OnRespawnFromGhost          = OnRespawnFromGhost,
     OnRespawnFromPlayerCorpse   = OnRespawnFromPlayerCorpse,
+	OnDeathTriggerVineSave		= OnDeathTriggerVineSave,
+	OnRespawnFromVineSave		= OnRespawnFromVineSave,
     OnSpooked                   = OnSpooked,
 	OnLearnCookbookRecipe		= OnLearnCookbookRecipe,
 	OnLearnCookbookStats		= OnLearnCookbookStats,
@@ -1009,6 +1135,7 @@ return
 	GivePlayerStartingItems		= GivePlayerStartingItems,
     CanSeeTileOnMiniMap         = CanSeeTileOnMiniMap,
     CanSeePointOnMiniMap        = CanSeePointOnMiniMap,
+    GetSeeableTilePercent       = GetSeeableTilePercent,
     MakeGenericCommander        = MakeGenericCommander,
     OnMurderCheckForFishRepel   = OnMurderCheckForFishRepel,
     OnOnStageEvent              = OnOnStageEvent,
@@ -1022,4 +1149,7 @@ return
     PostActivateHandshake       = PostActivateHandshake,
     OnClosePopups               = OnClosePopups,
     UpdateScrapbook             = UpdateScrapbook,
+    MapRevealable_OnIconCreatedFn = MapRevealable_OnIconCreatedFn,
+    EnableTargetLocking			= EnableTargetLocking,
+	CommandWheelAllowsGameplay	= CommandWheelAllowsGameplay,
 }

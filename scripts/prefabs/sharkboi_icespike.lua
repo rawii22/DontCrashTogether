@@ -73,7 +73,7 @@ local function SpikeLaunch(inst, launcher, basespeed, startheight, startradius)
 		local dist = math.sqrt(dsq)
 		angle = math.atan2(dz / dist, dx / dist) + (math.random() * 20 - 10) * DEGREES
 	else
-		angle = 2 * PI * math.random()
+		angle = TWOPI * math.random()
 	end
 	local sina, cosa = math.sin(angle), math.cos(angle)
 	local speed = basespeed + math.random()
@@ -217,11 +217,12 @@ local function CreatePhysicsPush(parent)
 	inst.entity:AddPhysics()
 	inst.Physics:SetMass(999999)
 	inst.Physics:SetCollisionGroup(COLLISION.OBSTACLES)
-	inst.Physics:ClearCollisionMask()
-	inst.Physics:CollidesWith(COLLISION.ITEMS)
-	inst.Physics:CollidesWith(COLLISION.CHARACTERS)
-	inst.Physics:CollidesWith(COLLISION.GIANTS)
-	inst.Physics:CollidesWith(COLLISION.WORLD)
+	inst.Physics:SetCollisionMask(
+		COLLISION.ITEMS,
+		COLLISION.CHARACTERS,
+		COLLISION.GIANTS,
+		COLLISION.WORLD
+	)
 	inst.Physics:SetCapsule(parent.islarge:value() and RADIUS_LARGE or RADIUS, 2)
 
 	inst:DoTaskInTime(0, inst.Remove)

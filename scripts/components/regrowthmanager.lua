@@ -85,10 +85,10 @@ local function DoRegrowth(key, product, position)
 
     local orig_tile = _map:GetTileAtPoint(x,y,z)
 
-    local theta = math.random() * 2 * PI
+    local theta = math.random() * TWOPI
     local radius = math.random() * JITTER_RADIUS
-    local x = x + radius * math.cos(theta)
-    local z = z - radius * math.sin(theta)
+    x = x + radius * math.cos(theta)
+    z = z - radius * math.sin(theta)
 
     if not IsAnyPlayerInRange(x,y,z, MIN_PLAYER_DISTANCE, nil) then
         if TestForRegrow(x,y,z, orig_tile) then
@@ -210,6 +210,12 @@ end
 self:SetRegrowthForType("red_mushroom", TUNING.MUSHROOM_REGROWTH_TIME, "red_mushroom", RedMushroomRegrowth)
 self:SetRegrowthForType("green_mushroom", TUNING.MUSHROOM_REGROWTH_TIME, "green_mushroom", GreenMushroomRegrowth)
 self:SetRegrowthForType("blue_mushroom", TUNING.MUSHROOM_REGROWTH_TIME, "blue_mushroom", BlueMushroomRegrowth)
+
+local function MandrakePlantedRegrowth()
+    return TUNING.MANDRAKE_PLANTED_REGROWTH_TIME_MULT
+end
+
+self:SetRegrowthForType("mandrake_planted", TUNING.MANDRAKE_PLANTED_REGROWTH_TIME, "mandrake_planted", MandrakePlantedRegrowth)
 
 --------------------------------------------------------------------------
 --[[ Update ]]

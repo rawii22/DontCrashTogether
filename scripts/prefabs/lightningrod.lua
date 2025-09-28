@@ -127,6 +127,8 @@ local function fn()
     inst.entity:AddSoundEmitter()
     inst.entity:AddNetwork()
 
+	inst:SetDeploySmartRadius(0.5) --recipe min_spacing/2
+
     inst.MiniMapEntity:SetIcon("lightningrod.png")
 
     inst.Light:Enable(false)
@@ -169,6 +171,7 @@ local function fn()
     inst.components.battery.onused = UseAsBattery
 
     MakeSnowCovered(inst)
+    SetLunarHailBuildupAmountSmall(inst)
     inst:ListenForEvent("onbuilt", onbuilt)
 
     MakeHauntableWork(inst)

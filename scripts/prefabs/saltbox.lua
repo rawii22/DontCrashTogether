@@ -52,6 +52,8 @@ local function fn()
     inst.entity:AddMiniMapEntity()
     inst.entity:AddNetwork()
 
+	inst:SetDeploySmartRadius(0.75) --recipe min_spacing/2
+
     inst.MiniMapEntity:SetIcon("saltbox.png")
 
     inst:AddTag("saltbox")
@@ -93,6 +95,7 @@ local function fn()
 
     inst:ListenForEvent("onbuilt", onbuilt)
     MakeSnowCovered(inst)
+    SetLunarHailBuildupAmountSmall(inst)
 
     AddHauntableDropItemOrWork(inst)
 

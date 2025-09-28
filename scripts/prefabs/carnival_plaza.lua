@@ -16,8 +16,12 @@ local prefabs =
 	"orange_leaves_chop",
 }
 
+-- Keep consistent with carnival_crowkidbrain.lua check
+local HOSTILE_CHECK_RANGE = 10
+local SHOULDFLYAWAY_CANT_TAGS = { "notarget", "INLIMBO" }
+local SHOULDFLYAWAY_ONEOF_TAGS = { "hostile" }
 local function IsSafeToSpawnCrowKid(inst)
-    return true -- check for danger
+	return not TheWorld.state.islunarhailing and not FindEntity(inst, HOSTILE_CHECK_RANGE, nil, nil, SHOULDFLYAWAY_CANT_TAGS, SHOULDFLYAWAY_ONEOF_TAGS)
 end
 
 local function OnSpawnCrowKid(inst, child)
@@ -325,6 +329,7 @@ local function fn()
     inst.entity:AddMiniMapEntity()
 	inst.entity:AddNetwork()
 
+	inst:SetDeploySmartRadius(DEPLOYSPACING_RADIUS[DEPLOYSPACING.DEFAULT] / 2) --match kit item
     MakeObstaclePhysics(inst, .4)
 
     inst.MiniMapEntity:SetPriority(5)
@@ -403,6 +408,7 @@ local function fn()
     inst.components.workable:SetOnFinishCallback(chop_down_tree)
 
     MakeSnowCovered(inst)
+    SetLunarHailBuildupAmountLarge(inst)
 
 	UpdateArtForRank(inst, 1, 1, true)
 

@@ -4,12 +4,12 @@ local events =
 {
     CommonHandlers.OnLocomote(false, true),
     CommonHandlers.OnSink(),
+    CommonHandlers.OnFallInVoid(),
 }
 
 local actionhandlers =
 {
     ActionHandler( ACTIONS.PICKUP,    "pickup" ),
-    ActionHandler( ACTIONS.CHECKTRAP, "pickup" ),
     ActionHandler( ACTIONS.STORE,     "store"  ),
 }
 
@@ -37,11 +37,11 @@ local idle_on_animover = { EventHandler("animover", _ReturnToIdle) }
 ------------------------------------------------------------------------------------------------------------------------------
 
 local function MakeImmovable(inst)
-    inst.Physics:SetTempMass0(true)
+    inst.Physics:SetMass(99999)
 end
 
 local function RestoreMobility(inst)
-    inst.Physics:SetTempMass0(false)
+    inst.Physics:SetMass(inst:GetFueledSectionMass())
 end
 
 local function PlaySectionSound(inst, sound, soundname)
@@ -122,7 +122,7 @@ local states =
         timeline =
         {
             FrameEvent(27, function(inst)
-                ShakeAllCameras(CAMERASHAKE.VERTICAL, .5, .02, .12, inst, 30)
+                ShakeAllCameras(CAMERASHAKE.VERTICAL, .5, .02, .12, inst, 15)
 
                 inst:PerformBufferedAction()
             end),

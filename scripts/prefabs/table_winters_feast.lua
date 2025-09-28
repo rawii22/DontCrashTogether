@@ -96,6 +96,10 @@ local function OnAnimOver(inst)
 	inst:RemoveEventCallback("animover", OnAnimOver)
 end
 
+local function RestorePhysics(inst)
+	inst.Physics:CollidesWith(COLLISION.OBSTACLES)
+end
+
 local function EjectFood(inst)
 	local item = DropFoodFromShelf(inst)
 
@@ -104,7 +108,7 @@ local function EjectFood(inst)
 
 		-- Turning off collision with obstacles so item can be spawned inside table collider
 		item.Physics:ClearCollidesWith(COLLISION.OBSTACLES)
-		item:DoTaskInTime(0.5, function(inst) inst.Physics:CollidesWith(COLLISION.OBSTACLES) end)
+		item:DoTaskInTime(0.5, RestorePhysics)
 
 		Launch2(item, inst, FOOD_LAUNCH_SPEED, 1, FOOD_LAUNCH_STARTHEIGHT, 0)
 	end
@@ -445,6 +449,8 @@ local function fn()
     inst.entity:AddSoundEmitter()
     inst.entity:AddMiniMapEntity()
     inst.entity:AddNetwork()
+
+	inst:SetDeploySmartRadius(1.4) --recipe min_spacing/2
 
     MakeObstaclePhysics(inst, 1, 0.25)
 

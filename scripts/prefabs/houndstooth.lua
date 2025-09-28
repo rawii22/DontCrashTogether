@@ -26,6 +26,9 @@ local function fn()
     MakeInventoryFloatable(inst, "small", nil, {0.6, 0.55, 0.6})
     inst.AnimState:AddOverrideBuild("hounds_tooth_water")
 
+    --selfstacker (from selfstacker component) added to pristine state for optimization
+    inst:AddTag("selfstacker")
+
     inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
@@ -42,6 +45,8 @@ local function fn()
     inst:AddComponent("inventoryitem")
 
     inst:AddComponent("selfstacker")
+
+	inst:AddComponent("snowmandecor")
 
     MakeHauntableLaunchAndSmash(inst)
 

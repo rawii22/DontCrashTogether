@@ -167,6 +167,7 @@ local function basefn(build, tags)
     inst.entity:AddDynamicShadow()
     inst.entity:AddNetwork()
 
+	inst:SetDeploySmartRadius(1) --recipe min_spacing/2
     MakeSmallObstaclePhysics(inst, 0.25)
 
     inst:AddTag("structure")
@@ -198,6 +199,7 @@ local function basefn(build, tags)
 
     --
     inst:AddComponent("combat")
+    inst.components.combat.hiteffectsymbol = "torso_comp"
 
     --
     inst:AddComponent("debuffable")

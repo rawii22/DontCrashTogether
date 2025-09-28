@@ -133,15 +133,24 @@ end
 ----------------------------------------------------------------------------------------
 local function OnForcedNightVisionDirty(inst)
     if inst.components.playervision ~= nil then
-        inst.components.playervision:ForceNightVision(inst._forced_nightvision:value())
+        if inst._forced_nightvision:value() then
+            inst.components.playervision:PushForcedNightVision(inst)
+        else
+            inst.components.playervision:PopForcedNightVision(inst)
+        end
     end
 end
 
 local NIGHTVISIONMODULE_GRUEIMMUNITY_NAME = "wxnightvisioncircuit"
 local function SetForcedNightVision(inst, nightvision_on)
     inst._forced_nightvision:set(nightvision_on)
+
     if inst.components.playervision ~= nil then
-        inst.components.playervision:ForceNightVision(nightvision_on)
+        if nightvision_on then
+            inst.components.playervision:PushForcedNightVision(inst)
+        else
+            inst.components.playervision:PopForcedNightVision(inst)
+        end
     end
 
     -- The nightvision event might get consumed during save/loading,
@@ -335,9 +344,10 @@ local function moisturetrack_update(inst)
         inst.components.upgrademoduleowner:AddCharge(-1)
         inst._moisture_steps = 0
 
-        SpawnPrefab("wx78_big_spark"):AlignToTarget(inst)
-
-        inst.sg:GoToState("hit")
+		if not inst.sg:HasStateTag("invisible") and inst.entity:IsVisible() then
+			SpawnPrefab("wx78_big_spark"):AlignToTarget(inst)
+		end
+		inst:PushEventImmediate("wx78_spark")
     end
 
     -- Send a message for the UI.
@@ -405,7 +415,7 @@ local function OnDeath(inst)
             if gear ~= nil then
                 if gear.Physics ~= nil then
                     local speed = 2 + math.random()
-                    local angle = math.random() * 2 * PI
+                    local angle = math.random() * TWOPI
                     gear.Physics:Teleport(x, y + 1, z)
                     gear.Physics:SetVel(speed * math.cos(angle), speed * 3, speed * math.sin(angle))
                 else
@@ -522,9 +532,9 @@ local function OnChargeFromBattery(inst, battery)
 
     inst.components.upgrademoduleowner:AddCharge(1)
 
-    if not inst.components.inventory:IsInsulated() then
-        inst.sg:GoToState("electrocute")
-    end
+	--V2C: -switched to stategraph event instead of GoToState
+	--     -use Immediate to preserve legacy timing
+	inst:PushEventImmediate("electrocute")
 
     return true
 end
@@ -566,9 +576,10 @@ local function on_hunger_drain_tick(inst)
     if inst.components.health ~= nil and not (inst.components.health:IsDead() or inst.components.health:IsInvincible()) then
         inst.components.upgrademoduleowner:AddCharge(-1)
 
-        SpawnPrefab("wx78_big_spark"):AlignToTarget(inst)
-
-        inst.sg:GoToState("hit")
+		if not inst.sg:HasStateTag("invisible") and inst.entity:IsVisible() then
+			SpawnPrefab("wx78_big_spark"):AlignToTarget(inst)
+		end
+		inst:PushEventImmediate("wx78_spark")
     end
     inst.components.timer:StartTimer(HUNGERDRAIN_TIMERNAME, TUNING.WX78_HUNGRYCHARGEDRAIN_TICKTIME)
 end
@@ -630,6 +641,7 @@ local function common_postinit(inst)
 end
 
 local function master_postinit(inst)
+    inst.refusestobowtoroyalty = true
     inst.starting_inventory = start_inv[TheNet:GetServerGameMode()] or start_inv.default
 
 	inst.customidlestate = "wx78_funnyidle"

@@ -241,6 +241,7 @@ local function SetShort(inst)
     if inst.components.workable then
         inst.components.workable:SetWorkLeft(TUNING.EVERGREEN_CHOPS_SMALL)
     end
+    SetLunarHailBuildupAmountSmall(inst)
 
     inst.components.lootdropper:SetLoot(GetBuild(inst).short_loot)
 
@@ -264,6 +265,7 @@ local function SetNormal(inst)
     if inst.components.workable then
         inst.components.workable:SetWorkLeft(TUNING.EVERGREEN_CHOPS_NORMAL)
     end
+    SetLunarHailBuildupAmountMedium(inst)
 
     inst.components.lootdropper:SetLoot(GetBuild(inst).normal_loot)
 
@@ -285,6 +287,7 @@ local function SetTall(inst)
     if inst.components.workable then
         inst.components.workable:SetWorkLeft(TUNING.EVERGREEN_CHOPS_TALL)
     end
+    SetLunarHailBuildupAmountLarge(inst)
 
     inst.components.lootdropper:SetLoot(GetBuild(inst).tall_loot)
 
@@ -447,6 +450,7 @@ local function make_stump(inst)
     inst:RemoveComponent("propagator")
     MakeSmallPropagator(inst)
     inst:RemoveComponent("workable")
+    inst:RemoveComponent("lunarhailbuildup")
     inst:RemoveTag("shelter")
     inst:RemoveComponent("hauntable")
     MakeHauntableIgnite(inst)
@@ -534,7 +538,7 @@ end
 
 local function onpineconetask(inst)
     local pt = inst:GetPosition()
-    local angle = math.random() * 2 * PI
+    local angle = math.random() * TWOPI
     pt.x = pt.x + math.cos(angle)
     pt.z = pt.z + math.sin(angle)
     inst.components.lootdropper:DropLoot(pt)
@@ -807,6 +811,8 @@ local function tree(name, build, stage, data)
 
         MakeObstaclePhysics(inst, .25)
 
+		inst:SetDeploySmartRadius(DEPLOYSPACING_RADIUS[DEPLOYSPACING.DEFAULT] / 2) --seed/planted_tree deployspacing/2
+
         if build == "twiggy" then
 
             inst:AddTag("renewable")
@@ -938,6 +944,7 @@ local function tree(name, build, stage, data)
             inst:RemoveComponent("burnable")
             MakeSmallBurnable(inst)
             inst:RemoveComponent("workable")
+            inst:RemoveComponent("lunarhailbuildup")
             inst:RemoveComponent("propagator")
             MakeSmallPropagator(inst)
             inst:RemoveComponent("growable")

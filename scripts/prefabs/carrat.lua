@@ -192,7 +192,7 @@ local function on_submerged_dug_up(inst, digger)
     inst.sg:GoToState("dug_up")
 end
 
-local function on_submerged_haunt_fn(inst, haunter)
+local function on_submerged_haunt_fn(inst)
     return true
 end
 
@@ -223,6 +223,7 @@ local function go_to_submerged(inst)
 	end
 
     inst:RemoveComponent("locomotor")
+    inst:RemoveComponent("drownable")
     inst:RemoveComponent("cookable")
     inst:RemoveComponent("lootdropper")
     inst:RemoveComponent("combat")
@@ -266,7 +267,6 @@ local function go_to_submerged(inst)
     )
 
     inst:SetBrain(nil)
-    inst:StopBrain()
 
     -- Track if we're burrowed for save/load
     inst._is_burrowed = true
@@ -473,6 +473,8 @@ local function go_to_emerged(inst)
     inst.components.locomotor.walkspeed = TUNING.CARRAT.WALK_SPEED
     inst.components.locomotor.runspeed = TUNING.CARRAT.RUN_SPEED
 
+    inst:AddComponent("drownable")
+
     inst:AddComponent("lootdropper")
     inst.components.lootdropper:SetChanceLootTable("carrat")
 
@@ -498,7 +500,6 @@ local function go_to_emerged(inst)
     end
 
     inst:SetBrain(brain)
-    inst:RestartBrain()
 
     -- Track if we're burrowed for save/load
     inst._is_burrowed = false
@@ -752,7 +753,10 @@ local function fn()
     inst.components.locomotor.walkspeed = TUNING.CARRAT.WALK_SPEED
     inst.components.locomotor.runspeed = TUNING.CARRAT.RUN_SPEED
 
+    inst:AddComponent("drownable")
+
     inst:SetStateGraph("SGcarrat")
+	inst.sg.mem.burn_on_electrocute = true
     inst:SetBrain(brain)
 
     inst:AddComponent("eater")

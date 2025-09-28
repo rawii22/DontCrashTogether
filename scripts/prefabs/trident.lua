@@ -14,6 +14,10 @@ local function reticule_target_function(inst)
     return Vector3(ThePlayer.entity:LocalToWorldSpace(3.5, 0.001, 0))
 end
 
+local function ReticuleValidFn(inst, reticule, targetpos, alwayspassable, allowwater, deployradius)
+	return TheWorld.Map:IsOceanAtPoint(targetpos.x, targetpos.y, targetpos.z, false) and not TheWorld.Map:IsGroundTargetBlocked(targetpos)
+end
+
 local function trident_damage_calculation(inst, attacker, target)
     local is_over_ground = TheWorld.Map:IsVisualGroundAtPoint(attacker:GetPosition():Get())
     return (is_over_ground and TUNING.TRIDENT.DAMAGE) or TUNING.TRIDENT.OCEAN_DAMAGE
@@ -65,7 +69,9 @@ local function do_water_explosion_effect(inst, affected_entity, owner, position)
     if affected_entity.components.health then
         local ae_combat = affected_entity.components.combat
         if ae_combat then
-            ae_combat:GetAttacked(owner, TUNING.TRIDENT.SPELL.DAMAGE, inst)
+            if ae_combat:CanBeAttacked(owner) then
+                ae_combat:GetAttacked(owner, TUNING.TRIDENT.SPELL.DAMAGE, inst)
+            end
         else
             affected_entity.components.health:DoDelta(-TUNING.TRIDENT.SPELL.DAMAGE, nil, inst.prefab, nil, owner)
         end
@@ -211,8 +217,12 @@ local function trident()
 
     inst:AddComponent("reticule")
     inst.components.reticule.targetfn = reticule_target_function
+	inst.components.reticule.twinstickcheckscheme = true
+	inst.components.reticule.twinstickmode = 1
+	inst.components.reticule.twinstickrange = 15
     inst.components.reticule.ease = true
     inst.components.reticule.ispassableatallpoints = true
+	inst.components.reticule.validfn = ReticuleValidFn
 
     inst.AnimState:SetBank("trident")
     inst.AnimState:SetBuild("trident")

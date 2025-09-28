@@ -40,13 +40,9 @@ local HEIGHT = nil
 --------------------------------------------------------------------------
 --[[ Private functions ]]
 --------------------------------------------------------------------------
-local function land_test(tile)
-    return (tile ~= WORLD_TILES.MONKEY_DOCK) and (TileGroupManager:IsLandTile(tile))
-end
-
 local function tile_is_a_root(x, y)
     local tile_to_test = _map:GetTile(x, y)
-    return TileGroupManager:IsLandTile(tile_to_test) and tile_to_test ~= WORLD_TILES.MONKEY_DOCK
+    return TileGroupManager:IsLandTile(tile_to_test) and tile_to_test ~= WORLD_TILES.MONKEY_DOCK and not (TileGroupManager:IsTemporaryTile(tile_to_test) and tile_to_test ~= WORLD_TILES.FARMING_SOIL)
 end
 
 local function generate_dock_data(tile_x, tile_y)
@@ -83,7 +79,7 @@ local function toss_debris(debris_prefab, dx, dz)
     local dock_debris = SpawnPrefab(debris_prefab)
     dock_debris.Physics:Teleport(dx, 0.1, dz)
 
-    local debris_angle = 2*PI*math.random()
+    local debris_angle = TWOPI*math.random()
     local debris_speed = 2.5 + 2*math.random()
     dock_debris.Physics:SetVel(debris_speed * math.cos(debris_angle), 10, debris_speed * math.sin(debris_angle))
 end

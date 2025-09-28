@@ -33,6 +33,7 @@ local function fn()
 
     inst:AddTag("molebait")
     inst:AddTag("quakedebris")
+    inst:AddTag("rocks")
 
     inst.entity:SetPristine()
 
@@ -63,6 +64,8 @@ local function fn()
     inst:AddComponent("repairer")
     inst.components.repairer.repairmaterial = MATERIALS.STONE
     inst.components.repairer.healthrepairvalue = TUNING.REPAIR_ROCKS_HEALTH
+
+	inst:AddComponent("snowmandecor")
 
     if TheNet:GetServerGameMode() == "quagmire" then
         event_server_data("quagmire", "prefabs/inv_rocks").master_postinit(inst)

@@ -16,6 +16,7 @@ local Teleporter = Class(function(self, inst)
     self.numteleporting = 0
     self.teleportees = {}
     self.saveenabled = true -- this only toggles saving targetTeleporter
+    --self.selfmanaged = nil -- If set the same teleporter instance sending players is also the one that handles receiving players.
 
     self.travelcameratime = 3
     self.travelarrivetime = 4
@@ -35,8 +36,12 @@ function Teleporter:OnRemoveFromEntity()
     self.inst:RemoveTag("teleporter")
 end
 
+function Teleporter:SetSelfManaged(selfmanaged)
+    self.selfmanaged = selfmanaged
+end
+
 function Teleporter:IsActive()
-    return self.enabled and (self.targetTeleporter ~= nil or self.migration_data ~= nil)
+    return self.enabled and (self.targetTeleporterTemporary ~= nil or self.targetTeleporter ~= nil or self.migration_data ~= nil)
 end
 
 function Teleporter:IsBusy()
@@ -62,6 +67,32 @@ function Teleporter:UnregisterTeleportee(doer)
     end
 end
 
+function Teleporter:UseTemporaryExit(doer, temporaryexit)
+    self.targetTeleporterTemporary = temporaryexit
+    local travelarrivetime = self.travelarrivetime
+    if temporaryexit == self.inst then
+        self.stopcamerafades = true
+        self.travelarrivetime = travelarrivetime * 0.1
+    end
+    local success = self:Activate(doer)
+    self.stopcamerafades = nil
+    self.travelarrivetime = travelarrivetime
+    self.targetTeleporterTemporary = nil
+    return success
+end
+
+local function ShouldTeleportFollower(follower)
+    if follower.components.follower and follower.components.follower.noleashing then
+        return false
+    end
+
+    if follower.components.inventoryitem and follower.components.inventoryitem:IsHeld() then
+        return false
+    end
+
+    return true
+end
+
 function Teleporter:Activate(doer)
     if not self:IsActive() then
         return false
@@ -83,17 +114,19 @@ function Teleporter:Activate(doer)
 
     self:Teleport(doer)
 
-    if self.targetTeleporter.components.teleporter ~= nil then
+    local targetTeleporter = self.targetTeleporterTemporary or (self.selfmanaged and self.inst) or self.targetTeleporter
+
+    if targetTeleporter.components.teleporter ~= nil then
         if doer:HasTag("player") then
-            self.targetTeleporter.components.teleporter:ReceivePlayer(doer, self.inst)
+            targetTeleporter.components.teleporter:ReceivePlayer(doer, self.inst)
         elseif doer.components.inventoryitem ~= nil then
-            self.targetTeleporter.components.teleporter:ReceiveItem(doer, self.inst)
+            targetTeleporter.components.teleporter:ReceiveItem(doer, self.inst)
         end
     end
 
     if doer.components.leader ~= nil then
         for follower, v in pairs(doer.components.leader.followers) do
-			if not (follower.components.follower ~= nil and follower.components.follower.noleashing) then
+			if ShouldTeleportFollower(follower) then
 				self:Teleport(follower)
 			end
         end
@@ -104,7 +137,9 @@ function Teleporter:Activate(doer)
         for k, item in pairs(doer.components.inventory.itemslots) do
             if item.components.leader ~= nil then
                 for follower, v in pairs(item.components.leader.followers) do
-                    self:Teleport(follower)
+                    if ShouldTeleportFollower(follower) then
+                        self:Teleport(follower)
+                    end
                 end
             end
         end
@@ -114,7 +149,9 @@ function Teleporter:Activate(doer)
                 for j, item in pairs(equipped.components.container.slots) do
                     if item.components.leader ~= nil then
                         for follower, v in pairs(item.components.leader.followers) do
-                            self:Teleport(follower)
+                            if ShouldTeleportFollower(follower) then
+                                self:Teleport(follower)
+                            end
                         end
                     end
                 end
@@ -135,14 +172,16 @@ end
 
 -- You probably don't want this, call Activate instead.
 function Teleporter:Teleport(obj)
-    if self.targetTeleporter ~= nil then
-        local target_x, target_y, target_z = self.targetTeleporter.Transform:GetWorldPosition()
-        local offset = self.targetTeleporter.components.teleporter ~= nil and self.targetTeleporter.components.teleporter.offset or 0
+    local targetDesination = self.targetTeleporterTemporary or self.targetTeleporter -- Do not adjust destination for selfmanaged.
+    local targetTeleporter = self.targetTeleporterTemporary or (self.selfmanaged and self.inst) or self.targetTeleporter
+    if targetTeleporter ~= nil then
+        local target_x, target_y, target_z = targetDesination.Transform:GetWorldPosition()
+        local offset = targetTeleporter.components.teleporter ~= nil and targetTeleporter.components.teleporter.offset or 0
 
         local is_aquatic = obj.components.locomotor ~= nil and obj.components.locomotor:IsAquatic()
 		local allow_ocean = is_aquatic or obj.components.amphibiouscreature ~= nil or obj.components.drownable ~= nil
 
-		if self.targetTeleporter.components.teleporter ~= nil and self.targetTeleporter.components.teleporter.trynooffset then
+		if targetTeleporter.components.teleporter ~= nil and targetTeleporter.components.teleporter.trynooffset then
             local pt = Vector3(target_x, target_y, target_z)
 			if FindWalkableOffset(pt, 0, 0, 1, true, false, NoPlayersOrHoles, allow_ocean) ~= nil then
 				offset = 0
@@ -151,7 +190,7 @@ function Teleporter:Teleport(obj)
 
         if offset ~= 0 then
             local pt = Vector3(target_x, target_y, target_z)
-            local angle = math.random() * 2 * PI
+            local angle = math.random() * TWOPI
 
             if not is_aquatic then
                 offset =
@@ -213,7 +252,7 @@ local function onitemarrive(inst, self, item)
 
 		if item.Transform ~= nil then
             local x, y, z = item.Transform:GetWorldPosition()
-            local angle = math.random() * 2 * PI
+            local angle = math.random() * TWOPI
             if item.Physics ~= nil then
                 item.Physics:Stop()
                 if item:IsAsleep() then
@@ -283,15 +322,28 @@ local function ondoerarrive(inst, self, doer)
     self:PushDoneTeleporting(doer)
 end
 
-function Teleporter:ReceivePlayer(doer, source)
+function Teleporter:ReceivePlayer(doer, source, skiptime)
     if self.onActivateByOther ~= nil then
         self.onActivateByOther(self.inst, source, doer)
     end
 
+	if skiptime then
+		skiptime = math.min(skiptime, self.travelarrivetime)
+		if not self.stopcamerafades then
+			skiptime = math.min(skiptime, self.travelcameratime)
+		end
+	else
+		skiptime = 0
+	end
+
     self.numteleporting = self.numteleporting + 1
-    doer:ScreenFade(false)
-    self.inst:DoTaskInTime(self.travelcameratime, oncameraarrive, doer)
-    self.inst:DoTaskInTime(self.travelarrivetime, ondoerarrive, self, doer)
+    if not self.stopcamerafades then
+        doer:ScreenFade(false)
+		self.inst:DoTaskInTime(self.travelcameratime - skiptime, oncameraarrive, doer)
+    else
+        doer._failed_doneteleporting = true -- Hack for wisecracker to not change event parameters.
+    end
+	self.inst:DoTaskInTime(self.travelarrivetime - skiptime, ondoerarrive, self, doer)
 end
 
 function Teleporter:Target(otherTeleporter)
@@ -312,6 +364,10 @@ end
 
 function Teleporter:SetEnabled(enabled)
     self.enabled = enabled
+end
+
+function Teleporter:GetEnabled()
+    return self.enabled
 end
 
 function Teleporter:OnSave()

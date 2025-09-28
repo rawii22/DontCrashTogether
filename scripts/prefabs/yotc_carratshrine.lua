@@ -226,7 +226,8 @@ local function fn()
     inst.entity:AddSoundEmitter()
     inst.entity:AddNetwork()
 
-    MakeObstaclePhysics(inst, .6)
+	inst:SetDeploySmartRadius(1) --recipe min_spacing/2
+    MakeObstaclePhysics(inst, .5)
 
     inst.MiniMapEntity:SetPriority(5)
     inst.MiniMapEntity:SetIcon("yotc_carratshrine.png")
@@ -267,6 +268,7 @@ local function fn()
     inst.components.workable:SetOnFinishCallback(onhammered)
     inst.components.workable:SetOnWorkCallback(onhit)
     MakeSnowCovered(inst)
+    SetLunarHailBuildupAmountSmall(inst)
 
     MakeMediumBurnable(inst, nil, nil, true)
     MakeMediumPropagator(inst)

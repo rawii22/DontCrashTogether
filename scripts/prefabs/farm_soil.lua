@@ -16,7 +16,7 @@ local function CanMouseThrough(inst)
 end
 
 local function DisplayNameFn(inst)
-    return TheInput:ControllerAttached() and TheInput:GetLocalizedControl(TheInput:GetControllerID(), CONTROL_INVENTORY_USEONSCENE).." "..GetActionString(ACTIONS.PLANTSOIL.id) or ""
+	return TheInput:ControllerAttached() and TheInput:GetLocalizedVirtualControl(TheInput:GetControllerID(), VIRTUAL_CONTROL_INV_ACTION_LEFT).." "..GetActionString(ACTIONS.PLANTSOIL.id) or ""
 end
 
 local function OnBreak(inst)
@@ -114,6 +114,7 @@ local function fn()
 
     inst:AddTag("soil")
 
+	inst:SetDeploySmartRadius(0.5) --match visuals, seeds use CUSTOM spacing
 	inst:SetPhysicsRadiusOverride(TUNING.FARM_PLANT_PHYSICS_RADIUS)
 
     inst.CanMouseThrough = CanMouseThrough

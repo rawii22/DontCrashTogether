@@ -24,6 +24,7 @@ local prefabs =
     "canary",
     "bird_mutant",
     "bird_mutant_spitter",
+    "mutatedbird",
 }
 
 --this should be redone as a periodic test, probably, so that we can control the expected return explicitly
@@ -121,6 +122,9 @@ local function fn()
     if not TheWorld.ismastersim then
         return inst
     end
+
+    inst.scrapbook_animoffsetbgx = 5
+    inst.scrapbook_animoffsetbgy = 30
 
     inst:AddComponent("inspectable")
     inst:AddComponent("inventoryitem")

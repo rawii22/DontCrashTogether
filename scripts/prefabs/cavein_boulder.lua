@@ -299,7 +299,7 @@ local function OnSave(inst, data)
 end
 
 local function OnPreLoad(inst, data)
-    local variation = math.floor(data ~= nil and data.variation or 1)
+    local variation = math.floor(data ~= nil and data.variation or math.random(NUM_VARIATIONS))
     if inst.skinname ~= nil then
         inst.variation = variation
     else
@@ -414,7 +414,7 @@ local function CreateFormation(boulders)
     z = z / #boulders
 
     local formation = MakeQuadFormation()
-    local angle = math.random() * PI * 2
+    local angle = math.random() * TWOPI
     local cosa = math.cos(angle)
     local sina = math.sin(angle)
     local raisedboulder = nil
@@ -557,6 +557,14 @@ end
 
 --------------------------------------------------------------------------
 
+local function Sink(inst)
+	if inst.components.inventoryitem.is_landed then
+		inst.components.inventoryitem:SetLanded(false, true)
+	end
+end
+
+--------------------------------------------------------------------------
+
 local function fn()
     local inst = CreateEntity()
 
@@ -629,6 +637,7 @@ local function fn()
 
     inst:ListenForEvent("onremove", OnRemoveFromScene)
     inst:ListenForEvent("enterlimbo", OnRemoveFromScene)
+	inst:ListenForEvent("abandon_ship", Sink)
 
     --inst._iconpos = nil
     --inst._basepos = nil

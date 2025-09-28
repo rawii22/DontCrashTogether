@@ -80,6 +80,7 @@ local function fn()
     inst.entity:AddMiniMapEntity()
     inst.entity:AddNetwork()
 
+	inst:SetDeploySmartRadius(1.25) --recipe min_spacing/2
     MakeObstaclePhysics(inst, .4)
 
     inst.MiniMapEntity:SetIcon("rainometer.png")
@@ -105,6 +106,7 @@ local function fn()
     inst.components.workable:SetOnFinishCallback(onhammered)
     inst.components.workable:SetOnWorkCallback(onhit)
     MakeSnowCovered(inst)
+    SetLunarHailBuildupAmountSmall(inst)
 
     inst:ListenForEvent("onbuilt", onbuilt)
     inst:ListenForEvent("animover", StartCheckRain)
